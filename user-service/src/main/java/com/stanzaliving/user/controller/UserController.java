@@ -1,0 +1,99 @@
+/**
+ * 
+ */
+package com.stanzaliving.user.controller;
+
+import java.util.List;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.stanzaliving.core.base.common.dto.PageResponse;
+import com.stanzaliving.core.base.common.dto.ResponseDto;
+import com.stanzaliving.core.base.constants.SecurityConstants;
+import com.stanzaliving.core.base.utils.CSVConverter;
+import com.stanzaliving.core.user.dto.UserDto;
+import com.stanzaliving.core.user.dto.UserProfileDto;
+import com.stanzaliving.core.user.enums.UserType;
+import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
+import com.stanzaliving.user.service.UserService;
+
+import lombok.extern.log4j.Log4j;
+
+/**
+ * @author naveen
+ *
+ * @date 10-Oct-2019
+ */
+@Log4j
+@RestController
+@RequestMapping("")
+public class UserController {
+
+	@Autowired
+	private UserService userService;
+
+	@GetMapping("pingMe")
+	public ResponseDto<String> pingMe() {
+		return ResponseDto.success("I am working");
+	}
+
+	@GetMapping("details")
+	public ResponseDto<UserDto> getUser(
+			@RequestAttribute(name = SecurityConstants.USER_ID) @NotBlank(message = "User Id is mandatory to get user") String userId) {
+
+		log.info("Fetching User with UserId: " + userId);
+
+		return ResponseDto.success("Found User for User Id", userService.getActiveUserByUserId(userId));
+	}
+
+	@GetMapping("profile")
+	public ResponseDto<UserProfileDto> getUserProfile(
+			@RequestAttribute(name = SecurityConstants.USER_ID) @NotBlank(message = "User Id is mandatory to get user profile") String userId) {
+
+		log.info("Fetching User Profile with UserId: " + userId);
+
+		return ResponseDto.success("Found User Profile for User Id", userService.getUserProfile(userId));
+	}
+
+	@PostMapping("add")
+	public ResponseDto<UserDto> addUser(@RequestBody @Valid AddUserRequestDto addUserRequestDto) {
+
+		UserDto userDto = userService.addUser(addUserRequestDto);
+
+		log.info("Added new user with id: " + userDto.getUuid());
+
+		return ResponseDto.success("New User Created", userDto);
+	}
+
+	@GetMapping("search/{pageNo}/{limit}")
+	public ResponseDto<PageResponse<UserDto>> searchUsers(
+			@PathVariable(name = "pageNo") @Min(value = 1, message = "Page No must be greater than 0") int pageNo,
+			@PathVariable(name = "limit") @Min(value = 1, message = "Limit must be greater than 0") int limit,
+			@RequestParam(name = "userIds", required = false) List<String> userIds,
+			@RequestParam(name = "mobile", required = false) String mobile,
+			@RequestParam(name = "isoCode", required = false) String isoCode,
+			@RequestParam(name = "email", required = false) String email,
+			@RequestParam(name = "userType", required = false) UserType userType,
+			@RequestParam(name = "status", required = false) Boolean status) {
+
+		log.info("Received User Search Request With Parameters [Page: " + pageNo + ", Limit: " + limit + ", Mobile: " + mobile + ", ISO: " + isoCode + ", Email: " + email + ", UserType: " + userType
+				+ ", Status: " + status + ", UserIds: {" + CSVConverter.getCSVString(userIds) + "} ]");
+
+		PageResponse<UserDto> userDtos = userService.searchUser(userIds, mobile, isoCode, email, userType, status, pageNo, limit);
+
+		return ResponseDto.success("Found " + userDtos.getRecords() + " Users for Search Criteria", userDtos);
+	}
+
+}
