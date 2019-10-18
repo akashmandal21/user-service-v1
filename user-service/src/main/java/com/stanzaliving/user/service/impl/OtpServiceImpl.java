@@ -21,7 +21,6 @@ import com.stanzaliving.core.base.utils.PhoneNumberUtils;
 import com.stanzaliving.core.base.utils.StanzaUtils;
 import com.stanzaliving.core.user.constants.UserErrorCodes.Otp;
 import com.stanzaliving.core.user.enums.OtpType;
-import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.LoginRequestDto;
 import com.stanzaliving.core.user.request.dto.OtpValidateRequestDto;
 import com.stanzaliving.user.db.service.OtpDbService;
@@ -152,7 +151,7 @@ public class OtpServiceImpl implements OtpService {
 	@Override
 	public void validateMobileOtp(OtpValidateRequestDto otpValidateRequestDto, OtpType otpType) {
 		OtpEntity userOtp =
-				getLastOtp(otpValidateRequestDto.getMobile(), otpValidateRequestDto.getIsoCode(), otpValidateRequestDto.getUserType(), otpType);
+				getLastOtp(otpValidateRequestDto.getMobile(), otpValidateRequestDto.getIsoCode(), otpType);
 
 		compareOTP(otpValidateRequestDto.getOtp(), userOtp);
 
@@ -161,10 +160,10 @@ public class OtpServiceImpl implements OtpService {
 		expireOtp(userOtp);
 	}
 
-	private OtpEntity getLastOtp(String mobile, String isoCode, UserType userType, OtpType otpType) {
+	private OtpEntity getLastOtp(String mobile, String isoCode, OtpType otpType) {
 
 		return otpDbService.getOtpForMobile(
-				PhoneNumberUtils.normalizeNumber(mobile), otpType, userType, isoCode);
+				PhoneNumberUtils.normalizeNumber(mobile), otpType, isoCode);
 
 	}
 
@@ -198,13 +197,12 @@ public class OtpServiceImpl implements OtpService {
 
 	@Override
 	public void resendMobileOtp(LoginRequestDto loginRequestDto, OtpType otpType) {
-		OtpEntity userOtp = getLastOtp(loginRequestDto.getMobile(), loginRequestDto.getIsoCode(), loginRequestDto.getUserType(), otpType);
+		OtpEntity userOtp = getLastOtp(loginRequestDto.getMobile(), loginRequestDto.getIsoCode(), otpType);
 
 		if (userOtp == null) {
 
 			throw new AuthException(
-					"No OTP found for Mobile: " + loginRequestDto.getMobile() + ", ISOCode: "
-							+ loginRequestDto.getIsoCode() + ", UserType: " + loginRequestDto.getUserType() + ", OtpType: " + otpType,
+					"No OTP found for Mobile: " + loginRequestDto.getMobile() + ", ISOCode: " + loginRequestDto.getIsoCode() + ", OtpType: " + otpType,
 					Otp.OTP_NOT_FOUND);
 
 		} else {

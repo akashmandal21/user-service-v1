@@ -80,8 +80,7 @@ Request Body -
 ```
 {
   "isoCode": "IN",
-  "mobile": "9716554117",
-  "userType": "STUDENT"
+  "mobile": "9716554117"
 }
 ```
 
@@ -98,7 +97,34 @@ Response Body -
 ```
 
 
-3. Validate the OTP sent in above API.
+3. Resend the OTP during the login flow. This API must be called after login request only.
+
+```
+POST http://localhost:8080/user/auth/resendOtp
+```
+
+Request Body -
+
+```
+{
+  "isoCode": "IN",
+  "mobile": "9716554117"
+}
+```
+
+Response Body -
+
+```
+{
+    "status": true,
+    "message": "OTP Successfully Resent",
+    "id": null,
+    "errorCode": null,
+    "data": null
+}
+```
+
+4. Validate the OTP sent in above API.
 
 Make sure to include the header `frontEnv` with value `local` in this request in order to use cookie authentication on local environment.
 
@@ -112,7 +138,6 @@ Request Body -
 {
   "isoCode": "IN",
   "mobile": "9716554117",
-  "userType": "STUDENT",
   "otp" : "123456"
 }
 ```
@@ -145,7 +170,7 @@ This will also set a cookie named `token` which will be used for authentication 
 }
 ```
 
-4. Verify the User Profile. 
+5. Verify the User Profile. 
 
 Authentication will be performed using the `token` available in cookie set during validateOtp call.
 
@@ -202,7 +227,7 @@ Response Body -
 }
 ```
 
-5. Search Users by various parameters. All parameters are optional except URL Parameters PageNo and Limit
+6. Search Users by various parameters. All parameters are optional except URL Parameters PageNo and Limit
 
 ```
 GET http://localhost:8080/user/search/{pageNo}/{limit}?RequestParameters

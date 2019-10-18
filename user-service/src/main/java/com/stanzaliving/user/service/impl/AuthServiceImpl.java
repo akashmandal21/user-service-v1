@@ -50,7 +50,7 @@ public class AuthServiceImpl implements AuthService {
 	private UserEntity getActiveUser(LoginRequestDto loginRequestDto) {
 
 		UserEntity userEntity =
-				userDbService.getUserForMobile(loginRequestDto.getMobile(), loginRequestDto.getUserType(), loginRequestDto.getIsoCode());
+				userDbService.getUserForMobile(loginRequestDto.getMobile(), loginRequestDto.getIsoCode());
 
 		if (Objects.isNull(userEntity)) {
 			throw new AuthException("User Not Found For Login", UserErrorCodes.USER_NOT_EXISTS);
@@ -60,7 +60,7 @@ public class AuthServiceImpl implements AuthService {
 			throw new AuthException("User Account is Disabled", UserErrorCodes.USER_ACCOUNT_INACTIVE);
 		}
 
-		log.info("Found User: " + userEntity.getUuid() + " for Mobile: " + loginRequestDto.getMobile() + " of Type: " + loginRequestDto.getUserType());
+		log.info("Found User: " + userEntity.getUuid() + " for Mobile: " + loginRequestDto.getMobile() + " of Type: " + userEntity.getUserType());
 
 		return userEntity;
 	}

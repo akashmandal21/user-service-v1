@@ -70,7 +70,7 @@ public class UserServiceImpl implements UserService {
 		}
 
 		UserEntity userEntity =
-				userDbService.getUserForMobile(addUserRequestDto.getMobile(), addUserRequestDto.getUserType(), addUserRequestDto.getIsoCode());
+				userDbService.getUserForMobile(addUserRequestDto.getMobile(), addUserRequestDto.getIsoCode());
 
 		if (Objects.nonNull(userEntity)) {
 			log.warn("User: " + userEntity.getUuid() + " already exists for Mobile: " + addUserRequestDto.getMobile() + ", ISO Code: " + addUserRequestDto.getIsoCode() + " of type: "
