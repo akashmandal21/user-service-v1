@@ -30,7 +30,7 @@ import com.stanzaliving.core.sqljpa.enums.DbType;
 @EnableJpaRepositories(
 		entityManagerFactoryRef = "entityManager",
 		transactionManagerRef = "transactionManager",
-		basePackages = "com.stanzaliving.user.repository")
+		basePackages = { "com.stanzaliving.user.repository", "com.stanzaliving.user.acl.repository" })
 @EnableTransactionManagement
 public class DatabaseConfig {
 
@@ -165,7 +165,7 @@ public class DatabaseConfig {
 		LocalContainerEntityManagerFactoryBean entityManagerFactory = new LocalContainerEntityManagerFactoryBean();
 		entityManagerFactory.setDataSource(dataSource());
 		entityManagerFactory.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
-		entityManagerFactory.setPackagesToScan("com.stanzaliving.user.entity");
+		entityManagerFactory.setPackagesToScan("com.stanzaliving.user.entity", "com.stanzaliving.user.acl.entity");
 		entityManagerFactory.setJpaPropertyMap(hibernateJpaProperties());
 		return entityManagerFactory;
 	}
