@@ -138,7 +138,7 @@ Request Body -
 {
   "isoCode": "IN",
   "mobile": "9716554117",
-  "otp" : "123456"
+  "otp" : "1234"
 }
 ```
 

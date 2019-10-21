@@ -47,6 +47,9 @@ public class OtpServiceImpl implements OtpService {
 	@Value("${test.mobile}")
 	private String testMobile;
 
+	@Value("${otp.length:4}")
+	private int otpLength;
+
 	@Value("${otp.expiry.minutes:5}")
 	private int otpExpiryMinutes;
 
@@ -107,7 +110,7 @@ public class OtpServiceImpl implements OtpService {
 	 * @return OTP to send
 	 */
 	private Integer generateOtp(OtpEntity userOtp) {
-		return isTestEnvironment() || isTestMobile(userOtp) ? 123456 : StanzaUtils.generateOTP();
+		return isTestEnvironment() || isTestMobile(userOtp) ? StanzaUtils.generateDefaultOtpOfLength(otpLength) : StanzaUtils.generateOTPOfLength(otpLength);
 	}
 
 	private boolean isTestEnvironment() {
