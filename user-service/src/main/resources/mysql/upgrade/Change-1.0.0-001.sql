@@ -29,7 +29,8 @@ CREATE TABLE IF NOT EXISTS `roles` (
   `updated_at` datetime DEFAULT NULL,
   `updated_by` char(40) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `UK_roles_uuid` (`uuid`)
+  UNIQUE KEY `UK_roles_uuid` (`uuid`),
+  UNIQUE KEY `UK_roles_name` (`role_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 

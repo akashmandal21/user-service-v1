@@ -1,0 +1,87 @@
+/**
+ * 
+ */
+package com.stanzaliving.user.acl.controller;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.stanzaliving.core.base.common.dto.PageResponse;
+import com.stanzaliving.core.base.common.dto.ResponseDto;
+import com.stanzaliving.core.user.acl.dto.ApiDto;
+import com.stanzaliving.core.user.acl.request.dto.AddApiRequestDto;
+import com.stanzaliving.core.user.acl.request.dto.UpdateApiRequestDto;
+import com.stanzaliving.user.acl.service.ApiService;
+
+import lombok.extern.log4j.Log4j;
+
+/**
+ * 
+ * @author naveen.kumar
+ * 
+ * @date 22-Oct-2019
+ *
+ */
+@Log4j
+@RestController
+@RequestMapping("acl/api")
+public class ApiController {
+
+	@Autowired
+	private ApiService apiService;
+
+	@PostMapping("add")
+	public ResponseDto<ApiDto> addApi(@RequestBody @Valid AddApiRequestDto addApiRequestDto) {
+
+		log.info("Received Request to add API [Name: " + addApiRequestDto.getApiName() + ", URL: " + addApiRequestDto.getActionUrl() + "]");
+
+		return ResponseDto.success("Added API with URL " + addApiRequestDto.getActionUrl(), apiService.addApi(addApiRequestDto));
+	}
+
+	@PostMapping("update")
+	public ResponseDto<ApiDto> updateApi(@RequestBody @Valid UpdateApiRequestDto updateApiRequestDto) {
+
+		log.info("Received Request to update API [ID: " + updateApiRequestDto.getApiId() + ", Name: " + updateApiRequestDto.getApiName() + ", URL: " + updateApiRequestDto.getActionUrl() + "]");
+
+		return ResponseDto.success("Updated API with URL " + updateApiRequestDto.getActionUrl(), apiService.updateApi(updateApiRequestDto));
+	}
+
+	@DeleteMapping("delete/{apiId}")
+	public ResponseDto<Void> deleteApi(@PathVariable(name = "apiId") String apiId) {
+
+		log.info("Received request to delete api: " + apiId);
+		
+		apiService.deleteApi(apiId);
+
+		return ResponseDto.success("Deleted Api " + apiId);
+	}
+
+	@GetMapping("search/{pageNo}/{limit}")
+	public ResponseDto<PageResponse<ApiDto>> searchApi(
+			@PathVariable(name = "pageNo") @Min(value = 1, message = "Page No must be greater than 0") int pageNo,
+			@PathVariable(name = "limit") @Min(value = 1, message = "Limit must be greater than 0") int limit,
+			@RequestParam(name = "apiName", required = false) String apiName,
+			@RequestParam(name = "apiUrl", required = false) String apiUrl,
+			@RequestParam(name = "category", required = false) String category,
+			@RequestParam(name = "status", required = false) Boolean status) {
+
+		log.info("Received Api Search Request With Parameters [Page: " + pageNo + ", Limit: " + limit + ", ApiName: " + apiName + ", ApiUrl: " + apiUrl + ", Category: " + category + ", Status: "
+				+ status + "]");
+
+		PageResponse<ApiDto> apiDtos = apiService.searchApi(apiName, apiUrl, category, status, pageNo, limit);
+
+		return ResponseDto.success("Found " + apiDtos.getRecords() + " Apis for Search Criteria", apiDtos);
+
+	}
+
+}

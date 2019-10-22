@@ -39,13 +39,10 @@ public class RoleEntity extends AbstractJpaEntity {
 
 	private static final long serialVersionUID = 7105880327634827863L;
 
-	@Column(name = "role_name", columnDefinition = "varchar(255) NOT NULL")
+	@Column(name = "role_name", columnDefinition = "varchar(255) NOT NULL", unique = true)
 	private String roleName;
 
-	@JoinTable(
-			name = "role_api",
-			joinColumns = @JoinColumn(name = "role_id"),
-			inverseJoinColumns = @JoinColumn(name = "api_id"))
+	@JoinTable(name = "role_api", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "api_id"))
 	@ManyToMany(cascade = CascadeType.ALL)
 	private List<ApiEntity> apiEntities;
 }
