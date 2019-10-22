@@ -20,5 +20,5 @@ public interface RoleRepository extends AbstractJpaRepository<RoleEntity, Long> 
 
 	boolean existsByRoleName(String roleName);
 
-	boolean existsByUuidInAndApiActionUrl(Collection<String> roleIds, String actionUrl);
+	boolean existsByUuidInAndApiEntities_ActionUrl(Collection<String> roleIds, String actionUrl);
 }
