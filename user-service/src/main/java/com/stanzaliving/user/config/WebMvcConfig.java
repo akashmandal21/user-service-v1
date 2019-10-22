@@ -28,6 +28,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 						"/mapping/**")
 				.excludePathPatterns(
 						"/pingMe",
+						"/acl/check",
 						"/v2/api-docs",
 						"/configuration/ui",
 						"/swagger-resources/**",
