@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.enums.SmsType;
+import com.stanzaliving.core.kafka.producer.NotificationProducer;
 import com.stanzaliving.core.pojo.EmailDto;
 import com.stanzaliving.core.pojo.SmsDto;
 import com.stanzaliving.core.user.constants.UserErrorCodes;
@@ -18,7 +19,6 @@ import com.stanzaliving.core.user.constants.UserErrorCodes.Otp;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.user.constants.UserConstants;
 import com.stanzaliving.user.entity.OtpEntity;
-import com.stanzaliving.user.kafka.producer.KafkaUserProducer;
 import com.stanzaliving.user.kafka.service.KafkaUserService;
 
 import lombok.extern.log4j.Log4j;
@@ -36,10 +36,10 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 	private Environment environment;
 
 	@Autowired
-	private KafkaUserProducer userProducer;
+	private ThreadPoolTaskExecutor userExecutor;
 
 	@Autowired
-	private ThreadPoolTaskExecutor userExecutor;
+	private NotificationProducer notificationProducer;
 
 	@Override
 	public void sendOtpToKafka(OtpEntity otpEntity) {
@@ -71,7 +71,7 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 	}
 
 	private void sendMessage(SmsDto smsDto) {
-		userProducer.publish(environment.getProperty("kafka.sms.topic", "sms"), smsDto);
+		notificationProducer.publish(environment.getProperty("kafka.sms.topic", "sms"), SmsDto.class.getName(), smsDto);
 	}
 
 	@Override
@@ -91,7 +91,7 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 			try {
 				EmailDto emailDto = getEmail(otpEntity);
 				log.debug("Sending OTP on Email for user: " + otpEntity.getUserId());
-				userProducer.publish(environment.getProperty("kafka.email.topic", "email"), emailDto);
+				notificationProducer.publish(environment.getProperty("kafka.email.topic", "email"), EmailDto.class.getName(), emailDto);
 			} catch (Exception e) {
 				log.error("Error sending OTP on Email for user: " + otpEntity.getUserId(), e);
 			}
