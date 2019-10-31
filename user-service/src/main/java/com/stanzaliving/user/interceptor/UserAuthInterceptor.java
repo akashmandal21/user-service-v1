@@ -24,7 +24,7 @@ import com.stanzaliving.user.entity.UserSessionEntity;
 import com.stanzaliving.user.exception.AuthException;
 import com.stanzaliving.user.service.SessionService;
 
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * 
@@ -32,7 +32,7 @@ import lombok.extern.log4j.Log4j;
  *
  * @date 11-Oct-2019
  */
-@Log4j
+@Log4j2
 @Component
 public class UserAuthInterceptor extends HandlerInterceptorAdapter {
 

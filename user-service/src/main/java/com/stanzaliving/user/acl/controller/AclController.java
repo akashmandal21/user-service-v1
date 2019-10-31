@@ -15,7 +15,7 @@ import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.user.acl.request.dto.UserAccessDto;
 import com.stanzaliving.user.acl.service.AclService;
 
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author naveen.kumar
@@ -23,7 +23,7 @@ import lombok.extern.log4j.Log4j;
  * @date 23-Oct-2019
  *
  **/
-@Log4j
+@Log4j2
 @RestController
 @RequestMapping("acl")
 public class AclController {

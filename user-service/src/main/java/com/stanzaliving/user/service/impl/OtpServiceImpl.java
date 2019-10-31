@@ -30,14 +30,14 @@ import com.stanzaliving.user.exception.AuthException;
 import com.stanzaliving.user.kafka.service.KafkaUserService;
 import com.stanzaliving.user.service.OtpService;
 
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author naveen
  *
  * @date 10-Oct-2019
  */
-@Log4j
+@Log4j2
 @Service
 public class OtpServiceImpl implements OtpService {
 

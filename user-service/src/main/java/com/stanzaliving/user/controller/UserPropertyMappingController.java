@@ -26,14 +26,14 @@ import com.stanzaliving.core.user.dto.UserPropertyMappingDto;
 import com.stanzaliving.core.user.request.dto.UserPropertyMappingRequestDto;
 import com.stanzaliving.user.service.UserPropertyMappingService;
 
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author naveen
  *
  * @date 13-Oct-2019
  */
-@Log4j
+@Log4j2
 @RestController
 @RequestMapping("mapping")
 public class UserPropertyMappingController {

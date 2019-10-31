@@ -33,14 +33,14 @@ import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.entity.UserProfileEntity;
 import com.stanzaliving.user.service.UserService;
 
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author naveen
  *
  * @date 10-Oct-2019
  */
-@Log4j
+@Log4j2
 @Service
 public class UserServiceImpl implements UserService {
 

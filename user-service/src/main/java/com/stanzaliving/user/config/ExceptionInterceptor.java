@@ -29,9 +29,9 @@ import com.stanzaliving.core.base.utils.StanzaUtils;
 import com.stanzaliving.user.exception.AuthException;
 import com.stanzaliving.user.exception.MappingNotFoundException;
 
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 
-@Log4j
+@Log4j2
 @RestControllerAdvice
 public class ExceptionInterceptor {
 

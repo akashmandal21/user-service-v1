@@ -30,14 +30,14 @@ import com.stanzaliving.user.entity.UserPropertyMappingEntity;
 import com.stanzaliving.user.exception.MappingNotFoundException;
 import com.stanzaliving.user.service.UserPropertyMappingService;
 
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author naveen
  *
  * @date 13-Oct-2019
  */
-@Log4j
+@Log4j2
 @Service
 public class UserPropertyMappingServiceImpl implements UserPropertyMappingService {
 

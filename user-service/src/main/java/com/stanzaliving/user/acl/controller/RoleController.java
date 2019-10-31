@@ -26,7 +26,7 @@ import com.stanzaliving.core.user.acl.request.dto.AddRoleRequestDto;
 import com.stanzaliving.core.user.acl.request.dto.UpdateRoleRequestDto;
 import com.stanzaliving.user.acl.service.RoleService;
 
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author naveen.kumar
@@ -34,7 +34,7 @@ import lombok.extern.log4j.Log4j;
  * @date 22-Oct-2019
  * 
  **/
-@Log4j
+@Log4j2
 @RestController
 @RequestMapping("acl/role")
 public class RoleController {

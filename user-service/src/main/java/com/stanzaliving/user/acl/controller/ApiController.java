@@ -23,7 +23,7 @@ import com.stanzaliving.core.user.acl.request.dto.AddApiRequestDto;
 import com.stanzaliving.core.user.acl.request.dto.UpdateApiRequestDto;
 import com.stanzaliving.user.acl.service.ApiService;
 
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * 
@@ -32,7 +32,7 @@ import lombok.extern.log4j.Log4j;
  * @date 22-Oct-2019
  *
  */
-@Log4j
+@Log4j2
 @RestController
 @RequestMapping("acl/api")
 public class ApiController {

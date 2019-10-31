@@ -21,14 +21,14 @@ import com.stanzaliving.user.constants.UserConstants;
 import com.stanzaliving.user.entity.OtpEntity;
 import com.stanzaliving.user.kafka.service.KafkaUserService;
 
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author naveen
  *
  * @date 12-Oct-2019
  */
-@Log4j
+@Log4j2
 @Service
 public class KafkaUserServiceImpl implements KafkaUserService {
 

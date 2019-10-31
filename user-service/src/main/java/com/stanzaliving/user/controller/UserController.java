@@ -29,14 +29,14 @@ import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.user.service.UserService;
 
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author naveen
  *
  * @date 10-Oct-2019
  */
-@Log4j
+@Log4j2
 @RestController
 @RequestMapping("")
 public class UserController {

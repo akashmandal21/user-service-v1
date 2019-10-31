@@ -28,14 +28,14 @@ import com.stanzaliving.user.acl.db.service.ApiDbService;
 import com.stanzaliving.user.acl.entity.ApiEntity;
 import com.stanzaliving.user.acl.service.ApiService;
 
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author naveen
  *
  * @date 21-Oct-2019
  */
-@Log4j
+@Log4j2
 @Service
 public class ApiServiceImpl implements ApiService {
 
