@@ -108,7 +108,10 @@ public class AuthController {
 			String frontEnv = request.getHeader(SecurityConstants.FRONT_ENVIRONMENT);
 			boolean isLocalFrontEnd = StringUtils.isNotBlank(frontEnv) && SecurityConstants.FRONT_ENVIRONMENT_LOCAL.equals(frontEnv);
 
-			response.addCookie(SecureCookieUtil.create(SecurityConstants.TOKEN_HEADER_NAME, token, Optional.of(isLocalFrontEnd)));
+			String appEnv = request.getHeader(SecurityConstants.APP_ENVIRONMENT);
+			boolean isApp = StringUtils.isNotBlank(appEnv) && SecurityConstants.APP_ENVIRONMENT_TRUE.equals(appEnv);
+
+			response.addCookie(SecureCookieUtil.create(SecurityConstants.TOKEN_HEADER_NAME, token, Optional.of(isLocalFrontEnd), Optional.of(isApp)));
 		}
 	}
 }
