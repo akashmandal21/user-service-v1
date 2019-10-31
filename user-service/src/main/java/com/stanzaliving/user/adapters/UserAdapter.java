@@ -3,6 +3,7 @@
  */
 package com.stanzaliving.user.adapters;
 
+import com.stanzaliving.core.sqljpa.adapter.AddressAdapter;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;

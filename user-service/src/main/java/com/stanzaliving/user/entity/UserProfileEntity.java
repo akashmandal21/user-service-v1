@@ -16,6 +16,7 @@ import javax.persistence.Table;
 
 import com.stanzaliving.core.sqljpa.conveter.LocalDateAttributeConverter;
 import com.stanzaliving.core.sqljpa.entity.AbstractJpaEntity;
+import com.stanzaliving.core.sqljpa.entity.AddressEntity;
 import com.stanzaliving.core.user.enums.Gender;
 import com.stanzaliving.core.user.enums.MaritalStatus;
 
