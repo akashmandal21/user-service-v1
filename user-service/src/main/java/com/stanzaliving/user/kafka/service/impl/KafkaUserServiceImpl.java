@@ -71,7 +71,14 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 	}
 
 	private void sendMessage(SmsDto smsDto) {
-		notificationProducer.publish(environment.getProperty("kafka.sms.topic", "sms"), SmsDto.class.getName(), smsDto);
+
+		String smsTopic = environment.getProperty("kafka.sms.topic", "sms");
+
+		if (SmsType.OTP == smsDto.getSmsType()) {
+			smsTopic = environment.getProperty("kafka.sms.otp.topic", "sms_otp");
+		}
+
+		notificationProducer.publish(smsTopic, SmsDto.class.getName(), smsDto);
 	}
 
 	@Override
