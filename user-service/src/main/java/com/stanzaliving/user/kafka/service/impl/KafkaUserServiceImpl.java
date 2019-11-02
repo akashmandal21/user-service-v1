@@ -72,10 +72,10 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 
 	private void sendMessage(SmsDto smsDto) {
 
-		String smsTopic = environment.getProperty("kafka.sms.topic", "sms");
+		String smsTopic = environment.getProperty("kafka.topic.sms", "sms");
 
 		if (SmsType.OTP == smsDto.getSmsType()) {
-			smsTopic = environment.getProperty("kafka.sms.otp.topic", "sms_otp");
+			smsTopic = environment.getProperty("kafka.topic.sms.otp", "sms_otp");
 		}
 
 		notificationProducer.publish(smsTopic, SmsDto.class.getName(), smsDto);
@@ -98,7 +98,7 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 			try {
 				EmailDto emailDto = getEmail(otpEntity);
 				log.debug("Sending OTP on Email for user: " + otpEntity.getUserId());
-				notificationProducer.publish(environment.getProperty("kafka.email.topic", "email"), EmailDto.class.getName(), emailDto);
+				notificationProducer.publish(environment.getProperty("kafka.topic.email.otp", "email_otp"), EmailDto.class.getName(), emailDto);
 			} catch (Exception e) {
 				log.error("Error sending OTP on Email for user: " + otpEntity.getUserId(), e);
 			}
