@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
+import com.stanzaliving.core.base.StanzaConstants;
 import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.enums.SmsType;
 import com.stanzaliving.core.kafka.producer.NotificationProducer;
@@ -16,7 +17,6 @@ import com.stanzaliving.core.pojo.SmsDto;
 import com.stanzaliving.core.property.manager.PropertyManager;
 import com.stanzaliving.core.user.constants.UserErrorCodes;
 import com.stanzaliving.core.user.constants.UserErrorCodes.Otp;
-import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.user.constants.UserConstants;
 import com.stanzaliving.user.entity.OtpEntity;
 import com.stanzaliving.user.kafka.service.KafkaUserService;
@@ -93,8 +93,7 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 
 	private void sendOtpOnMail(OtpEntity otpEntity) {
 		if (propertyManager.getPropertyAsBoolean("otp.email.enabled")
-				&& StringUtils.isNotBlank(otpEntity.getEmail())
-				&& UserType.STUDENT == otpEntity.getUserType()) {
+				&& StringUtils.isNotBlank(otpEntity.getEmail())) {
 
 			try {
 				EmailDto emailDto = getEmail(otpEntity);
@@ -109,6 +108,9 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 	private EmailDto getEmail(OtpEntity otpEntity) {
 		EmailDto emailDto = new EmailDto();
 
+		emailDto.setFrom(propertyManager.getProperty("email.from"));
+		emailDto.setFromName(StanzaConstants.ORGANIZATION_NAME);
+		
 		emailDto.setTo(new String[] { otpEntity.getEmail() });
 
 		emailDto.setSubject("OTP to access Stanza Living");
