@@ -78,7 +78,7 @@ public class UserController {
 	}
 
 	@GetMapping("search/{pageNo}/{limit}")
-	public ResponseDto<PageResponse<UserDto>> searchUsers(
+	public ResponseDto<PageResponse<UserProfileDto>> searchUsers(
 			@PathVariable(name = "pageNo") @Min(value = 1, message = "Page No must be greater than 0") int pageNo,
 			@PathVariable(name = "limit") @Min(value = 1, message = "Limit must be greater than 0") int limit,
 			@RequestParam(name = "userIds", required = false) List<String> userIds,
@@ -91,7 +91,7 @@ public class UserController {
 		log.info("Received User Search Request With Parameters [Page: " + pageNo + ", Limit: " + limit + ", Mobile: " + mobile + ", ISO: " + isoCode + ", Email: " + email + ", UserType: " + userType
 				+ ", Status: " + status + ", UserIds: {" + CSVConverter.getCSVString(userIds) + "} ]");
 
-		PageResponse<UserDto> userDtos = userService.searchUser(userIds, mobile, isoCode, email, userType, status, pageNo, limit);
+		PageResponse<UserProfileDto> userDtos = userService.searchUser(userIds, mobile, isoCode, email, userType, status, pageNo, limit);
 
 		return ResponseDto.success("Found " + userDtos.getRecords() + " Users for Search Criteria", userDtos);
 	}

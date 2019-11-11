@@ -116,13 +116,13 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public PageResponse<UserDto> searchUser(List<String> userIds, String mobile, String isoCode, String email, UserType userType, Boolean status, int pageNo, int limit) {
+	public PageResponse<UserProfileDto> searchUser(List<String> userIds, String mobile, String isoCode, String email, UserType userType, Boolean status, int pageNo, int limit) {
 
 		Page<UserEntity> userPage = getUserPage(userIds, mobile, isoCode, email, userType, status, pageNo, limit);
 
 		log.info("Found " + userPage.getNumberOfElements() + " User Records on Page: " + pageNo + " for Search Criteria");
 
-		List<UserDto> userDtos = userPage.getContent().stream().map(UserAdapter::getUserDto).collect(Collectors.toList());
+		List<UserProfileDto> userDtos = userPage.getContent().stream().map(UserAdapter::getUserProfileDto).collect(Collectors.toList());
 
 		return new PageResponse<>(pageNo, userPage.getNumberOfElements(), userPage.getTotalPages(), userPage.getTotalElements(), userDtos);
 
