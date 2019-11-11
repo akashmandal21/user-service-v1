@@ -38,6 +38,6 @@ public interface UserService {
 	 * 
 	 * @return paged response of users matching search criteria
 	 */
-	PageResponse<UserDto> searchUser(List<String> userIds, String mobile, String isoCode, String email, UserType userType, Boolean status, int pageNo, int limit);
+	PageResponse<UserProfileDto> searchUser(List<String> userIds, String mobile, String isoCode, String email, UserType userType, Boolean status, int pageNo, int limit);
 
 }
