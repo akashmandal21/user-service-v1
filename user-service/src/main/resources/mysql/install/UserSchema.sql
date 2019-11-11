@@ -182,3 +182,19 @@ CREATE TABLE IF NOT EXISTS `user_roles` (
   UNIQUE KEY `UK_user_roles_userid_roleid` (`user_id`,`role_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+CREATE TABLE IF NOT EXISTS `user_manager_mapping` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `uuid` char(40) NOT NULL,
+  `user_id` char(40) NOT NULL,
+  `manager_id` char(40) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `created_by` char(40) DEFAULT NULL,
+  `status` bit(1) DEFAULT b'1',
+  `updated_at` datetime DEFAULT NULL,
+  `updated_by` char(40) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UK_mapping_uuid` (`uuid`),
+  UNIQUE KEY `UK_mapping_userid_managerid` (`user_id`, `manager_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+
