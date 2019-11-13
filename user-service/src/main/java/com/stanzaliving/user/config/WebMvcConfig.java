@@ -25,7 +25,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
 				.excludePathPatterns(
 						"/add",
 						"/search/**",
-						"/mapping/**")
+						"/mapping/**",
+						"/usermanagermapping/**")
 				.excludePathPatterns(
 						"/pingMe",
 						"/acl/check",
