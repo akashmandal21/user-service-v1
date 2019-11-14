@@ -23,6 +23,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.base.exception.ApiValidationException;
+import com.stanzaliving.core.base.exception.NoRecordException;
 import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.base.exception.StanzaHttpException;
 import com.stanzaliving.core.base.utils.StanzaUtils;
@@ -212,6 +213,16 @@ public class ExceptionInterceptor {
 
 		String exceptionId = StanzaUtils.generateUniqueId();
 		log.error("Got StanzaHttpException for exceptionId: " + exceptionId, e);
+
+		return ResponseDto.failure(e.getMessage(), exceptionId);
+	}
+
+	@ExceptionHandler(NoRecordException.class)
+	@ResponseStatus(code = HttpStatus.NO_CONTENT)
+	public <T> ResponseDto<T> handleNoRecordException(NoRecordException e) {
+
+		String exceptionId = StanzaUtils.generateUniqueId();
+		log.error("Got NoRecordException for exceptionId: " + exceptionId, e);
 
 		return ResponseDto.failure(e.getMessage(), exceptionId);
 	}
