@@ -20,9 +20,9 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class UserAdapter {
 
-	public static UserDto getUserDto(UserEntity userEntity) {
+	public static UserProfileDto getUserDto(UserEntity userEntity) {
 
-		return UserDto.builder()
+		return UserProfileDto.builder()
 				.uuid(userEntity.getUuid())
 				.createdAt(userEntity.getCreatedAt())
 				.updatedAt(userEntity.getUpdatedAt())
@@ -35,6 +35,8 @@ public class UserAdapter {
 				.mobileVerified(userEntity.isMobileVerified())
 				.email(userEntity.getEmail())
 				.emailVerified(userEntity.isEmailVerified())
+				.firstName(userEntity.getUserProfile().getFirstName())
+				.lastName(userEntity.getUserProfile().getLastName())
 				.build();
 	}
 
