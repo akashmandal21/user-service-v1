@@ -19,6 +19,7 @@ import com.stanzaliving.user.acl.entity.RoleEntity;
 public interface RoleRepository extends AbstractJpaRepository<RoleEntity, Long> {
 
 	boolean existsByRoleName(String roleName);
+	//TODO:- update below
 
-	boolean existsByUuidInAndApiEntities_ActionUrl(Collection<String> roleIds, String actionUrl);
+//	boolean existsByUuidInAndApiEntities_ActionUrl(Collection<String> roleIds, String actionUrl);
 }

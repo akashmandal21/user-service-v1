@@ -36,7 +36,9 @@ public class RoleDbServiceImpl extends AbstractJpaServiceImpl<RoleEntity, Long, 
 
 	@Override
 	public boolean isActionPresentInRoles(Collection<String> roleIds, String actionUrl) {
-		return getJpaRepository().existsByUuidInAndApiEntities_ActionUrl(roleIds, actionUrl);
+		//TODO:- update below
+		//return getJpaRepository().existsByUuidInAndApiEntities_ActionUrl(roleIds, actionUrl);
+		return false;
 	}
 
 }

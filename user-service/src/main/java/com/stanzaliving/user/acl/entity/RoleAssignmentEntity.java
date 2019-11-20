@@ -6,6 +6,7 @@ package com.stanzaliving.user.acl.entity;
 import javax.persistence.*;
 
 import com.stanzaliving.core.sqljpa.entity.AbstractJpaEntity;
+import com.stanzaliving.core.user.acl.enums.AssignmentType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -36,6 +37,7 @@ public class RoleAssignmentEntity extends AbstractJpaEntity {
 	@Column(name = "api_uuid", columnDefinition = "char(40) NOT NULL")
 	private long assignedUuid;
 
-	@Enumerated
-	@Column(name = "assignment_type", columnDefinition = "char(40) NOT NULL")
+	@Enumerated(EnumType.STRING)
+	@Column(name = "assignment_type", columnDefinition = "char(10) NOT NULL")
+	private AssignmentType assignmentType;
 }

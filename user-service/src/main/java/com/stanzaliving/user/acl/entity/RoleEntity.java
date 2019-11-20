@@ -3,18 +3,12 @@
  */
 package com.stanzaliving.user.acl.entity;
 
-import java.util.List;
+import javax.persistence.*;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
-
+import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.sqljpa.entity.AbstractJpaEntity;
 
+import com.stanzaliving.core.base.enums.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,7 +27,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "roles")
+@Table(name = "roles", uniqueConstraints = {@UniqueConstraint(name = "UK_role_department_accesslevel", columnNames = {"role_name", "department", "access_level"})})
 @Entity(name = "roles")
 public class RoleEntity extends AbstractJpaEntity {
 
@@ -42,7 +36,14 @@ public class RoleEntity extends AbstractJpaEntity {
 	@Column(name = "role_name", columnDefinition = "varchar(255) NOT NULL", unique = true)
 	private String roleName;
 
-	@JoinTable(name = "role_api", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "api_id"))
-	@ManyToMany(cascade = CascadeType.ALL)
-	private List<ApiEntity> apiEntities;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "department", columnDefinition = "varchar(30)", nullable = false)
+	private Department department;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "access_level", columnDefinition = "varchar(30)", nullable = false)
+	private AccessLevel accessLevel;
+
+
+
 }
