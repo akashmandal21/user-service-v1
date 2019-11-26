@@ -3,22 +3,13 @@
  */
 package com.stanzaliving.user.entity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Table;
-
 import com.stanzaliving.core.sqljpa.entity.AbstractJpaEntity;
 import com.stanzaliving.core.user.enums.OtpType;
 import com.stanzaliving.core.user.enums.UserType;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
+
+import javax.persistence.*;
 
 /**
  * @author naveen
@@ -57,7 +48,7 @@ public class OtpEntity extends AbstractJpaEntity {
 	@Column(name = "mobile", columnDefinition = "varchar(15)")
 	private String mobile;
 
-	@Column(name = "email", columnDefinition = "varchar(100")
+	@Column(name = "email", columnDefinition = "varchar(100)")
 	private String email;
 
 	@Column(name = "resend_count", columnDefinition = "int(2)", nullable = false)
