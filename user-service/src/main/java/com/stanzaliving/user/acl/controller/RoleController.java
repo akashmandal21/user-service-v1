@@ -3,30 +3,24 @@
  */
 package com.stanzaliving.user.acl.controller;
 
-import java.util.List;
+import com.stanzaliving.core.base.common.dto.PageResponse;
+import com.stanzaliving.core.base.common.dto.ResponseDto;
+import com.stanzaliving.core.base.enums.AccessLevel;
+import com.stanzaliving.core.base.enums.Department;
+import com.stanzaliving.core.user.acl.dto.RoleAssignDto;
+import com.stanzaliving.core.user.acl.dto.RoleDto;
+import com.stanzaliving.core.user.acl.request.dto.AddRoleAssignDto;
+import com.stanzaliving.core.user.acl.request.dto.AddRoleRequestDto;
+import com.stanzaliving.core.user.acl.request.dto.UpdateRoleRequestDto;
+import com.stanzaliving.user.acl.service.impl.RoleServiceImpl;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.stanzaliving.core.base.common.dto.PageResponse;
-import com.stanzaliving.core.base.common.dto.ResponseDto;
-import com.stanzaliving.core.user.acl.dto.RoleDto;
-import com.stanzaliving.core.user.acl.dto.RoleMetadataDto;
-import com.stanzaliving.core.user.acl.request.dto.AddRoleRequestDto;
-import com.stanzaliving.core.user.acl.request.dto.UpdateRoleRequestDto;
-import com.stanzaliving.user.acl.service.RoleService;
-
-import lombok.extern.log4j.Log4j2;
+import java.util.List;
 
 /**
  * @author naveen.kumar
@@ -40,54 +34,72 @@ import lombok.extern.log4j.Log4j2;
 public class RoleController {
 
 	@Autowired
-	private RoleService roleService;
+	RoleServiceImpl roleService;
 
 	@PostMapping("add")
 	public ResponseDto<RoleDto> addRole(@RequestBody @Valid AddRoleRequestDto addRoleRequestDto) {
 
-		log.info("Received request to add new role: " + addRoleRequestDto.getRoleName());
+		log.info("Received request to add new role: " + addRoleRequestDto);
 
-		return ResponseDto.success("Added New Role: " + addRoleRequestDto.getRoleName(), roleService.addRole(addRoleRequestDto));
+
+
+		//TODO: update below
+		//return ResponseDto.success("Added New Role: " + addRoleRequestDto, roleService.addRole(addRoleRequestDto));
+		return null;
 	}
 
 	@PostMapping("update")
 	public ResponseDto<RoleDto> updateRole(@RequestBody @Valid UpdateRoleRequestDto updateRoleRequestDto) {
 
-		log.info("Received request to update role: " + updateRoleRequestDto.getRoleId());
+		log.info("Received request to update role: " + updateRoleRequestDto.getRoleUuid());
 
-		return ResponseDto.success("Updated Role: " + updateRoleRequestDto.getRoleName(), roleService.updateRole(updateRoleRequestDto));
-	}
-
-	@GetMapping("names")
-	public ResponseDto<List<RoleMetadataDto>> getAllRoleNames() {
-
-		log.info("Received Request to get all role names");
-
-		List<RoleMetadataDto> roleMetadataDtos = roleService.getAllRoleNames();
-
-		return ResponseDto.success("Found " + roleMetadataDtos.size() + " Roles", roleMetadataDtos);
+		//TODO: update below
+		//return ResponseDto.success("Updated Role: " + updateRoleRequestDto.getRoleName(), roleService.updateRole(updateRoleRequestDto));roleService.addRole(addRoleRequestDto);roleService.updateRole(updateRoleRequestDto);
+		return null;
 	}
 
 	@GetMapping("{roleId}")
-	public ResponseDto<RoleDto> getRole(@PathVariable @NotBlank(message = "Role Id must not be blank") String roleId) {
+	public ResponseDto<RoleDto> getRole(@PathVariable @NotBlank(message = "Role Id must not be blank") String roleUuid) {
 
-		log.info("Fetching role with id: " + roleId);
+		log.info("Fetching role with id: " + roleUuid);
 
-		return ResponseDto.success("Found Role with Id: " + roleId, roleService.getRoleById(roleId));
+		//TODO: update below
+		return null;
+		//return ResponseDto.success("Found Role with Id: " + roleId, roleService.getRoleById(roleId));
+	}
+
+	@GetMapping("getRoles")
+	public ResponseDto<List<RoleDto>> getRoleByDepartmentAndLevel(
+			@RequestParam(name = "department", required = false) Department department,
+			@RequestParam(name = "accessLevel", required = false) AccessLevel accessLevel
+	) {
+		//TODO: update below
+		return null;
+	}
+
+
+	@PostMapping("assign")
+	public ResponseDto<RoleAssignDto> assignRole(@RequestBody @Valid AddRoleAssignDto addRoleAssignDto) {
+
+		return null;
+	}
+
+	@PostMapping("assignBulk")
+	public ResponseDto<List<RoleAssignDto>> assignMultipleRoles(@RequestBody @Valid List<AddRoleAssignDto> addRoleAssignDtoList) {
+		return null;
 	}
 
 	@GetMapping("search/{pageNo}/{limit}")
 	public ResponseDto<PageResponse<RoleDto>> searchRole(
 			@PathVariable(name = "pageNo") @Min(value = 1, message = "Page No must be greater than 0") int pageNo,
 			@PathVariable(name = "limit") @Min(value = 1, message = "Limit must be greater than 0") int limit,
-			@RequestParam(name = "roleName", required = false) String roleName,
 			@RequestParam(name = "status", required = false) Boolean status) {
 
-		log.info("Received Api Search Request With Parameters [Page: " + pageNo + ", Limit: " + limit + ", RoleName: " + roleName + ", Status: " + status + "]");
+		log.info("Received Api Search Request With Parameters [Page: " + pageNo + ", Limit: " + limit + ", Status: " + status + "]");
 
-		PageResponse<RoleDto> roleDtos = roleService.searchRole(roleName, status, pageNo, limit);
-
-		return ResponseDto.success("Found " + roleDtos.getRecords() + " Roles for Search Criteria", roleDtos);
-
+		//PageResponse<RoleDto> roleDtos = roleService.searchRole(roleName, status, pageNo, limit);
+		//return ResponseDto.success("Found " + roleDtos.getRecords() + " Roles for Search Criteria", roleDtos);
+		return null;
 	}
+
 }

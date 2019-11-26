@@ -3,20 +3,6 @@
  */
 package com.stanzaliving.user.service.impl;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
-
 import com.stanzaliving.core.base.common.dto.PageResponse;
 import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.base.utils.PhoneNumberUtils;
@@ -32,8 +18,20 @@ import com.stanzaliving.user.db.service.UserDbService;
 import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.entity.UserProfileEntity;
 import com.stanzaliving.user.service.UserService;
-
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author naveen
@@ -64,7 +62,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserDto addUser(AddUserRequestDto addUserRequestDto) {
 
-		if (!PhoneNumberUtils.isValidMobileForCountry(addUserRequestDto.getMobile(), addUserRequestDto.getIsoCode())) {
+		if (false && !PhoneNumberUtils.isValidMobileForCountry(addUserRequestDto.getMobile(), addUserRequestDto.getIsoCode())) {
 			log.error("Number: " + addUserRequestDto.getMobile() + " and ISO: " + addUserRequestDto.getIsoCode() + " doesn't appear to be a valid mobile combination");
 			throw new StanzaException("Mobile Number and ISO Code combination not valid");
 		}

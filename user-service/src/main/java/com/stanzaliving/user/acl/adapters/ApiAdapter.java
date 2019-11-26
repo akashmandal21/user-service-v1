@@ -28,7 +28,7 @@ public class ApiAdapter {
 		return ApiEntity.builder()
 				.apiName(addApiRequestDto.getApiName())
 				.actionUrl(addApiRequestDto.getActionUrl())
-				.category(addApiRequestDto.getCategory())
+				.service(addApiRequestDto.getService())
 				.build();
 	}
 
@@ -52,7 +52,7 @@ public class ApiAdapter {
 				.status(apiEntity.isStatus())
 				.apiName(apiEntity.getApiName())
 				.actionUrl(apiEntity.getActionUrl())
-				.category(apiEntity.getCategory())
+				.service(apiEntity.getService())
 				.build();
 	}
 }

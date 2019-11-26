@@ -3,18 +3,13 @@
  */
 package com.stanzaliving.user.acl.entity;
 
+import com.stanzaliving.core.sqljpa.entity.AbstractJpaEntity;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-
-import com.stanzaliving.core.sqljpa.entity.AbstractJpaEntity;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-import lombok.experimental.SuperBuilder;
 
 /**
  * @author naveen
@@ -39,7 +34,7 @@ public class ApiEntity extends AbstractJpaEntity {
 	@Column(name = "action_url", columnDefinition = "varchar(255) NOT NULL", unique = true)
 	private String actionUrl;
 
-	@Column(name = "category", columnDefinition = "varchar(100) NOT NULL")
-	private String category;
+	@Column(name = "service", columnDefinition = "varchar(100) NOT NULL")
+	private String service;
 
 }

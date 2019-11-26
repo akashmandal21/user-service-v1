@@ -3,18 +3,6 @@
  */
 package com.stanzaliving.user.acl.service.impl;
 
-import java.util.List;
-import java.util.Objects;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
-
 import com.stanzaliving.core.base.common.dto.PageResponse;
 import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.sqljpa.specification.utils.CriteriaOperation;
@@ -27,8 +15,18 @@ import com.stanzaliving.user.acl.constants.QueryConstants;
 import com.stanzaliving.user.acl.db.service.ApiDbService;
 import com.stanzaliving.user.acl.entity.ApiEntity;
 import com.stanzaliving.user.acl.service.ApiService;
-
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author naveen
@@ -73,11 +71,11 @@ public class ApiServiceImpl implements ApiService {
 		}
 
 		log.info("Updating API: " + apiEntity.getUuid() + " With Details [Name: " + updateApiRequestDto.getApiName() + ", URL: " + updateApiRequestDto.getActionUrl() + ", Category: "
-				+ updateApiRequestDto.getCategory() + "]");
+				+ updateApiRequestDto.getService() + "]");
 
 		apiEntity.setApiName(updateApiRequestDto.getApiName());
 		apiEntity.setActionUrl(updateApiRequestDto.getActionUrl());
-		apiEntity.setCategory(updateApiRequestDto.getCategory());
+		apiEntity.setService(updateApiRequestDto.getService());
 
 		apiEntity = apiDbService.update(apiEntity);
 
@@ -134,7 +132,7 @@ public class ApiServiceImpl implements ApiService {
 		}
 
 		if (StringUtils.isNotBlank(category)) {
-			specificationBuilder.with(QueryConstants.Api.API_CATEGORY, CriteriaOperation.EQ, category);
+			specificationBuilder.with(QueryConstants.Api.SERVICE, CriteriaOperation.EQ, category);
 		}
 
 		if (status != null) {

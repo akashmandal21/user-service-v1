@@ -18,7 +18,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 		registry
 				.addInterceptor(userAuthInterceptor)
 				.addPathPatterns("/**")
-				.excludePathPatterns(
+				.excludePathPatterns("/**",
 						"/auth/login",
 						"/auth/validateOtp",
 						"/auth/resendOtp")

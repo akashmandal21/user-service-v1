@@ -20,7 +20,7 @@ public class QueryConstants {
 
 		public static String API_NAME = "apiName";
 		public static String API_URL = "actionUrl";
-		public static String API_CATEGORY = "category";
+		public static String SERVICE = "service";
 
 	}
 
