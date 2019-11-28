@@ -63,13 +63,13 @@ public class ApiController {
 			@PathVariable(name = "limit") @Min(value = 1, message = "Limit must be greater than 0") int limit,
 			@RequestParam(name = "apiName", required = false) String apiName,
 			@RequestParam(name = "apiUrl", required = false) String apiUrl,
-			@RequestParam(name = "category", required = false) String category,
+			@RequestParam(name = "service", required = false) String service,
 			@RequestParam(name = "status", required = false) Boolean status) {
 
-		log.info("Received Api Search Request With Parameters [Page: " + pageNo + ", Limit: " + limit + ", ApiName: " + apiName + ", ApiUrl: " + apiUrl + ", Category: " + category + ", Status: "
+		log.info("Received Api Search Request With Parameters [Page: " + pageNo + ", Limit: " + limit + ", ApiName: " + apiName + ", ApiUrl: " + apiUrl + ", Category: " + service + ", Status: "
 				+ status + "]");
 
-		PageResponse<ApiDto> apiDtos = apiService.searchApi(apiName, apiUrl, category, status, pageNo, limit);
+		PageResponse<ApiDto> apiDtos = apiService.searchApi(apiName, apiUrl, service, status, pageNo, limit);
 
 		return ResponseDto.success("Found " + apiDtos.getRecords() + " Apis for Search Criteria", apiDtos);
 

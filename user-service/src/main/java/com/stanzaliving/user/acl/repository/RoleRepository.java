@@ -3,12 +3,13 @@
  */
 package com.stanzaliving.user.acl.repository;
 
-import java.util.Collection;
-
-import org.springframework.stereotype.Repository;
-
+import com.stanzaliving.core.base.enums.AccessLevel;
+import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.sqljpa.repository.AbstractJpaRepository;
 import com.stanzaliving.user.acl.entity.RoleEntity;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * @author naveen
@@ -18,8 +19,7 @@ import com.stanzaliving.user.acl.entity.RoleEntity;
 @Repository
 public interface RoleRepository extends AbstractJpaRepository<RoleEntity, Long> {
 
-	boolean existsByRoleName(String roleName);
-	//TODO:- update below
+	boolean existsByRoleNameAndDepartmentAndAccessLevel(String roleName, Department department, AccessLevel accessLevel);
 
-//	boolean existsByUuidInAndApiEntities_ActionUrl(Collection<String> roleIds, String actionUrl);
+	List<RoleEntity> findByDepartmentAndAccessLevel(Department department, AccessLevel accessLevel);
 }

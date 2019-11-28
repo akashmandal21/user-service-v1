@@ -4,16 +4,16 @@
 package com.stanzaliving.user.acl.controller;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
+import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.user.acl.request.dto.UserAccessDto;
-import com.stanzaliving.core.user.acl.request.dto.UserRoleAssignRequestDto;
-import com.stanzaliving.user.acl.service.AclService;
+import com.stanzaliving.user.acl.service.impl.AclServiceImpl;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author naveen.kumar
@@ -27,7 +27,7 @@ import java.util.List;
 public class AclController {
 
 	@Autowired
-	private AclService aclService;
+	private AclServiceImpl aclService;
 
 	@PostMapping("check")
 	public ResponseDto<Boolean> isAccessible(@RequestBody @Valid UserAccessDto userAccessDto) {
@@ -41,20 +41,10 @@ public class AclController {
 		return ResponseDto.success("URL Access Status: " + accessible, accessible);
 	}
 
-	@PostMapping("user/assign")
-	public ResponseDto assignRole(@RequestBody @Valid UserRoleAssignRequestDto userRoleAssignRequestDto) {
-
-		return null;
+	@GetMapping("getDepartmentRoleMap")
+	public ResponseDto<Map<Department, List<String>>> getDepartmentRoleMap(@RequestParam String userUuid) {
+		log.info("Received request to get DepartmentRoleMap for user " + userUuid);
+		return aclService.getDepartmentRoleMap(userUuid);
 	}
-
-	@GetMapping("user/{userUuid}")
-	public ResponseDto<List<UserRoleAssignRequestDto>> getUserRole(@PathVariable @NotBlank(message = "User uuid must not be blank") String userUuid) {
-
-		log.info("Fetching user role with id: " + userUuid);
-
-		return null;
-	}
-
-
 
 }

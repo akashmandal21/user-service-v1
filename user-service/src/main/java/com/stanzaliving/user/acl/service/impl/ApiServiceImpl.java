@@ -98,9 +98,9 @@ public class ApiServiceImpl implements ApiService {
 	}
 
 	@Override
-	public PageResponse<ApiDto> searchApi(String apiName, String apiUrl, String category, Boolean status, int pageNo, int limit) {
+	public PageResponse<ApiDto> searchApi(String apiName, String apiUrl, String service, Boolean status, int pageNo, int limit) {
 
-		Page<ApiEntity> apiPage = getApiPage(apiName, apiUrl, category, status, pageNo, limit);
+		Page<ApiEntity> apiPage = getApiPage(apiName, apiUrl, service, status, pageNo, limit);
 
 		log.info("Found " + apiPage.getNumberOfElements() + " Api Records on Page: " + pageNo + " for Search Criteria");
 
@@ -110,16 +110,16 @@ public class ApiServiceImpl implements ApiService {
 
 	}
 
-	private Page<ApiEntity> getApiPage(String apiName, String apiUrl, String category, Boolean status, int pageNo, int limit) {
+	private Page<ApiEntity> getApiPage(String apiName, String apiUrl, String service, Boolean status, int pageNo, int limit) {
 
-		Specification<ApiEntity> specification = getSearchQuery(apiName, apiUrl, category, status);
+		Specification<ApiEntity> specification = getSearchQuery(apiName, apiUrl, service, status);
 
 		Pageable pagination = getPaginationForSearchRequest(pageNo, limit);
 
 		return apiDbService.findAll(specification, pagination);
 	}
 
-	private Specification<ApiEntity> getSearchQuery(String apiName, String apiUrl, String category, Boolean status) {
+	private Specification<ApiEntity> getSearchQuery(String apiName, String apiUrl, String service, Boolean status) {
 
 		StanzaSpecificationBuilder<ApiEntity> specificationBuilder = new StanzaSpecificationBuilder<>();
 
@@ -131,8 +131,8 @@ public class ApiServiceImpl implements ApiService {
 			specificationBuilder.with(QueryConstants.Api.API_URL, CriteriaOperation.EQ, apiUrl);
 		}
 
-		if (StringUtils.isNotBlank(category)) {
-			specificationBuilder.with(QueryConstants.Api.SERVICE, CriteriaOperation.EQ, category);
+		if (StringUtils.isNotBlank(service)) {
+			specificationBuilder.with(QueryConstants.Api.SERVICE, CriteriaOperation.EQ, service);
 		}
 
 		if (status != null) {

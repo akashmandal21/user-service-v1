@@ -21,6 +21,6 @@ public interface ApiService {
 
 	void deleteApi(String apiId);
 
-	PageResponse<ApiDto> searchApi(String apiName, String apiUrl, String category, Boolean status, int pageNo, int limit);
+	PageResponse<ApiDto> searchApi(String apiName, String apiUrl, String service, Boolean status, int pageNo, int limit);
 
 }

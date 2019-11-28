@@ -3,16 +3,15 @@
  */
 package com.stanzaliving.user.acl.adapters;
 
+import com.stanzaliving.core.user.acl.dto.RoleDto;
+import com.stanzaliving.core.user.acl.request.dto.AddRoleRequestDto;
+import com.stanzaliving.user.acl.entity.RoleEntity;
+import lombok.experimental.UtilityClass;
+import org.apache.commons.collections.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.apache.commons.collections.CollectionUtils;
-
-import com.stanzaliving.core.user.acl.dto.RoleDto;
-import com.stanzaliving.user.acl.entity.RoleEntity;
-
-import lombok.experimental.UtilityClass;
 
 /**
  * @author naveen.kumar
@@ -23,7 +22,17 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class RoleAdapter {
 
-	public static List<RoleDto> getDto(List<RoleEntity> roleEntities) {
+	public static RoleEntity getEntityFromRequest(AddRoleRequestDto addRoleRequestDto) {
+
+		return RoleEntity.builder()
+				.roleName(addRoleRequestDto.getRoleName())
+				.department(addRoleRequestDto.getDepartment())
+				.accessLevel(addRoleRequestDto.getAccessLevel())
+				.build();
+
+	}
+
+	public static List<RoleDto> getDtoList(List<RoleEntity> roleEntities) {
 
 		if (CollectionUtils.isEmpty(roleEntities)) {
 			return new ArrayList<>();
@@ -43,8 +52,8 @@ public class RoleAdapter {
 				.updatedBy(roleEntity.getUpdatedBy())
 				.status(roleEntity.isStatus())
 				.roleName(roleEntity.getRoleName())
-				//TODO: update below
-				//.apis(ApiAdapter.getDto(roleEntity.getApiEntities()))
+				.department(roleEntity.getDepartment())
+				.accessLevel(roleEntity.getAccessLevel())
 				.build();
 
 	}

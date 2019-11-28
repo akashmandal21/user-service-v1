@@ -1,0 +1,123 @@
+package com.stanzaliving.user.acl.service.impl;
+
+import com.stanzaliving.core.base.exception.StanzaException;
+import com.stanzaliving.core.user.acl.dto.RoleAccessDto;
+import com.stanzaliving.core.user.acl.enums.RoleAccessType;
+import com.stanzaliving.core.user.acl.request.dto.AddRoleAccessDto;
+import com.stanzaliving.core.user.acl.request.dto.UpdateRoleAccessDto;
+import com.stanzaliving.user.acl.adapters.RoleAccessAdapter;
+import com.stanzaliving.user.acl.db.service.ApiDbService;
+import com.stanzaliving.user.acl.db.service.RoleDbService;
+import com.stanzaliving.user.acl.db.service.impl.RoleAccessDbServiceImpl;
+import com.stanzaliving.user.acl.entity.RoleAccessEntity;
+import com.stanzaliving.user.acl.entity.RoleEntity;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Log4j2
+@Service
+public class RoleAccessServiceImpl {
+
+    @Autowired
+    RoleDbService roleDbService;
+
+    @Autowired
+    ApiDbService apiDbService;
+
+    @Autowired
+    RoleAccessDbServiceImpl roleAccessDbService;
+
+    public RoleAccessDto addRoleAccess(AddRoleAccessDto addRoleAccessDto) {
+
+        assertValidRoleAccessRequest(addRoleAccessDto.getRoleUuid(), addRoleAccessDto.getAccessUuid(), addRoleAccessDto.getRoleAccessType());
+
+        RoleAccessEntity roleAccessEntity = roleAccessDbService.findByRoleUuidAndAccessUuidAndRoleAccessType(addRoleAccessDto.getRoleUuid(),
+                addRoleAccessDto.getAccessUuid(), addRoleAccessDto.getRoleAccessType());
+
+        if (null != roleAccessEntity) {
+            roleAccessEntity.setStatus(true);
+        } else {
+            roleAccessEntity = new RoleAccessEntity(addRoleAccessDto.getRoleUuid(), addRoleAccessDto.getAccessUuid(), addRoleAccessDto.getRoleAccessType());
+        }
+
+        roleAccessDbService.save(roleAccessEntity);
+
+        return RoleAccessAdapter.getDto(roleAccessEntity);
+    }
+
+    public void revokeRoleAccess(AddRoleAccessDto addRoleAccessDto) {
+
+        assertValidRoleAccessRequest(addRoleAccessDto.getRoleUuid(), addRoleAccessDto.getAccessUuid(), addRoleAccessDto.getRoleAccessType());
+
+        RoleAccessEntity roleAccessEntity = roleAccessDbService.findByRoleUuidAndAccessUuidAndRoleAccessType(addRoleAccessDto.getRoleUuid(),
+                addRoleAccessDto.getAccessUuid(), addRoleAccessDto.getRoleAccessType());
+
+        if (null != roleAccessEntity) {
+            roleAccessEntity.setStatus(false);
+        }
+
+        roleAccessDbService.save(roleAccessEntity);
+
+    }
+
+    public RoleAccessDto updateRoleAccess(UpdateRoleAccessDto updateRoleAccessDto) {
+
+        assertValidRoleAccessRequest(updateRoleAccessDto.getRoleUuid(), updateRoleAccessDto.getAccessUuid(), updateRoleAccessDto.getRoleAccessType());
+
+        RoleAccessEntity roleAccessEntity = roleAccessDbService.findByUuid(updateRoleAccessDto.getRoleAccessUuid());
+
+        if (null == roleAccessEntity) {
+            throw new StanzaException("Unable to update roleAccess, RoleAccess doesn't exist " + updateRoleAccessDto.getRoleAccessUuid());
+        }
+
+        roleAccessEntity.setRoleUuid(updateRoleAccessDto.getRoleUuid());
+        roleAccessEntity.setAccessUuid(updateRoleAccessDto.getAccessUuid());
+        roleAccessEntity.setRoleAccessType(updateRoleAccessDto.getRoleAccessType());
+
+        roleAccessDbService.save(roleAccessEntity);
+
+        return RoleAccessAdapter.getDto(roleAccessEntity);
+
+    }
+
+    //method will throw StanzaException for invalid requests
+    private void assertValidRoleAccessRequest(String roleUuid, String accessUuid, RoleAccessType roleAccessType) {
+        RoleEntity roleEntity = roleDbService.findByUuid(roleUuid);
+        if (null == roleEntity) {
+            throw new StanzaException("Role doesn't exist, roleUuid " + roleUuid);
+        }
+
+        if (RoleAccessType.ROLE.equals(roleAccessType)) {
+            RoleEntity accessRoleEntity = roleDbService.findByUuid(accessUuid);
+            if (null == accessRoleEntity) {
+                throw new StanzaException("RoleAccess Entity doesn't exist, accessUuid " + accessUuid + ", roleAccessType " + roleAccessType);
+            }
+            assertSameDepartmentAssignment(roleEntity, accessRoleEntity);
+            assertLowerOrEqualLevelAssignment(roleEntity, accessRoleEntity);
+
+        } else {
+            if (!apiDbService.existsByUuidAndStatus(accessUuid, true)) {
+                throw new StanzaException("RoleAccess Entity doesn't exist, accessUuid " + accessUuid + ", roleAccessType " + roleAccessType);
+            }
+        }
+    }
+
+    private void assertLowerOrEqualLevelAssignment(RoleEntity roleEntity, RoleEntity assignedRoleEntity) {
+        if (roleEntity.getAccessLevel().isLower(assignedRoleEntity.getAccessLevel())) {
+            throw new StanzaException("Role of higher level cannot be assigned to role of lower level " + roleEntity + assignedRoleEntity);
+        }
+    }
+
+    public void assertSameDepartmentAssignment(RoleEntity roleEntity1, RoleEntity roleEntity2) {
+        if (!roleEntity1.getDepartment().equals(roleEntity2.getDepartment())) {
+            throw new StanzaException("Cross department role to role assignment not allowed");
+        }
+    }
+
+    public void assertParentChildAssignment(RoleEntity parentRoleEntity, RoleEntity childRoleEntity) {
+        if (!childRoleEntity.getAccessLevel().isLower(parentRoleEntity.getAccessLevel())) {
+            throw new StanzaException("Parent Role cannot be at lower level than current role level");
+        }
+    }
+}
