@@ -4,6 +4,8 @@ import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
+import com.stanzaliving.core.user.acl.enums.RoleAccessType;
+import com.stanzaliving.core.user.acl.request.dto.AddRoleAccessDto;
 import com.stanzaliving.core.user.acl.request.dto.AddRoleRequestDto;
 import com.stanzaliving.user.acl.adapters.RoleAdapter;
 import com.stanzaliving.user.acl.db.service.RoleDbService;
@@ -24,23 +26,36 @@ public class RoleServiceImpl {
     @Autowired
     RoleAccessServiceImpl roleAccessService;
 
+    private static String PARENT_UUID_TO_SKIP_PARENT_ROLE = "SELF";
+
     public RoleDto addRole(AddRoleRequestDto addRoleRequestDto) {
         if (roleDbService.isRoleExists(addRoleRequestDto.getRoleName(), addRoleRequestDto.getDepartment(), addRoleRequestDto.getAccessLevel())) {
             throw new StanzaException("Role already exists " + addRoleRequestDto);
         }
 
         RoleEntity parentRoleEntity = roleDbService.findByUuid(addRoleRequestDto.getParentRoleUuid());
-        if (null == parentRoleEntity) {
-            throw new StanzaException("Parent role doesn't exist " + addRoleRequestDto);
+        if (!PARENT_UUID_TO_SKIP_PARENT_ROLE.equalsIgnoreCase(addRoleRequestDto.getParentRoleUuid()) && null == parentRoleEntity) {
+            throw new StanzaException("Parent role doesn't exist for parentUuid" + addRoleRequestDto.getParentRoleUuid());
         }
 
         RoleEntity roleEntity = RoleAdapter.getEntityFromRequest(addRoleRequestDto);
 
-        roleAccessService.assertSameDepartmentAssignment(parentRoleEntity, roleEntity);
-        roleAccessService.assertParentChildAssignment(parentRoleEntity, roleEntity);
+        if (!PARENT_UUID_TO_SKIP_PARENT_ROLE.equalsIgnoreCase(addRoleRequestDto.getParentRoleUuid())) {
+            roleAccessService.assertSameDepartmentAssignment(parentRoleEntity, roleEntity);
+            roleAccessService.assertParentChildAssignment(parentRoleEntity, roleEntity);
+        }
 
         roleDbService.save(roleEntity);
 
+        if (!PARENT_UUID_TO_SKIP_PARENT_ROLE.equalsIgnoreCase(addRoleRequestDto.getParentRoleUuid())) {
+            roleAccessService.addRoleAccess(
+                    AddRoleAccessDto.builder()
+                            .roleUuid(addRoleRequestDto.getParentRoleUuid())
+                            .accessUuid(roleEntity.getUuid())
+                            .roleAccessType(RoleAccessType.ROLE)
+                            .build()
+            );
+        }
         return RoleAdapter.getDto(roleEntity);
     }
 

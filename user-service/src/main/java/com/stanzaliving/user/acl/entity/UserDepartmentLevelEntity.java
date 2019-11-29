@@ -3,7 +3,9 @@ package com.stanzaliving.user.acl.entity;
 import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.sqljpa.entity.AbstractJpaEntity;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
@@ -12,6 +14,8 @@ import javax.persistence.*;
 @Table(name = "user_department_level", uniqueConstraints = { @UniqueConstraint(name = "UK_user_dept_status", columnNames = { "user_uuid", "department", "status" }) })
 @Entity(name = "user_department_level")
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserDepartmentLevelEntity extends AbstractJpaEntity {
 
     private static final long serialVersionUID = 7105880327634827863L;

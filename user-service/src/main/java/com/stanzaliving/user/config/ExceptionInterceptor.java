@@ -1,9 +1,15 @@
 package com.stanzaliving.user.config;
 
-import java.sql.SQLIntegrityConstraintViolationException;
-
-import javax.validation.ConstraintViolationException;
-
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.stanzaliving.core.base.common.dto.ResponseDto;
+import com.stanzaliving.core.base.exception.ApiValidationException;
+import com.stanzaliving.core.base.exception.NoRecordException;
+import com.stanzaliving.core.base.exception.StanzaException;
+import com.stanzaliving.core.base.exception.StanzaHttpException;
+import com.stanzaliving.core.base.utils.StanzaUtils;
+import com.stanzaliving.user.exception.AuthException;
+import com.stanzaliving.user.exception.MappingNotFoundException;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.PropertyAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -20,17 +26,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
-import com.stanzaliving.core.base.common.dto.ResponseDto;
-import com.stanzaliving.core.base.exception.ApiValidationException;
-import com.stanzaliving.core.base.exception.NoRecordException;
-import com.stanzaliving.core.base.exception.StanzaException;
-import com.stanzaliving.core.base.exception.StanzaHttpException;
-import com.stanzaliving.core.base.utils.StanzaUtils;
-import com.stanzaliving.user.exception.AuthException;
-import com.stanzaliving.user.exception.MappingNotFoundException;
-
-import lombok.extern.log4j.Log4j2;
+import javax.validation.ConstraintViolationException;
+import java.sql.SQLIntegrityConstraintViolationException;
 
 @Log4j2
 @RestControllerAdvice
@@ -192,7 +189,7 @@ public class ExceptionInterceptor {
 	public <T> ResponseDto<T> handleStanzaException(StanzaException e) {
 
 		String exceptionId = StanzaUtils.generateUniqueId();
-		log.error("Got StanzaException for exceptionId: " + exceptionId, e);
+		log.error("Got StanzaException exceptionId: " + e.getMessage()  + ", exceptionId "+ exceptionId, e);
 
 		return ResponseDto.failure(e.getMessage(), exceptionId);
 	}

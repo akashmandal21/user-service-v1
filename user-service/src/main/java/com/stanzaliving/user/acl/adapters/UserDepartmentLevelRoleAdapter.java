@@ -4,6 +4,8 @@ package com.stanzaliving.user.acl.adapters;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleNameUrlExpandedDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRequestDto;
+import com.stanzaliving.user.acl.entity.ApiEntity;
+import com.stanzaliving.user.acl.entity.RoleEntity;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity;
 import lombok.experimental.UtilityClass;
@@ -35,7 +37,18 @@ public class UserDepartmentLevelRoleAdapter {
                 .build();
     }
 
-    public static UserDeptLevelRoleNameUrlExpandedDto getUserDeptLevelRoleNameUrlExpandedDto() {
-        return null;
+    public static UserDeptLevelRoleNameUrlExpandedDto getUserDeptLevelRoleNameUrlExpandedDto(UserDepartmentLevelEntity userDepartmentLevelEntity, List<RoleEntity> roleEntityList, List<ApiEntity> apiEntityList) {
+
+        List<String> roleNameList = roleEntityList.stream().map(entity -> entity.getRoleName()).collect(Collectors.toList());
+        List<String> actionUrlList = apiEntityList.stream().map(entity -> entity.getActionUrl()).collect(Collectors.toList());
+
+        return UserDeptLevelRoleNameUrlExpandedDto.builder()
+                .userUuid(userDepartmentLevelEntity.getUserUuid())
+                .department(userDepartmentLevelEntity.getDepartment())
+                .accessLevel(userDepartmentLevelEntity.getAccessLevel())
+                .accessLevelEntityListUuid(Arrays.asList(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid().split("\\s*,\\s*")))
+                .rolesList(roleNameList)
+                .urlList(actionUrlList)
+                .build();
     }
 }

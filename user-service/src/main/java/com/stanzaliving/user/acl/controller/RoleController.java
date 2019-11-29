@@ -87,10 +87,4 @@ public class RoleController {
 		return ResponseDto.success("Updated Role: " + updateRoleAccessDto.getRoleAccessUuid(), roleAccessService.updateRoleAccess(updateRoleAccessDto));
 	}
 
-//	@PostMapping("assignBulk")
-//	public ResponseDto<List<RoleAccessDto>> assignMultipleRoles(@RequestBody @Valid List<AddRoleAccessDto> addRoleAccessDtoList) {
-//
-//		return ResponseDto.success();
-//	}
-
 }

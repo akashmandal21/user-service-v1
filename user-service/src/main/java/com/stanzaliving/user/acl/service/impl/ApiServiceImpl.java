@@ -44,7 +44,7 @@ public class ApiServiceImpl implements ApiService {
 	public ApiDto addApi(AddApiRequestDto addApiRequestDto) {
 
 		if (apiDbService.isActionPresent(addApiRequestDto.getActionUrl())) {
-			throw new StanzaException("API already exists with given URL");
+			throw new StanzaException("API already exists with given URI");
 		}
 
 		log.info("Adding New API with URL: " + addApiRequestDto.getActionUrl() + " and name: " + addApiRequestDto.getApiName());
@@ -59,10 +59,10 @@ public class ApiServiceImpl implements ApiService {
 	@Override
 	public ApiDto updateApi(UpdateApiRequestDto updateApiRequestDto) {
 
-		ApiEntity apiEntity = apiDbService.findByUuid(updateApiRequestDto.getApiId());
+		ApiEntity apiEntity = apiDbService.findByUuid(updateApiRequestDto.getApiUuid());
 
 		if (Objects.isNull(apiEntity)) {
-			throw new StanzaException("No API exists with Id: " + updateApiRequestDto.getApiId() + " to update");
+			throw new StanzaException("No API exists with Id: " + updateApiRequestDto.getApiUuid() + " to update");
 		}
 
 		if (!apiEntity.getActionUrl().equals(updateApiRequestDto.getActionUrl())
@@ -83,15 +83,15 @@ public class ApiServiceImpl implements ApiService {
 	}
 
 	@Override
-	public void deleteApi(String apiId) {
+	public void deleteApi(String apiUuid) {
 
-		ApiEntity apiEntity = apiDbService.findByUuid(apiId);
+		ApiEntity apiEntity = apiDbService.findByUuid(apiUuid);
 
 		if (Objects.isNull(apiEntity)) {
-			throw new StanzaException("No API exists with Id: " + apiId + " to delete");
+			throw new StanzaException("No API exists with Id: " + apiUuid + " to delete");
 		}
 
-		log.info("Deleting API [ID: " + apiId + ", Name: " + apiEntity.getApiName() + ", URL: " + apiEntity.getActionUrl() + "]");
+		log.info("Deleting API [ID: " + apiUuid + ", Name: " + apiEntity.getApiName() + ", URL: " + apiEntity.getActionUrl() + "]");
 
 		apiDbService.delete(apiEntity);
 

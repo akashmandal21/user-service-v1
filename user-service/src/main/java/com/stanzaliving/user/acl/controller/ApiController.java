@@ -42,19 +42,19 @@ public class ApiController {
 	@PostMapping("update")
 	public ResponseDto<ApiDto> updateApi(@RequestBody @Valid UpdateApiRequestDto updateApiRequestDto) {
 
-		log.info("Received Request to update API [ID: " + updateApiRequestDto.getApiId() + ", Name: " + updateApiRequestDto.getApiName() + ", URL: " + updateApiRequestDto.getActionUrl() + "]");
+		log.info("Received Request to update API [ID: " + updateApiRequestDto.getApiUuid() + ", Name: " + updateApiRequestDto.getApiName() + ", URL: " + updateApiRequestDto.getActionUrl() + "]");
 
-		return ResponseDto.success("Updated API with URL " + updateApiRequestDto.getActionUrl(), apiService.updateApi(updateApiRequestDto));
+		return ResponseDto.success("Updated API with apiUuid " + updateApiRequestDto.getApiUuid(), apiService.updateApi(updateApiRequestDto));
 	}
 
-	@DeleteMapping("delete/{apiId}")
-	public ResponseDto<Void> deleteApi(@PathVariable(name = "apiId") String apiId) {
+	@DeleteMapping("delete/{apiUuid}")
+	public ResponseDto<Void> deleteApi(@PathVariable(name = "apiUuid") String apiUuid) {
 
-		log.info("Received request to delete api: " + apiId);
+		log.info("Received request to delete api: " + apiUuid);
 		
-		apiService.deleteApi(apiId);
+		apiService.deleteApi(apiUuid);
 
-		return ResponseDto.success("Deleted Api " + apiId);
+		return ResponseDto.success("Deleted Api " + apiUuid);
 	}
 
 	@GetMapping("search/{pageNo}/{limit}")

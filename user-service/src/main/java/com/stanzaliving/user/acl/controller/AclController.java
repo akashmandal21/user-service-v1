@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author naveen.kumar
@@ -34,24 +35,32 @@ public class AclController {
 
 		log.info("Checking User: " + userAccessDto.getUserId() + " access for url: " + userAccessDto.getUrl());
 
-		boolean accessible = aclService.isAccesible(userAccessDto.getUserId(), userAccessDto.getUrl());
+		boolean accessible = aclService.isAccessible(userAccessDto.getUserId(), userAccessDto.getUrl());
 
 		log.info("URL: " + userAccessDto.getUrl() + " accessible by user: " + userAccessDto.getUserId() + " Status: " + accessible);
 
 		return ResponseDto.success("URL Access Status: " + accessible, accessible);
 	}
 
+	@GetMapping("user/urlList/{userUuid}")
+	public ResponseDto<Set<String>> getAccessibleUrlList(@PathVariable @NotBlank(message = "User uuid must not be blank") String userUuid){
+		log.info("Request received to get urlList for user : " + userUuid);
+		return ResponseDto.success(aclService.getAccessibleUrlList(userUuid));
+	}
+
 	@GetMapping("user/fe/{userUuid}")
 	public ResponseDto<List<UserDeptLevelRoleNameUrlExpandedDto>> getUserRolesFe(@PathVariable @NotBlank(message = "User uuid must not be blank") String userUuid) {
 
-		return null;
+		log.info("Request received to getUserRolesFe for user : " + userUuid);
+		return ResponseDto.success(aclService.getUserDeptLevelRoleNameUrlExpandedDtoFe(userUuid));
 
 	}
 
 	@GetMapping("user/be/{userUuid}")
 	public ResponseDto<List<UserDeptLevelRoleNameUrlExpandedDto>> getUserRolesBe(@PathVariable @NotBlank(message = "User uuid must not be blank") String userUuid) {
 
-		return null;
+		log.info("Request received to getUserRolesBe for user : " + userUuid);
+		return ResponseDto.success(aclService.getUserDeptLevelRoleNameUrlExpandedDtoBe(userUuid));
 
 	}
 

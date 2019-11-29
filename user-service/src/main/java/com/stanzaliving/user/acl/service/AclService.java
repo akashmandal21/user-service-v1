@@ -11,5 +11,5 @@ package com.stanzaliving.user.acl.service;
  **/
 public interface AclService {
 
-	boolean isAccesible(String userId, String url);
+	boolean isAccessible(String userId, String url);
 }

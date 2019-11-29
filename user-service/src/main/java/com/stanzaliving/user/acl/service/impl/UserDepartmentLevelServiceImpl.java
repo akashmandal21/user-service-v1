@@ -17,7 +17,9 @@ public class UserDepartmentLevelServiceImpl {
     public UserDepartmentLevelEntity add(AddUserDeptLevelRequestDto addUserDeptLevelRequestDto) {
         UserDepartmentLevelEntity userDepartmentLevelEntity = userDepartmentLevelDbService.findByUserUuidAndDepartmentAndStatus(addUserDeptLevelRequestDto.getUserUuid(), addUserDeptLevelRequestDto.getDepartment(), true);
         if (null != userDepartmentLevelEntity) {
-            throw new StanzaException("User already have access level defined in this department, Please use update API " + addUserDeptLevelRequestDto);
+            throw new StanzaException("User already have access level defined in this department, " +
+                    "Please add role after revoking access, current level " + userDepartmentLevelEntity.getAccessLevel() +
+                    " in Department " + userDepartmentLevelEntity.getDepartment());
         }
         userDepartmentLevelEntity = UserDepartmentLevelAdapter.getEntityFromRequest(addUserDeptLevelRequestDto);
         return userDepartmentLevelDbService.save(userDepartmentLevelEntity);

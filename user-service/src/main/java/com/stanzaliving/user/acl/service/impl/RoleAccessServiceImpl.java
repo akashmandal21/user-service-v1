@@ -91,33 +91,45 @@ public class RoleAccessServiceImpl {
         if (RoleAccessType.ROLE.equals(roleAccessType)) {
             RoleEntity accessRoleEntity = roleDbService.findByUuid(accessUuid);
             if (null == accessRoleEntity) {
-                throw new StanzaException("RoleAccess Entity doesn't exist, accessUuid " + accessUuid + ", roleAccessType " + roleAccessType);
+                throw new StanzaException(roleAccessType + " Entity doesn't exist, accessUuid " + accessUuid);
             }
             assertSameDepartmentAssignment(roleEntity, accessRoleEntity);
             assertLowerLevelAssignment(roleEntity, accessRoleEntity);
 
         } else {
             if (!apiDbService.existsByUuidAndStatus(accessUuid, true)) {
-                throw new StanzaException("RoleAccess Entity doesn't exist, accessUuid " + accessUuid + ", roleAccessType " + roleAccessType);
+                throw new StanzaException(roleAccessType + " Entity doesn't exist, accessUuid " + accessUuid);
             }
         }
     }
 
     private void assertLowerLevelAssignment(RoleEntity roleEntity, RoleEntity assignedRoleEntity) {
+        if (null == roleEntity || null == assignedRoleEntity) {
+            throw new StanzaException("Either of roleEntity or assignedRoleEntity not found " + roleEntity + " " + assignedRoleEntity);
+        }
+
         if (!assignedRoleEntity.getAccessLevel().isLower(roleEntity.getAccessLevel())) {
-            throw new StanzaException("Only Role of higher level can be assigned to role of lower level " + roleEntity + assignedRoleEntity);
+            throw new StanzaException("Only Role of higher level can be assigned to role of lower level " + roleEntity.getAccessLevel() + " " + assignedRoleEntity.getAccessLevel());
         }
     }
 
     public void assertSameDepartmentAssignment(RoleEntity roleEntity1, RoleEntity roleEntity2) {
+        if (null == roleEntity1 || null == roleEntity2) {
+            throw new StanzaException("Either of roleEntity1 or roleEntity2 not found " + roleEntity1 + roleEntity2);
+        }
+
         if (!roleEntity1.getDepartment().equals(roleEntity2.getDepartment())) {
-            throw new StanzaException("Cross department role to role assignment not allowed");
+            throw new StanzaException("Cross department role to role assignment not allowed " + roleEntity1.getDepartment() + " " + roleEntity2.getDepartment());
         }
     }
 
     public void assertParentChildAssignment(RoleEntity parentRoleEntity, RoleEntity childRoleEntity) {
+        if (null == parentRoleEntity || null == childRoleEntity) {
+            throw new StanzaException("Either of parentEntity or childEntity not found " + parentRoleEntity + childRoleEntity);
+        }
+
         if (!childRoleEntity.getAccessLevel().isLower(parentRoleEntity.getAccessLevel())) {
-            throw new StanzaException("Parent Role should be at higher level than current role" + parentRoleEntity + childRoleEntity);
+            throw new StanzaException("Parent Role should be at higher level than current role, parentUuid " + parentRoleEntity.getUuid() + ",childUuid " + childRoleEntity.getUuid());
         }
     }
 }
