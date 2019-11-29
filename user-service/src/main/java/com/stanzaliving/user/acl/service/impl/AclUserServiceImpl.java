@@ -10,6 +10,7 @@ import com.stanzaliving.user.acl.db.service.impl.UserDepartmentLevelDbServiceImp
 import com.stanzaliving.user.acl.db.service.impl.UserDepartmentLevelRoleDbServiceImpl;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity;
+import com.stanzaliving.user.service.UserService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,7 +35,12 @@ public class AclUserServiceImpl {
     @Autowired
     UserDepartmentLevelRoleDbServiceImpl userDepartmentLevelRoleDbService;
 
+    @Autowired
+    UserService userService;
+
     public void addRole(AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleDto) {
+
+        userService.assertActiveUserByUserUuid(addUserDeptLevelRoleDto.getUserUuid());
 
         AddUserDeptLevelRequestDto addUserDeptLevelRequestDto = new AddUserDeptLevelRequestDto(addUserDeptLevelRoleDto);
 
@@ -48,6 +54,8 @@ public class AclUserServiceImpl {
     }
 
     public void revokeAllRolesOfDepartment(String userUuid, Department department) {
+
+        userService.assertActiveUserByUserUuid(userUuid);
 
         UserDepartmentLevelEntity userDepartmentLevelEntity = userDepartmentLevelDbService.findByUserUuidAndDepartment(userUuid, department);
         if (null == userDepartmentLevelEntity) {
@@ -64,6 +72,9 @@ public class AclUserServiceImpl {
     }
 
     public List<UserDeptLevelRoleDto> getUserDeptLevelRole(String userUuid) {
+
+        userService.assertActiveUserByUserUuid(userUuid);
+
         List<UserDeptLevelRoleDto> userDeptLevelRoleDtoList = new ArrayList<>();
         List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList;
 

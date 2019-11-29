@@ -3,13 +3,13 @@
  */
 package com.stanzaliving.user.service;
 
-import java.util.List;
-
 import com.stanzaliving.core.base.common.dto.PageResponse;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
+
+import java.util.List;
 
 /**
  * @author naveen
@@ -19,6 +19,8 @@ import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 public interface UserService {
 
 	UserDto getActiveUserByUserId(String userId);
+
+	void assertActiveUserByUserUuid(String userId);
 
 	UserDto addUser(AddUserRequestDto addUserRequestDto);
 

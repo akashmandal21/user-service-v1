@@ -9,6 +9,7 @@ import com.stanzaliving.user.acl.adapters.UserDepartmentLevelRoleAdapter;
 import com.stanzaliving.user.acl.db.service.impl.*;
 import com.stanzaliving.user.acl.entity.*;
 import com.stanzaliving.user.acl.service.AclService;
+import com.stanzaliving.user.service.UserService;
 import javafx.util.Pair;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections.CollectionUtils;
@@ -46,6 +47,9 @@ public class AclServiceImpl implements AclService {
 	@Autowired
 	ApiDbServiceImpl apiDbService;
 
+	@Autowired
+	UserService userService;
+
 	@Override
 	public boolean isAccessible(String userId, String url) {
 
@@ -80,6 +84,8 @@ public class AclServiceImpl implements AclService {
 	}
 
 	private List<UserDeptLevelRoleNameUrlExpandedDto> getUserDeptLevelRoleNameUrlExpandedDto(String userUuid) {
+
+		userService.assertActiveUserByUserUuid(userUuid);
 
 		List<UserDeptLevelRoleNameUrlExpandedDto> userDeptLevelRoleNameUrlExpandedDtoList = new ArrayList<>();
 

@@ -60,6 +60,11 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public void assertActiveUserByUserUuid(String userUuid) {
+		this.getActiveUserByUserId(userUuid);
+	}
+
+	@Override
 	public UserDto addUser(AddUserRequestDto addUserRequestDto) {
 
 		if (false && !PhoneNumberUtils.isValidMobileForCountry(addUserRequestDto.getMobile(), addUserRequestDto.getIsoCode())) {
