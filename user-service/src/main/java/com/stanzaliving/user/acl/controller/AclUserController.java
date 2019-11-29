@@ -45,7 +45,7 @@ public class AclUserController {
 
     }
 
-    //Api's will be needed for adding or removing entity for a particular level on a user
-    //Api's will be needed for adding or removing roles for a particular level on a user
+    //TODO: Api's will be needed for adding or removing entity for a particular level on a user
+    //TODO: will be needed for adding or removing roles for a particular level on a user
 
 }

@@ -67,7 +67,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserDto addUser(AddUserRequestDto addUserRequestDto) {
 
-		if (false && !PhoneNumberUtils.isValidMobileForCountry(addUserRequestDto.getMobile(), addUserRequestDto.getIsoCode())) {
+		if (!PhoneNumberUtils.isValidMobileForCountry(addUserRequestDto.getMobile(), addUserRequestDto.getIsoCode())) {
 			log.error("Number: " + addUserRequestDto.getMobile() + " and ISO: " + addUserRequestDto.getIsoCode() + " doesn't appear to be a valid mobile combination");
 			throw new StanzaException("Mobile Number and ISO Code combination not valid");
 		}
