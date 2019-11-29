@@ -10,6 +10,8 @@ import com.stanzaliving.core.user.acl.request.dto.AddRoleRequestDto;
 import com.stanzaliving.user.acl.adapters.RoleAdapter;
 import com.stanzaliving.user.acl.db.service.RoleDbService;
 import com.stanzaliving.user.acl.entity.RoleEntity;
+import com.stanzaliving.user.acl.service.RoleAccessService;
+import com.stanzaliving.user.acl.service.RoleService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,16 +20,17 @@ import java.util.List;
 
 @Log4j2
 @Service
-public class RoleServiceImpl {
+public class RoleServiceImpl implements RoleService {
 
     @Autowired
     RoleDbService roleDbService;
 
     @Autowired
-    RoleAccessServiceImpl roleAccessService;
+    RoleAccessService roleAccessService;
 
     private static String PARENT_UUID_TO_SKIP_PARENT_ROLE = "SELF";
 
+    @Override
     public RoleDto addRole(AddRoleRequestDto addRoleRequestDto) {
         if (roleDbService.isRoleExists(addRoleRequestDto.getRoleName(), addRoleRequestDto.getDepartment(), addRoleRequestDto.getAccessLevel())) {
             throw new StanzaException("Role already exists " + addRoleRequestDto);
@@ -59,6 +62,7 @@ public class RoleServiceImpl {
         return RoleAdapter.getDto(roleEntity);
     }
 
+    @Override
     public RoleDto getRoleByUuid(String roleUuid) {
         RoleEntity roleEntity = roleDbService.findByUuid(roleUuid);
 
@@ -69,6 +73,7 @@ public class RoleServiceImpl {
         return RoleAdapter.getDto(roleEntity);
     }
 
+    @Override
     public List<RoleDto> findByDepartmentAndAccessLevel(Department department, AccessLevel accessLevel) {
         List<RoleEntity> roleEntityList = roleDbService.findByDepartmentAndAccessLevel(department, accessLevel);
         return RoleAdapter.getDtoList(roleEntityList);

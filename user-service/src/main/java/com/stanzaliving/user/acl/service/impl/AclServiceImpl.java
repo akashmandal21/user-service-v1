@@ -6,7 +6,7 @@ package com.stanzaliving.user.acl.service.impl;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleNameUrlExpandedDto;
 import com.stanzaliving.core.user.acl.enums.RoleAccessType;
 import com.stanzaliving.user.acl.adapters.UserDepartmentLevelRoleAdapter;
-import com.stanzaliving.user.acl.db.service.impl.*;
+import com.stanzaliving.user.acl.db.service.*;
 import com.stanzaliving.user.acl.entity.*;
 import com.stanzaliving.user.acl.service.AclService;
 import com.stanzaliving.user.service.UserService;
@@ -33,19 +33,19 @@ import java.util.stream.Collectors;
 public class AclServiceImpl implements AclService {
 
 	@Autowired
-	UserDepartmentLevelDbServiceImpl userDepartmentLevelDbService;
+	UserDepartmentLevelDbService userDepartmentLevelDbService;
 
 	@Autowired
-	UserDepartmentLevelRoleDbServiceImpl userDepartmentLevelRoleDbService;
+	UserDepartmentLevelRoleDbService userDepartmentLevelRoleDbService;
 
 	@Autowired
-	RoleAccessDbServiceImpl roleAccessDbService;
+	RoleAccessDbService roleAccessDbService;
 
 	@Autowired
-	RoleDbServiceImpl roleDbService;
+	RoleDbService roleDbService;
 
 	@Autowired
-	ApiDbServiceImpl apiDbService;
+	ApiDbService apiDbService;
 
 	@Autowired
 	UserService userService;
@@ -58,6 +58,7 @@ public class AclServiceImpl implements AclService {
 
 	}
 
+	@Override
 	public List<UserDeptLevelRoleNameUrlExpandedDto> getUserDeptLevelRoleNameUrlExpandedDtoFe(String userUuid) {
 		List<UserDeptLevelRoleNameUrlExpandedDto> userDeptLevelRoleNameUrlExpandedDtoList = getUserDeptLevelRoleNameUrlExpandedDto(userUuid);
 		for(UserDeptLevelRoleNameUrlExpandedDto userDeptLevelRoleNameUrlExpandedDto : userDeptLevelRoleNameUrlExpandedDtoList) {
@@ -66,6 +67,7 @@ public class AclServiceImpl implements AclService {
 		return userDeptLevelRoleNameUrlExpandedDtoList;
 	}
 
+	@Override
 	public List<UserDeptLevelRoleNameUrlExpandedDto> getUserDeptLevelRoleNameUrlExpandedDtoBe(String userUuid) {
 		List<UserDeptLevelRoleNameUrlExpandedDto> userDeptLevelRoleNameUrlExpandedDtoList = getUserDeptLevelRoleNameUrlExpandedDto(userUuid);
 		for(UserDeptLevelRoleNameUrlExpandedDto userDeptLevelRoleNameUrlExpandedDto : userDeptLevelRoleNameUrlExpandedDtoList) {
@@ -74,6 +76,7 @@ public class AclServiceImpl implements AclService {
 		return userDeptLevelRoleNameUrlExpandedDtoList;
 	}
 
+	@Override
 	public Set<String> getAccessibleUrlList(String userUuid) {
 		List<UserDeptLevelRoleNameUrlExpandedDto> userDeptLevelRoleNameUrlExpandedDtoList = getUserDeptLevelRoleNameUrlExpandedDto(userUuid);
 		Set<String> accessibleUrlList = new HashSet<>();

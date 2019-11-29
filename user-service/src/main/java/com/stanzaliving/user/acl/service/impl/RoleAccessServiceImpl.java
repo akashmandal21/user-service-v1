@@ -7,17 +7,18 @@ import com.stanzaliving.core.user.acl.request.dto.AddRoleAccessDto;
 import com.stanzaliving.core.user.acl.request.dto.UpdateRoleAccessDto;
 import com.stanzaliving.user.acl.adapters.RoleAccessAdapter;
 import com.stanzaliving.user.acl.db.service.ApiDbService;
+import com.stanzaliving.user.acl.db.service.RoleAccessDbService;
 import com.stanzaliving.user.acl.db.service.RoleDbService;
-import com.stanzaliving.user.acl.db.service.impl.RoleAccessDbServiceImpl;
 import com.stanzaliving.user.acl.entity.RoleAccessEntity;
 import com.stanzaliving.user.acl.entity.RoleEntity;
+import com.stanzaliving.user.acl.service.RoleAccessService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Log4j2
 @Service
-public class RoleAccessServiceImpl {
+public class RoleAccessServiceImpl implements RoleAccessService {
 
     @Autowired
     RoleDbService roleDbService;
@@ -26,8 +27,9 @@ public class RoleAccessServiceImpl {
     ApiDbService apiDbService;
 
     @Autowired
-    RoleAccessDbServiceImpl roleAccessDbService;
+    RoleAccessDbService roleAccessDbService;
 
+    @Override
     public RoleAccessDto addRoleAccess(AddRoleAccessDto addRoleAccessDto) {
 
         assertValidRoleAccessRequest(addRoleAccessDto.getRoleUuid(), addRoleAccessDto.getAccessUuid(), addRoleAccessDto.getRoleAccessType());
@@ -46,6 +48,7 @@ public class RoleAccessServiceImpl {
         return RoleAccessAdapter.getDto(roleAccessEntity);
     }
 
+    @Override
     public void revokeRoleAccess(AddRoleAccessDto addRoleAccessDto) {
 
         assertValidRoleAccessRequest(addRoleAccessDto.getRoleUuid(), addRoleAccessDto.getAccessUuid(), addRoleAccessDto.getRoleAccessType());
@@ -61,6 +64,7 @@ public class RoleAccessServiceImpl {
 
     }
 
+    @Override
     public RoleAccessDto updateRoleAccess(UpdateRoleAccessDto updateRoleAccessDto) {
 
         assertValidRoleAccessRequest(updateRoleAccessDto.getRoleUuid(), updateRoleAccessDto.getAccessUuid(), updateRoleAccessDto.getRoleAccessType());
@@ -113,6 +117,7 @@ public class RoleAccessServiceImpl {
         }
     }
 
+    @Override
     public void assertSameDepartmentAssignment(RoleEntity roleEntity1, RoleEntity roleEntity2) {
         if (null == roleEntity1 || null == roleEntity2) {
             throw new StanzaException("Either of roleEntity1 or roleEntity2 not found " + roleEntity1 + roleEntity2);
@@ -123,6 +128,7 @@ public class RoleAccessServiceImpl {
         }
     }
 
+    @Override
     public void assertParentChildAssignment(RoleEntity parentRoleEntity, RoleEntity childRoleEntity) {
         if (null == parentRoleEntity || null == childRoleEntity) {
             throw new StanzaException("Either of parentEntity or childEntity not found " + parentRoleEntity + childRoleEntity);

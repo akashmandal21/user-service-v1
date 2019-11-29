@@ -6,10 +6,13 @@ import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRequestDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleRequestDto;
 import com.stanzaliving.user.acl.adapters.UserDepartmentLevelRoleAdapter;
-import com.stanzaliving.user.acl.db.service.impl.UserDepartmentLevelDbServiceImpl;
-import com.stanzaliving.user.acl.db.service.impl.UserDepartmentLevelRoleDbServiceImpl;
+import com.stanzaliving.user.acl.db.service.UserDepartmentLevelDbService;
+import com.stanzaliving.user.acl.db.service.UserDepartmentLevelRoleDbService;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity;
+import com.stanzaliving.user.acl.service.AclUserService;
+import com.stanzaliving.user.acl.service.UserDepartmentLevelRoleService;
+import com.stanzaliving.user.acl.service.UserDepartmentLevelService;
 import com.stanzaliving.user.service.UserService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,23 +24,24 @@ import java.util.stream.Collectors;
 
 @Service
 @Log4j2
-public class AclUserServiceImpl {
+public class AclUserServiceImpl implements AclUserService {
 
     @Autowired
-    UserDepartmentLevelServiceImpl userDepartmentLevelService;
+    UserDepartmentLevelService userDepartmentLevelService;
 
     @Autowired
-    UserDepartmentLevelDbServiceImpl userDepartmentLevelDbService;
+    UserDepartmentLevelDbService userDepartmentLevelDbService;
 
     @Autowired
-    UserDepartmentLevelRoleServiceImpl userDepartmentLevelRoleService;
+    UserDepartmentLevelRoleService userDepartmentLevelRoleService;
 
     @Autowired
-    UserDepartmentLevelRoleDbServiceImpl userDepartmentLevelRoleDbService;
+    UserDepartmentLevelRoleDbService userDepartmentLevelRoleDbService;
 
     @Autowired
     UserService userService;
 
+    @Override
     public void addRole(AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleDto) {
 
         userService.assertActiveUserByUserUuid(addUserDeptLevelRoleDto.getUserUuid());
@@ -53,6 +57,7 @@ public class AclUserServiceImpl {
 
     }
 
+    @Override
     public void revokeAllRolesOfDepartment(String userUuid, Department department) {
 
         userService.assertActiveUserByUserUuid(userUuid);
@@ -71,6 +76,7 @@ public class AclUserServiceImpl {
 
     }
 
+    @Override
     public List<UserDeptLevelRoleDto> getUserDeptLevelRole(String userUuid) {
 
         userService.assertActiveUserByUserUuid(userUuid);

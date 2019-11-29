@@ -12,7 +12,6 @@ import com.stanzaliving.user.acl.repository.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -34,14 +33,6 @@ public class RoleDbServiceImpl extends AbstractJpaServiceImpl<RoleEntity, Long, 
 	@Override
 	public boolean isRoleExists(String roleName, Department department, AccessLevel accessLevel) {
 		return getJpaRepository().existsByRoleNameAndDepartmentAndAccessLevel(roleName, department, accessLevel);
-	}
-
-
-	@Override
-	public boolean isActionPresentInRoles(Collection<String> roleIds, String actionUrl) {
-		//TODO:- update below
-		//return getJpaRepository().existsByUuidInAndApiEntities_ActionUrl(roleIds, actionUrl);
-		return false;
 	}
 
 	@Override

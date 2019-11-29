@@ -4,7 +4,7 @@ import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleRequestDto;
-import com.stanzaliving.user.acl.service.impl.AclUserServiceImpl;
+import com.stanzaliving.user.acl.service.AclUserService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +19,7 @@ import java.util.List;
 public class AclUserController {
 
     @Autowired
-    AclUserServiceImpl aclUserService;
+    AclUserService aclUserService;
 
     @PostMapping("addRole")
     public ResponseDto addRole(@RequestBody @Valid AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleDto) {

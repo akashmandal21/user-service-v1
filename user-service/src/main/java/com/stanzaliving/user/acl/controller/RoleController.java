@@ -11,8 +11,8 @@ import com.stanzaliving.core.user.acl.dto.RoleDto;
 import com.stanzaliving.core.user.acl.request.dto.AddRoleAccessDto;
 import com.stanzaliving.core.user.acl.request.dto.AddRoleRequestDto;
 import com.stanzaliving.core.user.acl.request.dto.UpdateRoleAccessDto;
-import com.stanzaliving.user.acl.service.impl.RoleAccessServiceImpl;
-import com.stanzaliving.user.acl.service.impl.RoleServiceImpl;
+import com.stanzaliving.user.acl.service.RoleAccessService;
+import com.stanzaliving.user.acl.service.RoleService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -33,10 +33,10 @@ import java.util.List;
 public class RoleController {
 
 	@Autowired
-	RoleServiceImpl roleService;
+	RoleService roleService;
 
 	@Autowired
-	RoleAccessServiceImpl roleAccessService;
+	RoleAccessService roleAccessService;
 
 	@PostMapping("add")
 	public ResponseDto<RoleDto> addRole(@RequestBody @Valid AddRoleRequestDto addRoleRequestDto) {

@@ -8,7 +8,6 @@ import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.sqljpa.service.AbstractJpaService;
 import com.stanzaliving.user.acl.entity.RoleEntity;
 
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -19,8 +18,6 @@ import java.util.List;
 public interface RoleDbService extends AbstractJpaService<RoleEntity, Long> {
 
 	boolean isRoleExists(String roleName, Department department, AccessLevel accessLevel);
-
-	boolean isActionPresentInRoles(Collection<String> roleIds, String actionUrl);
 
 	List<RoleEntity> findByDepartmentAndAccessLevel(Department department, AccessLevel accessLevel);
 

@@ -1,15 +1,16 @@
-/**
- * 
- */
 package com.stanzaliving.user.acl.service;
 
-/**
- * @author naveen.kumar
- *
- * @date 23-Oct-2019
- *
- **/
-public interface AclService {
+import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleNameUrlExpandedDto;
 
-	boolean isAccessible(String userId, String url);
+import java.util.List;
+import java.util.Set;
+
+public interface AclService {
+    boolean isAccessible(String userId, String url);
+
+    List<UserDeptLevelRoleNameUrlExpandedDto> getUserDeptLevelRoleNameUrlExpandedDtoFe(String userUuid);
+
+    List<UserDeptLevelRoleNameUrlExpandedDto> getUserDeptLevelRoleNameUrlExpandedDtoBe(String userUuid);
+
+    Set<String> getAccessibleUrlList(String userUuid);
 }

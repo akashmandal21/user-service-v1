@@ -1,6 +1,7 @@
 package com.stanzaliving.user.acl.db.service.impl;
 
 import com.stanzaliving.core.sqljpa.service.impl.AbstractJpaServiceImpl;
+import com.stanzaliving.user.acl.db.service.UserDepartmentLevelRoleDbService;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity;
 import com.stanzaliving.user.acl.repository.UserDepartmentLevelRoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class UserDepartmentLevelRoleDbServiceImpl extends AbstractJpaServiceImpl<UserDepartmentLevelRoleEntity, Long, UserDepartmentLevelRoleRepository> {
+public class UserDepartmentLevelRoleDbServiceImpl extends AbstractJpaServiceImpl<UserDepartmentLevelRoleEntity, Long, UserDepartmentLevelRoleRepository> implements UserDepartmentLevelRoleDbService {
 
     @Autowired
     UserDepartmentLevelRoleRepository userDepartmentLevelRoleRepository;
@@ -19,10 +20,12 @@ public class UserDepartmentLevelRoleDbServiceImpl extends AbstractJpaServiceImpl
         return userDepartmentLevelRoleRepository;
     }
 
+    @Override
     public List<UserDepartmentLevelRoleEntity> findByUserDepartmentLevelUuid(String userDepartmentLevelUuid) {
         return getJpaRepository().findByUserDepartmentLevelUuid(userDepartmentLevelUuid);
     }
 
+    @Override
     public List<UserDepartmentLevelRoleEntity> findByUserDepartmentLevelUuidAndStatus(String userDepartmentLevelUuid, boolean status) {
         return getJpaRepository().findByUserDepartmentLevelUuidAndStatus(userDepartmentLevelUuid, status);
     }
