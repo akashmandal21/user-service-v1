@@ -2,6 +2,7 @@ package com.stanzaliving.user.acl.adapters;
 
 
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
+import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleNameUrlExpandedDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRequestDto;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity;
@@ -32,5 +33,9 @@ public class UserDepartmentLevelRoleAdapter {
                 .accessLevelEntityListUuid(Arrays.asList(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid().split("\\s*,\\s*")))
                 .rolesUuid(userDepartmentLevelRoleEntityList.stream().map(entity -> entity.getRoleUuid()).collect(Collectors.toList()))
                 .build();
+    }
+
+    public static UserDeptLevelRoleNameUrlExpandedDto getUserDeptLevelRoleNameUrlExpandedDto() {
+        return null;
     }
 }

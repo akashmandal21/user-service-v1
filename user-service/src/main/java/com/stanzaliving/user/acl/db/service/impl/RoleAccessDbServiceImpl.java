@@ -7,6 +7,8 @@ import com.stanzaliving.user.acl.repository.RoleAccessRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class RoleAccessDbServiceImpl extends AbstractJpaServiceImpl<RoleAccessEntity, Long, RoleAccessRepository>  {
 
@@ -21,5 +23,13 @@ public class RoleAccessDbServiceImpl extends AbstractJpaServiceImpl<RoleAccessEn
 
     public RoleAccessEntity findByRoleUuidAndAccessUuidAndRoleAccessType(String roleUuid, String accessUuid, RoleAccessType roleAccessType) {
         return getJpaRepository().findByRoleUuidAndAccessUuidAndRoleAccessType(roleUuid, accessUuid, roleAccessType);
+    }
+
+    public List<RoleAccessEntity> findByRoleUuidInAndRoleAccessTypeAndStatus(List<String> roleUuidListParent, RoleAccessType role, boolean status) {
+        return getJpaRepository().findByRoleUuidInAndRoleAccessTypeAndStatus(roleUuidListParent, role, status);
+    }
+
+    public List<RoleAccessEntity> findByRoleUuidInAndStatus(List<String> roleUuidListParent, boolean status) {
+        return getJpaRepository().findByRoleUuidInAndStatus(roleUuidListParent, status);
     }
 }

@@ -94,7 +94,7 @@ public class RoleAccessServiceImpl {
                 throw new StanzaException("RoleAccess Entity doesn't exist, accessUuid " + accessUuid + ", roleAccessType " + roleAccessType);
             }
             assertSameDepartmentAssignment(roleEntity, accessRoleEntity);
-            assertLowerOrEqualLevelAssignment(roleEntity, accessRoleEntity);
+            assertLowerLevelAssignment(roleEntity, accessRoleEntity);
 
         } else {
             if (!apiDbService.existsByUuidAndStatus(accessUuid, true)) {
@@ -103,9 +103,9 @@ public class RoleAccessServiceImpl {
         }
     }
 
-    private void assertLowerOrEqualLevelAssignment(RoleEntity roleEntity, RoleEntity assignedRoleEntity) {
-        if (roleEntity.getAccessLevel().isLower(assignedRoleEntity.getAccessLevel())) {
-            throw new StanzaException("Role of higher level cannot be assigned to role of lower level " + roleEntity + assignedRoleEntity);
+    private void assertLowerLevelAssignment(RoleEntity roleEntity, RoleEntity assignedRoleEntity) {
+        if (!assignedRoleEntity.getAccessLevel().isLower(roleEntity.getAccessLevel())) {
+            throw new StanzaException("Only Role of higher level can be assigned to role of lower level " + roleEntity + assignedRoleEntity);
         }
     }
 
@@ -117,7 +117,7 @@ public class RoleAccessServiceImpl {
 
     public void assertParentChildAssignment(RoleEntity parentRoleEntity, RoleEntity childRoleEntity) {
         if (!childRoleEntity.getAccessLevel().isLower(parentRoleEntity.getAccessLevel())) {
-            throw new StanzaException("Parent Role cannot be at lower level than current role level");
+            throw new StanzaException("Parent Role should be at higher level than current role" + parentRoleEntity + childRoleEntity);
         }
     }
 }

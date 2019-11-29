@@ -42,6 +42,7 @@ public class AclUserController {
 
         log.info("Fetching user role with id: " + userUuid);
         return ResponseDto.success("User roles fetched for user " + userUuid, aclUserService.getUserDeptLevelRole(userUuid));
+
     }
 
     //Api's will be needed for adding or removing entity for a particular level on a user
