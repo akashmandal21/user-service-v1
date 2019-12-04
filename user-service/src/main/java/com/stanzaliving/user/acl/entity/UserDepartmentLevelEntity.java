@@ -11,7 +11,7 @@ import lombok.experimental.SuperBuilder;
 import javax.persistence.*;
 
 @SuperBuilder
-@Table(name = "user_department_level", uniqueConstraints = { @UniqueConstraint(name = "UK_user_dept_status", columnNames = { "user_uuid", "department", "status" }) })
+@Table(name = "user_department_level", uniqueConstraints = { @UniqueConstraint(name = "UK_user_dept_level_status", columnNames = { "user_uuid", "department", "access_level", "status" }) })
 @Entity(name = "user_department_level")
 @Data
 @AllArgsConstructor

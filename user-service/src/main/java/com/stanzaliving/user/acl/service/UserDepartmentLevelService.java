@@ -5,4 +5,8 @@ import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
 
 public interface UserDepartmentLevelService {
     UserDepartmentLevelEntity add(AddUserDeptLevelRequestDto addUserDeptLevelRequestDto);
+
+    void delete(UserDepartmentLevelEntity userDepartmentLevelEntity);
+
+    void revokeAccessLevelEntityForDepartmentOfLevel(AddUserDeptLevelRequestDto addUserDeptLevelRequestDto);
 }

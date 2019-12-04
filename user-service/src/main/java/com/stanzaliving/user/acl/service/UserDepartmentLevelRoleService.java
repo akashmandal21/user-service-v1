@@ -5,5 +5,8 @@ import com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity;
 import java.util.List;
 
 public interface UserDepartmentLevelRoleService {
-    List<UserDepartmentLevelRoleEntity> saveAll(List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList);
+
+    List<UserDepartmentLevelRoleEntity> addRoles(String userDepartmentLevelUuid, List<String> rolesUuid);
+
+    void revokeRoles(String uuid, List<String> rolesUuid);
 }

@@ -3,6 +3,7 @@
  */
 package com.stanzaliving.user.kafka.service.impl;
 
+import com.stanzaliving.core.user.acl.dto.RoleDto;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -153,4 +154,20 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 
 		return message;
 	}
+
+	public void sendNewRoleToKafka(RoleDto roleDto) {
+
+		try {
+			userExecutor.execute(() -> sendMessage(roleDto));
+		} catch (Exception e) {
+			log.error("Role Queue Overflow for : " + roleDto, e);
+		}
+
+	}
+
+	private void sendMessage(RoleDto roleDto) {
+		String topic = propertyManager.getProperty("kafka.topic.acl", "acl");
+		notificationProducer.publish(topic, RoleDto.class.getName(), roleDto);
+	}
+
 }
