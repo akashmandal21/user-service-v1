@@ -3,34 +3,29 @@
  */
 package com.stanzaliving.user.controller;
 
-import java.util.Objects;
-import java.util.Optional;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.base.constants.SecurityConstants;
 import com.stanzaliving.core.base.utils.SecureCookieUtil;
 import com.stanzaliving.core.base.utils.StanzaUtils;
+import com.stanzaliving.core.user.acl.dto.AclUserDto;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.request.dto.LoginRequestDto;
 import com.stanzaliving.core.user.request.dto.OtpValidateRequestDto;
+import com.stanzaliving.user.acl.service.AclService;
+import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.entity.UserSessionEntity;
 import com.stanzaliving.user.service.AuthService;
 import com.stanzaliving.user.service.SessionService;
-
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author naveen
@@ -48,6 +43,9 @@ public class AuthController {
 	@Autowired
 	private SessionService sessionService;
 
+	@Autowired
+	AclService aclService;
+
 	@PostMapping("login")
 	public ResponseDto<Void> login(@RequestBody @Valid LoginRequestDto loginRequestDto) {
 
@@ -57,7 +55,7 @@ public class AuthController {
 	}
 
 	@PostMapping("validateOtp")
-	public ResponseDto<UserDto> validateOtp(
+	public ResponseDto<AclUserDto> validateOtp(
 			@RequestBody @Valid OtpValidateRequestDto otpValidateRequestDto, HttpServletRequest request, HttpServletResponse response) {
 
 		UserDto userDto = authService.validateOtp(otpValidateRequestDto);
@@ -70,8 +68,7 @@ public class AuthController {
 
 		if (Objects.nonNull(userSessionEntity)) {
 			addTokenToResponse(request, response, token);
-
-			return ResponseDto.success("User Login Successfull", userDto);
+			return ResponseDto.success("User Login Successfull", UserAdapter.getAclUserDto(userDto, aclService.getUserDeptLevelRoleNameUrlExpandedDtoFe(userDto.getUuid())));
 		}
 
 		return ResponseDto.failure("Failed to create user session");

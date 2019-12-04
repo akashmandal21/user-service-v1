@@ -4,13 +4,16 @@
 package com.stanzaliving.user.adapters;
 
 import com.stanzaliving.core.sqljpa.adapter.AddressAdapter;
+import com.stanzaliving.core.user.acl.dto.AclUserDto;
+import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleNameUrlExpandedDto;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.entity.UserProfileEntity;
-
 import lombok.experimental.UtilityClass;
+
+import java.util.List;
 
 /**
  * @author naveen
@@ -91,4 +94,24 @@ public class UserAdapter {
 				.address(AddressAdapter.getAddressDto(profileEntity.getAddress()))
 				.build();
 	}
+
+	public static AclUserDto getAclUserDto(UserDto userDto, List<UserDeptLevelRoleNameUrlExpandedDto> acl) {
+		
+		return AclUserDto.builder()
+				.uuid(userDto.getUuid())
+				.createdAt(userDto.getCreatedAt())
+				.updatedAt(userDto.getUpdatedAt())
+				.createdBy(userDto.getCreatedBy())
+				.updatedBy(userDto.getUpdatedBy())
+				.status(userDto.getStatus())
+				.userType(userDto.getUserType())
+				.isoCode(userDto.getIsoCode())
+				.mobile(userDto.getMobile())
+				.mobileVerified(userDto.getMobileVerified())
+				.email(userDto.getEmail())
+				.emailVerified(userDto.getEmailVerified())
+				.acl(acl)
+				.build();
+	}
+
 }
