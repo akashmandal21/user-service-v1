@@ -18,4 +18,6 @@ import com.stanzaliving.user.entity.UserManagerMappingEntity;
 public interface UserManagerMappingRepository extends AbstractJpaRepository<UserManagerMappingEntity, Long> {
 
 	List<UserManagerMappingEntity> findByManagerIdAndStatus(String managerId, Boolean status);
+	
+	UserManagerMappingEntity findByUserId(String userId);
 }

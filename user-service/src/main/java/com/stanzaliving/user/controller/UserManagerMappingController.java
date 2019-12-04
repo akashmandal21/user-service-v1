@@ -49,4 +49,13 @@ public class UserManagerMappingController {
 		List<String> userIds = userManagerMappingService.getUserIdsMappedWithManagerId(managerId);		
 		return ResponseDto.success("Mapping Created Successfully", userIds);
 	}
+
+	@GetMapping("/managername/{userId}")
+	public ResponseDto<String> getManagerNameByUserID(@PathVariable(name = "userId") @NotBlank(message = "User Id is Mandatory") String userId) {
+		log.info(" Get manager name by " + userId);
+
+		String managerName = userManagerMappingService.findManagerNameForUser(userId);		
+		return ResponseDto.success("Mapping Created Successfully", managerName);
+	}
+
 }

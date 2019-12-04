@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.stanzaliving.core.base.exception.StanzaException;
+import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.request.dto.UserManagerMappingRequestDto;
 import com.stanzaliving.user.entity.UserManagerMappingEntity;
 import com.stanzaliving.user.repository.UserManagerMappingRepository;
@@ -73,6 +74,21 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 				userManagerMappingRecords.stream().map(UserManagerMappingEntity::getUserId).collect(Collectors.toList());
 		
 		return userIds;
+	}
+
+	@Override
+	public String findManagerNameForUser(String userId) {
+		
+		UserManagerMappingEntity userManagerMappingEntity = userManagerMappingRepository.findByUserId(userId);
+		
+		if(Objects.nonNull(userManagerMappingEntity)) {
+		
+			UserProfileDto userProfileDto = userService.getUserProfile(userId);
+		
+			return (Objects.nonNull(userProfileDto))?userProfileDto.getFirstName() + " " + userProfileDto.getLastName():null;
+		}
+		
+		return null;
 	}
 
 }
