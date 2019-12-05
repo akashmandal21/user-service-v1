@@ -55,7 +55,7 @@ public class UserManagerMappingController {
 		log.info(" Get manager name by " + userId);
 
 		String managerName = userManagerMappingService.findManagerNameForUser(userId);		
-		return ResponseDto.success("Mapping Created Successfully", managerName);
+		return ResponseDto.success("Manager Name Found!", managerName);
 	}
 
 }
