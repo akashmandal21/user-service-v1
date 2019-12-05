@@ -30,6 +30,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
 				.excludePathPatterns(
 						"/pingMe",
 						"/acl/check",
+						"/user/urlList/**",
+						"user/fe/**",
+						"user/be/**",
 						"/v2/api-docs",
 						"/configuration/ui",
 						"/swagger-resources/**",
@@ -38,5 +41,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 						"/webjars/**");
 
 	}
+
+
 
 }
