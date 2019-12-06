@@ -83,7 +83,7 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 		
 		if(Objects.nonNull(userManagerMappingEntity)) {
 		
-			UserProfileDto userProfileDto = userService.getUserProfile(userId);
+			UserProfileDto userProfileDto = userService.getUserProfile(userManagerMappingEntity.getManagerId());
 		
 			return (Objects.nonNull(userProfileDto))?userProfileDto.getFirstName() + " " + userProfileDto.getLastName():null;
 		}

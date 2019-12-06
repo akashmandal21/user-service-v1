@@ -48,6 +48,7 @@ public class AuthController {
 	@Autowired
 	private SessionService sessionService;
 
+	
 	@PostMapping("login")
 	public ResponseDto<Void> login(@RequestBody @Valid LoginRequestDto loginRequestDto) {
 
