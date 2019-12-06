@@ -16,4 +16,6 @@ public interface UserManagerMappingService {
 	void createUserManagerMapping(UserManagerMappingRequestDto userManagerMappingDto);
 	
 	List<String> getUserIdsMappedWithManagerId(String managerId);
+	
+	String findManagerNameForUser(String userId);
 }
