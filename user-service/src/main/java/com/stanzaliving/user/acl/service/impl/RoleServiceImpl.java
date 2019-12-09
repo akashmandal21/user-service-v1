@@ -12,6 +12,7 @@ import com.stanzaliving.user.acl.db.service.RoleDbService;
 import com.stanzaliving.user.acl.entity.RoleEntity;
 import com.stanzaliving.user.acl.service.RoleAccessService;
 import com.stanzaliving.user.acl.service.RoleService;
+import com.stanzaliving.user.kafka.service.KafkaUserService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,9 @@ public class RoleServiceImpl implements RoleService {
 
     @Autowired
     RoleAccessService roleAccessService;
+
+    @Autowired
+    KafkaUserService kafkaUserService;
 
     private static String PARENT_UUID_TO_SKIP_PARENT_ROLE = "SELF";
 
@@ -59,7 +63,9 @@ public class RoleServiceImpl implements RoleService {
                             .build()
             );
         }
-        return RoleAdapter.getDto(roleEntity);
+        RoleDto roleDto = RoleAdapter.getDto(roleEntity);
+        kafkaUserService.sendNewRoleToKafka(roleDto);
+        return roleDto;
     }
 
     @Override

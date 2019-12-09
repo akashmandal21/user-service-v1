@@ -4,6 +4,7 @@
 package com.stanzaliving.user.kafka.service;
 
 import com.stanzaliving.core.pojo.SmsDto;
+import com.stanzaliving.core.user.acl.dto.RoleDto;
 import com.stanzaliving.user.entity.OtpEntity;
 
 /**
@@ -16,5 +17,7 @@ public interface KafkaUserService {
 	void sendOtpToKafka(OtpEntity otpEntity);
 
 	void sendSmsToKafka(SmsDto smsDto);
+
+	void sendNewRoleToKafka(RoleDto roleDto);
 
 }
