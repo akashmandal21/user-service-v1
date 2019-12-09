@@ -147,7 +147,7 @@ public class UserAuthInterceptor extends HandlerInterceptorAdapter {
 				break;
 
 			default:
-				sessionExpiredTime = 15;
+				sessionExpiredTime = 0;
 				break;
 		}
 
