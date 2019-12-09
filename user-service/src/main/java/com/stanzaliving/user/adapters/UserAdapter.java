@@ -38,6 +38,7 @@ public class UserAdapter {
 				.mobileVerified(userEntity.isMobileVerified())
 				.email(userEntity.getEmail())
 				.emailVerified(userEntity.isEmailVerified())
+				.department(userEntity.getDepartment())
 				.build();
 	}
 
@@ -78,6 +79,7 @@ public class UserAdapter {
 				.mobileVerified(userEntity.isMobileVerified())
 				.email(userEntity.getEmail())
 				.emailVerified(userEntity.isEmailVerified())
+				.department(userEntity.getDepartment())
 				.firstName(profileEntity.getFirstName())
 				.middleName(profileEntity.getMiddleName())
 				.lastName(profileEntity.getLastName())
@@ -110,6 +112,7 @@ public class UserAdapter {
 				.mobileVerified(userDto.getMobileVerified())
 				.email(userDto.getEmail())
 				.emailVerified(userDto.getEmailVerified())
+				.department(userDto.getDepartment())
 				.acl(acl)
 				.build();
 	}

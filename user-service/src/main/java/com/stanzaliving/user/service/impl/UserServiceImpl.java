@@ -95,6 +95,7 @@ public class UserServiceImpl implements UserService {
 						.emailVerified(false)
 						.userProfile(profileEntity)
 						.status(true)
+						.department(addUserRequestDto.getDepartment())
 						.build();
 
 		profileEntity.setUser(userEntity);

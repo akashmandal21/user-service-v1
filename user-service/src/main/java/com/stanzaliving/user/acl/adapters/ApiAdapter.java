@@ -3,17 +3,16 @@
  */
 package com.stanzaliving.user.acl.adapters;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections.CollectionUtils;
-
 import com.stanzaliving.core.user.acl.dto.ApiDto;
 import com.stanzaliving.core.user.acl.request.dto.AddApiRequestDto;
 import com.stanzaliving.user.acl.entity.ApiEntity;
-
 import lombok.experimental.UtilityClass;
+import org.apache.commons.collections.CollectionUtils;
+
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author naveen
@@ -24,6 +23,12 @@ import lombok.experimental.UtilityClass;
 public class ApiAdapter {
 
 	public static ApiEntity getEntityFromRequest(AddApiRequestDto addApiRequestDto) {
+
+		try {
+			URL url = new URL(addApiRequestDto.getActionUrl());
+			addApiRequestDto.setActionUrl(url.getPath());
+		} catch (Exception ex) {
+		}
 
 		return ApiEntity.builder()
 				.apiName(addApiRequestDto.getApiName())

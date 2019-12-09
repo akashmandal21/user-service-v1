@@ -3,25 +3,13 @@
  */
 package com.stanzaliving.user.entity;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
+import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.sqljpa.entity.AbstractJpaEntity;
 import com.stanzaliving.core.user.enums.UserType;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
+
+import javax.persistence.*;
 
 /**
  * @author naveen
@@ -58,6 +46,10 @@ public class UserEntity extends AbstractJpaEntity {
 
 	@Column(name = "email_verified", columnDefinition = "bit(1) default 0")
 	private boolean emailVerified;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "department", columnDefinition = "varchar(50)", nullable = false)
+	private Department department;
 
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private UserProfileEntity userProfile;
