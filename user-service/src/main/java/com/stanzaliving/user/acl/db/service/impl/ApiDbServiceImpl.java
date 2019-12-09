@@ -28,8 +28,13 @@ public class ApiDbServiceImpl extends AbstractJpaServiceImpl<ApiEntity, Long, Ap
 	}
 
 	@Override
-	public boolean isActionPresent(String actionUrl) {
+	public boolean existsByActionUrl(String actionUrl) {
 		return getJpaRepository().existsByActionUrl(actionUrl);
+	}
+
+	@Override
+	public boolean existsByApiName(String apiName) {
+		return getJpaRepository().existsByApiName(apiName);
 	}
 
 }

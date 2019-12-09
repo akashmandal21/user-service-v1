@@ -22,7 +22,7 @@ import javax.persistence.*;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "roles", uniqueConstraints = {@UniqueConstraint(name = "UK_role_department_accesslevel", columnNames = {"role_name", "department", "access_level"})})
+@Table(name = "roles")
 @Entity(name = "roles")
 public class RoleEntity extends AbstractJpaEntity {
 

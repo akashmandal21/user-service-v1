@@ -13,5 +13,7 @@ import com.stanzaliving.user.acl.entity.ApiEntity;
  */
 public interface ApiDbService extends AbstractJpaService<ApiEntity, Long> {
 
-	boolean isActionPresent(String actionUrl);
+	boolean existsByActionUrl(String actionUrl);
+
+	boolean existsByApiName(String apiName);
 }

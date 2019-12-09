@@ -36,13 +36,13 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public RoleDto addRole(AddRoleRequestDto addRoleRequestDto) {
-        if (roleDbService.isRoleExists(addRoleRequestDto.getRoleName(), addRoleRequestDto.getDepartment(), addRoleRequestDto.getAccessLevel())) {
-            throw new StanzaException("Role already exists " + addRoleRequestDto);
+        if (roleDbService.isRoleExists(addRoleRequestDto.getRoleName())) {
+            throw new StanzaException("Role already exists with given name " + addRoleRequestDto.getRoleName());
         }
 
         RoleEntity parentRoleEntity = roleDbService.findByUuid(addRoleRequestDto.getParentRoleUuid());
         if (!PARENT_UUID_TO_SKIP_PARENT_ROLE.equalsIgnoreCase(addRoleRequestDto.getParentRoleUuid()) && null == parentRoleEntity) {
-            throw new StanzaException("Parent role doesn't exist for parentUuid" + addRoleRequestDto.getParentRoleUuid());
+            throw new StanzaException("Parent role doesn't exist for parentUuid " + addRoleRequestDto.getParentRoleUuid());
         }
 
         RoleEntity roleEntity = RoleAdapter.getEntityFromRequest(addRoleRequestDto);

@@ -135,7 +135,7 @@ public class RoleAccessServiceImpl implements RoleAccessService {
         }
 
         if (!childRoleEntity.getAccessLevel().isLower(parentRoleEntity.getAccessLevel())) {
-            throw new StanzaException("Parent Role should be at higher level than current role, parentUuid " + parentRoleEntity.getUuid() + ",childUuid " + childRoleEntity.getUuid());
+            throw new StanzaException("Parent Role should be at higher level than current role, parentUuid " + parentRoleEntity.getUuid() + ", childUuid " + childRoleEntity.getUuid());
         }
     }
 }

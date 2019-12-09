@@ -31,8 +31,8 @@ public class RoleDbServiceImpl extends AbstractJpaServiceImpl<RoleEntity, Long, 
 	}
 	
 	@Override
-	public boolean isRoleExists(String roleName, Department department, AccessLevel accessLevel) {
-		return getJpaRepository().existsByRoleNameAndDepartmentAndAccessLevel(roleName, department, accessLevel);
+	public boolean isRoleExists(String roleName) {
+		return getJpaRepository().existsByRoleName(roleName);
 	}
 
 	@Override

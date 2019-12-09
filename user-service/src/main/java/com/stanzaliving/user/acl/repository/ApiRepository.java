@@ -17,4 +17,6 @@ import com.stanzaliving.user.acl.entity.ApiEntity;
 public interface ApiRepository extends AbstractJpaRepository<ApiEntity, Long> {
 
 	boolean existsByActionUrl(String actionUrl);
+
+    boolean existsByApiName(String apiName);
 }

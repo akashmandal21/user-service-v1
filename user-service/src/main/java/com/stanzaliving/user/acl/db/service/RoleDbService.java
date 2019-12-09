@@ -17,7 +17,7 @@ import java.util.List;
  */
 public interface RoleDbService extends AbstractJpaService<RoleEntity, Long> {
 
-	boolean isRoleExists(String roleName, Department department, AccessLevel accessLevel);
+	boolean isRoleExists(String roleName);
 
 	List<RoleEntity> findByDepartmentAndAccessLevel(Department department, AccessLevel accessLevel);
 

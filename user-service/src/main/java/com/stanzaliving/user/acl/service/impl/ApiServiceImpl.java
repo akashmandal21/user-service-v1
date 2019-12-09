@@ -43,8 +43,12 @@ public class ApiServiceImpl implements ApiService {
 	@Override
 	public ApiDto addApi(AddApiRequestDto addApiRequestDto) {
 
-		if (apiDbService.isActionPresent(addApiRequestDto.getActionUrl())) {
+		if (apiDbService.existsByActionUrl(addApiRequestDto.getActionUrl())) {
 			throw new StanzaException("API already exists with given URI");
+		}
+
+		if (apiDbService.existsByApiName(addApiRequestDto.getApiName())) {
+			throw new StanzaException("API already exists with given Name");
 		}
 
 		log.info("Adding New API with URL: " + addApiRequestDto.getActionUrl() + " and name: " + addApiRequestDto.getApiName());
@@ -66,8 +70,13 @@ public class ApiServiceImpl implements ApiService {
 		}
 
 		if (!apiEntity.getActionUrl().equals(updateApiRequestDto.getActionUrl())
-				&& apiDbService.isActionPresent(updateApiRequestDto.getActionUrl())) {
+				&& apiDbService.existsByActionUrl(updateApiRequestDto.getActionUrl())) {
 			throw new StanzaException("API already exists with given URL");
+		}
+
+		if (!apiEntity.getApiName().equals(updateApiRequestDto.getApiName())
+				&& apiDbService.existsByApiName(updateApiRequestDto.getApiName())) {
+			throw new StanzaException("API already exists with given Name");
 		}
 
 		log.info("Updating API: " + apiEntity.getUuid() + " With Details [Name: " + updateApiRequestDto.getApiName() + ", URL: " + updateApiRequestDto.getActionUrl() + ", Category: "
