@@ -5,6 +5,7 @@ package com.stanzaliving.user.adapters;
 
 import com.stanzaliving.core.sqljpa.adapter.AddressAdapter;
 import com.stanzaliving.core.user.acl.dto.AclUserDto;
+import com.stanzaliving.core.user.acl.dto.AclUserProfileDTO;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleNameUrlExpandedDto;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
@@ -115,6 +116,41 @@ public class UserAdapter {
 				.department(userDto.getDepartment())
 				.acl(acl)
 				.build();
+	}
+
+	public static AclUserProfileDTO getAclUserProfileDTO(UserProfileDto userProfileDto, List<UserDeptLevelRoleNameUrlExpandedDto> acl) {
+
+		return AclUserProfileDTO.builder()
+				.uuid(userProfileDto.getUuid())
+				.createdAt(userProfileDto.getCreatedAt())
+				.updatedAt(userProfileDto.getUpdatedAt())
+				.createdBy(userProfileDto.getCreatedBy())
+				.updatedBy(userProfileDto.getUpdatedBy())
+				.status(userProfileDto.getStatus())
+				.userType(userProfileDto.getUserType())
+				.isoCode(userProfileDto.getIsoCode())
+				.mobile(userProfileDto.getMobile())
+				.mobileVerified(userProfileDto.getMobileVerified())
+				.email(userProfileDto.getEmail())
+				.emailVerified(userProfileDto.getEmailVerified())
+				.department(userProfileDto.getDepartment())
+				.firstName(userProfileDto.getFirstName())
+				.middleName(userProfileDto.getMiddleName())
+				.lastName(userProfileDto.getLastName())
+				.secondaryEmail(userProfileDto.getSecondaryEmail())
+				.secondaryEmailVerified(userProfileDto.isSecondaryEmailVerified())
+				.secondaryIsoCode(userProfileDto.getSecondaryIsoCode())
+				.secondaryMobile(userProfileDto.getSecondaryMobile())
+				.secondaryMobileVerified(userProfileDto.isSecondaryMobileVerified())
+				.gender(userProfileDto.getGender())
+				.profilePicture(userProfileDto.getProfilePicture())
+				.birthday(userProfileDto.getBirthday())
+				.maritalStatus(userProfileDto.getMaritalStatus())
+				.anniversaryDate(userProfileDto.getAnniversaryDate())
+				.address(userProfileDto.getAddress())
+				.acl(acl)
+				.build();
+
 	}
 
 }

@@ -3,33 +3,26 @@
  */
 package com.stanzaliving.user.controller;
 
-import java.util.List;
-
-import javax.validation.Valid;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.stanzaliving.core.base.common.dto.PageResponse;
 import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.base.constants.SecurityConstants;
 import com.stanzaliving.core.base.utils.CSVConverter;
+import com.stanzaliving.core.user.acl.dto.AclUserProfileDTO;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
+import com.stanzaliving.user.acl.service.AclService;
+import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.service.UserService;
-
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import java.util.List;
 
 /**
  * @author naveen
@@ -43,6 +36,9 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	AclService aclService;
 
 	@GetMapping("pingMe")
 	public ResponseDto<String> pingMe() {
@@ -59,12 +55,12 @@ public class UserController {
 	}
 
 	@GetMapping("profile")
-	public ResponseDto<UserProfileDto> getUserProfile(
+	public ResponseDto<AclUserProfileDTO> getUserProfile(
 			@RequestAttribute(name = SecurityConstants.USER_ID) @NotBlank(message = "User Id is mandatory to get user profile") String userId) {
 
 		log.info("Fetching User Profile with UserId: " + userId);
 
-		return ResponseDto.success("Found User Profile for User Id", userService.getUserProfile(userId));
+		return ResponseDto.success("Found User Profile for User Id", UserAdapter.getAclUserProfileDTO(userService.getUserProfile(userId), aclService.getUserDeptLevelRoleNameUrlExpandedDtoFe(userId)));
 	}
 
 	@PostMapping("add")
