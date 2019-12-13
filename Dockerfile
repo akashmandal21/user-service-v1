@@ -20,9 +20,12 @@ ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 ENV M2_HOME=/opt/apache-maven-3.5.4
 ENV PATH=${M2_HOME}/bin:${PATH}
 
+WORKDIR /opt/core-utils
+RUN mvn clean install
+
 WORKDIR /opt/user
 RUN mvn clean package
 EXPOSE 8080
 
-ENTRYPOINT ["/usr/bin/java","-Dspring.profiles.active=beta","-jar","user-service/target/user.jar"]
+ENTRYPOINT ["/usr/bin/java","-Dspring.profiles.active=dev","-jar","user-service/target/user.jar"]
 
