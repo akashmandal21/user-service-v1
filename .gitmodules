@@ -1,0 +1,4 @@
+[submodule "core-utils"]
+	path = core-utils
+	url = git@github.com:dtwelvespacespvt/core-utils.git
+	branch = master
