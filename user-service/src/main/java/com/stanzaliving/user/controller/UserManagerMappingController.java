@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
+import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.request.dto.UserManagerMappingRequestDto;
 import com.stanzaliving.user.service.UserManagerMappingService;
 
@@ -58,4 +59,11 @@ public class UserManagerMappingController {
 		return ResponseDto.success("Manager Name Found!", managerName);
 	}
 
+	@GetMapping("/managerprofile/{userId}")
+	public ResponseDto<UserProfileDto> getManagerProfieByUserID(@PathVariable(name = "userId") @NotBlank(message = "User Id is Mandatory") String userId) {
+		log.info(" Get manager name by " + userId);
+
+		UserProfileDto managerProfile = userManagerMappingService.getManagerProfileForUser(userId);		
+		return ResponseDto.success("Manager Name Found!", managerProfile);
+	}
 }

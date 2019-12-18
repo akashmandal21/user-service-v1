@@ -90,5 +90,18 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 		
 		return null;
 	}
+	
+	@Override
+	public UserProfileDto getManagerProfileForUser(String userId) {
+		
+		UserManagerMappingEntity userManagerMappingEntity = userManagerMappingRepository.findByUserId(userId);
+		
+		if(Objects.nonNull(userManagerMappingEntity)) {
+		
+			return userService.getUserProfile(userManagerMappingEntity.getManagerId());
+		}
+		
+		return null;
+	}
 
 }
