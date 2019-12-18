@@ -10,10 +10,10 @@ import com.stanzaliving.user.acl.db.service.*;
 import com.stanzaliving.user.acl.entity.*;
 import com.stanzaliving.user.acl.service.AclService;
 import com.stanzaliving.user.service.UserService;
-import javafx.util.Pair;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
