@@ -8,7 +8,7 @@ import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.base.utils.PhoneNumberUtils;
 import com.stanzaliving.core.sqljpa.specification.utils.CriteriaOperation;
 import com.stanzaliving.core.sqljpa.specification.utils.StanzaSpecificationBuilder;
-import com.stanzaliving.core.user.dto.UserDto;
+import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
@@ -46,7 +46,7 @@ public class UserServiceImpl implements UserService {
 	private UserDbService userDbService;
 
 	@Override
-	public UserDto getActiveUserByUserId(String userId) {
+	public UserProfileDto getActiveUserByUserId(String userId) {
 
 		log.info("Searching User by UserId: " + userId);
 
@@ -56,7 +56,7 @@ public class UserServiceImpl implements UserService {
 			throw new StanzaException("User not found for UserId: " + userId);
 		}
 
-		return UserAdapter.getUserDto(userEntity);
+		return UserAdapter.getUserProfileDto(userEntity);
 	}
 
 	@Override
@@ -65,7 +65,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public UserDto addUser(AddUserRequestDto addUserRequestDto) {
+	public UserProfileDto addUser(AddUserRequestDto addUserRequestDto) {
 
 		if (!PhoneNumberUtils.isValidMobileForCountry(addUserRequestDto.getMobile(), addUserRequestDto.getIsoCode())) {
 			log.error("Number: " + addUserRequestDto.getMobile() + " and ISO: " + addUserRequestDto.getIsoCode() + " doesn't appear to be a valid mobile combination");

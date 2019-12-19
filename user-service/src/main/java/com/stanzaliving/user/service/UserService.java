@@ -18,7 +18,7 @@ import java.util.List;
  */
 public interface UserService {
 
-	UserDto getActiveUserByUserId(String userId);
+	UserProfileDto getActiveUserByUserId(String userId);
 
 	void assertActiveUserByUserUuid(String userId);
 

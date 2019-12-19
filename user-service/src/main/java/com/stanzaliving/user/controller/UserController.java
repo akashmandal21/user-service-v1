@@ -46,7 +46,7 @@ public class UserController {
 	}
 
 	@GetMapping("details")
-	public ResponseDto<UserDto> getUser(
+	public ResponseDto<UserProfileDto> getUser(
 			@RequestAttribute(name = SecurityConstants.USER_ID) @NotBlank(message = "User Id is mandatory to get user") String userId) {
 
 		log.info("Fetching User with UserId: " + userId);
