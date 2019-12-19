@@ -96,8 +96,8 @@ public class AclServiceImpl implements AclService {
 
 		for(UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
 			Pair<List<String>, List<String>> roleUuidApiUuidList = getRoleUuidApiUuidListOfUser(userDepartmentLevelEntity);
-			List<RoleEntity> roleEntityList = roleDbService.findByUuidInAndStatus(roleUuidApiUuidList.getKey(), true);
-			List<ApiEntity> apiEntityList = apiDbService.findByUuidInAndStatus(roleUuidApiUuidList.getValue(), true);
+			List<RoleEntity> roleEntityList = roleDbService.findByUuidInAndStatus(roleUuidApiUuidList.getFirst(), true);
+			List<ApiEntity> apiEntityList = apiDbService.findByUuidInAndStatus(roleUuidApiUuidList.getSecond(), true);
 
 			userDeptLevelRoleNameUrlExpandedDtoList.add(
 					UserDepartmentLevelRoleAdapter.getUserDeptLevelRoleNameUrlExpandedDto(userDepartmentLevelEntity, roleEntityList, apiEntityList));
@@ -129,7 +129,7 @@ public class AclServiceImpl implements AclService {
 			finalApiUuidSet.addAll(apiUuidSetChild);
 		}
 
-		return new Pair<>(new ArrayList<>(finalRoleUuidSet), new ArrayList<>(finalApiUuidSet));
+		return Pair.of(new ArrayList<>(finalRoleUuidSet), new ArrayList<>(finalApiUuidSet));
 
 	}
 }
