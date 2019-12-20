@@ -83,7 +83,7 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 		
 		if(!CollectionUtils.isEmpty(userManagerMappingEntities)) {
 		
-			UserProfileDto userProfileDto = userService.getUserProfile(userManagerMappingEntities.get(0).getUuid());
+			UserProfileDto userProfileDto = userService.getUserProfile(userManagerMappingEntities.get(0).getManagerId());
 		
 			return (Objects.nonNull(userProfileDto))?userProfileDto.getFirstName() + " " + userProfileDto.getLastName():null;
 		}
@@ -98,7 +98,7 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 		
 		if(!CollectionUtils.isEmpty(userManagerMappingEntities)) {
 		
-			return userService.getUserProfile(userManagerMappingEntities.get(0).getUuid());
+			return userService.getUserProfile(userManagerMappingEntities.get(0).getManagerId());
 		}
 		
 		return null;
