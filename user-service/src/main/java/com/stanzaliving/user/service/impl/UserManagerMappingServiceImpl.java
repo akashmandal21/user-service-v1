@@ -79,11 +79,11 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 	@Override
 	public String findManagerNameForUser(String userId) {
 		
-		UserManagerMappingEntity userManagerMappingEntity = userManagerMappingRepository.findByUserId(userId);
+		List<UserManagerMappingEntity> userManagerMappingEntities = userManagerMappingRepository.findByUserId(userId);
 		
-		if(Objects.nonNull(userManagerMappingEntity)) {
+		if(!CollectionUtils.isEmpty(userManagerMappingEntities)) {
 		
-			UserProfileDto userProfileDto = userService.getUserProfile(userManagerMappingEntity.getManagerId());
+			UserProfileDto userProfileDto = userService.getUserProfile(userManagerMappingEntities.get(0).getUuid());
 		
 			return (Objects.nonNull(userProfileDto))?userProfileDto.getFirstName() + " " + userProfileDto.getLastName():null;
 		}
@@ -94,11 +94,11 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 	@Override
 	public UserProfileDto getManagerProfileForUser(String userId) {
 		
-		UserManagerMappingEntity userManagerMappingEntity = userManagerMappingRepository.findByUserId(userId);
+		List<UserManagerMappingEntity> userManagerMappingEntities = userManagerMappingRepository.findByUserId(userId);
 		
-		if(Objects.nonNull(userManagerMappingEntity)) {
+		if(!CollectionUtils.isEmpty(userManagerMappingEntities)) {
 		
-			return userService.getUserProfile(userManagerMappingEntity.getManagerId());
+			return userService.getUserProfile(userManagerMappingEntities.get(0).getUuid());
 		}
 		
 		return null;
