@@ -1,6 +1,7 @@
 package com.stanzaliving.user.acl.service.impl;
 
 import com.stanzaliving.core.base.exception.StanzaException;
+import com.stanzaliving.core.base.utils.StanzaUtils;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRequestDto;
 import com.stanzaliving.user.acl.adapters.UserDepartmentLevelAdapter;
 import com.stanzaliving.user.acl.db.service.UserDepartmentLevelDbService;
@@ -14,7 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -33,7 +33,7 @@ public class UserDepartmentLevelServiceImpl implements UserDepartmentLevelServic
     public UserDepartmentLevelEntity add(AddUserDeptLevelRequestDto addUserDeptLevelRequestDto) {
         UserDepartmentLevelEntity userDepartmentLevelEntity = userDepartmentLevelDbService.findByUserUuidAndDepartmentAndAccessLevelAndStatus(addUserDeptLevelRequestDto.getUserUuid(), addUserDeptLevelRequestDto.getDepartment(), addUserDeptLevelRequestDto.getAccessLevel(), true);
         if (null != userDepartmentLevelEntity) {
-            TreeSet<String> accessLevelEntityListUuid = Arrays.asList(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid().split("\\s*,\\s*")).stream().collect(Collectors.toCollection(TreeSet::new));
+            TreeSet<String> accessLevelEntityListUuid = StanzaUtils.getSplittedListOnComma(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid()).stream().collect(Collectors.toCollection(TreeSet::new));
             accessLevelEntityListUuid.addAll(addUserDeptLevelRequestDto.getAccessLevelEntityListUuid());
             userDepartmentLevelEntity.setCsvAccessLevelEntityUuid(String.join(",",accessLevelEntityListUuid));
         } else  {
@@ -58,12 +58,14 @@ public class UserDepartmentLevelServiceImpl implements UserDepartmentLevelServic
                 userDepartmentLevelDbService.findByUserUuidAndDepartmentAndAccessLevelAndStatus(
                         addUserDeptLevelRequestDto.getUserUuid(), addUserDeptLevelRequestDto.getDepartment(), addUserDeptLevelRequestDto.getAccessLevel(), true);
 
+        log.info("userDepartmentLevelEntity found for user " + addUserDeptLevelRequestDto.getUserUuid() + " is " + userDepartmentLevelEntity);
+
         if (StringUtils.isBlank(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid())) {
             this.delete(userDepartmentLevelEntity);
             throw new StanzaException("user doesn't have access to any entity for " + addUserDeptLevelRequestDto);
         }
 
-        List<String> accessLevelEntityUuidList = Arrays.asList(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid().split("\\s*,\\s*"));
+        List<String> accessLevelEntityUuidList = StanzaUtils.getSplittedListOnComma(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid());
         accessLevelEntityUuidList.removeAll(addUserDeptLevelRequestDto.getAccessLevelEntityListUuid());
 
         if (CollectionUtils.isEmpty(accessLevelEntityUuidList)) {

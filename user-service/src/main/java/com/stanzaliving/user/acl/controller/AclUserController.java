@@ -61,7 +61,7 @@ public class AclUserController {
 
     @PostMapping("revoke/department/level/levelEntityList")
     public ResponseDto revokeAccessLevelEntityForDepartmentOfLevel(@RequestBody @Valid AddUserDeptLevelRequestDto addUserDeptLevelRequestDto) {
-        log.info("Received request to revoke all Access Level Entity List for user " + addUserDeptLevelRequestDto);
+        log.info("Received request to revoke Access Level Entity List for user " + addUserDeptLevelRequestDto);
         aclUserService.revokeAccessLevelEntityForDepartmentOfLevel(addUserDeptLevelRequestDto);
         return ResponseDto.success("Access Level Entity Revocation successful");
     }

@@ -1,6 +1,7 @@
 package com.stanzaliving.user.acl.adapters;
 
 
+import com.stanzaliving.core.base.utils.StanzaUtils;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleNameUrlExpandedDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRequestDto;
@@ -10,7 +11,6 @@ import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity;
 import lombok.experimental.UtilityClass;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,7 +32,7 @@ public class UserDepartmentLevelRoleAdapter {
                 .userUuid(userDepartmentLevelEntity.getUserUuid())
                 .department(userDepartmentLevelEntity.getDepartment())
                 .accessLevel(userDepartmentLevelEntity.getAccessLevel())
-                .accessLevelEntityListUuid(Arrays.asList(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid().split("\\s*,\\s*")))
+                .accessLevelEntityListUuid(StanzaUtils.getSplittedListOnComma(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid()))
                 .rolesUuid(userDepartmentLevelRoleEntityList.stream().map(entity -> entity.getRoleUuid()).collect(Collectors.toList()))
                 .build();
     }
@@ -46,7 +46,7 @@ public class UserDepartmentLevelRoleAdapter {
                 .userUuid(userDepartmentLevelEntity.getUserUuid())
                 .department(userDepartmentLevelEntity.getDepartment())
                 .accessLevel(userDepartmentLevelEntity.getAccessLevel())
-                .accessLevelEntityListUuid(Arrays.asList(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid().split("\\s*,\\s*")))
+                .accessLevelEntityListUuid(StanzaUtils.getSplittedListOnComma(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid()))
                 .rolesList(roleNameList)
                 .urlList(actionUrlList)
                 .build();
