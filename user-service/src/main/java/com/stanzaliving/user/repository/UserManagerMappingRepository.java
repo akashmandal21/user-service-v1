@@ -19,5 +19,6 @@ public interface UserManagerMappingRepository extends AbstractJpaRepository<User
 
 	List<UserManagerMappingEntity> findByManagerIdAndStatus(String managerId, Boolean status);
 	
-	List<UserManagerMappingEntity> findByUserId(String userId);
+	UserManagerMappingEntity findByUserId(String userId);
+
 }
