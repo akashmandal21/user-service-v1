@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
+import com.stanzaliving.core.user.enums.UserManagerMappingType;
 import com.stanzaliving.core.user.request.dto.UserManagerMappingRequestDto;
 import com.stanzaliving.user.service.UserManagerMappingService;
 
@@ -61,9 +62,25 @@ public class UserManagerMappingController {
 
 	@GetMapping("/managerprofile/{userId}")
 	public ResponseDto<UserProfileDto> getManagerProfieByUserID(@PathVariable(name = "userId") @NotBlank(message = "User Id is Mandatory") String userId) {
-		log.info(" Get manager name by " + userId);
+		log.info(" Get manager profile by " + userId);
 
-		UserProfileDto managerProfile = userManagerMappingService.getManagerProfileForUser(userId);		
-		return ResponseDto.success("Manager Name Found!", managerProfile);
+		UserProfileDto managerProfile = userManagerMappingService.getManagerProfileForUser(userId);	
+		
+		if(managerProfile == null)
+			return ResponseDto.failure("Manager Profile Not Found");
+		
+		return ResponseDto.success("Manager Profile Found!", managerProfile);
+	}
+	
+	@GetMapping("/managerprofile/{userId}/{managertype}")
+	public ResponseDto<UserProfileDto> getManagerProfieByUserID(@PathVariable(name = "userId") @NotBlank(message = "User Id is Mandatory") String userId,
+			@PathVariable(name = "managertype") @NotBlank(message = "Manager Type cannot be blank") UserManagerMappingType userManagerMappingType) {
+		
+		UserProfileDto managerProfile = userManagerMappingService.getUserManagerMappingHierarchy(userId, userManagerMappingType);		
+		
+		if(managerProfile == null)
+			return ResponseDto.failure("Manager Mapping Not Found");
+		
+		return ResponseDto.success("Manager Mapping Found!", managerProfile);
 	}
 }

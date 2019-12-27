@@ -45,6 +45,7 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 		UserManagerMappingEntity mappingEntity = new UserManagerMappingEntity();
 		mappingEntity.setManagerId(userManagerMappingDto.getManagerId());
 		mappingEntity.setUserId(userManagerMappingDto.getUserId());
+		mappingEntity.setUserManagerMappingType(userManagerMappingDto.getUserManagerMappingType());
 		mappingEntity.setCreatedBy(userManagerMappingDto.getChangedBy());
 		mappingEntity.setUpdatedBy(userManagerMappingDto.getChangedBy());
 
