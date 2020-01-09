@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   `mobile_verified` bit(1) DEFAULT b'0',
   `email` varchar(100) DEFAULT NULL,
   `email_verified` bit(1) DEFAULT b'0',
+  `department` varchar(50) NOT NULL,
   `created_at` datetime DEFAULT NULL,
   `created_by` char(40) DEFAULT NULL,
   `status` bit(1) DEFAULT b'1',
