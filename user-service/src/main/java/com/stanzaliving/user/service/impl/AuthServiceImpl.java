@@ -90,6 +90,8 @@ public class AuthServiceImpl implements AuthService {
 					.userProfile(userProfileEntity)
 					.build();
 			
+			userProfileEntity.setUser(userEntity);
+			
 			userEntity = userDbService.save(userEntity);
 		}
 		
