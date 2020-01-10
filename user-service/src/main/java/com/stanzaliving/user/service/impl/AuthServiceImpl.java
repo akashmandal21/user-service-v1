@@ -17,6 +17,7 @@ import com.stanzaliving.core.user.request.dto.OtpValidateRequestDto;
 import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.db.service.UserDbService;
 import com.stanzaliving.user.entity.UserEntity;
+import com.stanzaliving.user.entity.UserProfileEntity;
 import com.stanzaliving.user.exception.AuthException;
 import com.stanzaliving.user.service.AuthService;
 import com.stanzaliving.user.service.OtpService;
@@ -75,11 +76,18 @@ public class AuthServiceImpl implements AuthService {
 				&& Objects.nonNull(loginRequestDto.getUserType()) 
 				&& UserType.CONSUMER == loginRequestDto.getUserType()) {
 			
+			UserProfileEntity userProfileEntity =
+					UserProfileEntity
+							.builder()
+							.firstName("")
+							.build();
+			
 			userEntity = UserEntity.builder()
 					.isoCode(loginRequestDto.getIsoCode())
 					.mobile(loginRequestDto.getMobile())
 					.userType(loginRequestDto.getUserType())
 					.department(Department.WEB)
+					.userProfile(userProfileEntity)
 					.build();
 			
 			userEntity = userDbService.save(userEntity);
