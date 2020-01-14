@@ -30,7 +30,9 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -118,6 +120,23 @@ public class UserServiceImpl implements UserService {
 		}
 
 		return UserAdapter.getUserProfileDto(userEntity);
+	}
+	
+	@Override
+	public Map<String, UserProfileDto> getUserProfileIn(List<String> userUuids) {
+
+		Map<String, UserProfileDto> userProfileDtoMap = new HashMap<>();
+		List<UserEntity> userEntities = userDbService.findByUuidIn(userUuids);
+
+		if (Objects.isNull(userEntities)) {
+			throw new StanzaException("User not found for Uuids: " + userUuids);
+		}
+
+		userEntities.forEach(userEntity -> {
+			userProfileDtoMap.put(userEntity.getUuid(), UserAdapter.getUserProfileDto(userEntity));
+		});
+		
+		return userProfileDtoMap;
 	}
 
 	@Override

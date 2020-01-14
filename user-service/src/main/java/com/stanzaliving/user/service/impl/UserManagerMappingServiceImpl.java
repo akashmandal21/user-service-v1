@@ -2,6 +2,7 @@ package com.stanzaliving.user.service.impl;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -106,6 +107,20 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 		return null;
 	}
 
+	@Override
+	public Map<String, UserProfileDto> getManagerProfileForUserIn(List<String> userIds) {
+
+		List<UserManagerMappingEntity> userManagerMappingEntities = userManagerMappingRepository.findByUserIdIn(userIds);
+
+		if(!CollectionUtils.isEmpty(userManagerMappingEntities)) {
+			List<String> userUuids = userManagerMappingEntities.stream().map(UserManagerMappingEntity::getUserId).collect(Collectors.toList());
+			
+			return userService.getUserProfileIn(userUuids);
+		}
+
+		return null;
+	}
+	
 	@Override
 	public UserProfileDto getUserManagerMappingHierarchy(String userId, UserManagerMappingType mappingType) {
 

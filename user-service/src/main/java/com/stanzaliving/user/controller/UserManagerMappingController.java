@@ -4,6 +4,7 @@
 package com.stanzaliving.user.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
@@ -70,6 +72,18 @@ public class UserManagerMappingController {
 			return ResponseDto.failure("Manager Profile Not Found");
 		
 		return ResponseDto.success("Manager Profile Found!", managerProfile);
+	}
+	
+	@GetMapping("/managerprofiles")
+	public ResponseDto<Map<String, UserProfileDto>> getManagerProfileByUserID(@RequestParam(name = "userIds") List<String> userIds) {
+		log.info(" Get manager profiles by " + userIds);
+
+		Map<String, UserProfileDto> userManagerMap = userManagerMappingService.getManagerProfileForUserIn(userIds);	
+		
+		if(userManagerMap == null)
+			return ResponseDto.failure("Manager Profiles Not Found");
+		
+		return ResponseDto.success("Manager Profile Found!", userManagerMap);
 	}
 	
 	@GetMapping("/managerprofile/{userId}/{managertype}")

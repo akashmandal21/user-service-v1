@@ -4,6 +4,7 @@
 package com.stanzaliving.user.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.UserManagerMappingType;
@@ -24,4 +25,6 @@ public interface UserManagerMappingService {
 	UserProfileDto getManagerProfileForUser(String userId);
 
 	UserProfileDto getUserManagerMappingHierarchy(String userId, UserManagerMappingType mappingType);
+
+	Map<String, UserProfileDto> getManagerProfileForUserIn(List<String> userIds);
 }
