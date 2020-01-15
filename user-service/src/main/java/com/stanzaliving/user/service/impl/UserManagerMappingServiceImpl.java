@@ -1,6 +1,7 @@
 package com.stanzaliving.user.service.impl;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -113,9 +114,13 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 		List<UserManagerMappingEntity> userManagerMappingEntities = userManagerMappingRepository.findByUserIdIn(userIds);
 
 		if(!CollectionUtils.isEmpty(userManagerMappingEntities)) {
-			List<String> userUuids = userManagerMappingEntities.stream().map(UserManagerMappingEntity::getUserId).collect(Collectors.toList());
+			Map<String, String> userManagerUuidMap = new HashMap<>();
 			
-			return userService.getUserProfileIn(userUuids);
+			userManagerMappingEntities.forEach(userManagerMapping -> {
+				userManagerUuidMap.put(userManagerMapping.getUserId(), userManagerMapping.getManagerId());
+			});
+			
+			return userService.getUserProfileIn(userManagerUuidMap);
 		}
 
 		return null;

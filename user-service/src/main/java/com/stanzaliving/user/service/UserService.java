@@ -43,6 +43,6 @@ public interface UserService {
 	 */
 	PageResponse<UserProfileDto> searchUser(List<String> userIds, String mobile, String isoCode, String email, UserType userType, Boolean status, int pageNo, int limit);
 
-	Map<String, UserProfileDto> getUserProfileIn(List<String> userUuids);
+	Map<String, UserProfileDto> getUserProfileIn(Map<String, String> userManagerUuidMap);
 
 }
