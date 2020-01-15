@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
+import com.stanzaliving.core.user.dto.UserManagerProfileRequestDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.UserManagerMappingType;
 import com.stanzaliving.core.user.request.dto.UserManagerMappingRequestDto;
@@ -74,11 +75,11 @@ public class UserManagerMappingController {
 		return ResponseDto.success("Manager Profile Found!", managerProfile);
 	}
 	
-	@GetMapping("/managerprofiles")
-	public ResponseDto<Map<String, UserProfileDto>> getManagerProfileByUserID(@RequestParam(name = "userIds") List<String> userIds) {
-		log.info(" Get manager profiles by " + userIds);
+	@PostMapping("/managerprofiles")
+	public ResponseDto<Map<String, UserProfileDto>> getManagerProfileByUserID(@RequestBody UserManagerProfileRequestDto profileRequestDto) {
+		log.info(" Get manager profiles by " + profileRequestDto.getUserUuids());
 
-		Map<String, UserProfileDto> userManagerMap = userManagerMappingService.getManagerProfileForUserIn(userIds);	
+		Map<String, UserProfileDto> userManagerMap = userManagerMappingService.getManagerProfileForUserIn(profileRequestDto.getUserUuids());	
 		
 		if(userManagerMap == null)
 			return ResponseDto.failure("Manager Profiles Not Found");
