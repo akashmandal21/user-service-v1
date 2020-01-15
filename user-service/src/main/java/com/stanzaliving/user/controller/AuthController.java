@@ -111,5 +111,4 @@ public class AuthController {
 			response.addCookie(SecureCookieUtil.create(SecurityConstants.TOKEN_HEADER_NAME, token, Optional.of(isLocalFrontEnd), Optional.of(isApp)));
 		}
 	}
-
 }
