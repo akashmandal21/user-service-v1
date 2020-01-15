@@ -45,8 +45,8 @@ public class UserManagerMappingEntity extends AbstractJpaEntity {
 	@Column(name = "manager_id", columnDefinition = "char(40)", nullable = false)
 	private String managerId;
 
-	@Enumerated(EnumType.STRING)
-	@Column(name = "mapping_type", nullable = false)
-	private UserManagerMappingType userManagerMappingType;
+//	@Enumerated(EnumType.STRING)
+//	@Column(name = "mapping_type", nullable = false)
+//	private UserManagerMappingType userManagerMappingType;
 	
 }

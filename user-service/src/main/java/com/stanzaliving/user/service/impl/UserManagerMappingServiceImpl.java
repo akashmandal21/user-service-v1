@@ -46,7 +46,7 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 		UserManagerMappingEntity mappingEntity = new UserManagerMappingEntity();
 		mappingEntity.setManagerId(userManagerMappingDto.getManagerId());
 		mappingEntity.setUserId(userManagerMappingDto.getUserId());
-		mappingEntity.setUserManagerMappingType(userManagerMappingDto.getUserManagerMappingType());
+		//mappingEntity.setUserManagerMappingType(userManagerMappingDto.getUserManagerMappingType());
 		mappingEntity.setCreatedBy(userManagerMappingDto.getChangedBy());
 		mappingEntity.setUpdatedBy(userManagerMappingDto.getChangedBy());
 
@@ -137,21 +137,23 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 
 	private UserProfileDto getUserManagerMappingHelper(String userId, UserManagerMappingType mappingType, int count) throws Exception {
 
-		UserManagerMappingEntity userManagerMappingEntity = userManagerMappingRepository.findByUserId(userId);
-
-		/*
-		  As of now, we have maximum of 3 level
-		  City Head, Regional Head, National Head
-		 */
-		if (count > 3 || userManagerMappingEntity == null) {
-			throw new Exception(" User manager mapping is not found for manager type " + mappingType);
-		}
-
-		if (userManagerMappingEntity.getUserManagerMappingType().equals(mappingType)) {
-			return userService.getUserProfile(userManagerMappingEntity.getManagerId());
-		}
-
-		return getUserManagerMappingHelper(userId, mappingType, count+1);
+//		UserManagerMappingEntity userManagerMappingEntity = userManagerMappingRepository.findByUserId(userId);
+//
+//		/*
+//		  As of now, we have maximum of 3 level
+//		  City Head, Regional Head, National Head
+//		 */
+//		if (count > 3 || userManagerMappingEntity == null) {
+//			throw new Exception(" User manager mapping is not found for manager type " + mappingType);
+//		}
+//
+//		if (userManagerMappingEntity.getUserManagerMappingType().equals(mappingType)) {
+//			return userService.getUserProfile(userManagerMappingEntity.getManagerId());
+//		}
+//
+//		return getUserManagerMappingHelper(userId, mappingType, count+1);
+		
+		return null;
 
 	}
 }
