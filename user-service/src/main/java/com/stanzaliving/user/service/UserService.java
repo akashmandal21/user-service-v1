@@ -10,6 +10,7 @@ import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author naveen
@@ -41,5 +42,7 @@ public interface UserService {
 	 * @return paged response of users matching search criteria
 	 */
 	PageResponse<UserProfileDto> searchUser(List<String> userIds, String mobile, String isoCode, String email, UserType userType, Boolean status, int pageNo, int limit);
+
+	Map<String, UserProfileDto> getUserProfileIn(Map<String, String> userManagerUuidMap);
 
 }
