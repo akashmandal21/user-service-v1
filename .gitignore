@@ -28,6 +28,7 @@ hs_err_pid*
 .settings
 target
 
+.sts4-cache
 # Idea Files
 .idea*
 *.iml

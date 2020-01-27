@@ -113,17 +113,8 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 
 		List<UserManagerMappingEntity> userManagerMappingEntities = userManagerMappingRepository.findByUserIdIn(userIds);
 
-		if(!CollectionUtils.isEmpty(userManagerMappingEntities)) {
-			Map<String, String> userManagerUuidMap = new HashMap<>();
-			
-			userManagerMappingEntities.forEach(userManagerMapping -> {
-				userManagerUuidMap.put(userManagerMapping.getUserId(), userManagerMapping.getManagerId());
-			});
-			
-			return userService.getUserProfileIn(userManagerUuidMap);
-		}
+		return getUserDetails(userManagerMappingEntities);
 
-		return null;
 	}
 	
 	@Override
@@ -160,5 +151,27 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 		
 		return null;
 
+	}
+
+	@Override
+	public Map<String, UserProfileDto> getPeopleReportingToManager(String managerId) {
+		
+		List<UserManagerMappingEntity> userManagerMappingEntities = userManagerMappingRepository.findByManagerId(managerId);
+		
+		return getUserDetails(userManagerMappingEntities);
+
+	}
+
+	private Map<String, UserProfileDto> getUserDetails(List<UserManagerMappingEntity> userManagerMappingEntities) {
+		if(!CollectionUtils.isEmpty(userManagerMappingEntities)) {
+			Map<String, String> userManagerUuidMap = new HashMap<>();
+			
+			userManagerMappingEntities.forEach(userManagerMapping -> {
+				userManagerUuidMap.put(userManagerMapping.getUserId(), userManagerMapping.getManagerId());
+			});
+			
+			return userService.getUserProfileIn(userManagerUuidMap);
+		}
+		return Collections.emptyMap();
 	}
 }

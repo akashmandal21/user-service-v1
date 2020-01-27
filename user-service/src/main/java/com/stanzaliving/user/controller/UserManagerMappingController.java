@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
@@ -43,7 +42,8 @@ public class UserManagerMappingController {
 	public ResponseDto<Void> createMapping(@RequestBody @Valid UserManagerMappingRequestDto userManagerMappingRequestDto) {
 		log.info(" Create userId and managerId mapping for : " + userManagerMappingRequestDto.getUserId() + " " + userManagerMappingRequestDto.getManagerId());
 
-		userManagerMappingService.createUserManagerMapping(userManagerMappingRequestDto);		
+		userManagerMappingService.createUserManagerMapping(userManagerMappingRequestDto);
+		
 		return ResponseDto.success("Mapping Created Successfully ");
 	}
 	
@@ -85,6 +85,18 @@ public class UserManagerMappingController {
 			return ResponseDto.failure("Manager Profiles Not Found");
 		
 		return ResponseDto.success("Manager Profile Found!", userManagerMap);
+	}
+	
+	@GetMapping("/userprofiles/{managerId}")
+	public ResponseDto<Map<String, UserProfileDto>> getUserProfilesByManagerID(@PathVariable("managerId") String managerId) {
+		log.info(" Get user profiles by " + managerId);
+
+		Map<String, UserProfileDto> userManagerMap = userManagerMappingService.getPeopleReportingToManager(managerId);	
+		
+		if(userManagerMap == null)
+			return ResponseDto.failure("User Profiles Not Found");
+		
+		return ResponseDto.success("User Profile Found!", userManagerMap);
 	}
 	
 	@GetMapping("/managerprofile/{userId}/{managertype}")
