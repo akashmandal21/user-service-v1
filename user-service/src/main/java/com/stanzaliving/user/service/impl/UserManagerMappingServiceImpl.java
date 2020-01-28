@@ -154,11 +154,21 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 	}
 
 	@Override
-	public Map<String, UserProfileDto> getPeopleReportingToManager(String managerId) {
+	public List<UserProfileDto> getPeopleReportingToManager(String managerId) {
 		
 		List<UserManagerMappingEntity> userManagerMappingEntities = userManagerMappingRepository.findByManagerId(managerId);
 		
-		return getUserDetails(userManagerMappingEntities);
+		if(!CollectionUtils.isEmpty(userManagerMappingEntities)) {
+			
+			List<String> userIds = userManagerMappingEntities
+														.stream()
+														.map(UserManagerMappingEntity::getUserId).collect(Collectors.toList());
+			
+			return userService.searchUser(userIds, null, null, null, null, null, 0, 100).getData();
+			
+		}
+		
+		return Collections.emptyList();
 
 	}
 

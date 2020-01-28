@@ -10,6 +10,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -88,15 +89,15 @@ public class UserManagerMappingController {
 	}
 	
 	@GetMapping("/userprofiles/{managerId}")
-	public ResponseDto<Map<String, UserProfileDto>> getUserProfilesByManagerID(@PathVariable("managerId") String managerId) {
+	public ResponseDto<List<UserProfileDto>> getUserProfilesByManagerID(@PathVariable("managerId") String managerId) {
 		log.info(" Get user profiles by " + managerId);
 
-		Map<String, UserProfileDto> userManagerMap = userManagerMappingService.getPeopleReportingToManager(managerId);	
+		List<UserProfileDto> userManagerList = userManagerMappingService.getPeopleReportingToManager(managerId);	
 		
-		if(userManagerMap == null)
+		if(CollectionUtils.isEmpty(userManagerList))
 			return ResponseDto.failure("User Profiles Not Found");
 		
-		return ResponseDto.success("User Profile Found!", userManagerMap);
+		return ResponseDto.success("User Profile Found!", userManagerList);
 	}
 	
 	@GetMapping("/managerprofile/{userId}/{managertype}")
