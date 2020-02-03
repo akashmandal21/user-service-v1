@@ -98,7 +98,7 @@ public class UserAdapter {
 				.build();
 	}
 
-	public static AclUserDto getAclUserDto(UserDto userDto, List<UserDeptLevelRoleNameUrlExpandedDto> acl) {
+	public static AclUserDto getAclUserDto(UserProfileDto userDto, List<UserDeptLevelRoleNameUrlExpandedDto> acl) {
 		
 		return AclUserDto.builder()
 				.uuid(userDto.getUuid())
@@ -114,6 +114,8 @@ public class UserAdapter {
 				.email(userDto.getEmail())
 				.emailVerified(userDto.getEmailVerified())
 				.department(userDto.getDepartment())
+				.firstName(userDto.getFirstName())
+				.lastName(userDto.getLastName())
 				.acl(acl)
 				.build();
 	}
