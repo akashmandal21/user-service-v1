@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.stanzaliving.core.user.constants.UserErrorCodes;
 import com.stanzaliving.core.user.dto.UserDto;
+import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.request.dto.LoginRequestDto;
 import com.stanzaliving.core.user.request.dto.OtpValidateRequestDto;
 import com.stanzaliving.user.adapters.UserAdapter;
@@ -66,7 +67,7 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	@Override
-	public UserDto validateOtp(OtpValidateRequestDto otpValidateRequestDto) {
+	public UserProfileDto validateOtp(OtpValidateRequestDto otpValidateRequestDto) {
 
 		UserEntity userEntity = getActiveUser(otpValidateRequestDto);
 
@@ -78,7 +79,7 @@ public class AuthServiceImpl implements AuthService {
 
 		userDbService.update(userEntity);
 
-		return UserAdapter.getUserDto(userEntity);
+		return UserAdapter.getUserProfileDto(userEntity);
 	}
 
 	@Override
