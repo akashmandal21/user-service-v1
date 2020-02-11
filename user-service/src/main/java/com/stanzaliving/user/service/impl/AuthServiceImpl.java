@@ -8,14 +8,16 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.user.constants.UserErrorCodes;
-import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
+import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.LoginRequestDto;
 import com.stanzaliving.core.user.request.dto.OtpValidateRequestDto;
 import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.db.service.UserDbService;
 import com.stanzaliving.user.entity.UserEntity;
+import com.stanzaliving.user.entity.UserProfileEntity;
 import com.stanzaliving.user.exception.AuthException;
 import com.stanzaliving.user.service.AuthService;
 import com.stanzaliving.user.service.OtpService;
@@ -53,6 +55,8 @@ public class AuthServiceImpl implements AuthService {
 		UserEntity userEntity =
 				userDbService.getUserForMobile(loginRequestDto.getMobile(), loginRequestDto.getIsoCode());
 
+		userEntity = createUserIfUserIsConsumer(loginRequestDto, userEntity);
+		
 		if (Objects.isNull(userEntity)) {
 			throw new AuthException("User Not Found For Login", UserErrorCodes.USER_NOT_EXISTS);
 		}
@@ -63,6 +67,34 @@ public class AuthServiceImpl implements AuthService {
 
 		log.info("Found User: " + userEntity.getUuid() + " for Mobile: " + loginRequestDto.getMobile() + " of Type: " + userEntity.getUserType());
 
+		return userEntity;
+	}
+
+	private UserEntity createUserIfUserIsConsumer(LoginRequestDto loginRequestDto, UserEntity userEntity) {
+		
+		if(Objects.isNull(userEntity) 
+				&& Objects.nonNull(loginRequestDto.getUserType()) 
+				&& UserType.CONSUMER == loginRequestDto.getUserType()) {
+			
+			UserProfileEntity userProfileEntity =
+					UserProfileEntity
+							.builder()
+							.firstName("")
+							.build();
+			
+			userEntity = UserEntity.builder()
+					.isoCode(loginRequestDto.getIsoCode())
+					.mobile(loginRequestDto.getMobile())
+					.userType(loginRequestDto.getUserType())
+					.department(Department.WEB)
+					.userProfile(userProfileEntity)
+					.build();
+			
+			userProfileEntity.setUser(userEntity);
+			
+			userEntity = userDbService.save(userEntity);
+		}
+		
 		return userEntity;
 	}
 
