@@ -10,7 +10,6 @@ import com.stanzaliving.core.sqljpa.specification.utils.CriteriaOperation;
 import com.stanzaliving.core.sqljpa.specification.utils.StanzaSpecificationBuilder;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
-import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.user.adapters.UserAdapter;
@@ -30,7 +29,10 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -118,6 +120,37 @@ public class UserServiceImpl implements UserService {
 		}
 
 		return UserAdapter.getUserProfileDto(userEntity);
+	}
+	
+	@Override
+	public Map<String, UserProfileDto> getUserProfileIn(Map<String, String> userManagerUuidMap) {
+
+		Map<String, UserProfileDto> managerProfileDtoMap = new HashMap<>();
+		
+		List<String> managerUuids = new ArrayList<>();
+		
+		//Extract managerIds
+		userManagerUuidMap.forEach((k,v) -> {
+			managerUuids.add(v);
+		});
+		
+		List<UserEntity> userEntities = userDbService.findByUuidIn(managerUuids);
+
+		if (Objects.isNull(userEntities)) {
+			throw new StanzaException("User not found for Uuids: " + managerUuids);
+		}
+
+		userEntities.forEach(userEntity -> {
+			managerProfileDtoMap.put(userEntity.getUuid(), UserAdapter.getUserProfileDto(userEntity));
+		});
+		
+		Map<String, UserProfileDto> userManagerProfileMapping = new HashMap<>();
+		
+		userManagerUuidMap.forEach((k, v) -> {
+			userManagerProfileMapping.put(k, managerProfileDtoMap.get(v));
+		});
+		
+		return userManagerProfileMapping;
 	}
 
 	@Override
