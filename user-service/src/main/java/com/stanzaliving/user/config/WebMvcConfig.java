@@ -29,6 +29,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 						"/usermanagermapping/**",
 						"/managerprofiles/**")
 				.excludePathPatterns(
+						"/internal/**",
 						"/pingMe",
 						"/acl/check",
 						"/user/urlList/**",
@@ -42,7 +43,4 @@ public class WebMvcConfig implements WebMvcConfigurer {
 						"/webjars/**");
 
 	}
-
-
-
 }

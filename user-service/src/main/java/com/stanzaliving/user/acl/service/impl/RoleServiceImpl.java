@@ -85,4 +85,15 @@ public class RoleServiceImpl implements RoleService {
         return RoleAdapter.getDtoList(roleEntityList);
     }
 
+	@Override
+	public RoleDto findByRoleName(String roleName) {
+		RoleEntity roleEntity = roleDbService.findByRoleName(roleName);
+
+        if (null == roleEntity) {
+            throw new StanzaException("Unable to find rule by roleName " + roleName);
+        }
+
+        return RoleAdapter.getDto(roleEntity);
+	}
+
 }

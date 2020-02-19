@@ -20,6 +20,8 @@ import java.util.List;
 public interface RoleRepository extends AbstractJpaRepository<RoleEntity, Long> {
 
 	boolean existsByRoleName(String roleName);
+	
+	RoleEntity findByRoleName(String roleName);
 
 	List<RoleEntity> findByDepartmentAndAccessLevel(Department department, AccessLevel accessLevel);
 }
