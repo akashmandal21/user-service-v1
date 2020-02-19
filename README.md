@@ -277,3 +277,67 @@ Response Body -
 2. Remove User Option
 
 3. Authorization
+
+
+
+## To give access to any user
+betaUrl - https://betaerp.stanzaliving.com/user/swagger-ui.html
+
+produrl - https://erpdashboard.stanzaliving.com/user/swagger-ui.html
+
+1. Login with an existing user to use the swagger
+
+auth-controller --> /auth/login
+
+Login with an existing user after filling required details
+
+
+auth-controller --> /auth/validateOtp
+
+Enter otp as 1234 for beta / preprod environment and received otp for prod environment
+
+
+2. To create user
+
+user-controller -> /add
+
+sample payload with mandatory fields:
+```
+{
+  "email": "narayan.murth@stanzaliving.com",
+  "firstName": "Narayan",
+  "gender": "MALE",
+  "isoCode": "IN",
+  "lastName": "Murthy",
+  "mobile": "9811666520",
+  "userType": "PROCUREMENT",
+  "department": "BUSINESS_DEVELOPMENT"
+}
+```
+save the uuid in received in response (this will be helpful in assigning roles to this user at later stage)
+
+3. To get uuid for an existing user by mobile number
+
+user-controller -> /search/{pageNo}/{limit}
+
+Enter 1 in both limit and pageNo and Mobile number to get the uuid of existing user.
+
+4. To create new roles
+
+role-controller -> /acl/role/add
+
+Input the required fields to create new role. To create a parent role, use "SELF" in parentRoleUuid else enter the uuid of parent role.
+
+save the uuid in received in response (this will be helpful in assigning roles to this user at later stage)
+
+5. To get uuid's of existing roles
+
+role-controller -> /acl/roles/getRoles
+
+6. To assign a particular role to any user
+
+acl-user-controller -> /acl/user/add/role
+
+to get the accessLevelEntityListUuid use https://erpdashboard.stanzaliving.com/transformationmaster/swagger-ui.html#/ 
+
+internal-data-controller -> /internal/cities/all or /internal/micromarkets/all or /internal/states/all
