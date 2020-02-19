@@ -280,24 +280,26 @@ Response Body -
 
 
 
-## To give access to any user
+## ACL
 betaUrl - https://betaerp.stanzaliving.com/user/swagger-ui.html
 
 produrl - https://erpdashboard.stanzaliving.com/user/swagger-ui.html
 
-1. Login with an existing user to use the swagger
+To perform any action listed below, click on "Try It Out" to open editor, fill in required details and then click on execute to perform the action.
+
+1. Login with your phone number to use the swagger to get authentication done
+
+enter ISO Code as "IN" and keep userType as "STUDENT" in below API's
 
 auth-controller --> /auth/login
-
-Login with an existing user after filling required details
-
 
 auth-controller --> /auth/validateOtp
 
 Enter otp as 1234 for beta / preprod environment and received otp for prod environment
 
+Now you are authorized to perform any action on swagger.
 
-2. To create user
+2. To add a new user (this api will give error, if user is already created)
 
 user-controller -> /add
 
@@ -314,7 +316,7 @@ sample payload with mandatory fields:
   "department": "BUSINESS_DEVELOPMENT"
 }
 ```
-save the uuid in received in response (this will be helpful in assigning roles to this user at later stage)
+save the uuid received in response (this will be helpful in assigning roles to this user at later stage)
 
 3. To get uuid for an existing user by mobile number
 
@@ -328,7 +330,7 @@ role-controller -> /acl/role/add
 
 Input the required fields to create new role. To create a parent role, use "SELF" in parentRoleUuid else enter the uuid of parent role.
 
-save the uuid in received in response (this will be helpful in assigning roles to this user at later stage)
+save the uuid in received in response (this will be helpful in assigning roles to any user at later stage)
 
 5. To get uuid's of existing roles
 
@@ -341,3 +343,11 @@ acl-user-controller -> /acl/user/add/role
 to get the accessLevelEntityListUuid use https://erpdashboard.stanzaliving.com/transformationmaster/swagger-ui.html#/ 
 
 internal-data-controller -> /internal/cities/all or /internal/micromarkets/all or /internal/states/all
+
+Possible values for UserType, Departments and AccessLevel :
+
+UserType: STUDENT,PARENT,LEGAL,HR,TECH,FINANCE,PROCUREMENT,MANAGER,BD,LEADERSHIP,OPS,CONSUMER
+
+Departments: TECH,FINANCE,HR,LEGAL,SUPERADMIN,LEADERSHIP,BUSINESS_DEVELOPMENT,OPS,PROCUREMENT,DESIGN,PROJECTS,TRANSFORMATIONS,SALES,WEB
+
+AccessLevel: RESIDENCE,MICROMARKET,CITY,COUNTRY
