@@ -1,11 +1,11 @@
 package com.stanzaliving.user.config;
 
 import com.stanzaliving.core.base.http.StanzaRestClient;
-import com.stanzaliving.core.pushnotification.client.api.SlackNotification;
+import com.stanzaliving.core.base.notification.SlackNotification;
 import lombok.extern.log4j.Log4j2;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,11 +35,9 @@ public class AopConfig {
         slackNotification = new SlackNotification(stanzaRestClient);
     }
 
-    @Around(value = "execution(* com.stanzaliving.user.config.ExceptionInterceptor.*(..)) && @annotation(com.stanzaliving.core.pushnotification.client.api.annotation.SendExceptionToSlack)")
-    public void sendToSlack(ProceedingJoinPoint proceedingJoinPoint) {
-        if (enableSlackException) {
-            log.debug("Sending exception to Slack through AOP");
-            slackNotification.sendExceptionNotificationRequest((Exception) proceedingJoinPoint.getArgs()[0], slackExceptionEndUrl);
-        }
+    @Before(value = "execution(* com.stanzaliving.core.base.exception.ExceptionInterceptor.*(..)) && @annotation(com.stanzaliving.core.base.annotation.SendExceptionToSlack))")
+    public void sendToSlack(JoinPoint joinPoint) {
+        if (enableSlackException)
+            slackNotification.sendExceptionNotificationRequest((Exception) joinPoint.getArgs()[0], slackExceptionEndUrl);
     }
 }
