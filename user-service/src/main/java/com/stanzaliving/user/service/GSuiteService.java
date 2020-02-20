@@ -4,6 +4,6 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.List;
 
-public interface GoogleGSuiteService {
+public interface GSuiteService {
     List<String> getUsers();
 }

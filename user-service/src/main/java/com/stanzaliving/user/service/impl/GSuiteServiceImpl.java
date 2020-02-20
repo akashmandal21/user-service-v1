@@ -6,12 +6,12 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.directory.Directory;
 import com.google.api.services.directory.model.Member;
-import com.google.api.services.directory.model.Members;
 import com.google.api.services.directory.model.User;
 import com.google.api.services.directory.model.Users;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
+import com.stanzaliving.user.service.GSuiteService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,7 +26,7 @@ import java.util.Objects;
 
 @Service
 @Log4j2
-public class GoogleGSuiteServiceImpl implements com.stanzaliving.user.service.GoogleGSuiteService {
+public class GSuiteServiceImpl implements GSuiteService {
 
 
     @Autowired
@@ -68,7 +68,7 @@ public class GoogleGSuiteServiceImpl implements com.stanzaliving.user.service.Go
 
             Directory.Users.List usersRequest = directory.users().list();
             do {
-                Users usersResponse = usersRequest.execute();
+                Users usersResponse = usersRequest.setShowDeleted("true").execute();
                 userList.addAll(usersResponse.getUsers());
                 usersRequest.setPageToken(usersResponse.getNextPageToken());
             } while (usersRequest.getPageToken() != null && usersRequest.getPageToken().length() > 0);
@@ -80,7 +80,7 @@ public class GoogleGSuiteServiceImpl implements com.stanzaliving.user.service.Go
         }
 
         memberList.stream().forEach(member -> log.info(member.getStatus() + member.getEmail() + member.getRole() + member));
-        userList.stream().forEach(user -> log.info(user.getEmails()));
+        userList.stream().forEach(user -> log.info(user.getEmails().toString() + user.getDeletionTime().toString()));
 
         return Collections.EMPTY_LIST;
     }
