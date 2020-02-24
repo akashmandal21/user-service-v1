@@ -283,7 +283,7 @@ Response Body -
 ## ACL
 betaUrl - https://betaerp.stanzaliving.com/user/swagger-ui.html
 
-produrl - https://erpdashboard.stanzaliving.com/user/swagger-ui.html
+produrl - userservice.stanzaliving.com/user/swagger-ui.html (https://erpdashboard.stanzaliving.com/user/swagger-ui.html)
 
 To perform any action listed below, click on "Try It Out" to open editor, fill in required details and then click on execute to perform the action.
 
