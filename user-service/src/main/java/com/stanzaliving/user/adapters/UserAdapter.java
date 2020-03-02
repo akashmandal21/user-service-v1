@@ -40,6 +40,7 @@ public class UserAdapter {
 				.email(userEntity.getEmail())
 				.emailVerified(userEntity.isEmailVerified())
 				.department(userEntity.getDepartment())
+				.departmentName(userEntity.getDepartment().departmentName)
 				.build();
 	}
 
