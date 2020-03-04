@@ -75,7 +75,7 @@ public class RoleController {
 	}
 
 	@PostMapping("revokeRoleAccess")
-	public ResponseDto revokeRole(@RequestBody @Valid AddRoleAccessDto addRoleAccessDto) {
+	public ResponseDto<Void> revokeRole(@RequestBody @Valid AddRoleAccessDto addRoleAccessDto) {
 		log.info("Received request to revoke role assignment : " + addRoleAccessDto);
 		roleAccessService.revokeRoleAccess(addRoleAccessDto);
 		return ResponseDto.success("Role access revocation successful");

@@ -21,6 +21,8 @@ import com.stanzaliving.user.entity.OtpEntity;
 public interface OtpRepository extends AbstractJpaRepository<OtpEntity, Long> {
 
 	List<OtpEntity> findByMobileAndOtpTypeAndIsoCode(String mobile, OtpType otpType, String isoCode, Pageable pageable);
+	
+	List<OtpEntity> findByMobileAndOtpTypeAndIsoCodeAndStatus(String mobile, OtpType otpType, String isoCode, boolean status, Pageable pageable);
 
 	List<OtpEntity> findByUserIdAndOtpType(String userId, OtpType otpType, Pageable pageable);
 }
