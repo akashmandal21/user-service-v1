@@ -11,6 +11,8 @@ public interface RoleService {
     RoleDto addRole(AddRoleRequestDto addRoleRequestDto);
 
     RoleDto getRoleByUuid(String roleUuid);
+    
+    RoleDto findByRoleName(String roleName);
 
     List<RoleDto> findByDepartmentAndAccessLevel(Department department, AccessLevel accessLevel);
 }

@@ -3,6 +3,7 @@ package com.stanzaliving.user.acl.service.impl;
 import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.base.exception.StanzaException;
+import com.stanzaliving.core.user.acl.dto.RoleDto;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleListDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRequestDto;
@@ -13,6 +14,7 @@ import com.stanzaliving.user.acl.db.service.UserDepartmentLevelRoleDbService;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity;
 import com.stanzaliving.user.acl.service.AclUserService;
+import com.stanzaliving.user.acl.service.RoleService;
 import com.stanzaliving.user.acl.service.UserDepartmentLevelRoleService;
 import com.stanzaliving.user.acl.service.UserDepartmentLevelService;
 import com.stanzaliving.user.service.UserService;
@@ -22,27 +24,33 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @Log4j2
 public class AclUserServiceImpl implements AclUserService {
 
     @Autowired
-    UserDepartmentLevelService userDepartmentLevelService;
+    private UserDepartmentLevelService userDepartmentLevelService;
 
     @Autowired
-    UserDepartmentLevelDbService userDepartmentLevelDbService;
+    private UserDepartmentLevelDbService userDepartmentLevelDbService;
 
     @Autowired
-    UserDepartmentLevelRoleService userDepartmentLevelRoleService;
+    private UserDepartmentLevelRoleService userDepartmentLevelRoleService;
 
     @Autowired
-    UserDepartmentLevelRoleDbService userDepartmentLevelRoleDbService;
+    private UserDepartmentLevelRoleDbService userDepartmentLevelRoleDbService;
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
+    @Autowired
+    private RoleService roleService;
+    
     @Override
     public void addRole(AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleDto) {
 
@@ -130,4 +138,42 @@ public class AclUserServiceImpl implements AclUserService {
         userDepartmentLevelRoleService.revokeRoles(userDepartmentLevelEntity.getUuid(), userDeptLevelRoleListDto.getRolesUuid());
 
     }
+
+	@Override
+	public List<String> getUsersForRoles(Department department, String roleName, String accessLevelEntity) {
+		
+		log.info("Got request to get list of userid by rolename {} and department {}",roleName,department);
+		
+		RoleDto roleDto = roleService.findByRoleName(roleName);
+		
+		List<String> userIds = new ArrayList<>();
+		
+		if(Objects.nonNull(roleDto) && roleDto.getDepartment().equals(department)) {
+			
+			List<UserDepartmentLevelRoleEntity> departmentLevelRoleEntities = userDepartmentLevelRoleDbService.findByRoleUuid(roleDto.getUuid());
+			
+			if(CollectionUtils.isNotEmpty(departmentLevelRoleEntities)) {
+				
+				List<String> uuids = departmentLevelRoleEntities.stream().map(UserDepartmentLevelRoleEntity::getUserDepartmentLevelUuid).collect(Collectors.toList());
+				
+				List<UserDepartmentLevelEntity> departmentLevelEntities = userDepartmentLevelDbService.findByUuidIn(uuids);
+				
+				if(CollectionUtils.isNotEmpty(departmentLevelEntities)) {
+					 
+					
+					departmentLevelEntities.forEach(entity->{
+						
+						List<String> accessLevelUuids = Arrays.asList(entity.getCsvAccessLevelEntityUuid().split(","));
+						
+						if(accessLevelUuids.contains(accessLevelEntity)) {
+							userIds.add(entity.getUserUuid());
+						}
+					});
+				}
+			}
+			
+		}
+		
+		return userIds;
+	}
 }

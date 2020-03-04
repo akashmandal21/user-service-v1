@@ -9,4 +9,5 @@ public interface UserDepartmentLevelRoleService {
     List<UserDepartmentLevelRoleEntity> addRoles(String userDepartmentLevelUuid, List<String> rolesUuid);
 
     void revokeRoles(String uuid, List<String> rolesUuid);
+    
 }
