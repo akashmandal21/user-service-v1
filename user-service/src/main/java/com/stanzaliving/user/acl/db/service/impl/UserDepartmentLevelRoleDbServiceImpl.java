@@ -34,4 +34,9 @@ public class UserDepartmentLevelRoleDbServiceImpl extends AbstractJpaServiceImpl
     public List<UserDepartmentLevelRoleEntity> findByUserDepartmentLevelUuidAndRoleUuidInAndStatus(String userDepartmentLevelUuid, List<String> rolesUuid, boolean status) {
         return getJpaRepository().findByUserDepartmentLevelUuidAndRoleUuidInAndStatus(userDepartmentLevelUuid, rolesUuid, true);
     }
+
+	@Override
+	public List<UserDepartmentLevelRoleEntity> findByRoleUuid(String roleUuid) {
+		return getJpaRepository().findByRoleUuid(roleUuid);
+	}
 }

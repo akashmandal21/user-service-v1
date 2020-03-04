@@ -27,4 +27,6 @@ public interface UserManagerMappingService {
 	UserProfileDto getUserManagerMappingHierarchy(String userId, UserManagerMappingType mappingType);
 
 	Map<String, UserProfileDto> getManagerProfileForUserIn(List<String> userIds);
+	
+	List<UserProfileDto> getPeopleReportingToManager( String managerId );
 }

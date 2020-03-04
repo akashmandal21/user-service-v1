@@ -3,7 +3,7 @@
  */
 package com.stanzaliving.user.service;
 
-import com.stanzaliving.core.user.dto.UserDto;
+import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.request.dto.LoginRequestDto;
 import com.stanzaliving.core.user.request.dto.OtpValidateRequestDto;
 
@@ -16,7 +16,7 @@ public interface AuthService {
 
 	void login(LoginRequestDto loginRequestDto);
 
-	UserDto validateOtp(OtpValidateRequestDto otpValidateRequestDto);
+	UserProfileDto validateOtp(OtpValidateRequestDto otpValidateRequestDto);
 
 	void resendOtp(LoginRequestDto loginRequestDto);
 
