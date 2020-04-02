@@ -2,6 +2,7 @@ package com.stanzaliving.user.config;
 
 import java.time.LocalDate;
 
+import com.stanzaliving.core.base.http.StanzaRestClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,6 +30,9 @@ public class UserConfiguration {
 
 	@Value("${user.thread.queue.capacity:100000}")
 	private int userQueueCapacity;
+
+	@Value("${service.slack.url}")
+	private String slackUrl;
 
 	@Bean(name = "userExecutor")
 	public ThreadPoolTaskExecutor userExecutor() {
@@ -58,4 +62,6 @@ public class UserConfiguration {
 		return mapper;
 	}
 
+	@Bean(name = "slackClient")
+	public StanzaRestClient slackExceptionClient() {return new StanzaRestClient(slackUrl);}
 }
