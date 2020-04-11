@@ -16,6 +16,8 @@ public interface OtpDbService extends AbstractJpaService<OtpEntity, Long> {
 
 	OtpEntity getOtpForMobile(String mobile, OtpType otpType, String isoCode);
 
+	OtpEntity getActiveOtpForMobile(String mobile, OtpType otpType, String isoCode);
+
 	OtpEntity getUserOtpByUserId(String userId, OtpType otpType);
 
 }
