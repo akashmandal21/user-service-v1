@@ -10,6 +10,7 @@ import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.base.utils.CSVConverter;
 import com.stanzaliving.core.user.acl.dto.AclUserProfileDTO;
 import com.stanzaliving.core.user.dto.UserDto;
+import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
@@ -119,6 +120,17 @@ public class UserController {
 	) {
 		log.info("Received request to deactivate user");
 		return ResponseDto.success("Successfully deactived user.", userService.updateUserStatus(userUuid));
+	}
+
+
+	@GetMapping("details/manager/role")
+	public ResponseDto<UserManagerAndRoleDto> getUserWithManagerAndRole(
+			@RequestParam("userId") String userUuid
+	){
+		log.info("Request received for getting user details along with manager and role details");
+		UserManagerAndRoleDto userManagerAndRoleDto = userService.getUserWithManagerAndRole(userUuid);
+		log.info("Successfully fetched user details along with manager and role details.");
+		return ResponseDto.success("Found user Details with manager and role details.", userManagerAndRoleDto);
 	}
 
 

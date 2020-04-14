@@ -9,15 +9,20 @@ import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.base.utils.PhoneNumberUtils;
 import com.stanzaliving.core.sqljpa.specification.utils.CriteriaOperation;
 import com.stanzaliving.core.sqljpa.specification.utils.StanzaSpecificationBuilder;
+import com.stanzaliving.core.user.acl.dto.RoleDto;
+import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
 import com.stanzaliving.core.user.dto.UserDto;
+import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
+import com.stanzaliving.user.acl.service.AclUserService;
 import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.constants.UserQueryConstants;
 import com.stanzaliving.user.db.service.UserDbService;
 import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.entity.UserProfileEntity;
+import com.stanzaliving.user.service.UserManagerMappingService;
 import com.stanzaliving.user.service.UserService;
 import javassist.NotFoundException;
 import lombok.extern.log4j.Log4j2;
@@ -50,6 +55,13 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private UserDbService userDbService;
+
+	@Autowired
+	private UserManagerMappingService userManagerMappingService;
+
+	@Autowired
+	private AclUserService aclUserService;
+
 
 	@Override
 	public UserProfileDto getActiveUserByUserId(String userId) {
@@ -244,5 +256,21 @@ public class UserServiceImpl implements UserService {
 		user.setStatus(false);
 		userDbService.save(user);
 		return true;
+	}
+
+	@Override
+	public UserManagerAndRoleDto getUserWithManagerAndRole(String userUuid) {
+		UserProfileDto userProfile = getActiveUserByUserId(userUuid);
+		if(userProfile == null){
+			throw new NoRecordException("Please provide valid userId.");
+		}
+		UserProfileDto managerProfile = userManagerMappingService.getManagerProfileForUser(userUuid);
+		List<UserDeptLevelRoleDto> roleDtoList = aclUserService.getUserDeptLevelRole(userUuid);
+
+		return UserManagerAndRoleDto.builder()
+				.userProfile(userProfile)
+				.manager(managerProfile)
+				.roles(roleDtoList)
+				.build();
 	}
 }

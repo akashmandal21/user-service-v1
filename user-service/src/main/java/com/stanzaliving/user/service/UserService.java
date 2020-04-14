@@ -5,6 +5,7 @@ package com.stanzaliving.user.service;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
 import com.stanzaliving.core.user.dto.UserDto;
+import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
@@ -47,5 +48,7 @@ public interface UserService {
 	Map<String, UserProfileDto> getUserProfileIn(Map<String, String> userManagerUuidMap);
 
 	boolean updateUserStatus(String userId);
+
+	UserManagerAndRoleDto getUserWithManagerAndRole(String userUuid);
 
 }
