@@ -6,6 +6,7 @@ package com.stanzaliving.user.controller;
 import com.stanzaliving.core.base.common.dto.PageResponse;
 import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.base.constants.SecurityConstants;
+import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.base.utils.CSVConverter;
 import com.stanzaliving.core.user.acl.dto.AclUserProfileDTO;
 import com.stanzaliving.core.user.dto.UserDto;
@@ -91,5 +92,34 @@ public class UserController {
 
 		return ResponseDto.success("Found " + userDtos.getRecords() + " Users for Search Criteria", userDtos);
 	}
+
+
+	@GetMapping("type/list")
+	public ResponseDto<UserType[]> getUserType() {
+
+		log.info("Received UserType listing request.");
+
+		return ResponseDto.success("Found UserType", UserType.values());
+	}
+
+
+	@GetMapping("department/list")
+	public ResponseDto<Department[]> getUserDepartment() {
+
+		log.info("Received Department listing request.");
+
+		return ResponseDto.success("Found Department", Department.values());
+	}
+
+
+	@PostMapping("update/userStatus")
+	public ResponseDto<Boolean> updateUserStatus(
+			@RequestParam("userid") String userUuid,
+			@RequestParam("status") Boolean status
+	) {
+		log.info("Received request to deactivate user");
+		return ResponseDto.success("Successfully deactived user.", userService.updateUserStatus(userUuid));
+	}
+
 
 }

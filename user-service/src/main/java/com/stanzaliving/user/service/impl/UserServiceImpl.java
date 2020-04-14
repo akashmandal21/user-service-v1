@@ -4,6 +4,7 @@
 package com.stanzaliving.user.service.impl;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
+import com.stanzaliving.core.base.exception.NoRecordException;
 import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.base.utils.PhoneNumberUtils;
 import com.stanzaliving.core.sqljpa.specification.utils.CriteriaOperation;
@@ -18,6 +19,7 @@ import com.stanzaliving.user.db.service.UserDbService;
 import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.entity.UserProfileEntity;
 import com.stanzaliving.user.service.UserService;
+import javassist.NotFoundException;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +30,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import sun.plugin.util.UserProfile;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -225,4 +228,21 @@ public class UserServiceImpl implements UserService {
 		return pagination;
 	}
 
+	@Override
+	public boolean updateUserStatus(String userId) {
+		UserEntity user = userDbService.findByUuidAndStatus(userId, true);
+		if(user == null){
+			throw new StanzaException("User either does not exist or user is not active.");
+		}
+		UserProfileEntity userProfile = user.getUserProfile();
+
+		if(userProfile != null){
+			userProfile.setStatus(false);
+			user.setUserProfile(userProfile);
+		}
+
+		user.setStatus(false);
+		userDbService.save(user);
+		return true;
+	}
 }

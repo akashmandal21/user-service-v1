@@ -8,6 +8,7 @@ import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
+import javassist.NotFoundException;
 
 import java.util.List;
 import java.util.Map;
@@ -44,5 +45,7 @@ public interface UserService {
 	PageResponse<UserProfileDto> searchUser(List<String> userIds, String mobile, String isoCode, String email, UserType userType, Boolean status, int pageNo, int limit);
 
 	Map<String, UserProfileDto> getUserProfileIn(Map<String, String> userManagerUuidMap);
+
+	boolean updateUserStatus(String userId);
 
 }
