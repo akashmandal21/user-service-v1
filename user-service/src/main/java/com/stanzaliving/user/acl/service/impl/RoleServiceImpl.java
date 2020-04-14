@@ -1,5 +1,6 @@
 package com.stanzaliving.user.acl.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.base.exception.StanzaException;
@@ -85,7 +86,25 @@ public class RoleServiceImpl implements RoleService {
         return RoleAdapter.getDtoList(roleEntityList);
     }
 
-	@Override
+    @Override
+    public List<RoleDto> filter(String roleName, Department department, AccessLevel accessLevel) {
+        return filter(
+                RoleDto.builder()
+                .roleName(roleName)
+                .accessLevel(accessLevel)
+                .department(department)
+                .build()
+        );
+    }
+
+    @Override
+    public List<RoleDto> filter(RoleDto roleDto) {
+        List<RoleEntity> roleEntities = roleDbService.filter(roleDto);
+        ObjectMapper objectMapper = new ObjectMapper();
+        return RoleAdapter.getDtoList(roleEntities);
+    }
+
+    @Override
 	public RoleDto findByRoleName(String roleName) {
 		RoleEntity roleEntity = roleDbService.findByRoleName(roleName);
 

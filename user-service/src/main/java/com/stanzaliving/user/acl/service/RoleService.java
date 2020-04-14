@@ -15,4 +15,8 @@ public interface RoleService {
     RoleDto findByRoleName(String roleName);
 
     List<RoleDto> findByDepartmentAndAccessLevel(Department department, AccessLevel accessLevel);
+
+    List<RoleDto> filter(String roleName, Department department, AccessLevel accessLevel);
+
+    List<RoleDto> filter(RoleDto roleDto);
 }
