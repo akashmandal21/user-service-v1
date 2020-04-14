@@ -1,12 +1,10 @@
 package com.stanzaliving.user.service.impl;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.stanzaliving.core.base.exception.NoRecordException;
+import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -171,6 +169,16 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 		return Collections.emptyList();
 
 	}
+
+	@Override
+	public void deleteManagerMapping(String uuid) {
+		UserManagerMappingEntity userManagerMappingEntity = userManagerMappingRepository.findFirstByUuid(uuid);
+		if (userManagerMappingEntity == null){
+			throw new NoRecordException("Manager mapping does not exist for id: " + uuid );
+		}
+		userManagerMappingRepository.delete(userManagerMappingEntity);
+	}
+
 
 	private Map<String, UserProfileDto> getUserDetails(List<UserManagerMappingEntity> userManagerMappingEntities) {
 		if(!CollectionUtils.isEmpty(userManagerMappingEntities)) {
