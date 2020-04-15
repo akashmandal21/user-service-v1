@@ -48,7 +48,7 @@ public interface UserService {
 
 	Map<String, UserProfileDto> getUserProfileIn(Map<String, String> userManagerUuidMap);
 
-	boolean updateUserStatus(String userId);
+	boolean updateUserStatus(String userId, Boolean status);
 
 	UserManagerAndRoleDto getUserWithManagerAndRole(String userUuid);
 

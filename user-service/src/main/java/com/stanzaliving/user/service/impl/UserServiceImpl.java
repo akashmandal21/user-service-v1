@@ -21,6 +21,7 @@ import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.entity.UserProfileEntity;
 import com.stanzaliving.user.service.UserManagerMappingService;
 import com.stanzaliving.user.service.UserService;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -198,10 +199,10 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public boolean updateUserStatus(String userId) {
-		UserEntity user = userDbService.findByUuidAndStatus(userId, true);
+	public boolean updateUserStatus(String userId, Boolean status) {
+		UserEntity user = userDbService.findByUuidAndStatus(userId, !status);
 		if(user == null){
-			throw new StanzaException("User either does not exist or user is not active.");
+			throw new StanzaException("User either does not exist or user is already in desired state.");
 		}
 		UserProfileEntity userProfile = user.getUserProfile();
 

@@ -117,7 +117,7 @@ public class UserController {
 			@RequestParam("status") Boolean status
 	) {
 		log.info("Received request to deactivate user");
-		return ResponseDto.success("Successfully deactived user.", userService.updateUserStatus(userUuid));
+		return ResponseDto.success("Successfully deactived user.", userService.updateUserStatus(userUuid, status));
 	}
 
 
