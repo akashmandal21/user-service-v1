@@ -207,11 +207,11 @@ public class UserServiceImpl implements UserService {
 		UserProfileEntity userProfile = user.getUserProfile();
 
 		if(userProfile != null){
-			userProfile.setStatus(false);
+			userProfile.setStatus(status);
 			user.setUserProfile(userProfile);
 		}
 
-		user.setStatus(false);
+		user.setStatus(status);
 		userDbService.save(user);
 		return true;
 	}
