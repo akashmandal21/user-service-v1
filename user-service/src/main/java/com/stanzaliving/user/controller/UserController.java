@@ -12,6 +12,7 @@ import com.stanzaliving.core.user.acl.dto.AclUserProfileDTO;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
+import com.stanzaliving.core.user.enums.EnumListing;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.user.acl.service.AclService;
@@ -24,7 +25,10 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
+import java.util.ArrayList;
 import java.util.List;
+
+import static java.util.stream.LongStream.builder;
 
 /**
  * @author naveen
@@ -84,7 +88,9 @@ public class UserController {
 			@RequestParam(name = "isoCode", required = false) String isoCode,
 			@RequestParam(name = "email", required = false) String email,
 			@RequestParam(name = "userType", required = false) UserType userType,
-			@RequestParam(name = "status", required = false) Boolean status) {
+			@RequestParam(name = "status", required = false) Boolean status,
+			@RequestParam(name = "department", required = false) Department department
+	) {
 
 		log.info("Received User Search Request With Parameters [Page: " + pageNo + ", Limit: " + limit + ", Mobile: " + mobile + ", ISO: " + isoCode + ", Email: " + email + ", UserType: " + userType
 				+ ", Status: " + status + ", UserIds: {" + CSVConverter.getCSVString(userIds) + "} ]");
@@ -96,21 +102,13 @@ public class UserController {
 
 
 	@GetMapping("type/list")
-	public ResponseDto<UserType[]> getUserType() {
+	public ResponseDto<List<EnumListing>> getUserType() {
 
 		log.info("Received UserType listing request.");
-
-		return ResponseDto.success("Found UserType", UserType.values());
+		return ResponseDto.success("Found UserType", userService.getAllUserType());
 	}
 
 
-	@GetMapping("department/list")
-	public ResponseDto<Department[]> getUserDepartment() {
-
-		log.info("Received Department listing request.");
-
-		return ResponseDto.success("Found Department", Department.values());
-	}
 
 
 	@PostMapping("update/userStatus")

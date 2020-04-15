@@ -14,6 +14,7 @@ import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
+import com.stanzaliving.core.user.enums.EnumListing;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.user.acl.service.AclUserService;
@@ -272,5 +273,19 @@ public class UserServiceImpl implements UserService {
 				.manager(managerProfile)
 				.roles(roleDtoList)
 				.build();
+	}
+
+	@Override
+	public List<EnumListing> getAllUserType() {
+		List<EnumListing> data = new ArrayList<>();
+		for (UserType type: UserType.values()) {
+			data.add(
+					EnumListing.builder()
+							.key(type.name())
+							.value(type.type)
+							.build()
+			);
+		}
+		return data;
 	}
 }
