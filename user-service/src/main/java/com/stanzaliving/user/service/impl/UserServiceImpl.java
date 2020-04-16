@@ -4,9 +4,12 @@
 package com.stanzaliving.user.service.impl;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
+import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.base.exception.NoRecordException;
 import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.base.utils.PhoneNumberUtils;
+import com.stanzaliving.core.sqljpa.specification.utils.CriteriaOperation;
+import com.stanzaliving.core.sqljpa.specification.utils.StanzaSpecificationBuilder;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
@@ -163,9 +166,9 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public PageResponse<UserProfileDto> searchUser(List<String> userIds, String mobile, String isoCode, String email, UserType userType, Boolean status, int pageNo, int limit) {
+	public PageResponse<UserProfileDto> searchUser(List<String> userIds, String mobile, String isoCode, String email, UserType userType, Boolean status, Department department, String name, int pageNo, int limit) {
 
-		Page<UserEntity> userPage = getUserPage(userIds, mobile, isoCode, email, userType, status, pageNo, limit);
+		Page<UserEntity> userPage = getUserPage(userIds, mobile, isoCode, email, userType, status, department, name, pageNo, limit);
 
 		log.info("Found " + userPage.getNumberOfElements() + " User Records on Page: " + pageNo + " for Search Criteria");
 
@@ -176,9 +179,9 @@ public class UserServiceImpl implements UserService {
 	}
 
 
-	private Page<UserEntity> getUserPage(List<String> userIds, String mobile, String isoCode, String email, UserType userType, Boolean status, int pageNo, int limit) {
+	private Page<UserEntity> getUserPage(List<String> userIds, String mobile, String isoCode, String email, UserType userType, Boolean status, Department department, String name, int pageNo, int limit) {
 
-		Specification<UserEntity> specification = userDbService.getSearchQuery(userIds, mobile, isoCode, email, userType, status);
+		Specification<UserEntity> specification = userDbService.getSearchQuery(userIds, mobile, isoCode, email, userType, status, department, name);
 
 		Pageable pagination = getPaginationForSearchRequest(pageNo, limit);
 

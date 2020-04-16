@@ -3,6 +3,7 @@
  */
 package com.stanzaliving.user.db.service;
 
+import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.sqljpa.service.AbstractJpaService;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.user.entity.UserEntity;
@@ -19,5 +20,6 @@ public interface UserDbService extends AbstractJpaService<UserEntity, Long> {
 
 	UserEntity getUserForMobile(String mobile, String isoCode);
 
-	Specification<UserEntity> getSearchQuery(List<String> userIds, String mobile, String isoCode, String email, UserType userType, Boolean status);
+	Specification<UserEntity> getSearchQuery(List<String> userIds, String mobile, String isoCode, String email, UserType userType, Boolean status, Department department, String name);
+
 }

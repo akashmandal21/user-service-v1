@@ -3,6 +3,7 @@
  */
 package com.stanzaliving.user.db.service.impl;
 
+import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.sqljpa.specification.utils.CriteriaOperation;
 import com.stanzaliving.core.sqljpa.specification.utils.StanzaSpecificationBuilder;
 import com.stanzaliving.core.user.enums.UserType;
@@ -18,6 +19,7 @@ import com.stanzaliving.user.db.service.UserDbService;
 import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.repository.UserRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -43,7 +45,7 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 	}
 
 	@Override
-	public Specification<UserEntity> getSearchQuery(List<String> userIds, String mobile, String isoCode, String email, UserType userType, Boolean status) {
+	public Specification<UserEntity> getSearchQuery(List<String> userIds, String mobile, String isoCode, String email, UserType userType, Boolean status, Department department, String name) {
 
 		StanzaSpecificationBuilder<UserEntity> specificationBuilder = new StanzaSpecificationBuilder<>();
 
@@ -75,6 +77,19 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 					specificationBuilder.with(UserQueryConstants.STATUS, CriteriaOperation.TRUE, true);
 				} else {
 					specificationBuilder.with(UserQueryConstants.STATUS, CriteriaOperation.FALSE, false);
+				}
+			}
+
+			if(Objects.nonNull(department)){
+				specificationBuilder.with(UserQueryConstants.DEPARTMENT, CriteriaOperation.ENUM_EQ, department);
+			}
+
+			if(StringUtils.isNotBlank(name)){
+				List<UserEntity> userEntities = userRepository.findByUserProfile_FirstNameStartingWith(name);
+				if(CollectionUtils.isNotEmpty(userEntities)){
+					List<String> userIdList = new ArrayList<>();
+					userEntities.forEach(userEntity -> {userIdList.add(userEntity.getUuid());});
+					specificationBuilder.with(UserQueryConstants.UUID, CriteriaOperation.IN, userIdList);
 				}
 			}
 		}

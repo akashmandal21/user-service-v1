@@ -89,13 +89,14 @@ public class UserController {
 			@RequestParam(name = "email", required = false) String email,
 			@RequestParam(name = "userType", required = false) UserType userType,
 			@RequestParam(name = "status", required = false) Boolean status,
-			@RequestParam(name = "department", required = false) Department department
+			@RequestParam(name = "department", required = false) Department department,
+			@RequestParam(name = "name", required = false) String name
 	) {
 
 		log.info("Received User Search Request With Parameters [Page: " + pageNo + ", Limit: " + limit + ", Mobile: " + mobile + ", ISO: " + isoCode + ", Email: " + email + ", UserType: " + userType
 				+ ", Status: " + status + ", UserIds: {" + CSVConverter.getCSVString(userIds) + "} ]");
 
-		PageResponse<UserProfileDto> userDtos = userService.searchUser(userIds, mobile, isoCode, email, userType, status, pageNo, limit);
+		PageResponse<UserProfileDto> userDtos = userService.searchUser(userIds, mobile, isoCode, email, userType, status, department, name, pageNo, limit);
 
 		return ResponseDto.success("Found " + userDtos.getRecords() + " Users for Search Criteria", userDtos);
 	}
@@ -113,11 +114,11 @@ public class UserController {
 
 	@PostMapping("update/userStatus")
 	public ResponseDto<Boolean> updateUserStatus(
-			@RequestParam("userid") String userUuid,
+			@RequestParam("userId") String userUuid,
 			@RequestParam("status") Boolean status
 	) {
 		log.info("Received request to deactivate user");
-		String updatedStatus = status == true ? "activated" : "deactivated";
+		String updatedStatus = status ? "activated" : "deactivated";
 		return ResponseDto.success("Successfully " + updatedStatus  + " user.", userService.updateUserStatus(userUuid, status));
 	}
 

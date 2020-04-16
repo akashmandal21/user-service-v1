@@ -162,8 +162,7 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 														.stream()
 														.map(UserManagerMappingEntity::getUserId).collect(Collectors.toList());
 			
-			return userService.searchUser(userIds, null, null, null, null, null, 0, 100).getData();
-			
+			return userService.searchUser(userIds, null, null, null, null, null, null, null, 0, 100).getData();
 		}
 		
 		return Collections.emptyList();

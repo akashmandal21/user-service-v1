@@ -3,6 +3,7 @@
  */
 package com.stanzaliving.user.constants;
 
+import com.stanzaliving.core.base.enums.Department;
 import lombok.experimental.UtilityClass;
 
 /**
@@ -20,4 +21,5 @@ public class UserQueryConstants {
 	public static final String EMAIL = "email";
 	public static final String STATUS = "status";
 	public static final String USER_TYPE = "userType";
+	public static final String DEPARTMENT = "department";
 }

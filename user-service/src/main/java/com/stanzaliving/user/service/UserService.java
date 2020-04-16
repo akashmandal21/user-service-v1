@@ -4,6 +4,7 @@
 package com.stanzaliving.user.service;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
+import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
@@ -44,7 +45,7 @@ public interface UserService {
 	 * 
 	 * @return paged response of users matching search criteria
 	 */
-	PageResponse<UserProfileDto> searchUser(List<String> userIds, String mobile, String isoCode, String email, UserType userType, Boolean status, int pageNo, int limit);
+	PageResponse<UserProfileDto> searchUser(List<String> userIds, String mobile, String isoCode, String email, UserType userType, Boolean status, Department department, String name, int pageNo, int limit);
 
 	Map<String, UserProfileDto> getUserProfileIn(Map<String, String> userManagerUuidMap);
 
