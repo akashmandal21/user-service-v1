@@ -85,7 +85,7 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 			}
 
 			if(StringUtils.isNotBlank(name)){
-				List<UserEntity> userEntities = userRepository.findByUserProfile_FirstNameStartingWith(name);
+				List<UserEntity> userEntities = userRepository.searchByName(name);
 				if(CollectionUtils.isNotEmpty(userEntities)){
 					List<String> userIdList = new ArrayList<>();
 					userEntities.forEach(userEntity -> {userIdList.add(userEntity.getUuid());});
