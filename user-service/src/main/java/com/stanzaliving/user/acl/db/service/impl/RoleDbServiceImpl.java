@@ -56,7 +56,7 @@ public class RoleDbServiceImpl extends AbstractJpaServiceImpl<RoleEntity, Long, 
 		}
 
 		if (Objects.nonNull(roleDto.getDepartment())) {
-			specificationBuilder = specificationBuilder.with(QueryConstants.Role.Department, CriteriaOperation.ENUM_EQ, roleDto.getDepartment());
+			specificationBuilder = specificationBuilder.with(QueryConstants.Role.DEPARTMENT, CriteriaOperation.ENUM_EQ, roleDto.getDepartment());
 		}
 
 		if (Objects.nonNull(roleDto.getRoleName())) {

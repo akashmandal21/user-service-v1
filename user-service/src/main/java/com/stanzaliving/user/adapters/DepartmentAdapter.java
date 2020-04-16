@@ -8,6 +8,13 @@ import lombok.extern.log4j.Log4j2;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author piyush srivastava "piyush@stanzaliving.com"
+ *
+ * @date 16-Apr-2020
+ *
+ */
+
 @Log4j2
 @UtilityClass
 public class DepartmentAdapter {
