@@ -32,6 +32,7 @@ public class DepartmentController {
 	public ResponseDto<List<EnumListing>> getUserDepartment() {
 
 		log.info("Received Department listing request.");
-		return ResponseDto.success("Found Department", departmentService.getAll());
+		List<EnumListing> departmentList = departmentService.getAll();
+		return ResponseDto.success("Found " + departmentList.size() + " Department", departmentList);
 	}
 }

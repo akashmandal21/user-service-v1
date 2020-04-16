@@ -11,7 +11,6 @@ import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.EnumListing;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
-import javassist.NotFoundException;
 
 import java.util.List;
 import java.util.Map;

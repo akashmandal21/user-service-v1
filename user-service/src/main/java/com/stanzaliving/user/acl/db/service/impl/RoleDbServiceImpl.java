@@ -9,6 +9,7 @@ import com.stanzaliving.core.sqljpa.service.impl.AbstractJpaServiceImpl;
 import com.stanzaliving.core.sqljpa.specification.utils.CriteriaOperation;
 import com.stanzaliving.core.sqljpa.specification.utils.StanzaSpecificationBuilder;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
+import com.stanzaliving.user.acl.constants.QueryConstants;
 import com.stanzaliving.user.acl.db.service.RoleDbService;
 import com.stanzaliving.user.acl.entity.RoleEntity;
 import com.stanzaliving.user.acl.repository.RoleRepository;
@@ -51,15 +52,15 @@ public class RoleDbServiceImpl extends AbstractJpaServiceImpl<RoleEntity, Long, 
 		StanzaSpecificationBuilder<RoleEntity> specificationBuilder = new StanzaSpecificationBuilder<>();
 
 		if (Objects.nonNull(roleDto.getAccessLevel())) {
-			specificationBuilder = specificationBuilder.with("accessLevel", CriteriaOperation.ENUM_EQ, roleDto.getAccessLevel());
+			specificationBuilder = specificationBuilder.with(QueryConstants.Role.ACCESS_LEVEL, CriteriaOperation.ENUM_EQ, roleDto.getAccessLevel());
 		}
 
 		if (Objects.nonNull(roleDto.getDepartment())) {
-			specificationBuilder = specificationBuilder.with("department", CriteriaOperation.ENUM_EQ, roleDto.getDepartment());
+			specificationBuilder = specificationBuilder.with(QueryConstants.Role.Department, CriteriaOperation.ENUM_EQ, roleDto.getDepartment());
 		}
 
 		if (Objects.nonNull(roleDto.getRoleName())) {
-			specificationBuilder = specificationBuilder.with("roleName", CriteriaOperation.LIKE, roleDto.getRoleName());
+			specificationBuilder = specificationBuilder.with(QueryConstants.Role.ROLE_NAME, CriteriaOperation.LIKE, roleDto.getRoleName());
 		}
 
 		return getJpaRepository().findAll(specificationBuilder.build());

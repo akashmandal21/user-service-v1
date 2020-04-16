@@ -234,15 +234,6 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public List<EnumListing> getAllUserType() {
-		List<EnumListing> data = new ArrayList<>();
-		for (UserType type: UserType.values()) {
-			data.add(
-					EnumListing.builder()
-							.key(type.name())
-							.value(type.typeName)
-							.build()
-			);
-		}
-		return data;
+		return UserAdapter.getUserTypeEnumAsListing();
 	}
 }

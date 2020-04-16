@@ -9,11 +9,14 @@ import com.stanzaliving.core.user.acl.dto.AclUserProfileDTO;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleNameUrlExpandedDto;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
+import com.stanzaliving.core.user.enums.EnumListing;
+import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.entity.UserProfileEntity;
 import lombok.experimental.UtilityClass;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -155,5 +158,21 @@ public class UserAdapter {
 				.build();
 
 	}
+
+
+
+	public List<EnumListing> getUserTypeEnumAsListing() {
+		List<EnumListing> data = new ArrayList<>();
+		for (UserType type: UserType.values()) {
+			data.add(
+					EnumListing.builder()
+							.key(type.name())
+							.value(type.typeName)
+							.build()
+			);
+		}
+		return data;
+	}
+
 
 }
