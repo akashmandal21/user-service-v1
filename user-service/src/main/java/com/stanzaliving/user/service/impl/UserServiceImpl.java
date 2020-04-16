@@ -8,8 +8,6 @@ import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.base.exception.NoRecordException;
 import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.base.utils.PhoneNumberUtils;
-import com.stanzaliving.core.sqljpa.specification.utils.CriteriaOperation;
-import com.stanzaliving.core.sqljpa.specification.utils.StanzaSpecificationBuilder;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
@@ -24,7 +22,6 @@ import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.entity.UserProfileEntity;
 import com.stanzaliving.user.service.UserManagerMappingService;
 import com.stanzaliving.user.service.UserService;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -242,7 +239,7 @@ public class UserServiceImpl implements UserService {
 			data.add(
 					EnumListing.builder()
 							.key(type.name())
-							.value(type.type)
+							.value(type.typeName)
 							.build()
 			);
 		}

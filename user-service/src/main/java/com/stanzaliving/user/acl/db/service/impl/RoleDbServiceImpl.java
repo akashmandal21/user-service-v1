@@ -51,11 +51,11 @@ public class RoleDbServiceImpl extends AbstractJpaServiceImpl<RoleEntity, Long, 
 		StanzaSpecificationBuilder<RoleEntity> specificationBuilder = new StanzaSpecificationBuilder<>();
 
 		if (Objects.nonNull(roleDto.getAccessLevel())) {
-			specificationBuilder = specificationBuilder.with("accessLevel", CriteriaOperation.LIKE, roleDto.getAccessLevel());
+			specificationBuilder = specificationBuilder.with("accessLevel", CriteriaOperation.ENUM_EQ, roleDto.getAccessLevel());
 		}
 
 		if (Objects.nonNull(roleDto.getDepartment())) {
-			specificationBuilder = specificationBuilder.with("department", CriteriaOperation.LIKE, roleDto.getDepartment());
+			specificationBuilder = specificationBuilder.with("department", CriteriaOperation.ENUM_EQ, roleDto.getDepartment());
 		}
 
 		if (Objects.nonNull(roleDto.getRoleName())) {
