@@ -90,6 +90,8 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 					List<String> userIdList = new ArrayList<>();
 					userEntities.forEach(userEntity -> {userIdList.add(userEntity.getUuid());});
 					specificationBuilder.with(UserQueryConstants.UUID, CriteriaOperation.IN, userIdList);
+				} else{
+					specificationBuilder.with(UserQueryConstants.UUID, CriteriaOperation.EQ, -1);
 				}
 			}
 		}
