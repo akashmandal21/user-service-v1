@@ -30,8 +30,7 @@ public interface UserRepository extends AbstractJpaRepository<UserEntity, Long> 
 	 */
 	@Query(
 			"SELECT u FROM com.stanzaliving.user.entity.UserEntity u" +
-					" WHERE CONCAT_WS(' ', u.userProfile.firstName, u.userProfile.middleName, u.userProfile.lastName)" +
-					" LIKE :name%"
-	)
+			" WHERE CONCAT_WS(' ', u.userProfile.firstName, u.userProfile.middleName, u.userProfile.lastName)" +
+			" LIKE :name%")
 	List<UserEntity> searchByName(@Param("name") String nameStartsWith);
 }

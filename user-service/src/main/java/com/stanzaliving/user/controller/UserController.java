@@ -106,7 +106,8 @@ public class UserController {
 	public ResponseDto<List<EnumListing>> getUserType() {
 
 		log.info("Received UserType listing request.");
-		return ResponseDto.success("Found UserType", userService.getAllUserType());
+		List<EnumListing> rolesList = userService.getAllUserType();
+		return ResponseDto.success("Found " + rolesList.size() + " UserType", rolesList);
 	}
 
 

@@ -70,11 +70,11 @@ public class RoleController {
 	public ResponseDto<List<RoleDto>> filterRoles(
 			@RequestParam(name = "department", required = false) Department department,
 			@RequestParam(name = "accessLevel", required = false) AccessLevel accessLevel,
-			@RequestParam(name = "roleName", required = false) String roleName,
-			@RequestParam(name = "userType", required = false) UserType userType
+			@RequestParam(name = "roleName", required = false) String roleName
 	) {
-		log.info("Fetching roles by Department {} And Level {} And roleName And userType",department, accessLevel, roleName, userType);
-		return ResponseDto.success("Found Roles with Department: " + department + " level: " + accessLevel,  roleService.filter(roleName, department, accessLevel));
+		log.info("Fetching roles by Department {} And AccessLevel {} And roleName {}",department, accessLevel, roleName);
+		List<RoleDto> roleDtoList = roleService.filter(roleName, department, accessLevel);
+		return ResponseDto.success("Found "+ roleDtoList.size() +" Roles with Department: " + department + " AccessLevel: " + accessLevel, roleDtoList );
 	}
 
 
