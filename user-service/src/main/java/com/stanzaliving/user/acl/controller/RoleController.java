@@ -11,7 +11,6 @@ import com.stanzaliving.core.user.acl.dto.RoleDto;
 import com.stanzaliving.core.user.acl.request.dto.AddRoleAccessDto;
 import com.stanzaliving.core.user.acl.request.dto.AddRoleRequestDto;
 import com.stanzaliving.core.user.acl.request.dto.UpdateRoleAccessDto;
-import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.user.acl.service.RoleAccessService;
 import com.stanzaliving.user.acl.service.RoleService;
 import lombok.extern.log4j.Log4j2;
@@ -74,7 +73,7 @@ public class RoleController {
 	) {
 		log.info("Fetching roles by Department {} And AccessLevel {} And roleName {}",department, accessLevel, roleName);
 		List<RoleDto> roleDtoList = roleService.filter(roleName, department, accessLevel);
-		return ResponseDto.success("Found "+ roleDtoList.size() +" Roles with Department: " + department + " AccessLevel: " + accessLevel, roleDtoList );
+		return ResponseDto.success("Found "+ roleDtoList.size() +" Roles with Department: " + department + " and AccessLevel: " + accessLevel, roleDtoList );
 	}
 
 
