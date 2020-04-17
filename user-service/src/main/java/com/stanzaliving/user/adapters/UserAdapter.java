@@ -85,6 +85,7 @@ public class UserAdapter {
 				.email(userEntity.getEmail())
 				.emailVerified(userEntity.isEmailVerified())
 				.department(userEntity.getDepartment())
+				.departmentName(userEntity.getDepartment().getDepartmentName())
 				.firstName(profileEntity.getFirstName())
 				.middleName(profileEntity.getMiddleName())
 				.lastName(profileEntity.getLastName())
