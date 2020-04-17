@@ -15,6 +15,7 @@ import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.EnumListing;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
+import com.stanzaliving.core.user.request.dto.UserStatusRequestDto;
 import com.stanzaliving.user.acl.service.AclService;
 import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.service.UserService;
@@ -113,12 +114,11 @@ public class UserController {
 
 	@PostMapping("update/userStatus")
 	public ResponseDto<Boolean> updateUserStatus(
-			@RequestParam("userId") String userUuid,
-			@RequestParam("status") Boolean status
-	) {
+			@RequestBody UserStatusRequestDto requestDto
+			) {
 		log.info("Received request to deactivate user");
-		String updatedStatus = status ? "activated" : "deactivated";
-		return ResponseDto.success("Successfully " + updatedStatus  + " user.", userService.updateUserStatus(userUuid, status));
+		String updatedStatus = requestDto.getStatus() ? "activated" : "deactivated";
+		return ResponseDto.success("Successfully " + updatedStatus  + " user.", userService.updateUserStatus(requestDto.getUserId(), requestDto.getStatus()));
 	}
 
 
