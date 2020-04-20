@@ -218,7 +218,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public UserManagerAndRoleDto getUserWithManagerAndRole(String userUuid) {
-		UserProfileDto userProfile = getActiveUserByUserId(userUuid);
+		UserProfileDto userProfile = getUserProfile(userUuid);
 		if(userProfile == null){
 			throw new NoRecordException("Please provide valid userId.");
 		}

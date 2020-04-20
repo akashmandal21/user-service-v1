@@ -38,7 +38,7 @@ public class AclUserController {
     public ResponseDto<List<UserDeptLevelRoleDto>> getUserRoles(@PathVariable @NotBlank(message = "User uuid must not be blank") String userUuid) {
 
         log.info("Fetching user role with id: " + userUuid);
-        return ResponseDto.success("User roles fetched for user " + userUuid, aclUserService.getUserDeptLevelRole(userUuid));
+        return ResponseDto.success("User roles fetched for user " + userUuid, aclUserService.getActiveUserDeptLevelRole(userUuid));
 
     }
 

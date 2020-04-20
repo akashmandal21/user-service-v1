@@ -14,6 +14,8 @@ public interface AclUserService {
 
     void revokeAllRolesOfDepartment(String userUuid, Department department);
 
+    List<UserDeptLevelRoleDto> getActiveUserDeptLevelRole(String userUuid);
+
     List<UserDeptLevelRoleDto> getUserDeptLevelRole(String userUuid);
 
     void revokeAllRolesOfDepartmentOfLevel(String userUuid, Department department, AccessLevel accessLevel);
