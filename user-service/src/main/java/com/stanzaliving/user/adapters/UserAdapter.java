@@ -18,6 +18,7 @@ import lombok.experimental.UtilityClass;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author naveen
@@ -70,6 +71,9 @@ public class UserAdapter {
 	public static UserProfileDto getUserProfileDto(UserEntity userEntity) {
 
 		UserProfileEntity profileEntity = userEntity.getUserProfile();
+		if(Objects.isNull(profileEntity)){
+			return null;
+		}
 
 		return UserProfileDto.builder()
 				.uuid(userEntity.getUuid())
