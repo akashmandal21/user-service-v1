@@ -11,6 +11,7 @@ import com.stanzaliving.core.user.acl.dto.RoleDto;
 import com.stanzaliving.core.user.acl.request.dto.AddRoleAccessDto;
 import com.stanzaliving.core.user.acl.request.dto.AddRoleRequestDto;
 import com.stanzaliving.core.user.acl.request.dto.UpdateRoleAccessDto;
+import com.stanzaliving.core.user.enums.EnumListing;
 import com.stanzaliving.user.acl.service.RoleAccessService;
 import com.stanzaliving.user.acl.service.RoleService;
 import lombok.extern.log4j.Log4j2;
@@ -97,6 +98,13 @@ public class RoleController {
 	public ResponseDto<RoleAccessDto> updateRoleAccess(@RequestBody @Valid UpdateRoleAccessDto updateRoleAccessDto) {
 		log.info("Received request to update role: " + updateRoleAccessDto);
 		return ResponseDto.success("Updated Role: " + updateRoleAccessDto.getRoleAccessUuid(), roleAccessService.updateRoleAccess(updateRoleAccessDto));
+	}
+
+	@GetMapping("accesslevel/list")
+	public ResponseDto<List<EnumListing>> getAccessLevelList(){
+		log.info("Received request for retrieving access level list api.");
+		List<EnumListing> listings = roleAccessService.getAccessLevelList();
+		return ResponseDto.success("Found " + listings.size() + " Access Levels.", listings);
 	}
 
 }

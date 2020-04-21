@@ -5,6 +5,7 @@ import com.stanzaliving.core.user.acl.dto.RoleAccessDto;
 import com.stanzaliving.core.user.acl.enums.RoleAccessType;
 import com.stanzaliving.core.user.acl.request.dto.AddRoleAccessDto;
 import com.stanzaliving.core.user.acl.request.dto.UpdateRoleAccessDto;
+import com.stanzaliving.core.user.enums.EnumListing;
 import com.stanzaliving.user.acl.adapters.RoleAccessAdapter;
 import com.stanzaliving.user.acl.db.service.ApiDbService;
 import com.stanzaliving.user.acl.db.service.RoleAccessDbService;
@@ -15,6 +16,8 @@ import com.stanzaliving.user.acl.service.RoleAccessService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Log4j2
 @Service
@@ -137,5 +140,10 @@ public class RoleAccessServiceImpl implements RoleAccessService {
         if (!childRoleEntity.getAccessLevel().isLower(parentRoleEntity.getAccessLevel())) {
             throw new StanzaException("Parent Role should be at higher level than current role, parentUuid " + parentRoleEntity.getUuid() + ", childUuid " + childRoleEntity.getUuid());
         }
+    }
+
+    @Override
+    public List<EnumListing> getAccessLevelList() {
+        return RoleAccessAdapter.getAccessLevelEnumAsEnumListing();
     }
 }

@@ -3,7 +3,7 @@ package com.stanzaliving.user.service.impl;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.stanzaliving.core.base.exception.NoRecordException;
+import com.stanzaliving.core.base.exception.ApiValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -172,7 +172,7 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 	public void deleteManagerMapping(String uuid) {
 		UserManagerMappingEntity userManagerMappingEntity = userManagerMappingRepository.findFirstByUuid(uuid);
 		if (userManagerMappingEntity == null){
-			throw new NoRecordException("Manager mapping does not exist for id: " + uuid );
+			throw new ApiValidationException("Manager mapping does not exist for id: " + uuid );
 		}
 		userManagerMappingRepository.delete(userManagerMappingEntity);
 	}
