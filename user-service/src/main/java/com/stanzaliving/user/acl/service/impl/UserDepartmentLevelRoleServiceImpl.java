@@ -1,8 +1,10 @@
 package com.stanzaliving.user.acl.service.impl;
 
+import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.user.acl.db.service.UserDepartmentLevelRoleDbService;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity;
 import com.stanzaliving.user.acl.service.UserDepartmentLevelRoleService;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +41,10 @@ public class UserDepartmentLevelRoleServiceImpl implements UserDepartmentLevelRo
 
         List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityListExisting =
                 userDepartmentLevelRoleDbService.findByUserDepartmentLevelUuidAndRoleUuidInAndStatus(userDepartmentLevelUuid, rolesUuid, true);
+
+        if(CollectionUtils.isEmpty(userDepartmentLevelRoleEntityListExisting)){
+            throw new StanzaException("Roles does not belong to user");
+        }
 
         userDepartmentLevelRoleDbService.delete(userDepartmentLevelRoleEntityListExisting);
 

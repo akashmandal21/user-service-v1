@@ -67,7 +67,7 @@ public class AclUserController {
     }
 
     @PostMapping("revoke/department/level/roleList")
-    public ResponseDto<Void> revokeRolesForDepartmentOfLevel(@RequestParam @Valid UserDeptLevelRoleListDto userDeptLevelRoleListDto) {
+    public ResponseDto<Void> revokeRolesForDepartmentOfLevel(@RequestBody @Valid UserDeptLevelRoleListDto userDeptLevelRoleListDto) {
         log.info("Received request to revoke role list for user " + userDeptLevelRoleListDto);
         aclUserService.revokeRolesForDepartmentOfLevel(userDeptLevelRoleListDto);
         return ResponseDto.success("Roles Revocation successful");
