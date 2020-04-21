@@ -70,9 +70,6 @@ public class AclServiceImpl implements AclService {
 	@Override
 	public List<UserDeptLevelRoleNameUrlExpandedDto> getUserDeptLevelRoleNameUrlExpandedDtoBe(String userUuid) {
 		List<UserDeptLevelRoleNameUrlExpandedDto> userDeptLevelRoleNameUrlExpandedDtoList = getUserDeptLevelRoleNameUrlExpandedDto(userUuid);
-		for(UserDeptLevelRoleNameUrlExpandedDto userDeptLevelRoleNameUrlExpandedDto : userDeptLevelRoleNameUrlExpandedDtoList) {
-			userDeptLevelRoleNameUrlExpandedDto.setRolesList(new ArrayList<>());
-		}
 		return userDeptLevelRoleNameUrlExpandedDtoList;
 	}
 
