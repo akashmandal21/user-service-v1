@@ -26,6 +26,7 @@ public class QueryConstants {
 
 	public static class Role {
 
+		public static String ROLE_UUID = "uuid";
 		public static String ROLE_NAME = "roleName";
 		public static String DEPARTMENT = "department";
 		public static String ACCESS_LEVEL = "accessLevel";

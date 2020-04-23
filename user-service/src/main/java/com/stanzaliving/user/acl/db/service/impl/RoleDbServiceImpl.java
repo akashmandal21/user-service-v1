@@ -13,6 +13,7 @@ import com.stanzaliving.user.acl.constants.QueryConstants;
 import com.stanzaliving.user.acl.db.service.RoleDbService;
 import com.stanzaliving.user.acl.entity.RoleEntity;
 import com.stanzaliving.user.acl.repository.RoleRepository;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -51,6 +52,10 @@ public class RoleDbServiceImpl extends AbstractJpaServiceImpl<RoleEntity, Long, 
 	public List<RoleEntity> filter(RoleDto roleDto) {
 		StanzaSpecificationBuilder<RoleEntity> specificationBuilder = new StanzaSpecificationBuilder<>();
 
+		if (StringUtils.isNotBlank(roleDto.getUuid())){
+			specificationBuilder.with(QueryConstants.Role.ROLE_UUID, CriteriaOperation.LIKE, roleDto.getUuid());
+		}
+
 		if (Objects.nonNull(roleDto.getAccessLevel())) {
 			specificationBuilder = specificationBuilder.with(QueryConstants.Role.ACCESS_LEVEL, CriteriaOperation.ENUM_EQ, roleDto.getAccessLevel());
 		}
@@ -64,6 +69,11 @@ public class RoleDbServiceImpl extends AbstractJpaServiceImpl<RoleEntity, Long, 
 		}
 
 		return getJpaRepository().findAll(specificationBuilder.build());
+	}
+
+	@Override
+	public List<RoleEntity> findByUuidIn(List<String> uuid) {
+		return getJpaRepository().findByUuidIn(uuid);
 	}
 
 	@Override

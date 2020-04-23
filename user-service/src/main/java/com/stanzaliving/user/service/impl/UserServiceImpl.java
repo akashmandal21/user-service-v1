@@ -8,6 +8,7 @@ import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.base.exception.NoRecordException;
 import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.base.utils.PhoneNumberUtils;
+import com.stanzaliving.core.user.acl.dto.RoleDto;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
@@ -223,7 +224,7 @@ public class UserServiceImpl implements UserService {
 			throw new NoRecordException("Please provide valid userId.");
 		}
 		UserProfileDto managerProfile = userManagerMappingService.getManagerProfileForUser(userUuid);
-		List<UserDeptLevelRoleDto> roleDtoList = aclUserService.getUserDeptLevelRole(userUuid);
+		List<RoleDto> roleDtoList = aclUserService.getUserRoles(userUuid);
 
 		return UserManagerAndRoleDto.builder()
 				.userProfile(userProfile)

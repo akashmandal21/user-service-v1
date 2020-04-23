@@ -8,9 +8,12 @@ import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleListDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRequestDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleRequestDto;
+import com.stanzaliving.user.acl.adapters.RoleAdapter;
 import com.stanzaliving.user.acl.adapters.UserDepartmentLevelRoleAdapter;
+import com.stanzaliving.user.acl.db.service.RoleDbService;
 import com.stanzaliving.user.acl.db.service.UserDepartmentLevelDbService;
 import com.stanzaliving.user.acl.db.service.UserDepartmentLevelRoleDbService;
+import com.stanzaliving.user.acl.entity.RoleEntity;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity;
 import com.stanzaliving.user.acl.service.AclUserService;
@@ -50,6 +53,9 @@ public class AclUserServiceImpl implements AclUserService {
 
 	@Autowired
 	private RoleService roleService;
+
+	@Autowired
+	private RoleDbService roleDbService;
 
 	@Override
 	public void addRole(AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleDto) {
@@ -103,6 +109,22 @@ public class AclUserServiceImpl implements AclUserService {
 			userDeptLevelRoleDtoList.add(UserDepartmentLevelRoleAdapter.getUserDeptLevelRoleDto(userDepartmentLevelEntity, userDepartmentLevelRoleEntityList));
 		}
 		return userDeptLevelRoleDtoList;
+	}
+
+	@Override
+	public List<RoleDto> getUserRoles(String userUuid) {
+		List<RoleDto> roleDtoList = new ArrayList<>();
+		List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList;
+		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelDbService.findByUserUuidAndStatus(userUuid, true);
+		List<String> roleUuids;
+
+		for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
+			userDepartmentLevelRoleEntityList = userDepartmentLevelRoleDbService.findByUserDepartmentLevelUuidAndStatus(userDepartmentLevelEntity.getUuid(), true);
+			roleUuids = userDepartmentLevelRoleEntityList.parallelStream().map(dept -> dept.getRoleUuid()).collect(Collectors.toList());
+			List<RoleEntity> roleEntities = roleDbService.findByUuidIn(roleUuids);
+			roleDtoList.addAll(RoleAdapter.getDtoList(roleEntities));
+		}
+		return roleDtoList;
 	}
 
 

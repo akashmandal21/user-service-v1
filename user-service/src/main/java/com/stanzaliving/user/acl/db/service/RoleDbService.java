@@ -26,4 +26,6 @@ public interface RoleDbService extends AbstractJpaService<RoleEntity, Long> {
 
 	List<RoleEntity> filter(RoleDto roleDto);
 
+	List<RoleEntity> findByUuidIn(List<String> uuid);
+
 }
