@@ -42,6 +42,6 @@ public class AopConfig {
     @Before(value = "execution(* com.stanzaliving.core.base.exception.ExceptionInterceptor.*(..)) && @annotation(com.stanzaliving.core.base.annotation.SendExceptionToSlack))")
     public void sendToSlack(JoinPoint joinPoint) {
         if (enableSlackException)
-            slackNotification.sendExceptionNotificationRequest(springApplicationName,(Exception) joinPoint.getArgs()[0], slackExceptionEndUrl);
+            slackNotification.sendExceptionNotificationRequest((Exception) joinPoint.getArgs()[0], slackExceptionEndUrl);
     }
 }
