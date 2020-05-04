@@ -107,7 +107,7 @@ public class UserManagerMappingController {
 		return ResponseDto.success("Manager Mapping Found!", managerProfile);
 	}
 
-	@DeleteMapping("remove/{uuid}")
+	@PostMapping("remove/{uuid}")
 	public ResponseDto<Void> removeManager(
 			@PathVariable("uuid") String mappingUuid
 	){
