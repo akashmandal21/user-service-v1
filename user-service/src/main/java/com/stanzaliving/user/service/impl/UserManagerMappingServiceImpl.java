@@ -163,7 +163,7 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 														.stream()
 														.map(UserManagerMappingEntity::getUserId).collect(Collectors.toList());
 
-			PaginationRequest pagination = PaginationRequest.builder().pageNo(0).limit(100).build();
+			PaginationRequest pagination = PaginationRequest.builder().pageNo(1).limit(100).build();
 			UserFilterDto userFilterDto = UserFilterDto.builder().userIds(userIds).pageRequest(pagination).build();
 			return userService.searchUser(userFilterDto).getData();
 		}
