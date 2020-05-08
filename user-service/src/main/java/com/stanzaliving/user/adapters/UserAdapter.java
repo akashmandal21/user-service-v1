@@ -181,10 +181,17 @@ public class UserAdapter {
 	}
 
 	public UserContactDetailsResponseDto convertToContactResponseDto(UserEntity userEntity) {
+		UserProfileEntity userProfile = userEntity.getUserProfile();
+		String name = null;
+		if (Objects.nonNull(userProfile)) {
+			name = userProfile.getFirstName().concat(userProfile.getMiddleName()).concat(userProfile.getLastName());
+		}
+
 		return UserContactDetailsResponseDto.builder()
 				.userId(userEntity.getUuid())
 				.email(userEntity.getEmail())
 				.mobile(userEntity.getMobile())
+				.name(name)
 				.build();
 	}
 

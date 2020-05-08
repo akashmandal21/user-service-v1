@@ -217,16 +217,10 @@ public class UserServiceImpl implements UserService {
 			userUuids.addAll(userDepartmentLevelEntities.parallelStream().map(UserDepartmentLevelEntity::getUserUuid).collect(Collectors.toSet()));
 		});
 
-		Pageable pageable = getPaginationForSearchRequest(paginationRequest.getPageNo(), paginationRequest.getLimit());
-		UserFilterDto filterDto = UserFilterDto.builder()
-				.userIds(new ArrayList<>(userUuids)).build();
-
-		if (CollectionUtils.isEmpty(filterDto.getUserIds())) {
+		Page<UserEntity> userEntities = userDbService.findByUuids(new ArrayList<>(userUuids), paginationRequest.getPageNo(), paginationRequest.getLimit());
+		if (userEntities == null || CollectionUtils.isEmpty(userEntities.getContent())) {
 			return new PageResponse<>(paginationRequest.getPageNo(), 0, 0, 0, null);
 		}
-		Specification<UserEntity> specification = userDbService.getSearchQuery(filterDto);
-		Page<UserEntity> userEntities = userDbService.findAll(specification, pageable);
-
 		List<UserContactDetailsResponseDto> userResponseDtos = userEntities.getContent().parallelStream().map(UserAdapter::convertToContactResponseDto).collect(Collectors.toList());
 		return new PageResponse<>(paginationRequest.getPageNo(), userEntities.getNumberOfElements(), userEntities.getTotalPages(), userEntities.getTotalElements(), userResponseDtos);
 	}

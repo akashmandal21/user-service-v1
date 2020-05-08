@@ -8,6 +8,7 @@ import com.stanzaliving.core.sqljpa.service.AbstractJpaService;
 import com.stanzaliving.core.user.dto.UserFilterDto;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.user.entity.UserEntity;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
@@ -23,4 +24,5 @@ public interface UserDbService extends AbstractJpaService<UserEntity, Long> {
 
 	Specification<UserEntity> getSearchQuery(UserFilterDto userFilterDto);
 
+	Page<UserEntity> findByUuids(List<String> userUuids, int pageNo, int limit);
 }
