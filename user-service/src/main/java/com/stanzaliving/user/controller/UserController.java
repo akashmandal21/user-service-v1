@@ -14,6 +14,7 @@ import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserFilterDto;
 import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
+import com.stanzaliving.core.user.dto.response.UserContactDetailsResponseDto;
 import com.stanzaliving.core.user.enums.EnumListing;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
@@ -145,6 +146,20 @@ public class UserController {
 		log.info("Successfully fetched user details along with manager and role details.");
 		return ResponseDto.success("Found user Details with manager and role details.", userManagerAndRoleDto);
 	}
+
+	@GetMapping("filter/roleParams/{pageNo}/{limit}")
+	public ResponseDto<PageResponse<UserContactDetailsResponseDto>> filterByRoleData(
+			@PathVariable(name = "pageNo") @Min(value = 1, message = "Page No must be greater than 0") int pageNo,
+			@PathVariable(name = "limit") @Min(value = 1, message = "Limit must be greater than 0") int limit,
+			@RequestParam(name = "roleName") String roleName,
+			@RequestParam(name = "department", required = false) Department department
+	) {
+
+		log.info("Received user filter request with params [pageNo: {}, limit: {}, roleName: {} and department: {} ]", pageNo, limit, roleName, department);
+		PageResponse<UserContactDetailsResponseDto> userDtos = userService.filterByRoleParams(roleName, department, pageNo, limit);
+		return ResponseDto.success("Found " + userDtos.getRecords() + " users for roleParams search criteria", userDtos);
+	}
+
 
 
 }

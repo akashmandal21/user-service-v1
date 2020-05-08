@@ -4,6 +4,7 @@
 package com.stanzaliving.user.service.impl;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
+import com.stanzaliving.core.base.common.dto.PaginationRequest;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.base.exception.NoRecordException;
 import com.stanzaliving.core.base.exception.StanzaException;
@@ -15,9 +16,16 @@ import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserFilterDto;
 import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
+import com.stanzaliving.core.user.dto.response.UserContactDetailsResponseDto;
 import com.stanzaliving.core.user.enums.EnumListing;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
+import com.stanzaliving.user.acl.db.service.RoleDbService;
+import com.stanzaliving.user.acl.db.service.UserDepartmentLevelDbService;
+import com.stanzaliving.user.acl.db.service.UserDepartmentLevelRoleDbService;
+import com.stanzaliving.user.acl.entity.RoleEntity;
+import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
+import com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity;
 import com.stanzaliving.user.acl.service.AclUserService;
 import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.db.service.UserDbService;
@@ -26,19 +34,17 @@ import com.stanzaliving.user.entity.UserProfileEntity;
 import com.stanzaliving.user.service.UserManagerMappingService;
 import com.stanzaliving.user.service.UserService;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -58,6 +64,15 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private AclUserService aclUserService;
+
+	@Autowired
+	private RoleDbService roleDbService;
+
+	@Autowired
+	private UserDepartmentLevelDbService userDepartmentLevelDbService;
+
+	@Autowired
+	private UserDepartmentLevelRoleDbService userDepartmentLevelRoleDbService;
 
 
 	@Override
@@ -180,6 +195,42 @@ public class UserServiceImpl implements UserService {
 
 	}
 
+	@Override
+	public PageResponse<UserContactDetailsResponseDto> filterByRoleParams(String roleName, Department department, int pageNo, int limit) {
+		RoleDto roleDto = RoleDto.builder().roleName(roleName).department(department).build();
+		PaginationRequest paginationRequest = PaginationRequest.builder()
+				.pageNo(pageNo).limit(limit).build();
+		return filterByRoleParams(roleDto, paginationRequest);
+	}
+
+
+	@Override
+	public PageResponse<UserContactDetailsResponseDto> filterByRoleParams(RoleDto roleDto, PaginationRequest paginationRequest) {
+		List<RoleEntity> roleEntities = roleDbService.filter(roleDto);
+		Set<String> userUuids = new HashSet<>();
+
+		roleEntities.forEach(roleEntity -> {
+			String roleId = roleEntity.getUuid();
+			List<UserDepartmentLevelRoleEntity> userRoleEntities = userDepartmentLevelRoleDbService.findByRoleUuid(roleId);
+			Set<String> userDepartmentLevelUuids = userRoleEntities.parallelStream().map(UserDepartmentLevelRoleEntity::getUserDepartmentLevelUuid).collect(Collectors.toSet());
+			List<UserDepartmentLevelEntity> userDepartmentLevelEntities = userDepartmentLevelDbService.findByUuidInAndStatus(userDepartmentLevelUuids, true);
+			userUuids.addAll(userDepartmentLevelEntities.parallelStream().map(UserDepartmentLevelEntity::getUserUuid).collect(Collectors.toSet()));
+		});
+
+		Pageable pageable = getPaginationForSearchRequest(paginationRequest.getPageNo(), paginationRequest.getLimit());
+		UserFilterDto filterDto = UserFilterDto.builder()
+				.userIds(new ArrayList<>(userUuids)).build();
+
+		if (CollectionUtils.isEmpty(filterDto.getUserIds())) {
+			return new PageResponse<>(paginationRequest.getPageNo(), 0, 0, 0, null);
+		}
+		Specification<UserEntity> specification = userDbService.getSearchQuery(filterDto);
+		Page<UserEntity> userEntities = userDbService.findAll(specification, pageable);
+
+		List<UserContactDetailsResponseDto> userResponseDtos = userEntities.getContent().parallelStream().map(UserAdapter::convertToContactResponseDto).collect(Collectors.toList());
+		return new PageResponse<>(paginationRequest.getPageNo(), userEntities.getNumberOfElements(), userEntities.getTotalPages(), userEntities.getTotalElements(), userResponseDtos);
+	}
+
 
 	private Page<UserEntity> getUserPage(UserFilterDto userFilterDto) {
 
@@ -193,14 +244,10 @@ public class UserServiceImpl implements UserService {
 
 
 	private Pageable getPaginationForSearchRequest(int pageNo, int limit) {
-
-		Pageable pagination = PageRequest.of(0, 10, Direction.DESC, "createdAt");
-
-		if (pageNo > 0 && limit > 0 && limit < 1000) {
-			pagination = PageRequest.of(pageNo - 1, limit, Direction.DESC, "createdAt");
-		}
-
-		return pagination;
+		pageNo = Math.max(0, pageNo - 1);
+		limit = Math.max(1, limit);
+		limit = Math.min(limit, 1000);
+		return PageRequest.of(pageNo, limit, Direction.DESC, "createdAt");
 	}
 
 	@Override
