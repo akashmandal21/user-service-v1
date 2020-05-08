@@ -4,12 +4,14 @@
 package com.stanzaliving.user.controller;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
+import com.stanzaliving.core.base.common.dto.PaginationRequest;
 import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.base.constants.SecurityConstants;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.base.utils.CSVConverter;
 import com.stanzaliving.core.user.acl.dto.AclUserProfileDTO;
 import com.stanzaliving.core.user.dto.UserDto;
+import com.stanzaliving.core.user.dto.UserFilterDto;
 import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.EnumListing;
@@ -95,7 +97,19 @@ public class UserController {
 		log.info("Received User Search Request With Parameters [Page: " + pageNo + ", Limit: " + limit + ", Mobile: " + mobile + ", ISO: " + isoCode + ", Email: " + email + ", UserType: " + userType
 				+ ", Status: " + status + ", UserIds: {" + CSVConverter.getCSVString(userIds) + "} ]");
 
-		PageResponse<UserProfileDto> userDtos = userService.searchUser(userIds, mobile, isoCode, email, userType, status, department, name, pageNo, limit);
+		PaginationRequest paginationRequest = PaginationRequest.builder().pageNo(pageNo).limit(limit).build();
+		UserFilterDto userFilterDto = UserFilterDto.builder()
+				.userIds(userIds)
+				.mobile(mobile)
+				.isoCode(isoCode)
+				.email(email)
+				.userType(userType)
+				.status(status)
+				.department(department)
+				.name(name)
+				.pageRequest(paginationRequest)
+				.build();
+		PageResponse<UserProfileDto> userDtos = userService.searchUser(userFilterDto);
 
 		return ResponseDto.success("Found " + userDtos.getRecords() + " Users for Search Criteria", userDtos);
 	}

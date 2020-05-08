@@ -8,9 +8,11 @@ import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.base.exception.NoRecordException;
 import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.base.utils.PhoneNumberUtils;
+import com.stanzaliving.core.leadership.dto.UserFilter;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
 import com.stanzaliving.core.user.dto.UserDto;
+import com.stanzaliving.core.user.dto.UserFilterDto;
 import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.EnumListing;
@@ -164,9 +166,11 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public PageResponse<UserProfileDto> searchUser(List<String> userIds, String mobile, String isoCode, String email, UserType userType, Boolean status, Department department, String name, int pageNo, int limit) {
+	public PageResponse<UserProfileDto> searchUser(UserFilterDto userFilterDto) {
 
-		Page<UserEntity> userPage = getUserPage(userIds, mobile, isoCode, email, userType, status, department, name, pageNo, limit);
+		Page<UserEntity> userPage = getUserPage(userFilterDto);
+
+		Integer pageNo = userFilterDto.getPageRequest().getPageNo();
 
 		log.info("Found " + userPage.getNumberOfElements() + " User Records on Page: " + pageNo + " for Search Criteria");
 
@@ -177,11 +181,11 @@ public class UserServiceImpl implements UserService {
 	}
 
 
-	private Page<UserEntity> getUserPage(List<String> userIds, String mobile, String isoCode, String email, UserType userType, Boolean status, Department department, String name, int pageNo, int limit) {
+	private Page<UserEntity> getUserPage(UserFilterDto userFilterDto) {
 
-		Specification<UserEntity> specification = userDbService.getSearchQuery(userIds, mobile, isoCode, email, userType, status, department, name);
+		Specification<UserEntity> specification = userDbService.getSearchQuery(userFilterDto);
 
-		Pageable pagination = getPaginationForSearchRequest(pageNo, limit);
+		Pageable pagination = getPaginationForSearchRequest(userFilterDto.getPageRequest().getPageNo(), userFilterDto.getPageRequest().getLimit());
 
 		return userDbService.findAll(specification, pagination);
 	}

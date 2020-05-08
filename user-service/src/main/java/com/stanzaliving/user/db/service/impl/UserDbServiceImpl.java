@@ -6,6 +6,7 @@ package com.stanzaliving.user.db.service.impl;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.sqljpa.specification.utils.CriteriaOperation;
 import com.stanzaliving.core.sqljpa.specification.utils.StanzaSpecificationBuilder;
+import com.stanzaliving.core.user.dto.UserFilterDto;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.user.constants.UserQueryConstants;
 import org.apache.commons.collections.CollectionUtils;
@@ -45,47 +46,47 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 	}
 
 	@Override
-	public Specification<UserEntity> getSearchQuery(List<String> userIds, String mobile, String isoCode, String email, UserType userType, Boolean status, Department department, String name) {
+	public Specification<UserEntity> getSearchQuery(UserFilterDto userFilterDto) {
 
 		StanzaSpecificationBuilder<UserEntity> specificationBuilder = new StanzaSpecificationBuilder<>();
 
-		if (CollectionUtils.isNotEmpty(userIds)) {
+		if (CollectionUtils.isNotEmpty(userFilterDto.getUserIds())) {
 
-			specificationBuilder.with(UserQueryConstants.UUID, CriteriaOperation.IN, userIds);
+			specificationBuilder.with(UserQueryConstants.UUID, CriteriaOperation.IN, userFilterDto.getUserIds());
 
 		} else {
 
-			if (StringUtils.isNotBlank(mobile)) {
-				specificationBuilder.with(UserQueryConstants.MOBILE, CriteriaOperation.EQ, mobile);
+			if (StringUtils.isNotBlank(userFilterDto.getMobile())) {
+				specificationBuilder.with(UserQueryConstants.MOBILE, CriteriaOperation.EQ, userFilterDto.getMobile());
 
-				if (StringUtils.isNotBlank(isoCode)) {
-					specificationBuilder.with(UserQueryConstants.ISO_CODE, CriteriaOperation.EQ, isoCode);
+				if (StringUtils.isNotBlank(userFilterDto.getIsoCode())) {
+					specificationBuilder.with(UserQueryConstants.ISO_CODE, CriteriaOperation.EQ, userFilterDto.getIsoCode());
 				}
 			}
 
-			if (StringUtils.isNotBlank(email)) {
-				specificationBuilder.with(UserQueryConstants.EMAIL, CriteriaOperation.EQ, email);
+			if (StringUtils.isNotBlank(userFilterDto.getEmail())) {
+				specificationBuilder.with(UserQueryConstants.EMAIL, CriteriaOperation.EQ, userFilterDto.getEmail());
 			}
 
-			if (Objects.nonNull(userType)) {
-				specificationBuilder.with(UserQueryConstants.USER_TYPE, CriteriaOperation.ENUM_EQ, userType);
+			if (Objects.nonNull(userFilterDto.getUserType())) {
+				specificationBuilder.with(UserQueryConstants.USER_TYPE, CriteriaOperation.ENUM_EQ, userFilterDto.getUserType());
 			}
 
-			if (status != null) {
+			if (userFilterDto.getStatus() != null) {
 
-				if (status) {
+				if (userFilterDto.getStatus()) {
 					specificationBuilder.with(UserQueryConstants.STATUS, CriteriaOperation.TRUE, true);
 				} else {
 					specificationBuilder.with(UserQueryConstants.STATUS, CriteriaOperation.FALSE, false);
 				}
 			}
 
-			if(Objects.nonNull(department)){
-				specificationBuilder.with(UserQueryConstants.DEPARTMENT, CriteriaOperation.ENUM_EQ, department);
+			if(Objects.nonNull(userFilterDto.getDepartment())){
+				specificationBuilder.with(UserQueryConstants.DEPARTMENT, CriteriaOperation.ENUM_EQ, userFilterDto.getDepartment());
 			}
 
-			if(StringUtils.isNotBlank(name)){
-				List<UserEntity> userEntities = userRepository.searchByName(name);
+			if(StringUtils.isNotBlank(userFilterDto.getName())){
+				List<UserEntity> userEntities = userRepository.searchByName(userFilterDto.getName());
 				if(CollectionUtils.isNotEmpty(userEntities)){
 					List<String> userIdList = new ArrayList<>();
 					userEntities.forEach(userEntity -> {userIdList.add(userEntity.getUuid());});

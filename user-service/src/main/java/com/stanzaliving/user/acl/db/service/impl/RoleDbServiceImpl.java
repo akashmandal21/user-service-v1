@@ -72,11 +72,6 @@ public class RoleDbServiceImpl extends AbstractJpaServiceImpl<RoleEntity, Long, 
 	}
 
 	@Override
-	public List<RoleEntity> findByUuidIn(List<String> uuid) {
-		return getJpaRepository().findByUuidIn(uuid);
-	}
-
-	@Override
 	public RoleEntity findByRoleName(String roleName) {
 		return getJpaRepository().findByRoleName(roleName);
 	}
