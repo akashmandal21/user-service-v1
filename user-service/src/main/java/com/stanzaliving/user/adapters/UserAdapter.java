@@ -184,7 +184,7 @@ public class UserAdapter {
 		UserProfileEntity userProfile = userEntity.getUserProfile();
 		String name = null;
 		if (Objects.nonNull(userProfile)) {
-			name = userProfile.getFirstName().concat(userProfile.getMiddleName()).concat(userProfile.getLastName());
+			name = userProfile.getFirstName().concat(" ").concat(userProfile.getMiddleName()).concat(" ").concat(userProfile.getLastName());
 		}
 
 		return UserContactDetailsResponseDto.builder()
