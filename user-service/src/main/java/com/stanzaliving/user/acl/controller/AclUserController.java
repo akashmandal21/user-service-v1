@@ -38,7 +38,7 @@ public class AclUserController {
     public ResponseDto<List<UserDeptLevelRoleDto>> getUserRoles(@PathVariable @NotBlank(message = "User uuid must not be blank") String userUuid) {
 
         log.info("Fetching user role with id: " + userUuid);
-        return ResponseDto.success("User roles fetched for user " + userUuid, aclUserService.getUserDeptLevelRole(userUuid));
+        return ResponseDto.success("User roles fetched for user " + userUuid, aclUserService.getActiveUserDeptLevelRole(userUuid));
 
     }
 
@@ -67,7 +67,7 @@ public class AclUserController {
     }
 
     @PostMapping("revoke/department/level/roleList")
-    public ResponseDto<Void> revokeRolesForDepartmentOfLevel(@RequestParam @Valid UserDeptLevelRoleListDto userDeptLevelRoleListDto) {
+    public ResponseDto<Void> revokeRolesForDepartmentOfLevel(@RequestBody @Valid UserDeptLevelRoleListDto userDeptLevelRoleListDto) {
         log.info("Received request to revoke role list for user " + userDeptLevelRoleListDto);
         aclUserService.revokeRolesForDepartmentOfLevel(userDeptLevelRoleListDto);
         return ResponseDto.success("Roles Revocation successful");

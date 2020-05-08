@@ -4,14 +4,20 @@
 package com.stanzaliving.user.controller;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
+import com.stanzaliving.core.base.common.dto.PaginationRequest;
 import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.base.constants.SecurityConstants;
+import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.base.utils.CSVConverter;
 import com.stanzaliving.core.user.acl.dto.AclUserProfileDTO;
 import com.stanzaliving.core.user.dto.UserDto;
+import com.stanzaliving.core.user.dto.UserFilterDto;
+import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
+import com.stanzaliving.core.user.enums.EnumListing;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
+import com.stanzaliving.core.user.request.dto.UserStatusRequestDto;
 import com.stanzaliving.user.acl.service.AclService;
 import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.service.UserService;
@@ -23,6 +29,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import java.util.List;
+
 
 /**
  * @author naveen
@@ -82,14 +89,62 @@ public class UserController {
 			@RequestParam(name = "isoCode", required = false) String isoCode,
 			@RequestParam(name = "email", required = false) String email,
 			@RequestParam(name = "userType", required = false) UserType userType,
-			@RequestParam(name = "status", required = false) Boolean status) {
+			@RequestParam(name = "status", required = false) Boolean status,
+			@RequestParam(name = "department", required = false) Department department,
+			@RequestParam(name = "name", required = false) String name
+	) {
 
 		log.info("Received User Search Request With Parameters [Page: " + pageNo + ", Limit: " + limit + ", Mobile: " + mobile + ", ISO: " + isoCode + ", Email: " + email + ", UserType: " + userType
 				+ ", Status: " + status + ", UserIds: {" + CSVConverter.getCSVString(userIds) + "} ]");
 
-		PageResponse<UserProfileDto> userDtos = userService.searchUser(userIds, mobile, isoCode, email, userType, status, pageNo, limit);
+		PaginationRequest paginationRequest = PaginationRequest.builder().pageNo(pageNo).limit(limit).build();
+		UserFilterDto userFilterDto = UserFilterDto.builder()
+				.userIds(userIds)
+				.mobile(mobile)
+				.isoCode(isoCode)
+				.email(email)
+				.userType(userType)
+				.status(status)
+				.department(department)
+				.name(name)
+				.pageRequest(paginationRequest)
+				.build();
+		PageResponse<UserProfileDto> userDtos = userService.searchUser(userFilterDto);
 
 		return ResponseDto.success("Found " + userDtos.getRecords() + " Users for Search Criteria", userDtos);
 	}
+
+
+	@GetMapping("type/list")
+	public ResponseDto<List<EnumListing>> getUserType() {
+
+		log.info("Received UserType listing request.");
+		List<EnumListing> rolesList = userService.getAllUserType();
+		return ResponseDto.success("Found " + rolesList.size() + " UserType", rolesList);
+	}
+
+
+
+
+	@PostMapping("update/userStatus")
+	public ResponseDto<Boolean> updateUserStatus(
+			@RequestBody UserStatusRequestDto requestDto
+			) {
+		log.info("Received request to deactivate user");
+		String updatedStatus = requestDto.getStatus() ? "activated" : "deactivated";
+		return ResponseDto.success("Successfully " + updatedStatus  + " user.", userService.updateUserStatus(requestDto.getUserId(), requestDto.getStatus()));
+	}
+
+
+	@GetMapping("details/manager/role")
+	public ResponseDto<UserManagerAndRoleDto> getUserWithManagerAndRole(
+			@RequestParam("userId") String userUuid
+	){
+		log.info("Request received for getting user details along with manager and role details");
+		UserManagerAndRoleDto userManagerAndRoleDto = userService.getUserWithManagerAndRole(userUuid);
+		log.info("Successfully fetched user details along with manager and role details.");
+		return ResponseDto.success("Found user Details with manager and role details.", userManagerAndRoleDto);
+	}
+
 
 }

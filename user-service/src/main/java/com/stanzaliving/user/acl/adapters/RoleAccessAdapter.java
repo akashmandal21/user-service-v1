@@ -1,8 +1,14 @@
 package com.stanzaliving.user.acl.adapters;
 
+import com.stanzaliving.core.base.enums.AccessLevel;
+import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.user.acl.dto.RoleAccessDto;
+import com.stanzaliving.core.user.enums.EnumListing;
 import com.stanzaliving.user.acl.entity.RoleAccessEntity;
 import lombok.experimental.UtilityClass;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @UtilityClass
 public class RoleAccessAdapter {
@@ -21,6 +27,19 @@ public class RoleAccessAdapter {
                 .roleAccessType(roleAccessEntity.getRoleAccessType())
                 .build();
 
+    }
+
+    public List<EnumListing> getAccessLevelEnumAsEnumListing(){
+        List<EnumListing> data = new ArrayList<>();
+        for (AccessLevel accessLevel: AccessLevel.values()) {
+            data.add(
+                    EnumListing.builder()
+                            .key(accessLevel.name())
+                            .value(String.valueOf(accessLevel.getLevelNum()))
+                            .build()
+            );
+        }
+        return data;
     }
 
 }

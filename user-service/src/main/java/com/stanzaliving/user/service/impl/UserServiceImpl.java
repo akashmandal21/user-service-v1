@@ -4,23 +4,28 @@
 package com.stanzaliving.user.service.impl;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
+import com.stanzaliving.core.base.enums.Department;
+import com.stanzaliving.core.base.exception.NoRecordException;
 import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.base.utils.PhoneNumberUtils;
-import com.stanzaliving.core.sqljpa.specification.utils.CriteriaOperation;
-import com.stanzaliving.core.sqljpa.specification.utils.StanzaSpecificationBuilder;
+import com.stanzaliving.core.leadership.dto.UserFilter;
+import com.stanzaliving.core.user.acl.dto.RoleDto;
+import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
 import com.stanzaliving.core.user.dto.UserDto;
+import com.stanzaliving.core.user.dto.UserFilterDto;
+import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
+import com.stanzaliving.core.user.enums.EnumListing;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
+import com.stanzaliving.user.acl.service.AclUserService;
 import com.stanzaliving.user.adapters.UserAdapter;
-import com.stanzaliving.user.constants.UserQueryConstants;
 import com.stanzaliving.user.db.service.UserDbService;
 import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.entity.UserProfileEntity;
+import com.stanzaliving.user.service.UserManagerMappingService;
 import com.stanzaliving.user.service.UserService;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -47,6 +52,13 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private UserDbService userDbService;
+
+	@Autowired
+	private UserManagerMappingService userManagerMappingService;
+
+	@Autowired
+	private AclUserService aclUserService;
+
 
 	@Override
 	public UserProfileDto getActiveUserByUserId(String userId) {
@@ -154,9 +166,11 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public PageResponse<UserProfileDto> searchUser(List<String> userIds, String mobile, String isoCode, String email, UserType userType, Boolean status, int pageNo, int limit) {
+	public PageResponse<UserProfileDto> searchUser(UserFilterDto userFilterDto) {
 
-		Page<UserEntity> userPage = getUserPage(userIds, mobile, isoCode, email, userType, status, pageNo, limit);
+		Page<UserEntity> userPage = getUserPage(userFilterDto);
+
+		Integer pageNo = userFilterDto.getPageRequest().getPageNo();
 
 		log.info("Found " + userPage.getNumberOfElements() + " User Records on Page: " + pageNo + " for Search Criteria");
 
@@ -166,53 +180,17 @@ public class UserServiceImpl implements UserService {
 
 	}
 
-	private Page<UserEntity> getUserPage(List<String> userIds, String mobile, String isoCode, String email, UserType userType, Boolean status, int pageNo, int limit) {
 
-		Specification<UserEntity> specification = getSearchQuery(userIds, mobile, isoCode, email, userType, status);
+	private Page<UserEntity> getUserPage(UserFilterDto userFilterDto) {
 
-		Pageable pagination = getPaginationForSearchRequest(pageNo, limit);
+		Specification<UserEntity> specification = userDbService.getSearchQuery(userFilterDto);
+
+		Pageable pagination = getPaginationForSearchRequest(userFilterDto.getPageRequest().getPageNo(), userFilterDto.getPageRequest().getLimit());
 
 		return userDbService.findAll(specification, pagination);
 	}
 
-	private Specification<UserEntity> getSearchQuery(List<String> userIds, String mobile, String isoCode, String email, UserType userType, Boolean status) {
 
-		StanzaSpecificationBuilder<UserEntity> specificationBuilder = new StanzaSpecificationBuilder<>();
-
-		if (CollectionUtils.isNotEmpty(userIds)) {
-
-			specificationBuilder.with(UserQueryConstants.UUID, CriteriaOperation.IN, userIds);
-
-		} else {
-
-			if (StringUtils.isNotBlank(mobile)) {
-				specificationBuilder.with(UserQueryConstants.MOBILE, CriteriaOperation.EQ, mobile);
-
-				if (StringUtils.isNotBlank(isoCode)) {
-					specificationBuilder.with(UserQueryConstants.ISO_CODE, CriteriaOperation.EQ, isoCode);
-				}
-			}
-
-			if (StringUtils.isNotBlank(email)) {
-				specificationBuilder.with(UserQueryConstants.EMAIL, CriteriaOperation.EQ, email);
-			}
-
-			if (Objects.nonNull(userType)) {
-				specificationBuilder.with(UserQueryConstants.USER_TYPE, CriteriaOperation.ENUM_EQ, userType);
-			}
-
-			if (status != null) {
-
-				if (status) {
-					specificationBuilder.with(UserQueryConstants.STATUS, CriteriaOperation.TRUE, true);
-				} else {
-					specificationBuilder.with(UserQueryConstants.STATUS, CriteriaOperation.FALSE, false);
-				}
-			}
-		}
-
-		return specificationBuilder.build();
-	}
 
 	private Pageable getPaginationForSearchRequest(int pageNo, int limit) {
 
@@ -225,4 +203,42 @@ public class UserServiceImpl implements UserService {
 		return pagination;
 	}
 
+	@Override
+	public boolean updateUserStatus(String userId, Boolean status) {
+		UserEntity user = userDbService.findByUuidAndStatus(userId, !status);
+		if(user == null){
+			throw new StanzaException("User either does not exist or user is already in desired state.");
+		}
+		UserProfileEntity userProfile = user.getUserProfile();
+
+		if(userProfile != null){
+			userProfile.setStatus(status);
+			user.setUserProfile(userProfile);
+		}
+
+		user.setStatus(status);
+		userDbService.save(user);
+		return true;
+	}
+
+	@Override
+	public UserManagerAndRoleDto getUserWithManagerAndRole(String userUuid) {
+		UserProfileDto userProfile = getUserProfile(userUuid);
+		if(userProfile == null){
+			throw new NoRecordException("Please provide valid userId.");
+		}
+		UserProfileDto managerProfile = userManagerMappingService.getManagerProfileForUser(userUuid);
+		List<RoleDto> roleDtoList = aclUserService.getUserRoles(userUuid);
+
+		return UserManagerAndRoleDto.builder()
+				.userProfile(userProfile)
+				.manager(managerProfile)
+				.roles(roleDtoList)
+				.build();
+	}
+
+	@Override
+	public List<EnumListing> getAllUserType() {
+		return UserAdapter.getUserTypeEnumAsListing();
+	}
 }

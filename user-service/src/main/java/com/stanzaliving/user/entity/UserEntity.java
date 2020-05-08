@@ -18,7 +18,7 @@ import javax.persistence.*;
  */
 @Getter
 @Setter
-@ToString(callSuper = true)
+@ToString(callSuper = true, exclude = {"userProfile"})
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor

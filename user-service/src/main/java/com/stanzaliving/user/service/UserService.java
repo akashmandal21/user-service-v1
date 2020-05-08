@@ -4,8 +4,12 @@
 package com.stanzaliving.user.service;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
+import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.user.dto.UserDto;
+import com.stanzaliving.core.user.dto.UserFilterDto;
+import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
+import com.stanzaliving.core.user.enums.EnumListing;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 
@@ -27,22 +31,14 @@ public interface UserService {
 
 	UserProfileDto getUserProfile(String userId);
 
-	/**
-	 * Search users based on the available parameters. All parameters has to be exact match to search. All parameters are optional except pageNo and limit
-	 * 
-	 * @param userIds
-	 * @param mobile
-	 * @param isoCode
-	 * @param email
-	 * @param userType
-	 * @param status
-	 * @param pageNo
-	 * @param limit
-	 * 
-	 * @return paged response of users matching search criteria
-	 */
-	PageResponse<UserProfileDto> searchUser(List<String> userIds, String mobile, String isoCode, String email, UserType userType, Boolean status, int pageNo, int limit);
+	PageResponse<UserProfileDto> searchUser(UserFilterDto userFilterDto);
 
 	Map<String, UserProfileDto> getUserProfileIn(Map<String, String> userManagerUuidMap);
+
+	boolean updateUserStatus(String userId, Boolean status);
+
+	UserManagerAndRoleDto getUserWithManagerAndRole(String userUuid);
+
+	List<EnumListing> getAllUserType();
 
 }

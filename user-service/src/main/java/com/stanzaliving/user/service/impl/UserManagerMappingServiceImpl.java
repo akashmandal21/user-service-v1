@@ -1,12 +1,11 @@
 package com.stanzaliving.user.service.impl;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.stanzaliving.core.base.common.dto.PaginationRequest;
+import com.stanzaliving.core.base.exception.ApiValidationException;
+import com.stanzaliving.core.user.dto.UserFilterDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -163,14 +162,25 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 			List<String> userIds = userManagerMappingEntities
 														.stream()
 														.map(UserManagerMappingEntity::getUserId).collect(Collectors.toList());
-			
-			return userService.searchUser(userIds, null, null, null, null, null, 0, 100).getData();
-			
+
+			PaginationRequest pagination = PaginationRequest.builder().pageNo(1).limit(100).build();
+			UserFilterDto userFilterDto = UserFilterDto.builder().userIds(userIds).pageRequest(pagination).build();
+			return userService.searchUser(userFilterDto).getData();
 		}
 		
 		return Collections.emptyList();
 
 	}
+
+	@Override
+	public void deleteManagerMapping(String uuid) {
+		UserManagerMappingEntity userManagerMappingEntity = userManagerMappingRepository.findFirstByUuid(uuid);
+		if (userManagerMappingEntity == null){
+			throw new ApiValidationException("Manager mapping does not exist for id: " + uuid );
+		}
+		userManagerMappingRepository.delete(userManagerMappingEntity);
+	}
+
 
 	private Map<String, UserProfileDto> getUserDetails(List<UserManagerMappingEntity> userManagerMappingEntities) {
 		if(!CollectionUtils.isEmpty(userManagerMappingEntities)) {

@@ -34,7 +34,7 @@ import lombok.experimental.SuperBuilder;
  */
 @Getter
 @Setter
-@ToString
+@ToString(exclude = {"user", "address"})
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor

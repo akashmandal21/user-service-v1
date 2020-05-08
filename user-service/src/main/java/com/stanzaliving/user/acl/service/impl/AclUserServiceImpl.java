@@ -8,9 +8,12 @@ import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleListDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRequestDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleRequestDto;
+import com.stanzaliving.user.acl.adapters.RoleAdapter;
 import com.stanzaliving.user.acl.adapters.UserDepartmentLevelRoleAdapter;
+import com.stanzaliving.user.acl.db.service.RoleDbService;
 import com.stanzaliving.user.acl.db.service.UserDepartmentLevelDbService;
 import com.stanzaliving.user.acl.db.service.UserDepartmentLevelRoleDbService;
+import com.stanzaliving.user.acl.entity.RoleEntity;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity;
 import com.stanzaliving.user.acl.service.AclUserService;
@@ -33,111 +36,137 @@ import java.util.stream.Collectors;
 @Log4j2
 public class AclUserServiceImpl implements AclUserService {
 
-    @Autowired
-    private UserDepartmentLevelService userDepartmentLevelService;
+	@Autowired
+	private UserDepartmentLevelService userDepartmentLevelService;
 
-    @Autowired
-    private UserDepartmentLevelDbService userDepartmentLevelDbService;
+	@Autowired
+	private UserDepartmentLevelDbService userDepartmentLevelDbService;
 
-    @Autowired
-    private UserDepartmentLevelRoleService userDepartmentLevelRoleService;
+	@Autowired
+	private UserDepartmentLevelRoleService userDepartmentLevelRoleService;
 
-    @Autowired
-    private UserDepartmentLevelRoleDbService userDepartmentLevelRoleDbService;
+	@Autowired
+	private UserDepartmentLevelRoleDbService userDepartmentLevelRoleDbService;
 
-    @Autowired
-    private UserService userService;
+	@Autowired
+	private UserService userService;
 
-    @Autowired
-    private RoleService roleService;
-    
-    @Override
-    public void addRole(AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleDto) {
+	@Autowired
+	private RoleService roleService;
 
-        userService.assertActiveUserByUserUuid(addUserDeptLevelRoleDto.getUserUuid());
+	@Autowired
+	private RoleDbService roleDbService;
 
-        AddUserDeptLevelRequestDto addUserDeptLevelRequestDto = new AddUserDeptLevelRequestDto(addUserDeptLevelRoleDto);
+	@Override
+	public void addRole(AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleDto) {
 
-        UserDepartmentLevelEntity  userDepartmentLevelEntity = userDepartmentLevelService.add(addUserDeptLevelRequestDto);
+		userService.assertActiveUserByUserUuid(addUserDeptLevelRoleDto.getUserUuid());
 
-        List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = userDepartmentLevelRoleService.addRoles(userDepartmentLevelEntity.getUuid(), addUserDeptLevelRoleDto.getRolesUuid());
+		AddUserDeptLevelRequestDto addUserDeptLevelRequestDto = new AddUserDeptLevelRequestDto(addUserDeptLevelRoleDto);
 
-    }
+		UserDepartmentLevelEntity  userDepartmentLevelEntity = userDepartmentLevelService.add(addUserDeptLevelRequestDto);
 
-    @Override
-    public void revokeAllRolesOfDepartment(String userUuid, Department department) {
+		List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = userDepartmentLevelRoleService.addRoles(userDepartmentLevelEntity.getUuid(), addUserDeptLevelRoleDto.getRolesUuid());
 
-        userService.assertActiveUserByUserUuid(userUuid);
+	}
 
-        List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelDbService.findByUserUuidAndDepartment(userUuid, department);
-        if (CollectionUtils.isEmpty(userDepartmentLevelEntityList)) {
-            throw new StanzaException("User doesn't have any access in this department");
-        }
+	@Override
+	public void revokeAllRolesOfDepartment(String userUuid, Department department) {
 
-        for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
-            userDepartmentLevelService.delete(userDepartmentLevelEntity);
-        }
+		userService.assertActiveUserByUserUuid(userUuid);
 
-        return;
+		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelDbService.findByUserUuidAndDepartment(userUuid, department);
+		if (CollectionUtils.isEmpty(userDepartmentLevelEntityList)) {
+			throw new StanzaException("User doesn't have any access in this department");
+		}
 
-    }
+		for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
+			userDepartmentLevelService.delete(userDepartmentLevelEntity);
+		}
 
-    @Override
-    public List<UserDeptLevelRoleDto> getUserDeptLevelRole(String userUuid) {
+		return;
 
-        userService.assertActiveUserByUserUuid(userUuid);
+	}
 
-        List<UserDeptLevelRoleDto> userDeptLevelRoleDtoList = new ArrayList<>();
-        List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList;
 
-        List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelDbService.findByUserUuidAndStatus(userUuid, true);
+	@Override
+	public List<UserDeptLevelRoleDto> getActiveUserDeptLevelRole(String userUuid){
+		userService.assertActiveUserByUserUuid(userUuid);
+		return getUserDeptLevelRole(userUuid);
+	}
 
-        for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
-            userDepartmentLevelRoleEntityList = userDepartmentLevelRoleDbService.findByUserDepartmentLevelUuidAndStatus(userDepartmentLevelEntity.getUuid(), true);
-            userDeptLevelRoleDtoList.add(UserDepartmentLevelRoleAdapter.getUserDeptLevelRoleDto(userDepartmentLevelEntity, userDepartmentLevelRoleEntityList));
-        }
-        return userDeptLevelRoleDtoList;
-    }
 
-    @Override
-    public void revokeAllRolesOfDepartmentOfLevel(String userUuid, Department department, AccessLevel accessLevel) {
-        userService.assertActiveUserByUserUuid(userUuid);
+	@Override
+	public List<UserDeptLevelRoleDto> getUserDeptLevelRole(String userUuid) {
 
-        List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelDbService.findByUserUuidAndDepartmentAndAccessLevel(userUuid, department, accessLevel);
-        if (CollectionUtils.isEmpty(userDepartmentLevelEntityList)) {
-            throw new StanzaException("User doesn't have any access in this department");
-        }
+		List<UserDeptLevelRoleDto> userDeptLevelRoleDtoList = new ArrayList<>();
+		List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList;
 
-        for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
-            userDepartmentLevelService.delete(userDepartmentLevelEntity);
-        }
+		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelDbService.findByUserUuidAndStatus(userUuid, true);
 
-        return;
-    }
+		for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
+			userDepartmentLevelRoleEntityList = userDepartmentLevelRoleDbService.findByUserDepartmentLevelUuidAndStatus(userDepartmentLevelEntity.getUuid(), true);
+			userDeptLevelRoleDtoList.add(UserDepartmentLevelRoleAdapter.getUserDeptLevelRoleDto(userDepartmentLevelEntity, userDepartmentLevelRoleEntityList));
+		}
+		return userDeptLevelRoleDtoList;
+	}
 
-    @Override
-    public void revokeAccessLevelEntityForDepartmentOfLevel(AddUserDeptLevelRequestDto addUserDeptLevelRequestDto) {
+	@Override
+	public List<RoleDto> getUserRoles(String userUuid) {
+		List<RoleDto> roleDtoList = new ArrayList<>();
+		List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList;
+		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelDbService.findByUserUuidAndStatus(userUuid, true);
+		List<String> roleUuids;
 
-        userService.assertActiveUserByUserUuid(addUserDeptLevelRequestDto.getUserUuid());
+		for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
+			userDepartmentLevelRoleEntityList = userDepartmentLevelRoleDbService.findByUserDepartmentLevelUuidAndStatus(userDepartmentLevelEntity.getUuid(), true);
+			roleUuids = userDepartmentLevelRoleEntityList.parallelStream().map(UserDepartmentLevelRoleEntity::getRoleUuid).collect(Collectors.toList());
+			List<RoleEntity> roleEntities = roleDbService.findByUuidInAndStatus(roleUuids, true);
+			roleDtoList.addAll(RoleAdapter.getDtoList(roleEntities));
+		}
+		return roleDtoList;
+	}
 
-        userDepartmentLevelService.revokeAccessLevelEntityForDepartmentOfLevel(addUserDeptLevelRequestDto);
 
-    }
+	@Override
+	public void revokeAllRolesOfDepartmentOfLevel(String userUuid, Department department, AccessLevel accessLevel) {
+		userService.assertActiveUserByUserUuid(userUuid);
 
-    @Override
-    public void revokeRolesForDepartmentOfLevel(UserDeptLevelRoleListDto userDeptLevelRoleListDto) {
-        userService.assertActiveUserByUserUuid(userDeptLevelRoleListDto.getUserUuid());
+		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelDbService.findByUserUuidAndDepartmentAndAccessLevel(userUuid, department, accessLevel);
+		if (CollectionUtils.isEmpty(userDepartmentLevelEntityList)) {
+			throw new StanzaException("User doesn't have any access in this department");
+		}
 
-        UserDepartmentLevelEntity userDepartmentLevelEntity = userDepartmentLevelDbService.findByUserUuidAndDepartmentAndAccessLevelAndStatus
-                (userDeptLevelRoleListDto.getUserUuid(), userDeptLevelRoleListDto.getDepartment(), userDeptLevelRoleListDto.getAccessLevel(), true);
+		for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
+			userDepartmentLevelService.delete(userDepartmentLevelEntity);
+		}
 
-        if (null == userDepartmentLevelEntity) {
-            throw new StanzaException("Unable to revoke roles, User doesn't exist at this level in the department");
-        }
+		return;
+	}
 
-        userDepartmentLevelRoleService.revokeRoles(userDepartmentLevelEntity.getUuid(), userDeptLevelRoleListDto.getRolesUuid());
+	@Override
+	public void revokeAccessLevelEntityForDepartmentOfLevel(AddUserDeptLevelRequestDto addUserDeptLevelRequestDto) {
 
-    }
+		userService.assertActiveUserByUserUuid(addUserDeptLevelRequestDto.getUserUuid());
+
+		userDepartmentLevelService.revokeAccessLevelEntityForDepartmentOfLevel(addUserDeptLevelRequestDto);
+
+	}
+
+	@Override
+	public void revokeRolesForDepartmentOfLevel(UserDeptLevelRoleListDto userDeptLevelRoleListDto) {
+		userService.assertActiveUserByUserUuid(userDeptLevelRoleListDto.getUserUuid());
+
+		UserDepartmentLevelEntity userDepartmentLevelEntity = userDepartmentLevelDbService.findByUserUuidAndDepartmentAndAccessLevelAndStatus
+				(userDeptLevelRoleListDto.getUserUuid(), userDeptLevelRoleListDto.getDepartment(), userDeptLevelRoleListDto.getAccessLevel(), true);
+
+		if (null == userDepartmentLevelEntity) {
+			throw new StanzaException("Unable to revoke roles, User doesn't exist at this level in the department");
+		}
+
+		userDepartmentLevelRoleService.revokeRoles(userDepartmentLevelEntity.getUuid(), userDeptLevelRoleListDto.getRolesUuid());
+
+	}
 
 	@Override
 	public List<String> getUsersForRoles(Department department, String roleName, String accessLevelEntity) {

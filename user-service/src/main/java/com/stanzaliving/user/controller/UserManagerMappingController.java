@@ -11,12 +11,7 @@ import javax.validation.constraints.NotBlank;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.user.dto.UserManagerProfileRequestDto;
@@ -110,5 +105,13 @@ public class UserManagerMappingController {
 			return ResponseDto.failure("Manager Mapping Not Found");
 		
 		return ResponseDto.success("Manager Mapping Found!", managerProfile);
+	}
+
+	@PostMapping("remove/{uuid}")
+	public ResponseDto<Void> removeManager(
+			@PathVariable("uuid") String mappingUuid
+	){
+		userManagerMappingService.deleteManagerMapping(mappingUuid);
+		return ResponseDto.success("Manager removed successfully.");
 	}
 }
