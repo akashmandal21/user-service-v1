@@ -53,7 +53,7 @@ public class RoleDbServiceImpl extends AbstractJpaServiceImpl<RoleEntity, Long, 
 		StanzaSpecificationBuilder<RoleEntity> specificationBuilder = new StanzaSpecificationBuilder<>();
 
 		if (StringUtils.isNotBlank(roleDto.getUuid())){
-			specificationBuilder.with(QueryConstants.Role.ROLE_UUID, CriteriaOperation.LIKE, roleDto.getUuid());
+			specificationBuilder.with(QueryConstants.Role.ROLE_UUID, CriteriaOperation.EQ, roleDto.getUuid());
 		}
 
 		if (Objects.nonNull(roleDto.getAccessLevel())) {
