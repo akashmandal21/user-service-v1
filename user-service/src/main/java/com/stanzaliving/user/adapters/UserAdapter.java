@@ -16,6 +16,7 @@ import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.entity.UserProfileEntity;
 import lombok.experimental.UtilityClass;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -185,7 +186,16 @@ public class UserAdapter {
 		UserProfileEntity userProfile = userEntity.getUserProfile();
 		String name = null;
 		if (Objects.nonNull(userProfile)) {
-			name = userProfile.getFirstName().concat(" ").concat(userProfile.getMiddleName()).concat(" ").concat(userProfile.getLastName());
+			if (StringUtils.isNotEmpty(userProfile.getFirstName()) ) {
+				name = userProfile.getFirstName() + " ";
+			}
+			if (StringUtils.isNotEmpty(userProfile.getMiddleName()) ) {
+				name += userProfile.getMiddleName() + " ";
+			}
+			if (StringUtils.isNotEmpty(userProfile.getLastName()) ) {
+				name += userProfile.getLastName();
+			}
+			name = StringUtils.trim(name);
 		}
 
 		return UserContactDetailsResponseDto.builder()
