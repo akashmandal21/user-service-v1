@@ -25,4 +25,6 @@ public interface UserDbService extends AbstractJpaService<UserEntity, Long> {
 	Specification<UserEntity> getSearchQuery(UserFilterDto userFilterDto);
 
 	Page<UserEntity> findByUuids(List<String> userUuids, int pageNo, int limit);
+
+	List<UserEntity> findByUuids(List<String> userUuids);
 }

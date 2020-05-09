@@ -76,4 +76,9 @@ public class RoleDbServiceImpl extends AbstractJpaServiceImpl<RoleEntity, Long, 
 		return getJpaRepository().findByRoleName(roleName);
 	}
 
+	@Override
+	public List<RoleEntity> findByRoleNameAndDepartment(List<String> roleName, Department department) {
+		return getJpaRepository().findByRoleNameInAndDepartment(roleName, department);
+	}
+
 }

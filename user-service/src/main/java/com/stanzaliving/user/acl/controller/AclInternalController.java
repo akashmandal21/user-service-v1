@@ -5,6 +5,7 @@ package com.stanzaliving.user.acl.controller;
 
 import java.util.List;
 
+import com.stanzaliving.core.user.dto.response.UserContactDetailsResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,9 +29,19 @@ public class AclInternalController {
 	@GetMapping("/useridByRoleName/{department}/{roleName}/{accessLevelId}")
 	public ResponseDto<List<String>> getUserIds(@PathVariable Department department,@PathVariable String roleName,@PathVariable String accessLevelId ) {
 
-		log.info("Fetching user by {},{},{}" + department,roleName,accessLevelId);
+		log.info("Fetching user by {},{},{}", department,roleName,accessLevelId);
 
 		return ResponseDto.success("Found User", aclUserService.getUsersForRoles(department, roleName, accessLevelId));
+	}
+
+	@GetMapping("/usercontactdetails/{department}/{roleName}/{accessLevelId}")
+	public ResponseDto<List<UserContactDetailsResponseDto>> getUserContactDetails(
+			@PathVariable Department department,
+			@PathVariable String roleName,
+			@PathVariable String accessLevelId
+	) {
+		log.info("Received user contact details request by department {}, roleName {} and accessLevelId {}", department, roleName, accessLevelId);
+		return ResponseDto.success("Found contact details of users", aclUserService.getUserContactDetails(department, roleName, accessLevelId));
 	}
 
 }

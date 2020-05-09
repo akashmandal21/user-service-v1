@@ -138,4 +138,9 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 
 		return findAll(specification, getPageable(pageAndSortDto));
 	}
+
+	@Override
+	public List<UserEntity> findByUuids(List<String> userUuids) {
+		return getJpaRepository().findByUuidIn(userUuids);
+	}
 }

@@ -148,16 +148,16 @@ public class UserController {
 	}
 
 	@GetMapping("filter/roleParams/{pageNo}/{limit}")
-	public ResponseDto<PageResponse<UserContactDetailsResponseDto>> filterByRoleData(
+	public ResponseDto<List<UserContactDetailsResponseDto>> filterByRoleData(
 			@PathVariable(name = "pageNo") @Min(value = 1, message = "Page No must be greater than 0") int pageNo,
 			@PathVariable(name = "limit") @Min(value = 1, message = "Limit must be greater than 0") int limit,
-			@RequestParam(name = "roleName") String roleName,
+			@RequestParam(name = "roleName") List<String> roleNames,
 			@RequestParam(name = "department", required = false) Department department
 	) {
 
-		log.info("Received user filter request with params [pageNo: {}, limit: {}, roleName: {} and department: {} ]", pageNo, limit, roleName, department);
-		PageResponse<UserContactDetailsResponseDto> userDtos = userService.filterByRoleParams(roleName, department, pageNo, limit);
-		return ResponseDto.success("Found " + userDtos.getRecords() + " users for roleParams search criteria", userDtos);
+		log.info("Received user filter request with params [pageNo: {}, limit: {}, roleNames: {} and department: {} ]", pageNo, limit, roleNames, department);
+		List<UserContactDetailsResponseDto> userDtos = userService.filterByRoleParams(roleNames, department, pageNo, limit);
+		return ResponseDto.success("Found " + userDtos.size() + " users for roleParams search criteria", userDtos);
 	}
 
 

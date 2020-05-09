@@ -7,6 +7,7 @@ import com.stanzaliving.core.base.common.dto.PageResponse;
 import com.stanzaliving.core.base.common.dto.PaginationRequest;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
+import com.stanzaliving.core.user.acl.request.dto.RoleSearchDto;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserFilterDto;
 import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
@@ -36,11 +37,11 @@ public interface UserService {
 
 	PageResponse<UserProfileDto> searchUser(UserFilterDto userFilterDto);
 
-	PageResponse<UserContactDetailsResponseDto> filterByRoleParams(String roleName, Department department, int pageNo, int limit);
+	List<UserContactDetailsResponseDto> filterByRoleParams(List<String> roleNames, Department department, int pageNo, int limit);
 
 	Map<String, UserProfileDto> getUserProfileIn(Map<String, String> userManagerUuidMap);
 
-	PageResponse<UserContactDetailsResponseDto> filterByRoleParams(RoleDto roleDto, PaginationRequest paginationRequest);
+	List<UserContactDetailsResponseDto> filterByRoleParams(RoleSearchDto roleSearchDto, PaginationRequest paginationRequest);
 
 	boolean updateUserStatus(String userId, Boolean status);
 

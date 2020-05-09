@@ -7,6 +7,7 @@ import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleListDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRequestDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleRequestDto;
+import com.stanzaliving.core.user.dto.response.UserContactDetailsResponseDto;
 
 import java.util.List;
 
@@ -28,4 +29,6 @@ public interface AclUserService {
 	void revokeRolesForDepartmentOfLevel(UserDeptLevelRoleListDto userDeptLevelRoleListDto);
 
 	List<String> getUsersForRoles(Department department,String roleName,String accessLevelEntity);
+
+	List<UserContactDetailsResponseDto> getUserContactDetails(Department department, String roleName, String accessLevelEntity);
 }

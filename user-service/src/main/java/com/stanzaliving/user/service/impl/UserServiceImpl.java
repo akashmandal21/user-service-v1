@@ -12,6 +12,7 @@ import com.stanzaliving.core.base.utils.PhoneNumberUtils;
 import com.stanzaliving.core.leadership.dto.UserFilter;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
+import com.stanzaliving.core.user.acl.request.dto.RoleSearchDto;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserFilterDto;
 import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
@@ -196,17 +197,17 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public PageResponse<UserContactDetailsResponseDto> filterByRoleParams(String roleName, Department department, int pageNo, int limit) {
-		RoleDto roleDto = RoleDto.builder().roleName(roleName).department(department).build();
+	public List<UserContactDetailsResponseDto> filterByRoleParams(List<String> roleNames, Department department, int pageNo, int limit) {
+		RoleSearchDto roleSearchDto = RoleSearchDto.builder().roleNames(roleNames).department(department).build();
 		PaginationRequest paginationRequest = PaginationRequest.builder()
 				.pageNo(pageNo).limit(limit).build();
-		return filterByRoleParams(roleDto, paginationRequest);
+		return filterByRoleParams(roleSearchDto, paginationRequest);
 	}
 
 
 	@Override
-	public PageResponse<UserContactDetailsResponseDto> filterByRoleParams(RoleDto roleDto, PaginationRequest paginationRequest) {
-		List<RoleEntity> roleEntities = roleDbService.filter(roleDto);
+	public List<UserContactDetailsResponseDto> filterByRoleParams(RoleSearchDto roleSearchDto, PaginationRequest paginationRequest) {
+		List<RoleEntity> roleEntities = roleDbService.findByRoleNameAndDepartment(roleSearchDto.getRoleNames(), roleSearchDto.getDepartment());
 		Set<String> userUuids = new HashSet<>();
 
 		roleEntities.forEach(roleEntity -> {
@@ -219,10 +220,9 @@ public class UserServiceImpl implements UserService {
 
 		Page<UserEntity> userEntities = userDbService.findByUuids(new ArrayList<>(userUuids), paginationRequest.getPageNo(), paginationRequest.getLimit());
 		if (userEntities == null || CollectionUtils.isEmpty(userEntities.getContent())) {
-			return new PageResponse<>(paginationRequest.getPageNo(), 0, 0, 0, null);
+			return Collections.emptyList();
 		}
-		List<UserContactDetailsResponseDto> userResponseDtos = userEntities.getContent().parallelStream().map(UserAdapter::convertToContactResponseDto).collect(Collectors.toList());
-		return new PageResponse<>(paginationRequest.getPageNo(), userEntities.getNumberOfElements(), userEntities.getTotalPages(), userEntities.getTotalElements(), userResponseDtos);
+		return userEntities.getContent().parallelStream().map(UserAdapter::convertToContactResponseDto).collect(Collectors.toList());
 	}
 
 
