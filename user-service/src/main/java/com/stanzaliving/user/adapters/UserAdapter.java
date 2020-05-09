@@ -184,17 +184,11 @@ public class UserAdapter {
 
 	public UserContactDetailsResponseDto convertToContactResponseDto(UserEntity userEntity) {
 		UserProfileEntity userProfile = userEntity.getUserProfile();
-		String name = null;
+		String name = StringUtils.defaultString(null);
 		if (Objects.nonNull(userProfile)) {
-			if (StringUtils.isNotEmpty(userProfile.getFirstName()) ) {
-				name = userProfile.getFirstName() + " ";
-			}
-			if (StringUtils.isNotEmpty(userProfile.getMiddleName()) ) {
-				name += userProfile.getMiddleName() + " ";
-			}
-			if (StringUtils.isNotEmpty(userProfile.getLastName()) ) {
-				name += userProfile.getLastName();
-			}
+			name = StringUtils.defaultString(userProfile.getFirstName()) + " ";
+			name += StringUtils.defaultString(userProfile.getMiddleName()) + " ";
+			name += StringUtils.defaultString(userProfile.getLastName());
 			name = StringUtils.trim(name);
 		}
 
