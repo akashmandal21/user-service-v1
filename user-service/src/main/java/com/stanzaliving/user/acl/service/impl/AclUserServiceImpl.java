@@ -213,10 +213,17 @@ public class AclUserServiceImpl implements AclUserService {
 	@Override
 	public List<UserContactDetailsResponseDto> getUserContactDetails(Department department, String roleName, String accessLevelEntity) {
 		List<String> userUuids = getUsersForRoles(department, roleName, accessLevelEntity);
-		List<UserEntity> userEntities = userDbService.findByUuids(new ArrayList<>(userUuids));
-		if (userEntities == null || CollectionUtils.isEmpty(userEntities)) {
+
+		if (CollectionUtils.isEmpty(userUuids)) {
 			return Collections.emptyList();
 		}
+
+		List<UserEntity> userEntities = userDbService.findByUuidInAndStatus(userUuids, true);
+
+		if (CollectionUtils.isEmpty(userEntities)) {
+			return Collections.emptyList();
+		}
+
 		return userEntities.parallelStream().map(UserAdapter::convertToContactResponseDto).collect(Collectors.toList());
 	}
 }

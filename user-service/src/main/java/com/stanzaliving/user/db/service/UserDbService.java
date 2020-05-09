@@ -22,6 +22,4 @@ public interface UserDbService extends AbstractJpaService<UserEntity, Long> {
 	UserEntity getUserForMobile(String mobile, String isoCode);
 
 	Specification<UserEntity> getSearchQuery(UserFilterDto userFilterDto);
-
-	List<UserEntity> findByUuids(List<String> userUuids);
 }
