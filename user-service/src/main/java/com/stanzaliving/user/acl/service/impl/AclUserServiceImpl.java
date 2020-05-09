@@ -8,6 +8,7 @@ import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleListDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRequestDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleRequestDto;
+import com.stanzaliving.core.user.dto.response.UserContactDetailsResponseDto;
 import com.stanzaliving.user.acl.adapters.RoleAdapter;
 import com.stanzaliving.user.acl.adapters.UserDepartmentLevelRoleAdapter;
 import com.stanzaliving.user.acl.db.service.RoleDbService;
@@ -20,16 +21,17 @@ import com.stanzaliving.user.acl.service.AclUserService;
 import com.stanzaliving.user.acl.service.RoleService;
 import com.stanzaliving.user.acl.service.UserDepartmentLevelRoleService;
 import com.stanzaliving.user.acl.service.UserDepartmentLevelService;
+import com.stanzaliving.user.adapters.UserAdapter;
+import com.stanzaliving.user.db.service.UserDbService;
+import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.service.UserService;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,6 +58,9 @@ public class AclUserServiceImpl implements AclUserService {
 
 	@Autowired
 	private RoleDbService roleDbService;
+
+	@Autowired
+	private UserDbService userDbService;
 
 	@Override
 	public void addRole(AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleDto) {
@@ -185,14 +190,13 @@ public class AclUserServiceImpl implements AclUserService {
 				
 				List<String> uuids = departmentLevelRoleEntities.stream().map(UserDepartmentLevelRoleEntity::getUserDepartmentLevelUuid).collect(Collectors.toList());
 				
-				List<UserDepartmentLevelEntity> departmentLevelEntities = userDepartmentLevelDbService.findByUuidIn(uuids);
+				List<UserDepartmentLevelEntity> departmentLevelEntities = userDepartmentLevelDbService.findByUuidInAndAccessLevel(uuids, roleDto.getAccessLevel());
 				
 				if(CollectionUtils.isNotEmpty(departmentLevelEntities)) {
-					 
-					
+
 					departmentLevelEntities.forEach(entity->{
 						
-						List<String> accessLevelUuids = Arrays.asList(entity.getCsvAccessLevelEntityUuid().split(","));
+						Set<String> accessLevelUuids = new HashSet<>(Arrays.asList((entity.getCsvAccessLevelEntityUuid().split(","))));
 						
 						if(accessLevelUuids.contains(accessLevelEntity)) {
 							userIds.add(entity.getUserUuid());
@@ -204,5 +208,15 @@ public class AclUserServiceImpl implements AclUserService {
 		}
 		
 		return userIds;
+	}
+
+	@Override
+	public List<UserContactDetailsResponseDto> getUserContactDetails(Department department, String roleName, String accessLevelEntity) {
+		List<String> userUuids = getUsersForRoles(department, roleName, accessLevelEntity);
+		List<UserEntity> userEntities = userDbService.findByUuids(new ArrayList<>(userUuids));
+		if (userEntities == null || CollectionUtils.isEmpty(userEntities)) {
+			return Collections.emptyList();
+		}
+		return userEntities.parallelStream().map(UserAdapter::convertToContactResponseDto).collect(Collectors.toList());
 	}
 }

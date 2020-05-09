@@ -9,6 +9,7 @@ import com.stanzaliving.core.user.acl.dto.AclUserProfileDTO;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleNameUrlExpandedDto;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
+import com.stanzaliving.core.user.dto.response.UserContactDetailsResponseDto;
 import com.stanzaliving.core.user.enums.EnumListing;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
@@ -179,5 +180,20 @@ public class UserAdapter {
 		return data;
 	}
 
+
+	public UserContactDetailsResponseDto convertToContactResponseDto(UserEntity userEntity) {
+		UserProfileEntity userProfile = userEntity.getUserProfile();
+		String name = null;
+		if (Objects.nonNull(userProfile)) {
+			name = userProfile.getFirstName().concat(" ").concat(userProfile.getMiddleName()).concat(" ").concat(userProfile.getLastName());
+		}
+
+		return UserContactDetailsResponseDto.builder()
+				.userId(userEntity.getUuid())
+				.email(userEntity.getEmail())
+				.mobile(userEntity.getMobile())
+				.name(name)
+				.build();
+	}
 
 }

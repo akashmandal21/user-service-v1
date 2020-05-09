@@ -146,5 +146,4 @@ public class UserController {
 		return ResponseDto.success("Found user Details with manager and role details.", userManagerAndRoleDto);
 	}
 
-
 }

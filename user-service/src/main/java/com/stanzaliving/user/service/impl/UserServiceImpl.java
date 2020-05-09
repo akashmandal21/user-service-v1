@@ -4,19 +4,15 @@
 package com.stanzaliving.user.service.impl;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
-import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.base.exception.NoRecordException;
 import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.base.utils.PhoneNumberUtils;
-import com.stanzaliving.core.leadership.dto.UserFilter;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
-import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserFilterDto;
 import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.EnumListing;
-import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.user.acl.service.AclUserService;
 import com.stanzaliving.user.adapters.UserAdapter;
