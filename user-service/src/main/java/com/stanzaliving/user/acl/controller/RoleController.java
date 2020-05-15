@@ -12,6 +12,7 @@ import com.stanzaliving.core.user.acl.request.dto.AddRoleAccessDto;
 import com.stanzaliving.core.user.acl.request.dto.AddRoleRequestDto;
 import com.stanzaliving.core.user.acl.request.dto.UpdateRoleAccessDto;
 import com.stanzaliving.core.user.enums.EnumListing;
+import com.stanzaliving.user.acl.adapters.RoleAccessAdapter;
 import com.stanzaliving.user.acl.service.RoleAccessService;
 import com.stanzaliving.user.acl.service.RoleService;
 import lombok.extern.log4j.Log4j2;
@@ -34,10 +35,10 @@ import java.util.List;
 public class RoleController {
 
 	@Autowired
-	RoleService roleService;
+	private RoleService roleService;
 
 	@Autowired
-	RoleAccessService roleAccessService;
+	private RoleAccessService roleAccessService;
 
 	@PostMapping("add")
 	public ResponseDto<RoleDto> addRole(@RequestBody @Valid AddRoleRequestDto addRoleRequestDto) {
@@ -58,32 +59,28 @@ public class RoleController {
 	@GetMapping("getRoles")
 	public ResponseDto<List<RoleDto>> getRoleByDepartmentAndLevel(
 			@RequestParam(name = "department") Department department,
-			@RequestParam(name = "accessLevel") AccessLevel accessLevel
-	) {
-		log.info("Fetching roles by Department {} And Level {} ",department, accessLevel);
+			@RequestParam(name = "accessLevel") AccessLevel accessLevel) {
+		log.info("Fetching roles by Department {} And Level {} ", department, accessLevel);
 
-		return ResponseDto.success("Found Role with Department: " + department + " level: " + accessLevel,  roleService.findByDepartmentAndAccessLevel(department, accessLevel));
+		return ResponseDto.success("Found Role with Department: " + department + " level: " + accessLevel, roleService.findByDepartmentAndAccessLevel(department, accessLevel));
 	}
-
 
 	@GetMapping("list")
 	public ResponseDto<List<RoleDto>> filterRoles(
 			@RequestParam(name = "department", required = false) Department department,
 			@RequestParam(name = "accessLevel", required = false) AccessLevel accessLevel,
-			@RequestParam(name = "roleName", required = false) String roleName
-	) {
-		log.info("Fetching roles by Department {} And AccessLevel {} And roleName {}",department, accessLevel, roleName);
+			@RequestParam(name = "roleName", required = false) String roleName) {
+		log.info("Fetching roles by Department {} And AccessLevel {} And roleName {}", department, accessLevel, roleName);
 		List<RoleDto> roleDtoList = roleService.filter(roleName, department, accessLevel);
-		return ResponseDto.success("Found "+ roleDtoList.size() +" Roles with Department: " + department + " and AccessLevel: " + accessLevel, roleDtoList );
+		return ResponseDto.success("Found " + roleDtoList.size() + " Roles with Department: " + department + " and AccessLevel: " + accessLevel, roleDtoList);
 	}
-
 
 	@PostMapping("addRoleAccess")
 	public ResponseDto<RoleAccessDto> addRoleAccess(@RequestBody @Valid AddRoleAccessDto addRoleAccessDto) {
 
 		log.info("Received request for role assignment : " + addRoleAccessDto);
 
-		return ResponseDto.success("Added role access successfully",  roleAccessService.addRoleAccess(addRoleAccessDto));
+		return ResponseDto.success("Added role access successfully", roleAccessService.addRoleAccess(addRoleAccessDto));
 
 	}
 
@@ -101,10 +98,9 @@ public class RoleController {
 	}
 
 	@GetMapping("accesslevel/list")
-	public ResponseDto<List<EnumListing>> getAccessLevelList(){
+	public ResponseDto<List<EnumListing<AccessLevel>>> getAccessLevelList() {
 		log.info("Received request for retrieving access level list api.");
-		List<EnumListing> listings = roleAccessService.getAccessLevelList();
-		return ResponseDto.success("Found " + listings.size() + " Access Levels.", listings);
+		return ResponseDto.success("Found Access Levels", RoleAccessAdapter.getAccessLevelEnumAsEnumListing());
 	}
 
 }

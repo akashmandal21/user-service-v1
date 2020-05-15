@@ -3,14 +3,11 @@
  */
 package com.stanzaliving.user.db.service;
 
-import com.stanzaliving.core.base.enums.Department;
-import com.stanzaliving.core.sqljpa.service.AbstractJpaService;
-import com.stanzaliving.core.user.dto.UserFilterDto;
-import com.stanzaliving.core.user.enums.UserType;
-import com.stanzaliving.user.entity.UserEntity;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.util.List;
+import com.stanzaliving.core.sqljpa.service.AbstractJpaService;
+import com.stanzaliving.core.user.dto.UserFilterDto;
+import com.stanzaliving.user.entity.UserEntity;
 
 /**
  * @author naveen

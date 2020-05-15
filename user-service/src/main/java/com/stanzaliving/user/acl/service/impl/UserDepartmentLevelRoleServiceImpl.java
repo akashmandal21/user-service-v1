@@ -17,38 +17,38 @@ import java.util.stream.Collectors;
 @Service
 public class UserDepartmentLevelRoleServiceImpl implements UserDepartmentLevelRoleService {
 
-    @Autowired
-    UserDepartmentLevelRoleDbService userDepartmentLevelRoleDbService;
+	@Autowired
+	private UserDepartmentLevelRoleDbService userDepartmentLevelRoleDbService;
 
-    @Override
-    public List<UserDepartmentLevelRoleEntity> addRoles(String userDepartmentLevelUuid, List<String> rolesUuid) {
+	@Override
+	public List<UserDepartmentLevelRoleEntity> addRoles(String userDepartmentLevelUuid, List<String> rolesUuid) {
 
-        List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityListExisting =
-                userDepartmentLevelRoleDbService.findByUserDepartmentLevelUuidAndStatus(userDepartmentLevelUuid, true);
+		List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityListExisting =
+				userDepartmentLevelRoleDbService.findByUserDepartmentLevelUuidAndStatus(userDepartmentLevelUuid, true);
 
-        List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityListNew = rolesUuid.stream()
-                .map(roleUuid -> new UserDepartmentLevelRoleEntity(userDepartmentLevelUuid, roleUuid)).collect(Collectors.toList());
+		List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityListNew =
+				rolesUuid.stream()
+						.map(roleUuid -> new UserDepartmentLevelRoleEntity(userDepartmentLevelUuid, roleUuid)).collect(Collectors.toList());
 
-        TreeSet<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityTreeSet = new TreeSet<>(Comparator.comparing(UserDepartmentLevelRoleEntity::getRoleUuid));
-        userDepartmentLevelRoleEntityTreeSet.addAll(userDepartmentLevelRoleEntityListExisting);
-        userDepartmentLevelRoleEntityTreeSet.addAll(userDepartmentLevelRoleEntityListNew);
-        return userDepartmentLevelRoleDbService.save(new ArrayList<>(userDepartmentLevelRoleEntityTreeSet));
+		TreeSet<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityTreeSet = new TreeSet<>(Comparator.comparing(UserDepartmentLevelRoleEntity::getRoleUuid));
+		userDepartmentLevelRoleEntityTreeSet.addAll(userDepartmentLevelRoleEntityListExisting);
+		userDepartmentLevelRoleEntityTreeSet.addAll(userDepartmentLevelRoleEntityListNew);
+		return userDepartmentLevelRoleDbService.save(new ArrayList<>(userDepartmentLevelRoleEntityTreeSet));
 
-    }
+	}
 
-    @Override
-    public void revokeRoles(String userDepartmentLevelUuid, List<String> rolesUuid) {
+	@Override
+	public void revokeRoles(String userDepartmentLevelUuid, List<String> rolesUuid) {
 
-        List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityListExisting =
-                userDepartmentLevelRoleDbService.findByUserDepartmentLevelUuidAndRoleUuidInAndStatus(userDepartmentLevelUuid, rolesUuid, true);
+		List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityListExisting =
+				userDepartmentLevelRoleDbService.findByUserDepartmentLevelUuidAndRoleUuidInAndStatus(userDepartmentLevelUuid, rolesUuid, true);
 
-        if(CollectionUtils.isEmpty(userDepartmentLevelRoleEntityListExisting)){
-            throw new StanzaException("Roles does not belong to user");
-        }
+		if (CollectionUtils.isEmpty(userDepartmentLevelRoleEntityListExisting)) {
+			throw new StanzaException("Roles does not belong to user");
+		}
 
-        userDepartmentLevelRoleDbService.delete(userDepartmentLevelRoleEntityListExisting);
+		userDepartmentLevelRoleDbService.delete(userDepartmentLevelRoleEntityListExisting);
 
-    }
-
+	}
 
 }
