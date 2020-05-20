@@ -6,12 +6,7 @@ import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.user.service.UserService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import javax.validation.constraints.NotBlank;
+import org.springframework.web.bind.annotation.*;
 
 @Log4j2
 @RestController
@@ -21,12 +16,11 @@ public class InternalController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("details")
-    public ResponseDto<UserProfileDto> getUser(
-            @RequestAttribute(name = SecurityConstants.USER_ID) @NotBlank(message = "User Id is mandatory to get user") String userId) {
+    @GetMapping("details/{userUuid}")
+    public ResponseDto<UserProfileDto> getUser(@PathVariable String userUuid) {
 
-        log.info("Fetching User with UserId: " + userId);
+        log.info("Fetching User with userUuid: " + userUuid);
 
-        return ResponseDto.success("Found User for User Id", userService.getActiveUserByUserId(userId));
+        return ResponseDto.success("Found User for userUuid", userService.getActiveUserByUserId(userUuid));
     }
 }
