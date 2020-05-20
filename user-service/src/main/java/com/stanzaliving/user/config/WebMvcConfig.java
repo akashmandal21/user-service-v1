@@ -40,8 +40,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 						"/search/**",
 						"/mapping/**",
 						"/usermanagermapping/**",
-						"/managerprofiles/**",
-						"/details/**")
+						"/managerprofiles/**")
 				.excludePathPatterns(
 						"/internal/**",
 						"/pingMe",
