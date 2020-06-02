@@ -230,4 +230,12 @@ public class UserServiceImpl implements UserService {
 				.build();
 	}
 
+	@Override
+	public List<UserProfileDto> getAllUsers() {
+
+		List<UserEntity> userEntities = userDbService.findAll();
+
+		return UserAdapter.getUserProfileDtos(userEntities);
+	}
+
 }

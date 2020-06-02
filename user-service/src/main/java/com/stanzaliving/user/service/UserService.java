@@ -3,6 +3,7 @@
  */
 package com.stanzaliving.user.service;
 
+import java.util.List;
 import java.util.Map;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
@@ -34,5 +35,7 @@ public interface UserService {
 	boolean updateUserStatus(String userId, Boolean status);
 
 	UserManagerAndRoleDto getUserWithManagerAndRole(String userUuid);
+
+	List<UserProfileDto> getAllUsers();
 
 }

@@ -16,11 +16,14 @@ import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.entity.UserProfileEntity;
 import lombok.experimental.UtilityClass;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author naveen
@@ -30,7 +33,7 @@ import java.util.Objects;
 @UtilityClass
 public class UserAdapter {
 
-	public static UserDto getUserDto(UserEntity userEntity) {
+	public UserDto getUserDto(UserEntity userEntity) {
 
 		return UserDto.builder()
 				.uuid(userEntity.getUuid())
@@ -50,7 +53,7 @@ public class UserAdapter {
 				.build();
 	}
 
-	public static UserProfileEntity getUserProfileEntity(AddUserRequestDto addUserRequestDto) {
+	public UserProfileEntity getUserProfileEntity(AddUserRequestDto addUserRequestDto) {
 
 		return UserProfileEntity.builder()
 				.firstName(addUserRequestDto.getFirstName())
@@ -70,7 +73,16 @@ public class UserAdapter {
 				.build();
 	}
 
-	public static UserProfileDto getUserProfileDto(UserEntity userEntity) {
+	public List<UserProfileDto> getUserProfileDtos(List<UserEntity> userEntities) {
+
+		if (CollectionUtils.isEmpty(userEntities)) {
+			return new ArrayList<>();
+		}
+
+		return userEntities.stream().map(UserAdapter::getUserProfileDto).collect(Collectors.toList());
+	}
+
+	public UserProfileDto getUserProfileDto(UserEntity userEntity) {
 
 		UserProfileEntity profileEntity = userEntity.getUserProfile();
 		if (Objects.isNull(profileEntity)) {
@@ -109,7 +121,7 @@ public class UserAdapter {
 				.build();
 	}
 
-	public static AclUserDto getAclUserDto(UserProfileDto userDto, List<UserDeptLevelRoleNameUrlExpandedDto> acl) {
+	public AclUserDto getAclUserDto(UserProfileDto userDto, List<UserDeptLevelRoleNameUrlExpandedDto> acl) {
 
 		return AclUserDto.builder()
 				.uuid(userDto.getUuid())
@@ -131,7 +143,7 @@ public class UserAdapter {
 				.build();
 	}
 
-	public static AclUserProfileDTO getAclUserProfileDTO(UserProfileDto userProfileDto, List<UserDeptLevelRoleNameUrlExpandedDto> acl) {
+	public AclUserProfileDTO getAclUserProfileDTO(UserProfileDto userProfileDto, List<UserDeptLevelRoleNameUrlExpandedDto> acl) {
 
 		return AclUserProfileDTO.builder()
 				.uuid(userProfileDto.getUuid())
