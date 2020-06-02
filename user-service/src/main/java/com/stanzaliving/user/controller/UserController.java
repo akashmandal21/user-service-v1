@@ -3,6 +3,22 @@
  */
 package com.stanzaliving.user.controller;
 
+import java.util.List;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.stanzaliving.core.base.common.dto.PageResponse;
 import com.stanzaliving.core.base.common.dto.PaginationRequest;
 import com.stanzaliving.core.base.common.dto.ResponseDto;
@@ -21,15 +37,8 @@ import com.stanzaliving.core.user.request.dto.UserStatusRequestDto;
 import com.stanzaliving.user.acl.service.AclService;
 import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.service.UserService;
+
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import java.util.List;
-
 
 /**
  * @author naveen
@@ -42,15 +51,10 @@ import java.util.List;
 public class UserController {
 
 	@Autowired
-	private UserService userService;
+	private AclService aclService;
 
 	@Autowired
-	AclService aclService;
-
-	@GetMapping("pingMe")
-	public ResponseDto<String> pingMe() {
-		return ResponseDto.success("I am working");
-	}
+	private UserService userService;
 
 	@GetMapping("details")
 	public ResponseDto<UserProfileDto> getUser(
@@ -91,8 +95,7 @@ public class UserController {
 			@RequestParam(name = "userType", required = false) UserType userType,
 			@RequestParam(name = "status", required = false) Boolean status,
 			@RequestParam(name = "department", required = false) Department department,
-			@RequestParam(name = "name", required = false) String name
-	) {
+			@RequestParam(name = "name", required = false) String name) {
 
 		log.info("Received User Search Request With Parameters [Page: " + pageNo + ", Limit: " + limit + ", Mobile: " + mobile + ", ISO: " + isoCode + ", Email: " + email + ", UserType: " + userType
 				+ ", Status: " + status + ", UserIds: {" + CSVConverter.getCSVString(userIds) + "} ]");
@@ -114,37 +117,30 @@ public class UserController {
 		return ResponseDto.success("Found " + userDtos.getRecords() + " Users for Search Criteria", userDtos);
 	}
 
-
 	@GetMapping("type/list")
-	public ResponseDto<List<EnumListing>> getUserType() {
+	public ResponseDto<List<EnumListing<UserType>>> getUserType() {
 
-		log.info("Received UserType listing request.");
-		List<EnumListing> rolesList = userService.getAllUserType();
-		return ResponseDto.success("Found " + rolesList.size() + " UserType", rolesList);
+		log.info("Received UserType listing request");
+		return ResponseDto.success("Found UserType List", UserAdapter.getUserTypeEnumAsListing());
 	}
-
-
-
 
 	@PostMapping("update/userStatus")
-	public ResponseDto<Boolean> updateUserStatus(
-			@RequestBody UserStatusRequestDto requestDto
-			) {
+	public ResponseDto<Boolean> updateUserStatus(@RequestBody UserStatusRequestDto requestDto) {
+
 		log.info("Received request to deactivate user");
 		String updatedStatus = requestDto.getStatus() ? "activated" : "deactivated";
-		return ResponseDto.success("Successfully " + updatedStatus  + " user.", userService.updateUserStatus(requestDto.getUserId(), requestDto.getStatus()));
+
+		return ResponseDto.success("Successfully " + updatedStatus + " user.", userService.updateUserStatus(requestDto.getUserId(), requestDto.getStatus()));
 	}
 
-
 	@GetMapping("details/manager/role")
-	public ResponseDto<UserManagerAndRoleDto> getUserWithManagerAndRole(
-			@RequestParam("userId") String userUuid
-	){
+	public ResponseDto<UserManagerAndRoleDto> getUserWithManagerAndRole(@RequestParam("userId") String userUuid) {
+
 		log.info("Request received for getting user details along with manager and role details");
 		UserManagerAndRoleDto userManagerAndRoleDto = userService.getUserWithManagerAndRole(userUuid);
+
 		log.info("Successfully fetched user details along with manager and role details.");
 		return ResponseDto.success("Found user Details with manager and role details.", userManagerAndRoleDto);
 	}
-
 
 }

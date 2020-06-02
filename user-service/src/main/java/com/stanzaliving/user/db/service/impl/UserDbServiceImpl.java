@@ -3,12 +3,10 @@
  */
 package com.stanzaliving.user.db.service.impl;
 
-import com.stanzaliving.core.base.enums.Department;
-import com.stanzaliving.core.sqljpa.specification.utils.CriteriaOperation;
-import com.stanzaliving.core.sqljpa.specification.utils.StanzaSpecificationBuilder;
-import com.stanzaliving.core.user.dto.UserFilterDto;
-import com.stanzaliving.core.user.enums.UserType;
-import com.stanzaliving.user.constants.UserQueryConstants;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,13 +14,13 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.stanzaliving.core.sqljpa.service.impl.AbstractJpaServiceImpl;
+import com.stanzaliving.core.sqljpa.specification.utils.CriteriaOperation;
+import com.stanzaliving.core.sqljpa.specification.utils.StanzaSpecificationBuilder;
+import com.stanzaliving.core.user.dto.UserFilterDto;
+import com.stanzaliving.user.constants.UserQueryConstants;
 import com.stanzaliving.user.db.service.UserDbService;
 import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.repository.UserRepository;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * @author naveen
@@ -81,17 +79,19 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 				}
 			}
 
-			if(Objects.nonNull(userFilterDto.getDepartment())){
+			if (Objects.nonNull(userFilterDto.getDepartment())) {
 				specificationBuilder.with(UserQueryConstants.DEPARTMENT, CriteriaOperation.ENUM_EQ, userFilterDto.getDepartment());
 			}
 
-			if(StringUtils.isNotBlank(userFilterDto.getName())){
+			if (StringUtils.isNotBlank(userFilterDto.getName())) {
 				List<UserEntity> userEntities = userRepository.searchByName(userFilterDto.getName());
-				if(CollectionUtils.isNotEmpty(userEntities)){
+				if (CollectionUtils.isNotEmpty(userEntities)) {
 					List<String> userIdList = new ArrayList<>();
-					userEntities.forEach(userEntity -> {userIdList.add(userEntity.getUuid());});
+					userEntities.forEach(userEntity -> {
+						userIdList.add(userEntity.getUuid());
+					});
 					specificationBuilder.with(UserQueryConstants.UUID, CriteriaOperation.IN, userIdList);
-				} else{
+				} else {
 					specificationBuilder.with(UserQueryConstants.UUID, CriteriaOperation.EQ, -1);
 				}
 			}

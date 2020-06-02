@@ -9,12 +9,14 @@ import com.stanzaliving.core.user.acl.dto.AclUserProfileDTO;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleNameUrlExpandedDto;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
+import com.stanzaliving.core.user.dto.response.UserContactDetailsResponseDto;
 import com.stanzaliving.core.user.enums.EnumListing;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.entity.UserProfileEntity;
 import lombok.experimental.UtilityClass;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +46,7 @@ public class UserAdapter {
 				.email(userEntity.getEmail())
 				.emailVerified(userEntity.isEmailVerified())
 				.department(userEntity.getDepartment())
-				.departmentName(userEntity.getDepartment().departmentName)
+				.departmentName(userEntity.getDepartment().getDepartmentName())
 				.build();
 	}
 
@@ -71,7 +73,7 @@ public class UserAdapter {
 	public static UserProfileDto getUserProfileDto(UserEntity userEntity) {
 
 		UserProfileEntity profileEntity = userEntity.getUserProfile();
-		if(Objects.isNull(profileEntity)){
+		if (Objects.isNull(profileEntity)) {
 			return null;
 		}
 
@@ -108,7 +110,7 @@ public class UserAdapter {
 	}
 
 	public static AclUserDto getAclUserDto(UserProfileDto userDto, List<UserDeptLevelRoleNameUrlExpandedDto> acl) {
-		
+
 		return AclUserDto.builder()
 				.uuid(userDto.getUuid())
 				.createdAt(userDto.getCreatedAt())
@@ -164,20 +166,35 @@ public class UserAdapter {
 
 	}
 
+	public List<EnumListing<UserType>> getUserTypeEnumAsListing() {
+		List<EnumListing<UserType>> data = new ArrayList<>();
 
-
-	public List<EnumListing> getUserTypeEnumAsListing() {
-		List<EnumListing> data = new ArrayList<>();
-		for (UserType type: UserType.values()) {
-			data.add(
-					EnumListing.builder()
-							.key(type.name())
-							.value(type.typeName)
-							.build()
-			);
+		for (UserType type : UserType.values()) {
+			data.add(EnumListing.of(type, type.getTypeName()));
 		}
+
 		return data;
 	}
 
+	public UserContactDetailsResponseDto convertToContactResponseDto(UserEntity userEntity) {
+
+		UserProfileEntity userProfile = userEntity.getUserProfile();
+
+		String name = StringUtils.defaultString(null);
+
+		if (Objects.nonNull(userProfile)) {
+			name = StringUtils.defaultString(userProfile.getFirstName()) + " ";
+			name += StringUtils.defaultString(userProfile.getMiddleName()) + " ";
+			name += StringUtils.defaultString(userProfile.getLastName());
+			name = StringUtils.trim(name);
+		}
+
+		return UserContactDetailsResponseDto.builder()
+				.userId(userEntity.getUuid())
+				.email(userEntity.getEmail())
+				.mobile(userEntity.getMobile())
+				.name(name)
+				.build();
+	}
 
 }

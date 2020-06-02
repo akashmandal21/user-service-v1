@@ -3,24 +3,34 @@
  */
 package com.stanzaliving.user.acl.service.impl;
 
-import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleNameUrlExpandedDto;
-import com.stanzaliving.core.user.acl.enums.RoleAccessType;
-import com.stanzaliving.user.acl.adapters.UserDepartmentLevelRoleAdapter;
-import com.stanzaliving.user.acl.db.service.*;
-import com.stanzaliving.user.acl.entity.*;
-import com.stanzaliving.user.acl.service.AclService;
-import com.stanzaliving.user.service.UserService;
-import lombok.extern.log4j.Log4j2;
-import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
+import org.springframework.stereotype.Service;
+
+import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleNameUrlExpandedDto;
+import com.stanzaliving.core.user.acl.enums.RoleAccessType;
+import com.stanzaliving.user.acl.adapters.UserDepartmentLevelRoleAdapter;
+import com.stanzaliving.user.acl.db.service.ApiDbService;
+import com.stanzaliving.user.acl.db.service.RoleAccessDbService;
+import com.stanzaliving.user.acl.db.service.RoleDbService;
+import com.stanzaliving.user.acl.db.service.UserDepartmentLevelDbService;
+import com.stanzaliving.user.acl.db.service.UserDepartmentLevelRoleDbService;
+import com.stanzaliving.user.acl.entity.ApiEntity;
+import com.stanzaliving.user.acl.entity.RoleAccessEntity;
+import com.stanzaliving.user.acl.entity.RoleEntity;
+import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
+import com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity;
+import com.stanzaliving.user.acl.service.AclService;
+import com.stanzaliving.user.service.UserService;
+
+import lombok.extern.log4j.Log4j2;
 
 /**
  * @author naveen.kumar
@@ -33,44 +43,48 @@ import java.util.stream.Collectors;
 public class AclServiceImpl implements AclService {
 
 	@Autowired
-	UserDepartmentLevelDbService userDepartmentLevelDbService;
+	private UserService userService;
 
 	@Autowired
-	UserDepartmentLevelRoleDbService userDepartmentLevelRoleDbService;
+	private ApiDbService apiDbService;
 
 	@Autowired
-	RoleAccessDbService roleAccessDbService;
+	private RoleDbService roleDbService;
 
 	@Autowired
-	RoleDbService roleDbService;
+	private RoleAccessDbService roleAccessDbService;
 
 	@Autowired
-	ApiDbService apiDbService;
+	private UserDepartmentLevelDbService userDepartmentLevelDbService;
 
 	@Autowired
-	UserService userService;
+	private UserDepartmentLevelRoleDbService userDepartmentLevelRoleDbService;
 
 	@Override
 	public boolean isAccessible(String userId, String url) {
 
 		Set<String> accessibleUrlList = getAccessibleUrlList(userId);
 		return accessibleUrlList.contains(url);
-
 	}
 
 	@Override
 	public List<UserDeptLevelRoleNameUrlExpandedDto> getUserDeptLevelRoleNameUrlExpandedDtoFe(String userUuid) {
+
 		List<UserDeptLevelRoleNameUrlExpandedDto> userDeptLevelRoleNameUrlExpandedDtoList = getUserDeptLevelRoleNameUrlExpandedDto(userUuid);
-		for(UserDeptLevelRoleNameUrlExpandedDto userDeptLevelRoleNameUrlExpandedDto : userDeptLevelRoleNameUrlExpandedDtoList) {
+
+		for (UserDeptLevelRoleNameUrlExpandedDto userDeptLevelRoleNameUrlExpandedDto : userDeptLevelRoleNameUrlExpandedDtoList) {
 			userDeptLevelRoleNameUrlExpandedDto.setUrlList(new ArrayList<>());
 		}
+
 		return userDeptLevelRoleNameUrlExpandedDtoList;
 	}
 
 	@Override
 	public List<UserDeptLevelRoleNameUrlExpandedDto> getUserDeptLevelRoleNameUrlExpandedDtoBe(String userUuid) {
-		List<UserDeptLevelRoleNameUrlExpandedDto> userDeptLevelRoleNameUrlExpandedDtoList = getUserDeptLevelRoleNameUrlExpandedDto(userUuid);
-		return userDeptLevelRoleNameUrlExpandedDtoList;
+
+		log.info("Fetching User Department role name for user: {}", userUuid);
+
+		return getUserDeptLevelRoleNameUrlExpandedDto(userUuid);
 	}
 
 	@Override
@@ -91,7 +105,7 @@ public class AclServiceImpl implements AclService {
 
 		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelDbService.findByUserUuidAndStatus(userUuid, true);
 
-		for(UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
+		for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
 			Pair<List<String>, List<String>> roleUuidApiUuidList = getRoleUuidApiUuidListOfUser(userDepartmentLevelEntity);
 			List<RoleEntity> roleEntityList = roleDbService.findByUuidInAndStatus(roleUuidApiUuidList.getFirst(), true);
 			List<ApiEntity> apiEntityList = apiDbService.findByUuidInAndStatus(roleUuidApiUuidList.getSecond(), true);
@@ -102,7 +116,6 @@ public class AclServiceImpl implements AclService {
 
 		return userDeptLevelRoleNameUrlExpandedDtoList;
 	}
-
 
 	private Pair<List<String>, List<String>> getRoleUuidApiUuidListOfUser(UserDepartmentLevelEntity userDepartmentLevelEntity) {
 
@@ -117,10 +130,12 @@ public class AclServiceImpl implements AclService {
 		Set<String> roleUuidSetChild;
 		Set<String> apiUuidSetChild;
 
-		while(CollectionUtils.isNotEmpty(roleUuidListParent)) {
+		while (CollectionUtils.isNotEmpty(roleUuidListParent)) {
 			roleAccessEntityListChild = roleAccessDbService.findByRoleUuidInAndStatus(roleUuidListParent, true);
-			roleUuidSetChild = roleAccessEntityListChild.stream().filter(entity -> RoleAccessType.ROLE.equals(entity.getRoleAccessType())).map(entity -> entity.getAccessUuid()).collect(Collectors.toSet());
-			apiUuidSetChild = roleAccessEntityListChild.stream().filter(entity -> RoleAccessType.API.equals(entity.getRoleAccessType())).map(entity -> entity.getAccessUuid()).collect(Collectors.toSet());
+			roleUuidSetChild =
+					roleAccessEntityListChild.stream().filter(entity -> RoleAccessType.ROLE.equals(entity.getRoleAccessType())).map(entity -> entity.getAccessUuid()).collect(Collectors.toSet());
+			apiUuidSetChild =
+					roleAccessEntityListChild.stream().filter(entity -> RoleAccessType.API.equals(entity.getRoleAccessType())).map(entity -> entity.getAccessUuid()).collect(Collectors.toSet());
 			roleUuidListParent = roleUuidSetChild.stream().filter(child -> !finalRoleUuidSet.contains(child)).collect(Collectors.toList());
 			finalRoleUuidSet.addAll(roleUuidListParent);
 			finalApiUuidSet.addAll(apiUuidSetChild);
