@@ -21,6 +21,7 @@ import com.stanzaliving.core.base.utils.PhoneNumberUtils;
 import com.stanzaliving.core.base.utils.StanzaUtils;
 import com.stanzaliving.core.user.constants.UserErrorCodes.Otp;
 import com.stanzaliving.core.user.enums.OtpType;
+import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.LoginRequestDto;
 import com.stanzaliving.core.user.request.dto.OtpValidateRequestDto;
 import com.stanzaliving.user.db.service.OtpDbService;
@@ -154,7 +155,7 @@ public class OtpServiceImpl implements OtpService {
 	@Override
 	public void validateMobileOtp(OtpValidateRequestDto otpValidateRequestDto, OtpType otpType) {
 		OtpEntity userOtp =
-				getLastActiveOtp(otpValidateRequestDto.getMobile(), otpValidateRequestDto.getIsoCode(), otpType);
+				getLastActiveOtp(otpValidateRequestDto.getMobile(), otpValidateRequestDto.getIsoCode(),otpValidateRequestDto.getUserType(), otpType);
 
 		compareOTP(otpValidateRequestDto.getOtp(), userOtp);
 
@@ -163,10 +164,10 @@ public class OtpServiceImpl implements OtpService {
 		expireOtp(userOtp);
 	}
 
-	private OtpEntity getLastActiveOtp(String mobile, String isoCode, OtpType otpType) {
+	private OtpEntity getLastActiveOtp(String mobile, String isoCode,UserType userType, OtpType otpType) {
 
 		return otpDbService.getActiveOtpForMobile(
-				PhoneNumberUtils.normalizeNumber(mobile), otpType, isoCode);
+				PhoneNumberUtils.normalizeNumber(mobile), otpType,userType, isoCode);
 
 	}
 
@@ -200,7 +201,7 @@ public class OtpServiceImpl implements OtpService {
 
 	@Override
 	public void resendMobileOtp(LoginRequestDto loginRequestDto, OtpType otpType) {
-		OtpEntity userOtp = getLastActiveOtp(loginRequestDto.getMobile(), loginRequestDto.getIsoCode(), otpType);
+		OtpEntity userOtp = getLastActiveOtp(loginRequestDto.getMobile(), loginRequestDto.getIsoCode(),loginRequestDto.getUserType(), otpType);
 
 		if (userOtp == null) {
 
