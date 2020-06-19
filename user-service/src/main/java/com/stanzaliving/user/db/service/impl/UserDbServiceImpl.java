@@ -44,6 +44,7 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 	public UserEntity getUserForMobile(String mobile, String isoCode) {
 		return getJpaRepository().findByMobileAndIsoCode(mobile, isoCode);
 	}
+	
 
 	@Override
 	public Specification<UserEntity> getSearchQuery(UserFilterDto userFilterDto) {
@@ -98,6 +99,11 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 		}
 
 		return specificationBuilder.build();
+	}
+
+	@Override
+	public UserEntity getUserForMobileAndUserType(String mobile, String isoCode, UserType userType) {
+		return getJpaRepository().findByMobileAndIsoCodeAndUserType(mobile, isoCode, userType);
 	}
 
 }

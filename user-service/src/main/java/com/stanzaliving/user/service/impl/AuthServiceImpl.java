@@ -52,8 +52,13 @@ public class AuthServiceImpl implements AuthService {
 
 	private UserEntity getActiveUser(LoginRequestDto loginRequestDto) {
 
-		UserEntity userEntity =
-				userDbService.getUserForMobile(loginRequestDto.getMobile(), loginRequestDto.getIsoCode());
+		UserEntity userEntity =null;
+		
+		if(Objects.nonNull(loginRequestDto.getUserType()) && loginRequestDto.getUserType().equals(UserType.CONSUMER)) {
+			userEntity = userDbService.getUserForMobileAndUserType(loginRequestDto.getMobile(), loginRequestDto.getIsoCode(),loginRequestDto.getUserType());
+		}else {
+			userEntity = userDbService.getUserForMobile(loginRequestDto.getMobile(), loginRequestDto.getIsoCode());
+		}
 
 		userEntity = createUserIfUserIsConsumer(loginRequestDto, userEntity);
 		
