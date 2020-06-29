@@ -3,18 +3,17 @@
  */
 package com.stanzaliving.user.service;
 
+import java.util.List;
+import java.util.Map;
+
 import com.stanzaliving.core.base.common.dto.PageResponse;
-import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserFilterDto;
 import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.EnumListing;
-import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
-
-import java.util.List;
-import java.util.Map;
+import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
 
 /**
  * @author naveen
@@ -40,5 +39,7 @@ public interface UserService {
 	UserManagerAndRoleDto getUserWithManagerAndRole(String userUuid);
 
 	List<EnumListing> getAllUserType();
+	
+	UserDto updateUser(UpdateUserRequestDto updateUserRequestDto);
 
 }

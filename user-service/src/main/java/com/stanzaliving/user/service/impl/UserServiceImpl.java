@@ -9,6 +9,7 @@ import com.stanzaliving.core.base.exception.NoRecordException;
 import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.base.utils.PhoneNumberUtils;
 import com.stanzaliving.core.leadership.dto.UserFilter;
+import com.stanzaliving.core.sqljpa.adapter.AddressAdapter;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
 import com.stanzaliving.core.user.dto.UserDto;
@@ -18,6 +19,7 @@ import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.EnumListing;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
+import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
 import com.stanzaliving.user.acl.service.AclUserService;
 import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.db.service.UserDbService;
@@ -240,5 +242,29 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public List<EnumListing> getAllUserType() {
 		return UserAdapter.getUserTypeEnumAsListing();
+	}
+
+	@Override
+	public UserDto updateUser(UpdateUserRequestDto updateUserRequestDto) {
+
+		UserEntity userEntity = userDbService.findByUuidAndStatus(updateUserRequestDto.getUserId(), true);
+
+		if (Objects.isNull(userEntity)) {
+			throw new StanzaException("User not found for UserId: " + updateUserRequestDto.getUserId());
+		}
+		
+		if(Objects.nonNull(updateUserRequestDto.getAddress())) {userEntity.getUserProfile().setAddress(AddressAdapter.getAddressEntity(updateUserRequestDto.getAddress()));}
+		if(Objects.nonNull(updateUserRequestDto.getBirthday())) {userEntity.getUserProfile().setBirthday(updateUserRequestDto.getBirthday());}
+		if(Objects.nonNull(updateUserRequestDto.getBloodGroup())) {userEntity.getUserProfile().setBloodGroup(updateUserRequestDto.getBloodGroup());}
+		if(Objects.nonNull(updateUserRequestDto.getEmail())) {userEntity.setEmail(updateUserRequestDto.getEmail());}
+		if(Objects.nonNull(updateUserRequestDto.getFirstName())) {userEntity.getUserProfile().setFirstName(updateUserRequestDto.getFirstName());}
+		if(Objects.nonNull(updateUserRequestDto.getGender())) {userEntity.getUserProfile().setGender(updateUserRequestDto.getGender());};
+		if(Objects.nonNull(updateUserRequestDto.getLastName())){userEntity.getUserProfile().setLastName(updateUserRequestDto.getLastName());}
+		if(Objects.nonNull(updateUserRequestDto.getNationality())){userEntity.getUserProfile().setNationality(updateUserRequestDto.getNationality());}
+		if(Objects.nonNull(updateUserRequestDto.getProfilePicture())){userEntity.getUserProfile().setProfilePicture(updateUserRequestDto.getProfilePicture());}
+		
+		userEntity = userDbService.update(userEntity);
+		
+		return UserAdapter.getUserDto(userEntity);
 	}
 }

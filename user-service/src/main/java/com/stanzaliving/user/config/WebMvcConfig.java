@@ -37,6 +37,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 						"/auth/resendOtp")
 				.excludePathPatterns(
 						"/add",
+						"/update",
 						"/search/**",
 						"/mapping/**",
 						"/usermanagermapping/**",
