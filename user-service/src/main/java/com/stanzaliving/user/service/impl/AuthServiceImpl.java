@@ -60,7 +60,7 @@ public class AuthServiceImpl implements AuthService {
 			userEntity = userDbService.getUserForMobile(loginRequestDto.getMobile(), loginRequestDto.getIsoCode());
 		}
 
-		userEntity = createUserIfUserIsConsumer(loginRequestDto, userEntity);
+		//userEntity = createUserIfUserIsConsumer(loginRequestDto, userEntity);
 		
 		if (Objects.isNull(userEntity)) {
 			throw new AuthException("User Not Found For Login", UserErrorCodes.USER_NOT_EXISTS);

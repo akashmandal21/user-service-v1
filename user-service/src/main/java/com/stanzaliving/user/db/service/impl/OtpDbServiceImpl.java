@@ -57,11 +57,11 @@ public class OtpDbServiceImpl extends AbstractJpaServiceImpl<OtpEntity, Long, Ot
 		if(Objects.nonNull(userType) && userType.equals(UserType.CONSUMER)) {
 			userOtps =
 					getJpaRepository()
-					.findByMobileAndOtpTypeAndIsoCodeAndStatus(PhoneNumberUtils.normalizeNumber(mobile), otpType, isoCode, true, pageable);			
+					.findByMobileAndOtpTypeAndIsoCodeAndStatusAndUserType(PhoneNumberUtils.normalizeNumber(mobile), otpType, isoCode, true,userType, pageable);
 		}else {
 			userOtps =
 					getJpaRepository()
-					.findByMobileAndOtpTypeAndIsoCodeAndStatusAndUserType(PhoneNumberUtils.normalizeNumber(mobile), otpType, isoCode, true,userType, pageable);
+					.findByMobileAndOtpTypeAndIsoCodeAndStatus(PhoneNumberUtils.normalizeNumber(mobile), otpType, isoCode, true, pageable);			
 		}
 
 		return CollectionUtils.isNotEmpty(userOtps) ? userOtps.get(0) : null;
