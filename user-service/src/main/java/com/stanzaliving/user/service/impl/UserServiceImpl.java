@@ -245,7 +245,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public UserDto updateUser(UpdateUserRequestDto updateUserRequestDto) {
+	public UserProfileDto updateUser(UpdateUserRequestDto updateUserRequestDto) {
 
 		UserEntity userEntity = userDbService.findByUuidAndStatus(updateUserRequestDto.getUserId(), true);
 
@@ -265,6 +265,6 @@ public class UserServiceImpl implements UserService {
 		
 		userEntity = userDbService.update(userEntity);
 		
-		return UserAdapter.getUserDto(userEntity);
+		return UserAdapter.getUserProfileDto(userEntity);
 	}
 }

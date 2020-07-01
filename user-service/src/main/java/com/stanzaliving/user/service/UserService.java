@@ -40,6 +40,6 @@ public interface UserService {
 
 	List<EnumListing> getAllUserType();
 	
-	UserDto updateUser(UpdateUserRequestDto updateUserRequestDto);
+	UserProfileDto updateUser(UpdateUserRequestDto updateUserRequestDto);
 
 }

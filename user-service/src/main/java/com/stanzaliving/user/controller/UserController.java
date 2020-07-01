@@ -72,9 +72,9 @@ public class UserController {
 	}
 	
 	@PostMapping("update")
-	public ResponseDto<UserDto> updateUser(@RequestBody @Valid UpdateUserRequestDto updateUserRequestDto) {
+	public ResponseDto<UserProfileDto> updateUser(@RequestBody @Valid UpdateUserRequestDto updateUserRequestDto) {
 
-		UserDto userDto = userService.updateUser(updateUserRequestDto);
+		UserProfileDto userDto = userService.updateUser(updateUserRequestDto);
 
 		log.info("Update user with id: " + userDto.getUuid());
 
