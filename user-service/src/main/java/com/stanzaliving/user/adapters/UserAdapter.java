@@ -65,6 +65,8 @@ public class UserAdapter {
 				.maritalStatus(addUserRequestDto.getMaritalStatus())
 				.anniversaryDate(addUserRequestDto.getAnniversaryDate())
 				.address(AddressAdapter.getAddressEntity(addUserRequestDto.getAddress()))
+				.nationality(addUserRequestDto.getNationality())
+				.bloodGroup(addUserRequestDto.getBloodGroup())
 				.build();
 	}
 
@@ -104,6 +106,8 @@ public class UserAdapter {
 				.maritalStatus(profileEntity.getMaritalStatus())
 				.anniversaryDate(profileEntity.getAnniversaryDate())
 				.address(AddressAdapter.getAddressDto(profileEntity.getAddress()))
+				.nationality(profileEntity.getNationality())
+				.bloodGroup(profileEntity.getBloodGroup())
 				.build();
 	}
 
@@ -159,6 +163,8 @@ public class UserAdapter {
 				.maritalStatus(userProfileDto.getMaritalStatus())
 				.anniversaryDate(userProfileDto.getAnniversaryDate())
 				.address(userProfileDto.getAddress())
+				.nationality(userProfileDto.getNationality())
+				.bloodGroup(userProfileDto.getBloodGroup())
 				.acl(acl)
 				.build();
 
