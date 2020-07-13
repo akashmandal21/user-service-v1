@@ -129,6 +129,8 @@ public class UserAdapter {
 				.department(userDto.getDepartment())
 				.firstName(userDto.getFirstName())
 				.lastName(userDto.getLastName())
+				.gender(userDto.getGender())
+				.nationality(userDto.getNationality())
 				.acl(acl)
 				.build();
 	}
