@@ -8,6 +8,8 @@ import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.base.exception.NoRecordException;
 import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.base.utils.PhoneNumberUtils;
+import com.stanzaliving.core.kafka.dto.KafkaDTO;
+import com.stanzaliving.core.kafka.producer.NotificationProducer;
 import com.stanzaliving.core.leadership.dto.UserFilter;
 import com.stanzaliving.core.sqljpa.adapter.AddressAdapter;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
@@ -29,6 +31,7 @@ import com.stanzaliving.user.service.UserManagerMappingService;
 import com.stanzaliving.user.service.UserService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -61,6 +64,11 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private AclUserService aclUserService;
 
+	@Autowired
+	private NotificationProducer notificationProducer;
+	
+	@Value("${kafka.resident.detail.topic}")
+	private String kafkaResidentDetailTopic;
 
 	@Override
 	public UserProfileDto getActiveUserByUserId(String userId) {
@@ -121,7 +129,15 @@ public class UserServiceImpl implements UserService {
 
 		log.info("Added New User with Id: " + userEntity.getUuid());
 
-		return UserAdapter.getUserDto(userEntity);
+		UserDto userDto = UserAdapter.getUserDto(userEntity);
+		
+		
+		KafkaDTO kafkaDTO = new KafkaDTO();
+		kafkaDTO.setData(userDto);
+		
+		notificationProducer.publish(kafkaResidentDetailTopic, KafkaDTO.class.getName(), kafkaDTO);
+
+		return userDto;
 	}
 
 	@Override
@@ -265,6 +281,13 @@ public class UserServiceImpl implements UserService {
 		
 		userEntity = userDbService.update(userEntity);
 		
-		return UserAdapter.getUserProfileDto(userEntity);
+		UserProfileDto userProfileDto = UserAdapter.getUserProfileDto(userEntity);
+		
+		KafkaDTO kafkaDTO = new KafkaDTO();
+		kafkaDTO.setData(userProfileDto);
+		
+		notificationProducer.publish(kafkaResidentDetailTopic, KafkaDTO.class.getName(), kafkaDTO);
+
+		return userProfileDto;
 	}
 }
