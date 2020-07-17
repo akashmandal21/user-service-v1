@@ -97,6 +97,13 @@ public class UserProfileEntity extends AbstractJpaEntity {
 	@Column(name = "blood_group",columnDefinition = "varchar(20)")
 	private BloodGroup bloodGroup;
 
+	@Column(name = "arrival_date", columnDefinition = "DATE")
+	@Convert(converter = LocalDateAttributeConverter.class)
+	private LocalDate arrivalDate;
+
+	@Column(name= "next_destination",columnDefinition = "varchar(100)")
+	private String nextDestination;
+
 	@Embedded
 	private AddressEntity address;
 

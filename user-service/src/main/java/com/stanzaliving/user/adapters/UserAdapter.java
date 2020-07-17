@@ -104,6 +104,10 @@ public class UserAdapter {
 				.maritalStatus(profileEntity.getMaritalStatus())
 				.anniversaryDate(profileEntity.getAnniversaryDate())
 				.address(AddressAdapter.getAddressDto(profileEntity.getAddress()))
+				.nationality(profileEntity.getNationality())
+				.bloodGroup(profileEntity.getBloodGroup())
+				.arrivalDate(profileEntity.getArrivalDate())
+				.nextDestination(profileEntity.getNextDestination())
 				.build();
 	}
 
@@ -125,6 +129,10 @@ public class UserAdapter {
 				.department(userDto.getDepartment())
 				.firstName(userDto.getFirstName())
 				.lastName(userDto.getLastName())
+				.gender(userDto.getGender())
+				.nationality(userDto.getNationality())
+				.arrivalDate(userDto.getArrivalDate())
+				.nextDestination(userDto.getNextDestination())
 				.acl(acl)
 				.build();
 	}
@@ -159,6 +167,10 @@ public class UserAdapter {
 				.maritalStatus(userProfileDto.getMaritalStatus())
 				.anniversaryDate(userProfileDto.getAnniversaryDate())
 				.address(userProfileDto.getAddress())
+				.nationality(userProfileDto.getNationality())
+				.bloodGroup(userProfileDto.getBloodGroup())
+				.arrivalDate(userProfileDto.getArrivalDate())
+				.nextDestination(userProfileDto.getNextDestination())
 				.acl(acl)
 				.build();
 
