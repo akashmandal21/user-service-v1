@@ -17,3 +17,7 @@ CREATE TABLE IF NOT EXISTS `departments` (
   UNIQUE KEY `UK_departments_name` (`department_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+
+ALTER TABLE `user_service_preprod`.`user_profile` 
+ADD COLUMN `arrival_date` DATE NULL DEFAULT NULL AFTER `nationality`,
+ADD COLUMN `next_destination` VARCHAR(100) NULL DEFAULT NULL AFTER `arrival_date`;
