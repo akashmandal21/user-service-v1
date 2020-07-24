@@ -78,6 +78,7 @@ public class OtpServiceImpl implements OtpService {
 		} else {
 			currentOtp.setResendCount(0);
 			userOtp = updateUserOtp(currentOtp);
+			log.debug("User Otp Record {}", userOtp);
 		}
 
 		log.info("Sending OTP: " + userOtp.getOtp() + " for User: " + userOtp.getUserId() + " for login");
