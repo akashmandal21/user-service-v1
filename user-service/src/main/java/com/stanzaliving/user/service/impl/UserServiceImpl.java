@@ -280,7 +280,7 @@ public class UserServiceImpl implements UserService {
 		if(Objects.nonNull(updateUserRequestDto.getProfilePicture())){userEntity.getUserProfile().setProfilePicture(updateUserRequestDto.getProfilePicture());}
 		if(Objects.nonNull(updateUserRequestDto.getDateOfArrival())){userEntity.getUserProfile().setArrivalDate(updateUserRequestDto.getDateOfArrival());}
 		if(Objects.nonNull(updateUserRequestDto.getForiegnCountryCode())){userEntity.getUserProfile().setSecondaryIsoCode(updateUserRequestDto.getForiegnCountryCode());}
-		if(Objects.nonNull(updateUserRequestDto.getForiegnMobileNumber())){userEntity.getUserProfile().setProfilePicture(updateUserRequestDto.getForiegnMobileNumber());}
+		if(Objects.nonNull(updateUserRequestDto.getForiegnMobileNumber())){userEntity.getUserProfile().setSecondaryMobile(updateUserRequestDto.getForiegnMobileNumber());}
 		if(Objects.nonNull(updateUserRequestDto.getNextDestination())){userEntity.getUserProfile().setNextDestination(updateUserRequestDto.getNextDestination());}
 		userEntity = userDbService.update(userEntity);
 		
