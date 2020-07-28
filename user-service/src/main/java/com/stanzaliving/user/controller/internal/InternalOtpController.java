@@ -32,7 +32,7 @@ public class InternalOtpController {
 		return ResponseDto.success("OTP sent to mobile");
 	}
 
-	@PostMapping("moible/validate")
+	@PostMapping("mobile/validate")
 	public ResponseDto<Void> validateMobileOtp(@RequestBody MobileOtpValidateRequestDto mobileOtpValidateRequestDto) {
 
 		log.info("Received request to validate OTP: {}", mobileOtpValidateRequestDto);
