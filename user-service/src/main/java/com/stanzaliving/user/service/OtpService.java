@@ -5,6 +5,7 @@ package com.stanzaliving.user.service;
 
 import com.stanzaliving.core.user.enums.OtpType;
 import com.stanzaliving.core.user.request.dto.LoginRequestDto;
+import com.stanzaliving.core.user.request.dto.MobileOtpRequestDto;
 import com.stanzaliving.core.user.request.dto.OtpValidateRequestDto;
 import com.stanzaliving.user.entity.UserEntity;
 
@@ -19,10 +20,12 @@ public interface OtpService {
 
 	void validateLoginOtp(OtpValidateRequestDto otpValidateRequestDto);
 
-	void validateMobileOtp(OtpValidateRequestDto otpValidateRequestDto, OtpType otpType);
+	void validateMobileOtp(String mobile, String isoCode, String otp, OtpType otpType);
 
 	void resendLoginOtp(LoginRequestDto loginRequestDto);
 
-	void resendMobileOtp(LoginRequestDto loginRequestDto, OtpType otpType);
+	void resendMobileOtp(String mobile, String isoCode, OtpType otpType);
+
+	void sendMobileOtp(MobileOtpRequestDto mobileOtpRequestDto);
 
 }

@@ -16,13 +16,13 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @RestController
-@RequestMapping("/internal/")
-public class InternalController {
+@RequestMapping("/internal/details")
+public class InternalUserDetailsController {
 
 	@Autowired
 	private UserService userService;
 
-	@GetMapping("details/{userUuid}")
+	@GetMapping("{userUuid}")
 	public ResponseDto<UserProfileDto> getUser(@PathVariable String userUuid) {
 
 		log.info("Fetching User with userUuid: {}", userUuid);
@@ -30,7 +30,7 @@ public class InternalController {
 		return ResponseDto.success("Found User for userUuid", userService.getActiveUserByUserId(userUuid));
 	}
 
-	@GetMapping("details/all")
+	@GetMapping("all")
 	public ResponseDto<List<UserProfileDto>> getAllUsers() {
 
 		log.info("Fetching All User");
