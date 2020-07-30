@@ -245,12 +245,12 @@ public class UserServiceImpl implements UserService {
 	public void syncUsersFromGoogle() {
 		UserListAndStatusDto userListAndStatusDto = gSuiteUserSyncService.getSegregatedUsers();
 
-		marUsersInActive(userListAndStatusDto.getInActivesUsers());
+		markUsersInActive(userListAndStatusDto.getInActivesUsers());
 
 		kafkaUserService.sendUsersListToKafka(userListAndStatusDto);
 	}
 
-	private void marUsersInActive(Collection<String> inActivesUsers) {
+	private void markUsersInActive(Collection<String> inActivesUsers) {
 		List<UserEntity> activeUsers = userDbService.findByEmailInAndStatus(inActivesUsers, true);
 
 		if (CollectionUtils.isNotEmpty(activeUsers)) {
