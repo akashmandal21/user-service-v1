@@ -5,5 +5,5 @@ import java.security.GeneralSecurityException;
 import java.util.List;
 
 public interface GSuiteService {
-    List<String> getUsers();
+	List<String> getUsers();
 }

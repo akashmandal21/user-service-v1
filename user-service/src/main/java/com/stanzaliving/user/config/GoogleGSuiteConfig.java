@@ -28,17 +28,17 @@ import java.util.Objects;
 @Configuration
 public class GoogleGSuiteConfig {
 
-    @Bean
-    public GoogleCredentials googleCredentials() {
-        GoogleCredentials credentials = null;
+	@Bean
+	public GoogleCredentials googleCredentials() {
+		GoogleCredentials credentials = null;
 
-        try {
-            credentials = GoogleCredentials.fromStream(new FileInputStream("/path/to/credentials.json"));
-        } catch (IOException e) {
-            log.error("IOException while creating credentials object " + e.getMessage(), e);
-        }
+		try {
+			credentials = GoogleCredentials.fromStream(new FileInputStream("/path/to/credentials.json"));
+		} catch (IOException e) {
+			log.error("IOException while creating credentials object " + e.getMessage(), e);
+		}
 
-        return credentials;
-    }
+		return credentials;
+	}
 
 }
