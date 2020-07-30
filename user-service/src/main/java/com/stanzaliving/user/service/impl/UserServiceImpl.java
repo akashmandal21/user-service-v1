@@ -6,10 +6,12 @@ package com.stanzaliving.user.service.impl;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.stanzaliving.core.property.manager.PropertyManager;
 import com.stanzaliving.core.user.dto.*;
 import com.stanzaliving.user.kafka.service.KafkaUserService;
 import com.stanzaliving.user.service.GSuiteUserSyncService;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -57,6 +59,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private KafkaUserService kafkaUserService;
+
+	@Autowired
+	private PropertyManager propertyManager;
 
 	@Override
 	public UserProfileDto getActiveUserByUserId(String userId) {
@@ -245,9 +250,23 @@ public class UserServiceImpl implements UserService {
 	public void syncUsersFromGoogle() {
 		UserListAndStatusDto userListAndStatusDto = gSuiteUserSyncService.getSegregatedUsers();
 
-		markUsersInActive(userListAndStatusDto.getInActivesUsers());
+		Set<String> inActiveUsersOnGSuite = userListAndStatusDto.getInActivesUsers();
+
+		skipUsers(inActiveUsersOnGSuite);
+
+		markUsersInActive(inActiveUsersOnGSuite);
 
 		kafkaUserService.sendUsersListToKafka(userListAndStatusDto);
+	}
+
+	private void skipUsers(Set<String> inActiveUsersOnGsuite) {
+		String skipList = propertyManager.getProperty("users.sync.skip.list");
+
+		if (StringUtils.isNotBlank(skipList)) {
+			Set<String> skipUsers = new HashSet<>(Arrays.asList(skipList.split(",")));
+
+			inActiveUsersOnGsuite.removeAll(skipUsers);
+		}
 	}
 
 	private void markUsersInActive(Collection<String> inActivesUsers) {
