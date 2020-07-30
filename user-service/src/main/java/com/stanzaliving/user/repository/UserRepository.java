@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import com.stanzaliving.core.sqljpa.repository.AbstractJpaRepository;
 import com.stanzaliving.user.entity.UserEntity;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -33,4 +34,11 @@ public interface UserRepository extends AbstractJpaRepository<UserEntity, Long> 
 			" WHERE CONCAT_WS(' ', u.userProfile.firstName, u.userProfile.middleName, u.userProfile.lastName)" +
 			" LIKE :name%")
 	List<UserEntity> searchByName(@Param("name") String nameStartsWith);
+
+	/**
+	 * @author piyush srivastava
+	 * @param emails Collection
+	 * @return List
+	 */
+	List<UserEntity> findByEmailInAndStatus(Collection<String> emails, boolean status);
 }

@@ -4,6 +4,7 @@
 package com.stanzaliving.user.db.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -98,6 +99,11 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 		}
 
 		return specificationBuilder.build();
+	}
+
+	@Override
+	public List<UserEntity> findByEmailInAndStatus(Collection<String> emails, boolean status) {
+		return getJpaRepository().findByEmailInAndStatus(emails, status);
 	}
 
 }
