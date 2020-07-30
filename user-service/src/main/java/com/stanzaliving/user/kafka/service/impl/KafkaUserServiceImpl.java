@@ -3,7 +3,9 @@
  */
 package com.stanzaliving.user.kafka.service.impl;
 
+import com.stanzaliving.core.kafka.dto.KafkaDTO;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
+import com.stanzaliving.core.user.dto.UserListAndStatusDto;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -160,7 +162,7 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 		try {
 			userExecutor.execute(() -> sendMessage(roleDto));
 		} catch (Exception e) {
-			log.error("Role Queue Overflow for : " + roleDto, e);
+			log.error("Role Queue Overflow for : {}", roleDto, e);
 		}
 
 	}
@@ -168,6 +170,26 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 	private void sendMessage(RoleDto roleDto) {
 		String topic = propertyManager.getProperty("kafka.topic.acl", "acl");
 		notificationProducer.publish(topic, RoleDto.class.getName(), roleDto);
+	}
+
+
+	@Override
+	public void sendUsersListToKafka(UserListAndStatusDto userListAndStatusDto) {
+		KafkaDTO kafkaDTO = new KafkaDTO();
+		kafkaDTO.setClassName(userListAndStatusDto.getClass().getName());
+		kafkaDTO.setData(userListAndStatusDto);
+
+		try {
+			userExecutor.execute(() -> publishToKafka(kafkaDTO));
+		} catch (Exception e) {
+			log.error("Unable to publish user details to kafka. {}", kafkaDTO, e);
+		}
+
+	}
+
+	private void publishToKafka(KafkaDTO kafkaDTO) {
+		String topic = propertyManager.getProperty("kafka.topic.userSync");
+		notificationProducer.publish(topic, KafkaDTO.class.getName(), kafkaDTO);
 	}
 
 }
