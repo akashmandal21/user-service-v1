@@ -38,4 +38,5 @@ public interface UserService {
 
 	List<UserProfileDto> getAllUsers();
 
+	void syncUsersFromGoogle();
 }

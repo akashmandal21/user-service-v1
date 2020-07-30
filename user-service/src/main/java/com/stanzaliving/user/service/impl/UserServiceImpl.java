@@ -3,13 +3,13 @@
  */
 package com.stanzaliving.user.service.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.stanzaliving.core.user.dto.*;
+import com.stanzaliving.user.kafka.service.KafkaUserService;
+import com.stanzaliving.user.service.GSuiteUserSyncService;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,10 +23,6 @@ import com.stanzaliving.core.base.exception.NoRecordException;
 import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.base.utils.PhoneNumberUtils;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
-import com.stanzaliving.core.user.dto.UserDto;
-import com.stanzaliving.core.user.dto.UserFilterDto;
-import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
-import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.user.acl.service.AclUserService;
 import com.stanzaliving.user.adapters.UserAdapter;
@@ -55,6 +51,12 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private AclUserService aclUserService;
+
+	@Autowired
+	private GSuiteUserSyncService gSuiteUserSyncService;
+
+	@Autowired
+	private KafkaUserService kafkaUserService;
 
 	@Override
 	public UserProfileDto getActiveUserByUserId(String userId) {
@@ -237,5 +239,26 @@ public class UserServiceImpl implements UserService {
 
 		return UserAdapter.getUserProfileDtos(userEntities);
 	}
+
+
+	@Override
+	public void syncUsersFromGoogle() {
+		UserListAndStatusDto userListAndStatusDto = gSuiteUserSyncService.getSegregatedUsers();
+
+		marUsersInActive(userListAndStatusDto.getInActivesUsers());
+
+		kafkaUserService.sendUsersListToKafka(userListAndStatusDto);
+	}
+
+	private void marUsersInActive(Collection<String> inActivesUsers) {
+		List<UserEntity> activeUsers = userDbService.findByEmailInAndStatus(inActivesUsers, true);
+
+		if (CollectionUtils.isNotEmpty(activeUsers)) {
+			activeUsers.forEach(user -> user.setStatus(false));
+
+			userDbService.save(activeUsers);
+		}
+	}
+
 
 }
