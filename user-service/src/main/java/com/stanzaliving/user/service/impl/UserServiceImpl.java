@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import com.stanzaliving.core.property.manager.PropertyManager;
 import com.stanzaliving.core.user.dto.*;
 import com.stanzaliving.user.kafka.service.KafkaUserService;
-import com.stanzaliving.user.service.GSuiteUserSyncService;
+import com.stanzaliving.user.service.GSuiteService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +55,7 @@ public class UserServiceImpl implements UserService {
 	private AclUserService aclUserService;
 
 	@Autowired
-	private GSuiteUserSyncService gSuiteUserSyncService;
+	private GSuiteService gSuiteService;
 
 	@Autowired
 	private KafkaUserService kafkaUserService;
@@ -248,7 +248,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void syncUsersFromGoogle() {
-		UserListAndStatusDto userListAndStatusDto = gSuiteUserSyncService.getSegregatedUsers();
+		UserListAndStatusDto userListAndStatusDto = gSuiteService.getSegregatedUsers();
 
 		Set<String> inActiveUsersOnGSuite = userListAndStatusDto.getInActivesUsers();
 
