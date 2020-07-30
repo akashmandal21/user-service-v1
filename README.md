@@ -283,7 +283,7 @@ Response Body -
 ## ACL
 betaUrl - https://betaerp.stanzaliving.com/user/swagger-ui.html
 
-produrl - https://erpdashboard.stanzaliving.com/user/swagger-ui.html
+produrl - userservice.stanzaliving.com/user/swagger-ui.html (https://erpdashboard.stanzaliving.com/user/swagger-ui.html)
 
 To perform any action listed below, click on "Try It Out" to open editor, fill in required details and then click on execute to perform the action.
 
@@ -324,7 +324,15 @@ user-controller -> /search/{pageNo}/{limit}
 
 Enter 1 in both limit and pageNo and Mobile number to get the uuid of existing user.
 
-4. To create new roles
+4. To check what all roles / department a User is having:
+
+acl-controller -> /acl/user/fe/{userUuid}
+
+5. To view (or to get uuid's of) existing roles
+
+role-controller -> /acl/roles/getRoles
+
+6. To create new roles
 
 role-controller -> /acl/role/add
 
@@ -332,17 +340,15 @@ Input the required fields to create new role. To create a parent role, use "SELF
 
 save the uuid in received in response (this will be helpful in assigning roles to any user at later stage)
 
-5. To get uuid's of existing roles
-
-role-controller -> /acl/roles/getRoles
-
-6. To assign a particular role to any user
+7. To assign a particular role to any user
 
 acl-user-controller -> /acl/user/add/role
 
-to get the accessLevelEntityListUuid use https://erpdashboard.stanzaliving.com/transformationmaster/swagger-ui.html#/ 
+uuid of INDIA -> 7d0e47bf-52c0-4560-924e-e6599e56501a
 
-internal-data-controller -> /internal/cities/all or /internal/micromarkets/all or /internal/states/all
+to get the accessLevelEntityListUuid of cities / micromarket use https://erpdashboard.stanzaliving.com/transformationmaster/swagger-ui.html#/ 
+
+internal-data-controller -> /internal/cities/all or /internal/micromarkets/all 
 
 Possible values for UserType, Departments and AccessLevel :
 

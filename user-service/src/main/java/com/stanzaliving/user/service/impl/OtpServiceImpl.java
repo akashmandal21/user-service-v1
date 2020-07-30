@@ -154,7 +154,7 @@ public class OtpServiceImpl implements OtpService {
 	@Override
 	public void validateMobileOtp(OtpValidateRequestDto otpValidateRequestDto, OtpType otpType) {
 		OtpEntity userOtp =
-				getLastOtp(otpValidateRequestDto.getMobile(), otpValidateRequestDto.getIsoCode(), otpType);
+				getLastActiveOtp(otpValidateRequestDto.getMobile(), otpValidateRequestDto.getIsoCode(), otpType);
 
 		compareOTP(otpValidateRequestDto.getOtp(), userOtp);
 
@@ -163,9 +163,9 @@ public class OtpServiceImpl implements OtpService {
 		expireOtp(userOtp);
 	}
 
-	private OtpEntity getLastOtp(String mobile, String isoCode, OtpType otpType) {
+	private OtpEntity getLastActiveOtp(String mobile, String isoCode, OtpType otpType) {
 
-		return otpDbService.getOtpForMobile(
+		return otpDbService.getActiveOtpForMobile(
 				PhoneNumberUtils.normalizeNumber(mobile), otpType, isoCode);
 
 	}
@@ -200,7 +200,7 @@ public class OtpServiceImpl implements OtpService {
 
 	@Override
 	public void resendMobileOtp(LoginRequestDto loginRequestDto, OtpType otpType) {
-		OtpEntity userOtp = getLastOtp(loginRequestDto.getMobile(), loginRequestDto.getIsoCode(), otpType);
+		OtpEntity userOtp = getLastActiveOtp(loginRequestDto.getMobile(), loginRequestDto.getIsoCode(), otpType);
 
 		if (userOtp == null) {
 
@@ -227,7 +227,8 @@ public class OtpServiceImpl implements OtpService {
 		}
 
 		userOtp.setResendCount(userOtp.getResendCount() + 1);
-		userOtp = updateUserOtp(userOtp);
+		log.debug("Updating OTP for User: " + userOtp.getUserId());
+		userOtp = otpDbService.updateAndFlush(userOtp);
 
 		log.info("Re-Sending OTP: " + userOtp.getOtp() + " for User: " + userOtp.getUserId() + " of Type " + otpType);
 		kafkaUserService.sendOtpToKafka(userOtp);

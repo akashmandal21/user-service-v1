@@ -27,7 +27,7 @@ public class AclUserController {
     AclUserService aclUserService;
 
     @PostMapping("add/role")
-    public ResponseDto addRole(@RequestBody @Valid AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleDto) {
+    public ResponseDto<Void> addRole(@RequestBody @Valid AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleDto) {
         log.info("Received request to add role " + addUserDeptLevelRoleDto);
         aclUserService.addRole(addUserDeptLevelRoleDto);
         return ResponseDto.success("Role Assignment successful");
@@ -38,12 +38,12 @@ public class AclUserController {
     public ResponseDto<List<UserDeptLevelRoleDto>> getUserRoles(@PathVariable @NotBlank(message = "User uuid must not be blank") String userUuid) {
 
         log.info("Fetching user role with id: " + userUuid);
-        return ResponseDto.success("User roles fetched for user " + userUuid, aclUserService.getUserDeptLevelRole(userUuid));
+        return ResponseDto.success("User roles fetched for user " + userUuid, aclUserService.getActiveUserDeptLevelRole(userUuid));
 
     }
 
     @PostMapping("revoke/department/roles/all")
-    public ResponseDto revokeAllRolesForDepartment(@RequestParam String userUuid,
+    public ResponseDto<Void> revokeAllRolesForDepartment(@RequestParam String userUuid,
                                                   @RequestParam Department department) {
         log.info("Received request to revoke all roles for user {} of department {}", userUuid, department);
         aclUserService.revokeAllRolesOfDepartment(userUuid, department);
@@ -51,7 +51,7 @@ public class AclUserController {
     }
 
     @PostMapping("revoke/department/level/roles/all")
-    public ResponseDto revokeAllRolesForDepartmentOfLevel(@RequestParam @NotEmpty String userUuid,
+    public ResponseDto<Void> revokeAllRolesForDepartmentOfLevel(@RequestParam @NotEmpty String userUuid,
                                                   @RequestParam @NotNull Department department,
                                                   @RequestParam @NotNull AccessLevel accessLevel) {
         log.info("Received request to revoke all roles for user {} of department {} of level {}", userUuid, department, accessLevel);
@@ -60,14 +60,14 @@ public class AclUserController {
     }
 
     @PostMapping("revoke/department/level/levelEntityList")
-    public ResponseDto revokeAccessLevelEntityForDepartmentOfLevel(@RequestBody @Valid AddUserDeptLevelRequestDto addUserDeptLevelRequestDto) {
+    public ResponseDto<Void> revokeAccessLevelEntityForDepartmentOfLevel(@RequestBody @Valid AddUserDeptLevelRequestDto addUserDeptLevelRequestDto) {
         log.info("Received request to revoke Access Level Entity List for user " + addUserDeptLevelRequestDto);
         aclUserService.revokeAccessLevelEntityForDepartmentOfLevel(addUserDeptLevelRequestDto);
         return ResponseDto.success("Access Level Entity Revocation successful");
     }
 
     @PostMapping("revoke/department/level/roleList")
-    public ResponseDto revokeRolesForDepartmentOfLevel(@RequestParam @Valid UserDeptLevelRoleListDto userDeptLevelRoleListDto) {
+    public ResponseDto<Void> revokeRolesForDepartmentOfLevel(@RequestBody @Valid UserDeptLevelRoleListDto userDeptLevelRoleListDto) {
         log.info("Received request to revoke role list for user " + userDeptLevelRoleListDto);
         aclUserService.revokeRolesForDepartmentOfLevel(userDeptLevelRoleListDto);
         return ResponseDto.success("Roles Revocation successful");
