@@ -188,7 +188,7 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 	}
 
 	private void publishToKafka(KafkaDTO kafkaDTO) {
-		String topic = propertyManager.getProperty("kafka.topic.userSync");
+		String topic = propertyManager.getProperty("kafka.topic.user.sync");
 		notificationProducer.publish(topic, KafkaDTO.class.getName(), kafkaDTO);
 	}
 
