@@ -22,6 +22,7 @@ import com.stanzaliving.core.base.utils.StanzaUtils;
 import com.stanzaliving.core.user.constants.UserErrorCodes.Otp;
 import com.stanzaliving.core.user.enums.OtpType;
 import com.stanzaliving.core.user.request.dto.LoginRequestDto;
+import com.stanzaliving.core.user.request.dto.MobileOtpRequestDto;
 import com.stanzaliving.core.user.request.dto.OtpValidateRequestDto;
 import com.stanzaliving.user.db.service.OtpDbService;
 import com.stanzaliving.user.entity.OtpEntity;
@@ -87,20 +88,25 @@ public class OtpServiceImpl implements OtpService {
 		OtpEntity userOtp = new OtpEntity();
 
 		userOtp.setUserId(user.getUuid());
-		userOtp.setUserType(user.getUserType());
-
-		userOtp.setMobile(PhoneNumberUtils.normalizeNumber(user.getMobile()));
-		userOtp.setIsoCode(user.getIsoCode());
-
 		userOtp.setEmail(user.getEmail());
 
-		userOtp.setOtp(generateOtp(userOtp));
-		userOtp.setOtpType(otpType);
+		userOtp.setUserType(user.getUserType());
 
-		userOtp.setResendCount(0);
-		userOtp = otpDbService.saveAndFlush(userOtp);
+		return setMobileOtpDetailsAndSave(user.getMobile(), user.getIsoCode(), otpType, userOtp);
+	}
 
-		return userOtp;
+	private OtpEntity setMobileOtpDetailsAndSave(String mobile, String isoCode, OtpType otpType, OtpEntity otpEntity) {
+
+		otpEntity.setMobile(PhoneNumberUtils.normalizeNumber(mobile));
+		otpEntity.setIsoCode(isoCode);
+
+		otpEntity.setOtp(generateOtp(otpEntity));
+		otpEntity.setOtpType(otpType);
+
+		otpEntity.setResendCount(0);
+		otpEntity = otpDbService.saveAndFlush(otpEntity);
+
+		return otpEntity;
 	}
 
 	/**
@@ -140,7 +146,7 @@ public class OtpServiceImpl implements OtpService {
 		userOtp.setOtp(generateOtp(userOtp));
 		userOtp.setStatus(true);
 
-		log.debug("Updating OTP for User: " + userOtp.getUserId());
+		log.debug("Updating OTP for User [Id: {}, Mobile: {}]", userOtp.getUserId(), userOtp.getMobile());
 		userOtp = otpDbService.updateAndFlush(userOtp);
 
 		return userOtp;
@@ -148,15 +154,14 @@ public class OtpServiceImpl implements OtpService {
 
 	@Override
 	public void validateLoginOtp(OtpValidateRequestDto otpValidateRequestDto) {
-		validateMobileOtp(otpValidateRequestDto, OtpType.LOGIN);
+		validateMobileOtp(otpValidateRequestDto.getMobile(), otpValidateRequestDto.getIsoCode(), otpValidateRequestDto.getOtp(), OtpType.LOGIN);
 	}
 
 	@Override
-	public void validateMobileOtp(OtpValidateRequestDto otpValidateRequestDto, OtpType otpType) {
-		OtpEntity userOtp =
-				getLastActiveOtp(otpValidateRequestDto.getMobile(), otpValidateRequestDto.getIsoCode(), otpType);
+	public void validateMobileOtp(String mobile, String isoCode, String otp, OtpType otpType) {
+		OtpEntity userOtp = getLastActiveOtp(mobile, isoCode, otpType);
 
-		compareOTP(otpValidateRequestDto.getOtp(), userOtp);
+		compareOTP(otp, userOtp);
 
 		log.debug("OTP validated for mobile: " + userOtp.getMobile());
 
@@ -188,25 +193,23 @@ public class OtpServiceImpl implements OtpService {
 	private void expireOtp(OtpEntity otp) {
 		otp.setStatus(false);
 
-		log.debug("Marking OTP Expired for User: " + otp.getUserId());
+		log.debug("Marking OTP Expired for User [Id: {}, Mobile: {}]", otp.getUserId(), otp.getMobile());
 
 		otpDbService.updateAndFlush(otp);
 	}
 
 	@Override
 	public void resendLoginOtp(LoginRequestDto loginRequestDto) {
-		resendMobileOtp(loginRequestDto, OtpType.LOGIN);
+		resendMobileOtp(loginRequestDto.getMobile(), loginRequestDto.getIsoCode(), OtpType.LOGIN);
 	}
 
 	@Override
-	public void resendMobileOtp(LoginRequestDto loginRequestDto, OtpType otpType) {
-		OtpEntity userOtp = getLastActiveOtp(loginRequestDto.getMobile(), loginRequestDto.getIsoCode(), otpType);
+	public void resendMobileOtp(String mobile, String isoCode, OtpType otpType) {
+		OtpEntity userOtp = getLastActiveOtp(mobile, isoCode, otpType);
 
 		if (userOtp == null) {
 
-			throw new AuthException(
-					"No OTP found for Mobile: " + loginRequestDto.getMobile() + ", ISOCode: " + loginRequestDto.getIsoCode() + ", OtpType: " + otpType,
-					Otp.OTP_NOT_FOUND);
+			throw new AuthException("No OTP found for Mobile: " + mobile + ", ISOCode: " + isoCode + ", OtpType: " + otpType, Otp.OTP_NOT_FOUND);
 
 		} else {
 
@@ -227,11 +230,38 @@ public class OtpServiceImpl implements OtpService {
 		}
 
 		userOtp.setResendCount(userOtp.getResendCount() + 1);
-		log.debug("Updating OTP for User: " + userOtp.getUserId());
+		log.info("Updating OTP for Mobile: " + userOtp.getMobile());
 		userOtp = otpDbService.updateAndFlush(userOtp);
 
-		log.info("Re-Sending OTP: " + userOtp.getOtp() + " for User: " + userOtp.getUserId() + " of Type " + otpType);
+		log.info("Re-Sending OTP: " + userOtp.getOtp() + " for Mobile: " + userOtp.getMobile() + " of Type " + otpType);
 		kafkaUserService.sendOtpToKafka(userOtp);
 	}
 
+	@Override
+	public void sendMobileOtp(MobileOtpRequestDto mobileOtpRequestDto) {
+
+		log.debug("Searching current OTP for Mobile: {}, ISO: {} of Type: {}", 
+				mobileOtpRequestDto.getMobile(), mobileOtpRequestDto.getIsoCode(), mobileOtpRequestDto.getOtpType());
+
+		OtpEntity currentOtp =
+				otpDbService.getOtpForMobile(mobileOtpRequestDto.getMobile(), mobileOtpRequestDto.getOtpType(), mobileOtpRequestDto.getIsoCode());
+
+		OtpEntity mobileOtp;
+
+		if (currentOtp == null) {
+
+			mobileOtp = OtpEntity.builder().userType(mobileOtpRequestDto.getUserType()).build();
+
+			setMobileOtpDetailsAndSave(mobileOtpRequestDto.getMobile(), mobileOtpRequestDto.getIsoCode(), mobileOtpRequestDto.getOtpType(), mobileOtp);
+
+		} else {
+
+			currentOtp.setResendCount(0);
+			mobileOtp = updateUserOtp(currentOtp);
+		}
+
+		log.info("Sending OTP: " + mobileOtp.getOtp() + " for Mobile: " + mobileOtp.getMobile() + " for " + mobileOtpRequestDto.getOtpType());
+		kafkaUserService.sendOtpToKafka(mobileOtp);
+
+	}
 }
