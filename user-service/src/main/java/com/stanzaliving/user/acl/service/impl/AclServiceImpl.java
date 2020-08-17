@@ -3,12 +3,10 @@
  */
 package com.stanzaliving.user.acl.service.impl;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.stanzaliving.user.entity.UserEntity;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
@@ -95,6 +93,19 @@ public class AclServiceImpl implements AclService {
 			accessibleUrlList.addAll(userDeptLevelRoleNameUrlExpandedDto.getUrlList());
 		}
 		return accessibleUrlList;
+	}
+
+	@Override
+	public List<UserDeptLevelRoleNameUrlExpandedDto> getUserDeptLevelRoleNameUrlExpandedDtoFeFromEmail(String email) {
+		List<UserEntity> userEntityList = userService.getUserByEmail(email.trim());
+		if (CollectionUtils.isEmpty(userEntityList)) {
+			return Collections.EMPTY_LIST;
+		}
+		List<UserDeptLevelRoleNameUrlExpandedDto> userDeptLevelRoleNameUrlExpandedDtoList = new ArrayList<>();
+		for (UserEntity userEntity : userEntityList) {
+			userDeptLevelRoleNameUrlExpandedDtoList.addAll(getUserDeptLevelRoleNameUrlExpandedDtoFe(userEntity.getUuid()));
+		}
+		return userDeptLevelRoleNameUrlExpandedDtoList;
 	}
 
 	private List<UserDeptLevelRoleNameUrlExpandedDto> getUserDeptLevelRoleNameUrlExpandedDto(String userUuid) {
