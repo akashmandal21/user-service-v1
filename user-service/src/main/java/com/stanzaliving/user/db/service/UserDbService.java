@@ -9,6 +9,8 @@ import com.stanzaliving.core.sqljpa.service.AbstractJpaService;
 import com.stanzaliving.core.user.dto.UserFilterDto;
 import com.stanzaliving.user.entity.UserEntity;
 
+import java.util.List;
+
 /**
  * @author naveen
  *
@@ -19,4 +21,6 @@ public interface UserDbService extends AbstractJpaService<UserEntity, Long> {
 	UserEntity getUserForMobile(String mobile, String isoCode);
 
 	Specification<UserEntity> getSearchQuery(UserFilterDto userFilterDto);
+
+	List<UserEntity> findByEmail(String email);
 }

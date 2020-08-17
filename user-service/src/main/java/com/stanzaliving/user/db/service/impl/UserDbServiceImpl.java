@@ -100,4 +100,9 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 		return specificationBuilder.build();
 	}
 
+    @Override
+    public List<UserEntity> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
 }
