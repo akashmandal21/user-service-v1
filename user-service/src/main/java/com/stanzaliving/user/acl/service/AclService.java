@@ -13,4 +13,6 @@ public interface AclService {
     List<UserDeptLevelRoleNameUrlExpandedDto> getUserDeptLevelRoleNameUrlExpandedDtoBe(String userUuid);
 
     Set<String> getAccessibleUrlList(String userUuid);
+
+    List<UserDeptLevelRoleNameUrlExpandedDto> getUserDeptLevelRoleNameUrlExpandedDtoFeFromEmail(String email);
 }

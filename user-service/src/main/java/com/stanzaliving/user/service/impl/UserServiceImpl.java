@@ -238,4 +238,9 @@ public class UserServiceImpl implements UserService {
 		return UserAdapter.getUserProfileDtos(userEntities);
 	}
 
+	@Override
+	public List<UserEntity> getUserByEmail(String email) {
+		return userDbService.findByEmail(email);
+	}
+
 }
