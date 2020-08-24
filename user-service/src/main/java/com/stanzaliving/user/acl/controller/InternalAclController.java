@@ -16,7 +16,7 @@ import java.util.List;
 @Log4j2
 @RestController
 @RequestMapping("/internal/acl/")
-public class InternalController {
+public class InternalAclController {
 
     @Autowired
     private AclService aclService;

@@ -110,6 +110,15 @@ public class UserAuthInterceptor extends HandlerInterceptorAdapter {
 			}
 		}
 
+		if (token == null) {
+			token = request.getHeader(SecurityConstants.AUTHORIZATION_HEADER);
+			if (token != null && token.startsWith(SecurityConstants.VENTA_TOKEN_PREFIX)) {		//only if it follows bearer schema, then we would consider valid token
+				token = token.replace(SecurityConstants.VENTA_TOKEN_PREFIX, "");
+			} else {
+				token = null;
+			}
+		}
+
 		return token;
 	}
 
