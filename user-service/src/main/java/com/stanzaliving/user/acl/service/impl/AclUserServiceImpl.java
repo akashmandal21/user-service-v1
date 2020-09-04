@@ -179,7 +179,7 @@ public class AclUserServiceImpl implements AclUserService {
 	}
 
 	@Override
-	public List<String> getUsersForRoles(Department department, String roleName, String accessLevelEntity) {
+	public List<String> getUsersForRoles(Department department, String roleName, List<String> accessLevelEntity) {
 
 		log.info("Got request to get list of userid by rolename {} and department {}", roleName, department);
 
@@ -203,7 +203,7 @@ public class AclUserServiceImpl implements AclUserService {
 
 						Set<String> accessLevelUuids = new HashSet<>(Arrays.asList((entity.getCsvAccessLevelEntityUuid().split(","))));
 
-						if (accessLevelUuids.contains(accessLevelEntity)) {
+						if (!Collections.disjoint(accessLevelEntity, accessLevelUuids)) {
 							userIds.add(entity.getUserUuid());
 						}
 					});
@@ -216,7 +216,7 @@ public class AclUserServiceImpl implements AclUserService {
 	}
 
 	@Override
-	public List<UserContactDetailsResponseDto> getUserContactDetails(Department department, String roleName, String accessLevelEntity) {
+	public List<UserContactDetailsResponseDto> getUserContactDetails(Department department, String roleName, List<String> accessLevelEntity) {
 		List<String> userUuids = getUsersForRoles(department, roleName, accessLevelEntity);
 
 		if (CollectionUtils.isEmpty(userUuids)) {

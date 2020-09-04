@@ -27,7 +27,7 @@ public class AclInternalController {
 	private AclUserService aclUserService;
 	
 	@GetMapping("/useridByRoleName/{department}/{roleName}/{accessLevelId}")
-	public ResponseDto<List<String>> getUserIds(@PathVariable Department department,@PathVariable String roleName,@PathVariable String accessLevelId ) {
+	public ResponseDto<List<String>> getUserIds(@PathVariable Department department,@PathVariable String roleName,@PathVariable List<String> accessLevelId ) {
 
 		log.info("Fetching user by {},{},{}", department,roleName,accessLevelId);
 
@@ -38,7 +38,7 @@ public class AclInternalController {
 	public ResponseDto<List<UserContactDetailsResponseDto>> getUserContactDetails(
 			@PathVariable Department department,
 			@PathVariable String roleName,
-			@PathVariable String accessLevelId
+			@PathVariable List<String> accessLevelId
 	) {
 		log.info("Received user contact details request by department {}, roleName {} and accessLevelId {}", department, roleName, accessLevelId);
 		return ResponseDto.success("Found contact details of users", aclUserService.getUserContactDetails(department, roleName, accessLevelId));

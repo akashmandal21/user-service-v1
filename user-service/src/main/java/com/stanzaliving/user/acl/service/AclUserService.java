@@ -28,7 +28,7 @@ public interface AclUserService {
 
 	void revokeRolesForDepartmentOfLevel(UserDeptLevelRoleListDto userDeptLevelRoleListDto);
 
-	List<String> getUsersForRoles(Department department,String roleName,String accessLevelEntity);
+	List<String> getUsersForRoles(Department department,String roleName,List<String> accessLevelEntity);
 
-	List<UserContactDetailsResponseDto> getUserContactDetails(Department department, String roleName, String accessLevelEntity);
+	List<UserContactDetailsResponseDto> getUserContactDetails(Department department, String roleName, List<String> accessLevelEntity);
 }
