@@ -1,12 +1,6 @@
 package com.stanzaliving.user.acl.service.impl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -179,13 +173,13 @@ public class AclUserServiceImpl implements AclUserService {
 	}
 
 	@Override
-	public List<String> getUsersForRoles(Department department, String roleName, List<String> accessLevelEntity) {
+	public Map<String, String> getUsersForRoles(Department department, String roleName, List<String> accessLevelEntityList) {
 
 		log.info("Got request to get list of userid by rolename {} and department {}", roleName, department);
 
 		RoleDto roleDto = roleService.findByRoleName(roleName);
 
-		List<String> userIds = new ArrayList<>();
+		Map<String, String> userIds = new HashMap<>();
 
 		if (Objects.nonNull(roleDto) && roleDto.getDepartment().equals(department)) {
 
@@ -203,9 +197,14 @@ public class AclUserServiceImpl implements AclUserService {
 
 						Set<String> accessLevelUuids = new HashSet<>(Arrays.asList((entity.getCsvAccessLevelEntityUuid().split(","))));
 
-						if (!Collections.disjoint(accessLevelEntity, accessLevelUuids)) {
-							userIds.add(entity.getUserUuid());
+						for (String accessLevelEntity : accessLevelEntityList) {
+							if (accessLevelUuids.contains(accessLevelEntity)) {
+								userIds.put(entity.getUserUuid(), accessLevelEntity);
+							}
 						}
+//						if (!Collections.disjoint(accessLevelEntityList, accessLevelUuids)) {
+//							userIds.add(entity.getUserUuid());
+//						}
 					});
 				}
 			}
@@ -217,7 +216,7 @@ public class AclUserServiceImpl implements AclUserService {
 
 	@Override
 	public List<UserContactDetailsResponseDto> getUserContactDetails(Department department, String roleName, List<String> accessLevelEntity) {
-		List<String> userUuids = getUsersForRoles(department, roleName, accessLevelEntity);
+		List<String> userUuids = new ArrayList<>(getUsersForRoles(department, roleName, accessLevelEntity).keySet());
 
 		if (CollectionUtils.isEmpty(userUuids)) {
 			return Collections.emptyList();

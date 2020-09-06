@@ -10,6 +10,7 @@ import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleRequestDto
 import com.stanzaliving.core.user.dto.response.UserContactDetailsResponseDto;
 
 import java.util.List;
+import java.util.Map;
 
 public interface AclUserService {
 	void addRole(AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleDto);
@@ -28,7 +29,7 @@ public interface AclUserService {
 
 	void revokeRolesForDepartmentOfLevel(UserDeptLevelRoleListDto userDeptLevelRoleListDto);
 
-	List<String> getUsersForRoles(Department department,String roleName,List<String> accessLevelEntity);
+	Map<String, String> getUsersForRoles(Department department,String roleName,List<String> accessLevelEntity);
 
 	List<UserContactDetailsResponseDto> getUserContactDetails(Department department, String roleName, List<String> accessLevelEntity);
 }
