@@ -41,8 +41,6 @@ public class RoleDbServiceImpl extends AbstractJpaServiceImpl<RoleEntity, Long, 
 		return getJpaRepository().existsByRoleName(roleName);
 	}
 
-	
-	
 	@Override
 	public List<RoleEntity> findByDepartmentAndAccessLevel(Department department, AccessLevel accessLevel) {
 		return getJpaRepository().findByDepartmentAndAccessLevel(department, accessLevel);
@@ -79,6 +77,16 @@ public class RoleDbServiceImpl extends AbstractJpaServiceImpl<RoleEntity, Long, 
 	@Override
 	public List<RoleEntity> findByRoleNameAndDepartment(List<String> roleName, Department department) {
 		return getJpaRepository().findByRoleNameInAndDepartment(roleName, department);
+	}
+
+	@Override
+	public RoleEntity findByRoleNameAndDepartment(String roleName,Department department) {
+		return getJpaRepository().findByRoleNameAndDepartment(roleName, department);
+	}
+
+	@Override
+	public boolean isRoleExists(String roleName, Department department) {
+		return getJpaRepository().existsByRoleNameAndDepartment(roleName, department);
 	}
 
 }
