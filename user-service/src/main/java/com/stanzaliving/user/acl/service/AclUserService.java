@@ -29,7 +29,7 @@ public interface AclUserService {
 
 	void revokeRolesForDepartmentOfLevel(UserDeptLevelRoleListDto userDeptLevelRoleListDto);
 
-	Map<String, String> getUsersForRoles(Department department,String roleName,List<String> accessLevelEntity);
+    Map<String, List<String>> getUsersForRoles(Department department,String roleName,List<String> accessLevelEntity);
 
 	List<UserContactDetailsResponseDto> getUserContactDetails(Department department, String roleName, List<String> accessLevelEntity);
 }

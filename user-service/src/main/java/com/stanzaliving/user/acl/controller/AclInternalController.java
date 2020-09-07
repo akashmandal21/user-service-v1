@@ -37,7 +37,7 @@ public class AclInternalController {
 	}
 
 	@GetMapping("/useridAccessLevelIdByRoleName/{department}/{roleName}/{accessLevelId}")
-	public ResponseDto<Map<String, String>> useridAccessLevelIdByRoleName(@PathVariable Department department, @PathVariable String roleName, @PathVariable List<String> accessLevelId ) {
+	public ResponseDto<Map<String, List<String>>> useridAccessLevelIdByRoleName(@PathVariable Department department, @PathVariable String roleName, @PathVariable List<String> accessLevelId ) {
 
 		log.info("Fetching user by {},{},{}", department,roleName,accessLevelId);
 

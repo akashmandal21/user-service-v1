@@ -173,13 +173,13 @@ public class AclUserServiceImpl implements AclUserService {
 	}
 
 	@Override
-	public Map<String, String> getUsersForRoles(Department department, String roleName, List<String> accessLevelEntityList) {
+	public Map<String, List<String>> getUsersForRoles(Department department, String roleName, List<String> accessLevelEntityList) {
 
 		log.info("Got request to get list of userid by rolename {} and department {}", roleName, department);
 
 		RoleDto roleDto = roleService.findByRoleName(roleName);
 
-		Map<String, String> userIds = new HashMap<>();
+		Map<String, List<String>> userIdAccessLevelIdListMap = new HashMap<>();
 
 		if (Objects.nonNull(roleDto) && roleDto.getDepartment().equals(department)) {
 
@@ -199,7 +199,9 @@ public class AclUserServiceImpl implements AclUserService {
 
 						for (String accessLevelEntity : accessLevelEntityList) {
 							if (accessLevelUuids.contains(accessLevelEntity)) {
-								userIds.put(entity.getUserUuid(), accessLevelEntity);
+							    List<String> accessLevelIds = userIdAccessLevelIdListMap.getOrDefault(entity.getUserUuid(), new ArrayList<>());
+                                accessLevelIds.add(accessLevelEntity);
+								userIdAccessLevelIdListMap.put(entity.getUserUuid(), accessLevelIds);
 							}
 						}
 //						if (!Collections.disjoint(accessLevelEntityList, accessLevelUuids)) {
@@ -211,7 +213,7 @@ public class AclUserServiceImpl implements AclUserService {
 
 		}
 
-		return userIds;
+		return userIdAccessLevelIdListMap;
 	}
 
 	@Override
