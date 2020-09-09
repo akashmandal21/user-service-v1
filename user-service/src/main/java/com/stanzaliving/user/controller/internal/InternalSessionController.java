@@ -15,14 +15,14 @@ import java.util.List;
 
 @Log4j2
 @RestController
-@RequestMapping("/internal/")
-public class InternalController {
+@RequestMapping("/internal/session/")
+public class InternalSessionController {
 
     @Autowired
     private SessionService sessionService;
 
-    @PostMapping("createSession")
-    public ResponseDto createSession(@RequestBody SessionRequestDto sessionRequestDto) {
+    @PostMapping("create")
+    public ResponseDto create(@RequestBody SessionRequestDto sessionRequestDto) {
 
         log.info("Request received to create session : " + sessionRequestDto);
         sessionService.createSession(sessionRequestDto);
@@ -30,8 +30,8 @@ public class InternalController {
 
     }
 
-    @GetMapping("removeSession")
-    public ResponseDto removeSession(@RequestBody SessionRequestDto sessionRequestDto) {
+    @PostMapping("remove")
+    public ResponseDto remove(@RequestBody SessionRequestDto sessionRequestDto) {
 
         log.info("Request received to remove session : " + sessionRequestDto);
         sessionService.removeUserSession(sessionRequestDto.getToken());

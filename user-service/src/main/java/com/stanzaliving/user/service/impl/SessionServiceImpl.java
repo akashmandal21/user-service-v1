@@ -42,7 +42,7 @@ public class SessionServiceImpl implements SessionService {
 	private UserSessionDbService userSessionDbService;
 
 	@Autowired
-	UserService userService;
+	private UserService userService;
 
 	@Override
 	public UserSessionEntity createUserSession(UserDto userDto, String token) {
