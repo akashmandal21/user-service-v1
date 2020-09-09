@@ -18,6 +18,7 @@ import com.stanzaliving.core.pojo.SmsDto;
 import com.stanzaliving.core.property.manager.PropertyManager;
 import com.stanzaliving.core.user.constants.UserErrorCodes;
 import com.stanzaliving.core.user.constants.UserErrorCodes.Otp;
+import com.stanzaliving.core.user.enums.OtpType;
 import com.stanzaliving.user.constants.UserConstants;
 import com.stanzaliving.user.entity.OtpEntity;
 import com.stanzaliving.user.kafka.service.KafkaUserService;
@@ -111,7 +112,7 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 
 		emailDto.setFrom(propertyManager.getProperty("email.from"));
 		emailDto.setFromName(StanzaConstants.ORGANIZATION_NAME);
-		
+
 		emailDto.setTo(new String[] { otpEntity.getEmail() });
 
 		emailDto.setSubject("OTP to access Stanza Living");
@@ -124,30 +125,40 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 	private String getOtpMessageForUserType(OtpEntity otpEntity) {
 		String message;
 
-		switch (otpEntity.getUserType()) {
-			case STUDENT:
-				message = propertyManager.getProperty("student.otp.msg", UserConstants.DEFAULT_OTP_TEXT);
-				break;
-			case PARENT:
-				message = propertyManager.getProperty("parent.otp.msg", UserConstants.DEFAULT_OTP_TEXT);
-				break;
-			case LEGAL:
-				message = propertyManager.getProperty("legal.otp.msg", UserConstants.DEFAULT_OTP_TEXT);
-				break;
-			case HR:
-				message = propertyManager.getProperty("hr.otp.msg", UserConstants.DEFAULT_OTP_TEXT);
-				break;
-			case TECH:
-				message = propertyManager.getProperty("tech.otp.msg", UserConstants.DEFAULT_OTP_TEXT);
-				break;
-			case FINANCE:
-				message = propertyManager.getProperty("finance.otp.msg", UserConstants.DEFAULT_OTP_TEXT);
-				break;
-			case PROCUREMENT:
-				message = propertyManager.getProperty("procurement.otp.msg", UserConstants.DEFAULT_OTP_TEXT);
-				break;
-			default:
-				message = propertyManager.getProperty("default.otp.msg", UserConstants.DEFAULT_OTP_TEXT);
+		if (OtpType.MOBILE_VERIFICATION == otpEntity.getOtpType()) {
+
+			message = propertyManager.getProperty("mobile.verification.otp.msg", UserConstants.MOBILE_VERIFICATION_OTP_TEXT);
+
+		} else if (OtpType.EMAIL_VERIFICATION == otpEntity.getOtpType()) {
+
+			message = propertyManager.getProperty("email.verification.otp.msg", UserConstants.EMAIL_VERIFICATION_OTP_TEXT);
+
+		} else {
+			switch (otpEntity.getUserType()) {
+				case STUDENT:
+					message = propertyManager.getProperty("student.otp.msg", UserConstants.DEFAULT_OTP_TEXT);
+					break;
+				case PARENT:
+					message = propertyManager.getProperty("parent.otp.msg", UserConstants.DEFAULT_OTP_TEXT);
+					break;
+				case LEGAL:
+					message = propertyManager.getProperty("legal.otp.msg", UserConstants.DEFAULT_OTP_TEXT);
+					break;
+				case HR:
+					message = propertyManager.getProperty("hr.otp.msg", UserConstants.DEFAULT_OTP_TEXT);
+					break;
+				case TECH:
+					message = propertyManager.getProperty("tech.otp.msg", UserConstants.DEFAULT_OTP_TEXT);
+					break;
+				case FINANCE:
+					message = propertyManager.getProperty("finance.otp.msg", UserConstants.DEFAULT_OTP_TEXT);
+					break;
+				case PROCUREMENT:
+					message = propertyManager.getProperty("procurement.otp.msg", UserConstants.DEFAULT_OTP_TEXT);
+					break;
+				default:
+					message = propertyManager.getProperty("default.otp.msg", UserConstants.DEFAULT_OTP_TEXT);
+			}
 		}
 
 		message = message.replaceAll("<otp>", String.valueOf(otpEntity.getOtp()));

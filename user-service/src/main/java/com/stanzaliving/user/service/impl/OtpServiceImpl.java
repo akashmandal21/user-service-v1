@@ -186,7 +186,7 @@ public class OtpServiceImpl implements OtpService {
 				|| userOtp.getUpdatedAt().before(otpTime)
 				|| !userOtp.getOtp().toString().equals(otp)) {
 
-			throw new AuthException("Invalid OTP For User", Otp.INVALID_OTP);
+			throw new AuthException("Invalid OTP For User With Mobile " + userOtp.getMobile(), Otp.INVALID_OTP);
 		}
 	}
 
@@ -240,7 +240,7 @@ public class OtpServiceImpl implements OtpService {
 	@Override
 	public void sendMobileOtp(MobileOtpRequestDto mobileOtpRequestDto) {
 
-		log.debug("Searching current OTP for Mobile: {}, ISO: {} of Type: {}", 
+		log.debug("Searching current OTP for Mobile: {}, ISO: {} of Type: {}",
 				mobileOtpRequestDto.getMobile(), mobileOtpRequestDto.getIsoCode(), mobileOtpRequestDto.getOtpType());
 
 		OtpEntity currentOtp =

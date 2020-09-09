@@ -56,13 +56,13 @@ public class AuthServiceImpl implements AuthService {
 				userDbService.getUserForMobile(loginRequestDto.getMobile(), loginRequestDto.getIsoCode());
 
 		userEntity = createUserIfUserIsConsumer(loginRequestDto, userEntity);
-		
+
 		if (Objects.isNull(userEntity)) {
-			throw new AuthException("User Not Found For Login", UserErrorCodes.USER_NOT_EXISTS);
+			throw new AuthException("User Not Found For Login With Mobile " + loginRequestDto.getMobile(), UserErrorCodes.USER_NOT_EXISTS);
 		}
 
 		if (!userEntity.isStatus()) {
-			throw new AuthException("User Account is Disabled", UserErrorCodes.USER_ACCOUNT_INACTIVE);
+			throw new AuthException("User Account is Disabled for Mobile " + loginRequestDto.getMobile(), UserErrorCodes.USER_ACCOUNT_INACTIVE);
 		}
 
 		log.info("Found User: " + userEntity.getUuid() + " for Mobile: " + loginRequestDto.getMobile() + " of Type: " + userEntity.getUserType());
@@ -71,17 +71,17 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	private UserEntity createUserIfUserIsConsumer(LoginRequestDto loginRequestDto, UserEntity userEntity) {
-		
-		if(Objects.isNull(userEntity) 
-				&& Objects.nonNull(loginRequestDto.getUserType()) 
+
+		if (Objects.isNull(userEntity)
+				&& Objects.nonNull(loginRequestDto.getUserType())
 				&& UserType.CONSUMER == loginRequestDto.getUserType()) {
-			
+
 			UserProfileEntity userProfileEntity =
 					UserProfileEntity
 							.builder()
 							.firstName("")
 							.build();
-			
+
 			userEntity = UserEntity.builder()
 					.isoCode(loginRequestDto.getIsoCode())
 					.mobile(loginRequestDto.getMobile())
@@ -89,12 +89,12 @@ public class AuthServiceImpl implements AuthService {
 					.department(Department.WEB)
 					.userProfile(userProfileEntity)
 					.build();
-			
+
 			userProfileEntity.setUser(userEntity);
-			
+
 			userEntity = userDbService.save(userEntity);
 		}
-		
+
 		return userEntity;
 	}
 
