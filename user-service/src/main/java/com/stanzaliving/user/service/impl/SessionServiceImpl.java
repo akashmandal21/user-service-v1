@@ -3,8 +3,15 @@
  */
 package com.stanzaliving.user.service.impl;
 
+import java.util.List;
 import java.util.Objects;
 
+import com.stanzaliving.core.base.constants.SecurityConstants;
+import com.stanzaliving.core.base.exception.StanzaException;
+import com.stanzaliving.core.user.dto.SessionRequestDto;
+import com.stanzaliving.user.entity.UserEntity;
+import com.stanzaliving.user.service.UserService;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCrypt;
@@ -33,6 +40,9 @@ public class SessionServiceImpl implements SessionService {
 
 	@Autowired
 	private UserSessionDbService userSessionDbService;
+
+	@Autowired
+	private UserService userService;
 
 	@Override
 	public UserSessionEntity createUserSession(UserDto userDto, String token) {
@@ -78,7 +88,33 @@ public class SessionServiceImpl implements SessionService {
 		return userSessionDbService.updateAndFlush(userSessionEntity);
 	}
 
-	private String getBcryptPassword(String password) {
+    @Override
+    public void createSession(SessionRequestDto sessionRequestDto) {
+		List<UserEntity> userEntityList = userService.getUserByEmail(sessionRequestDto.getEmail().trim());
+		if (CollectionUtils.isEmpty(userEntityList)) {
+			log.info("User not found for email: " + sessionRequestDto.getEmail());			//if all users of venta will be created in user service, then throw exception
+			return;
+		}
+
+		String token = sessionRequestDto.getToken().replace(SecurityConstants.VENTA_TOKEN_PREFIX, "");
+		UserSessionEntity userSessionEntity = getUserSessionByToken(token);
+		if (null != userSessionEntity) {
+			log.info("Session already exist with token {}", token);
+			return;
+		}
+
+		UserEntity userEntity = userEntityList.get(0);
+		userSessionEntity = UserSessionEntity.builder()
+						.userId(userEntity.getUuid())
+						.token(getBcryptPassword(token))
+						.userType(userEntity.getUserType())
+						.build();
+		userSessionEntity = userSessionDbService.saveAndFlush(userSessionEntity);
+
+		log.info("Created Manual Session: " + userSessionEntity.getUuid() + " for User: " + userEntity.getUuid());
+    }
+
+    private String getBcryptPassword(String password) {
 		return BCrypt.hashpw(password, bcryptSalt);
 	}
 
