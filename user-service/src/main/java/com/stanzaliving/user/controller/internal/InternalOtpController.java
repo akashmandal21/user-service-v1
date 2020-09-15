@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
+import com.stanzaliving.core.base.exception.AuthException;
 import com.stanzaliving.core.user.request.dto.MobileOtpRequestDto;
 import com.stanzaliving.core.user.request.dto.MobileOtpValidateRequestDto;
-import com.stanzaliving.user.exception.AuthException;
 import com.stanzaliving.user.service.OtpService;
 
 import lombok.extern.log4j.Log4j2;

@@ -17,11 +17,11 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import com.stanzaliving.core.base.StanzaConstants;
 import com.stanzaliving.core.base.constants.SecurityConstants;
+import com.stanzaliving.core.base.exception.AuthException;
 import com.stanzaliving.core.base.utils.DateUtil;
 import com.stanzaliving.core.base.utils.SecureCookieUtil;
 import com.stanzaliving.core.user.constants.UserErrorCodes;
 import com.stanzaliving.user.entity.UserSessionEntity;
-import com.stanzaliving.user.exception.AuthException;
 import com.stanzaliving.user.service.SessionService;
 
 import lombok.extern.log4j.Log4j2;

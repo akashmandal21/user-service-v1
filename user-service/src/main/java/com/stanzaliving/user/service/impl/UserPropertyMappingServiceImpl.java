@@ -19,6 +19,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
+import com.stanzaliving.core.base.exception.MappingNotFoundException;
 import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.sqljpa.specification.utils.CriteriaOperation;
 import com.stanzaliving.core.sqljpa.specification.utils.StanzaSpecificationBuilder;
@@ -27,7 +28,6 @@ import com.stanzaliving.core.user.request.dto.UserPropertyMappingRequestDto;
 import com.stanzaliving.user.adapters.UserPropertyMappingAdapter;
 import com.stanzaliving.user.db.service.UserPropertyMappingDbService;
 import com.stanzaliving.user.entity.UserPropertyMappingEntity;
-import com.stanzaliving.user.exception.MappingNotFoundException;
 import com.stanzaliving.user.service.UserPropertyMappingService;
 
 import lombok.extern.log4j.Log4j2;

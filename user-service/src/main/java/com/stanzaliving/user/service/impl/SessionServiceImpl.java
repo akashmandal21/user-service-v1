@@ -6,23 +6,22 @@ package com.stanzaliving.user.service.impl;
 import java.util.List;
 import java.util.Objects;
 
-import com.stanzaliving.core.base.constants.SecurityConstants;
-import com.stanzaliving.core.base.exception.StanzaException;
-import com.stanzaliving.core.user.dto.SessionRequestDto;
-import com.stanzaliving.user.entity.UserEntity;
-import com.stanzaliving.user.service.UserService;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
+import com.stanzaliving.core.base.constants.SecurityConstants;
+import com.stanzaliving.core.base.exception.AuthException;
 import com.stanzaliving.core.user.constants.UserErrorCodes;
+import com.stanzaliving.core.user.dto.SessionRequestDto;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.user.db.service.UserSessionDbService;
+import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.entity.UserSessionEntity;
-import com.stanzaliving.user.exception.AuthException;
 import com.stanzaliving.user.service.SessionService;
+import com.stanzaliving.user.service.UserService;
 
 import lombok.extern.log4j.Log4j2;
 

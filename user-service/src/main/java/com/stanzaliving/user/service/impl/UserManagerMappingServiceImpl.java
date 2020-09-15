@@ -1,16 +1,20 @@
 package com.stanzaliving.user.service.impl;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-import com.stanzaliving.core.base.common.dto.PaginationRequest;
-import com.stanzaliving.core.base.exception.ApiValidationException;
-import com.stanzaliving.core.user.dto.UserFilterDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.stanzaliving.core.base.common.dto.PaginationRequest;
+import com.stanzaliving.core.base.exception.ApiValidationException;
 import com.stanzaliving.core.base.exception.StanzaException;
+import com.stanzaliving.core.user.dto.UserFilterDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.UserManagerMappingType;
 import com.stanzaliving.core.user.request.dto.UserManagerMappingRequestDto;
