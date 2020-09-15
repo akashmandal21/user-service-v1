@@ -21,7 +21,11 @@ public interface RoleRepository extends AbstractJpaRepository<RoleEntity, Long> 
 
 	boolean existsByRoleName(String roleName);
 
+	boolean existsByRoleNameAndDepartment(String roleName,Department department);
+
 	RoleEntity findByRoleName(String roleName);
+	
+	RoleEntity findByRoleNameAndDepartment(String roleName, Department department);
 
 	List<RoleEntity> findByRoleNameInAndDepartment(List<String> roleNames, Department department);
 

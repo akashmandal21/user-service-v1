@@ -38,7 +38,7 @@ public class RoleServiceImpl implements RoleService {
 
 	@Override
 	public RoleDto addRole(AddRoleRequestDto addRoleRequestDto) {
-		if (roleDbService.isRoleExists(addRoleRequestDto.getRoleName())) {
+		if (roleDbService.isRoleExists(addRoleRequestDto.getRoleName(), addRoleRequestDto.getDepartment())) {
 			throw new StanzaException("Role already exists with given name " + addRoleRequestDto.getRoleName());
 		}
 
@@ -108,6 +108,20 @@ public class RoleServiceImpl implements RoleService {
 		log.info("Searching role by name: {}", roleName);
 
 		RoleEntity roleEntity = roleDbService.findByRoleName(roleName);
+
+		if (null == roleEntity) {
+			throw new StanzaException("Unable to find rule by roleName " + roleName);
+		}
+
+		return RoleAdapter.getDto(roleEntity);
+	}
+
+	@Override
+	public RoleDto findByRoleNameAndDepartment(String roleName, Department department) {
+
+		log.info("Searching role by name: {}", roleName);
+
+		RoleEntity roleEntity = roleDbService.findByRoleNameAndDepartment(roleName, department);
 
 		if (null == roleEntity) {
 			throw new StanzaException("Unable to find rule by roleName " + roleName);

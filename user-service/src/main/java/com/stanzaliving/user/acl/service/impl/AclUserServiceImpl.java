@@ -183,7 +183,7 @@ public class AclUserServiceImpl implements AclUserService {
 
 		log.info("Got request to get list of userid by rolename {} and department {}", roleName, department);
 
-		RoleDto roleDto = roleService.findByRoleName(roleName);
+		RoleDto roleDto = roleService.findByRoleNameAndDepartment(roleName, department);
 
 		List<String> userIds = new ArrayList<>();
 
