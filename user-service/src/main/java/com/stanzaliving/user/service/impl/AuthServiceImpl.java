@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.stanzaliving.core.base.enums.Department;
+import com.stanzaliving.core.base.exception.AuthException;
 import com.stanzaliving.core.user.constants.UserErrorCodes;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.UserType;
@@ -18,7 +19,6 @@ import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.db.service.UserDbService;
 import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.entity.UserProfileEntity;
-import com.stanzaliving.user.exception.AuthException;
 import com.stanzaliving.user.service.AuthService;
 import com.stanzaliving.user.service.OtpService;
 

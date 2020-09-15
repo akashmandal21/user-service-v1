@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.stanzaliving.core.base.StanzaConstants;
+import com.stanzaliving.core.base.exception.AuthException;
 import com.stanzaliving.core.base.utils.DateUtil;
 import com.stanzaliving.core.base.utils.PhoneNumberUtils;
 import com.stanzaliving.core.base.utils.StanzaUtils;
@@ -27,7 +28,6 @@ import com.stanzaliving.core.user.request.dto.OtpValidateRequestDto;
 import com.stanzaliving.user.db.service.OtpDbService;
 import com.stanzaliving.user.entity.OtpEntity;
 import com.stanzaliving.user.entity.UserEntity;
-import com.stanzaliving.user.exception.AuthException;
 import com.stanzaliving.user.kafka.service.KafkaUserService;
 import com.stanzaliving.user.service.OtpService;
 
