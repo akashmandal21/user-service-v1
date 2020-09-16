@@ -179,9 +179,11 @@ public class OtpServiceImpl implements OtpService {
 		Date otpTime = new Date(
 				LocalDateTime.now(StanzaConstants.IST_TIMEZONEID).atZone(StanzaConstants.IST_TIMEZONEID).toInstant().getEpochSecond() - (otpExpiryMinutes * 60000));
 
-		if (userOtp == null
-				|| userOtp.getOtp() == null
-				|| !userOtp.isStatus()
+		if (userOtp == null) {
+			throw new AuthException("No OTP exists for mobile", Otp.OTP_NOT_FOUND);
+		}
+		
+		if (!userOtp.isStatus()
 				|| userOtp.getUpdatedAt() == null
 				|| userOtp.getUpdatedAt().before(otpTime)
 				|| !userOtp.getOtp().toString().equals(otp)) {
