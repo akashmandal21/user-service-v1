@@ -34,6 +34,7 @@ import com.stanzaliving.core.user.enums.EnumListing;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.core.user.request.dto.UserStatusRequestDto;
+import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
 import com.stanzaliving.user.acl.service.AclService;
 import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.service.UserService;
@@ -141,6 +142,14 @@ public class UserController {
 
 		log.info("Successfully fetched user details along with manager and role details.");
 		return ResponseDto.success("Found user Details with manager and role details.", userManagerAndRoleDto);
+	}
+
+	@PostMapping("update/usertype/department")
+	public ResponseDto<UserDto> updateUserTypeAndDepartment(@RequestBody @Valid UpdateDepartmentUserTypeDto updateDepartmentUserTypeDto) {
+
+		boolean response = userService.updateUserTypeAndDepartment(updateDepartmentUserTypeDto);
+
+		return response ? ResponseDto.success("User type and department modified successfully") : ResponseDto.failure("User type and department not modified");
 	}
 
 }

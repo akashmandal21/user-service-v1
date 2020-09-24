@@ -28,6 +28,7 @@ import com.stanzaliving.core.user.dto.UserFilterDto;
 import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
+import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
 import com.stanzaliving.user.acl.service.AclUserService;
 import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.db.service.UserDbService;
@@ -241,6 +242,27 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public List<UserEntity> getUserByEmail(String email) {
 		return userDbService.findByEmail(email);
+	}
+
+	@Override
+	public boolean updateUserTypeAndDepartment(UpdateDepartmentUserTypeDto updateDepartmentUserTypeDto) {
+
+		log.info("Searching User by UserId: " + updateDepartmentUserTypeDto.getUserId());
+
+		UserEntity userEntity = userDbService.findByUuidAndStatus(updateDepartmentUserTypeDto.getUserId(), Boolean.TRUE);
+
+		if (Objects.isNull(userEntity))
+			throw new StanzaException("User not found for UserId: " + updateDepartmentUserTypeDto.getUserId());
+
+		userEntity.setUserType(updateDepartmentUserTypeDto.getUserType());
+		userEntity.setDepartment(updateDepartmentUserTypeDto.getDepartment());
+
+		userEntity = userDbService.update(userEntity);
+
+		if (Objects.nonNull(userEntity))
+			return Boolean.TRUE;
+
+		return Boolean.FALSE;
 	}
 
 }
