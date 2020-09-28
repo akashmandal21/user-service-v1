@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import com.stanzaliving.core.base.utils.PhoneNumberUtils;
 import com.stanzaliving.core.sqljpa.service.impl.AbstractJpaServiceImpl;
 import com.stanzaliving.core.user.enums.OtpType;
-import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.user.db.service.OtpDbService;
 import com.stanzaliving.user.entity.OtpEntity;
 import com.stanzaliving.user.repository.OtpRepository;
@@ -47,13 +46,12 @@ public class OtpDbServiceImpl extends AbstractJpaServiceImpl<OtpEntity, Long, Ot
 	}
 
 	@Override
-	public OtpEntity getActiveOtpForMobile(String mobile, OtpType otpType, UserType userType, String isoCode) {
+	public OtpEntity getActiveOtpForMobile(String mobile, OtpType otpType, String isoCode) {
 		Pageable pageable = PageRequest.of(0, 1, Direction.DESC, "updatedAt");
 
-		List<OtpEntity> userOtps = null;
-
-		userOtps = getJpaRepository().findByMobileAndOtpTypeAndIsoCodeAndStatus(
-				PhoneNumberUtils.normalizeNumber(mobile), otpType, isoCode, true, pageable);
+		List<OtpEntity> userOtps =
+				getJpaRepository()
+						.findByMobileAndOtpTypeAndIsoCodeAndStatus(PhoneNumberUtils.normalizeNumber(mobile), otpType, isoCode, true, pageable);
 
 		return CollectionUtils.isNotEmpty(userOtps) ? userOtps.get(0) : null;
 	}

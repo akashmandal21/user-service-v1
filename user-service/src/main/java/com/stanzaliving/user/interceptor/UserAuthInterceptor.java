@@ -17,11 +17,11 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import com.stanzaliving.core.base.StanzaConstants;
 import com.stanzaliving.core.base.constants.SecurityConstants;
+import com.stanzaliving.core.base.exception.AuthException;
 import com.stanzaliving.core.base.utils.DateUtil;
 import com.stanzaliving.core.base.utils.SecureCookieUtil;
 import com.stanzaliving.core.user.constants.UserErrorCodes;
 import com.stanzaliving.user.entity.UserSessionEntity;
-import com.stanzaliving.user.exception.AuthException;
 import com.stanzaliving.user.service.SessionService;
 
 import lombok.extern.log4j.Log4j2;
@@ -107,6 +107,15 @@ public class UserAuthInterceptor extends HandlerInterceptorAdapter {
 					token = cookie.getValue();
 					break;
 				}
+			}
+		}
+
+		if (token == null) {
+			token = request.getHeader(SecurityConstants.AUTHORIZATION_HEADER);
+			if (token != null && token.startsWith(SecurityConstants.VENTA_TOKEN_PREFIX)) {		//only if it follows bearer schema, then we would consider valid token
+				token = token.replace(SecurityConstants.VENTA_TOKEN_PREFIX, "");
+			} else {
+				token = null;
 			}
 		}
 

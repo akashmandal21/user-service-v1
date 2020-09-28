@@ -13,6 +13,8 @@ public interface RoleService {
     RoleDto getRoleByUuid(String roleUuid);
     
     RoleDto findByRoleName(String roleName);
+    
+    RoleDto findByRoleNameAndDepartment(String roleName,Department department);
 
     List<RoleDto> findByDepartmentAndAccessLevel(Department department, AccessLevel accessLevel);
 

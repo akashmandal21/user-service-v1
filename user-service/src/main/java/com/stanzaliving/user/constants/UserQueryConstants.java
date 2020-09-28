@@ -3,7 +3,6 @@
  */
 package com.stanzaliving.user.constants;
 
-import com.stanzaliving.core.base.enums.Department;
 import lombok.experimental.UtilityClass;
 
 /**

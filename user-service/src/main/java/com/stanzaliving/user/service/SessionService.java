@@ -3,6 +3,7 @@
  */
 package com.stanzaliving.user.service;
 
+import com.stanzaliving.core.user.dto.SessionRequestDto;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.user.entity.UserSessionEntity;
 
@@ -21,5 +22,5 @@ public interface SessionService {
 
 	UserSessionEntity updateUserSession(UserSessionEntity userSessionEntity);
 
-
+	void createSession(SessionRequestDto sessionRequestDto);
 }

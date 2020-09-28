@@ -11,8 +11,9 @@ import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserFilterDto;
 import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
-import com.stanzaliving.core.user.enums.EnumListing;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
+import com.stanzaliving.user.entity.UserEntity;
+import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
 
 /**
@@ -38,8 +39,12 @@ public interface UserService {
 
 	UserManagerAndRoleDto getUserWithManagerAndRole(String userUuid);
 
-	List<EnumListing> getAllUserType();
-	
+	List<UserProfileDto> getAllUsers();
+
+	List<UserEntity> getUserByEmail(String email);
+
+	boolean updateUserTypeAndDepartment(UpdateDepartmentUserTypeDto updateDepartmentUserTypeDto);
+
 	UserDto updateUser(UpdateUserRequestDto updateUserRequestDto);
 
 }
