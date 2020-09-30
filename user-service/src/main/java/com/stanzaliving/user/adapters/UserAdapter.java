@@ -121,6 +121,7 @@ public class UserAdapter {
 				.nationality(profileEntity.getNationality())
 				.bloodGroup(profileEntity.getBloodGroup())
 				.arrivalDate(profileEntity.getArrivalDate())
+				.birthday(profileEntity.getBirthday())
 				.nextDestination(profileEntity.getNextDestination())
 				.build();
 	}
