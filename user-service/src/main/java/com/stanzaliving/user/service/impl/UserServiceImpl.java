@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +23,9 @@ import com.stanzaliving.core.base.common.dto.PageResponse;
 import com.stanzaliving.core.base.exception.NoRecordException;
 import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.base.utils.PhoneNumberUtils;
+import com.stanzaliving.core.kafka.dto.KafkaDTO;
+import com.stanzaliving.core.kafka.producer.NotificationProducer;
+import com.stanzaliving.core.sqljpa.adapter.AddressAdapter;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserFilterDto;
@@ -29,6 +33,7 @@ import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
+import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
 import com.stanzaliving.user.acl.service.AclUserService;
 import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.db.service.UserDbService;
@@ -56,6 +61,12 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private AclUserService aclUserService;
+
+	@Autowired
+	private NotificationProducer notificationProducer;
+	
+	@Value("${kafka.resident.detail.topic}")
+	private String kafkaResidentDetailTopic;
 
 	@Override
 	public UserProfileDto getActiveUserByUserId(String userId) {
@@ -116,7 +127,15 @@ public class UserServiceImpl implements UserService {
 
 		log.info("Added New User with Id: " + userEntity.getUuid());
 
-		return UserAdapter.getUserDto(userEntity);
+		UserDto userDto = UserAdapter.getUserDto(userEntity);
+		
+		
+		KafkaDTO kafkaDTO = new KafkaDTO();
+		kafkaDTO.setData(userDto);
+		
+		notificationProducer.publish(kafkaResidentDetailTopic, KafkaDTO.class.getName(), kafkaDTO);
+
+		return userDto;
 	}
 
 	@Override
@@ -264,5 +283,40 @@ public class UserServiceImpl implements UserService {
 
 		return Boolean.FALSE;
 	}
+	
+	@Override
+	public UserDto updateUser(UpdateUserRequestDto updateUserRequestDto) {
+
+		UserEntity userEntity = userDbService.findByUuidAndStatus(updateUserRequestDto.getUserId(), true);
+
+		if (Objects.isNull(userEntity)) {
+			throw new StanzaException("User not found for UserId: " + updateUserRequestDto.getUserId());
+		}
+		
+		if(Objects.nonNull(updateUserRequestDto.getAddress())) {userEntity.getUserProfile().setAddress(AddressAdapter.getAddressEntity(updateUserRequestDto.getAddress()));}
+		if(Objects.nonNull(updateUserRequestDto.getBirthday())) {userEntity.getUserProfile().setBirthday(updateUserRequestDto.getBirthday());}
+		if(Objects.nonNull(updateUserRequestDto.getBloodGroup())) {userEntity.getUserProfile().setBloodGroup(updateUserRequestDto.getBloodGroup());}
+		if(Objects.nonNull(updateUserRequestDto.getEmail())) {userEntity.setEmail(updateUserRequestDto.getEmail());}
+		if(Objects.nonNull(updateUserRequestDto.getFirstName())) {userEntity.getUserProfile().setFirstName(updateUserRequestDto.getFirstName());}
+		if(Objects.nonNull(updateUserRequestDto.getGender())) {userEntity.getUserProfile().setGender(updateUserRequestDto.getGender());};
+		if(Objects.nonNull(updateUserRequestDto.getLastName())){userEntity.getUserProfile().setLastName(updateUserRequestDto.getLastName());}
+		if(Objects.nonNull(updateUserRequestDto.getNationality())){userEntity.getUserProfile().setNationality(updateUserRequestDto.getNationality());}
+		if(Objects.nonNull(updateUserRequestDto.getProfilePicture())){userEntity.getUserProfile().setProfilePicture(updateUserRequestDto.getProfilePicture());}
+		if(Objects.nonNull(updateUserRequestDto.getDateOfArrival())){userEntity.getUserProfile().setArrivalDate(updateUserRequestDto.getDateOfArrival());}
+		if(Objects.nonNull(updateUserRequestDto.getForiegnCountryCode())){userEntity.getUserProfile().setSecondaryIsoCode(updateUserRequestDto.getForiegnCountryCode());}
+		if(Objects.nonNull(updateUserRequestDto.getForiegnMobileNumber())){userEntity.getUserProfile().setProfilePicture(updateUserRequestDto.getForiegnMobileNumber());}
+		if(Objects.nonNull(updateUserRequestDto.getNextDestination())){userEntity.getUserProfile().setNextDestination(updateUserRequestDto.getNextDestination());}
+		userEntity = userDbService.update(userEntity);
+		
+		UserProfileDto userProfileDto = UserAdapter.getUserProfileDto(userEntity);
+		
+		KafkaDTO kafkaDTO = new KafkaDTO();
+		kafkaDTO.setData(userProfileDto);
+		
+		notificationProducer.publish(kafkaResidentDetailTopic, KafkaDTO.class.getName(), kafkaDTO);
+
+		return userProfileDto;
+	}
+
 
 }

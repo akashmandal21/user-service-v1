@@ -17,8 +17,10 @@ import javax.persistence.Table;
 import com.stanzaliving.core.sqljpa.conveter.LocalDateAttributeConverter;
 import com.stanzaliving.core.sqljpa.entity.AbstractJpaEntity;
 import com.stanzaliving.core.sqljpa.entity.AddressEntity;
+import com.stanzaliving.core.user.enums.BloodGroup;
 import com.stanzaliving.core.user.enums.Gender;
 import com.stanzaliving.core.user.enums.MaritalStatus;
+import com.stanzaliving.core.user.enums.Nationality;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -86,6 +88,21 @@ public class UserProfileEntity extends AbstractJpaEntity {
 	@Column(name = "anniversary_date", columnDefinition = "DATE")
 	@Convert(converter = LocalDateAttributeConverter.class)
 	private LocalDate anniversaryDate;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name= "nationality",columnDefinition = "varchar(100)")
+	private Nationality nationality;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "blood_group",columnDefinition = "varchar(20)")
+	private BloodGroup bloodGroup;
+
+	@Column(name = "arrival_date", columnDefinition = "DATE")
+	@Convert(converter = LocalDateAttributeConverter.class)
+	private LocalDate arrivalDate;
+
+	@Column(name= "next_destination",columnDefinition = "varchar(100)")
+	private String nextDestination;
 
 	@Embedded
 	private AddressEntity address;
