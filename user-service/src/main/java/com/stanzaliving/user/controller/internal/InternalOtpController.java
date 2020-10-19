@@ -1,5 +1,7 @@
 package com.stanzaliving.user.controller.internal;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -8,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.base.exception.AuthException;
+import com.stanzaliving.core.user.request.dto.MobileEmailOtpRequestDto;
 import com.stanzaliving.core.user.request.dto.MobileOtpRequestDto;
 import com.stanzaliving.core.user.request.dto.MobileOtpValidateRequestDto;
 import com.stanzaliving.user.service.OtpService;
@@ -23,7 +26,7 @@ public class InternalOtpController {
 	private OtpService otpService;
 
 	@PostMapping("mobile/request")
-	public ResponseDto<Void> sendMobileOtp(@RequestBody MobileOtpRequestDto mobileOtpRequestDto) {
+	public ResponseDto<Void> sendMobileOtp(@RequestBody @Valid MobileOtpRequestDto mobileOtpRequestDto) {
 
 		log.info("Received request to send OTP: {}", mobileOtpRequestDto);
 
@@ -33,7 +36,7 @@ public class InternalOtpController {
 	}
 
 	@PostMapping("mobile/validate")
-	public ResponseDto<Void> validateMobileOtp(@RequestBody MobileOtpValidateRequestDto mobileOtpValidateRequestDto) {
+	public ResponseDto<Void> validateMobileOtp(@RequestBody @Valid MobileOtpValidateRequestDto mobileOtpValidateRequestDto) {
 
 		log.info("Received request to validate OTP: {}", mobileOtpValidateRequestDto);
 
@@ -54,7 +57,7 @@ public class InternalOtpController {
 	}
 
 	@PostMapping("mobile/resend")
-	public ResponseDto<Void> resendMobileOtp(@RequestBody MobileOtpRequestDto mobileOtpRequestDto) {
+	public ResponseDto<Void> resendMobileOtp(@RequestBody @Valid MobileOtpRequestDto mobileOtpRequestDto) {
 
 		log.info("Received request to resend OTP: {}", mobileOtpRequestDto);
 
@@ -69,4 +72,15 @@ public class InternalOtpController {
 			return ResponseDto.failure(e.getMessage());
 		}
 	}
+
+	@PostMapping("request")
+	public ResponseDto<Void> sendMobileAndEmailOtp(@RequestBody @Valid MobileEmailOtpRequestDto mobileEmailOtpRequestDto) {
+
+		log.info("Received request to send OTP: {}", mobileEmailOtpRequestDto);
+
+		otpService.sendOtp(mobileEmailOtpRequestDto);
+
+		return ResponseDto.success("OTP sent to mobile & email");
+	}
+
 }
