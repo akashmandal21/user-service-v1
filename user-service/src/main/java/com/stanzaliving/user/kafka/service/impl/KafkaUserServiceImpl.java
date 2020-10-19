@@ -133,6 +133,10 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 
 			message = propertyManager.getProperty("email.verification.otp.msg", UserConstants.EMAIL_VERIFICATION_OTP_TEXT);
 
+		} else if (OtpType.USER_VERFICATION == otpEntity.getOtpType()) {
+
+			message = propertyManager.getProperty("user.verification.otp.msg", UserConstants.USER_VERIFICATION_OTP_TEXT);
+
 		} else {
 			switch (otpEntity.getUserType()) {
 				case STUDENT:
