@@ -33,8 +33,9 @@ import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.EnumListing;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
-import com.stanzaliving.core.user.request.dto.UserStatusRequestDto;
 import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
+import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
+import com.stanzaliving.core.user.request.dto.UserStatusRequestDto;
 import com.stanzaliving.user.acl.service.AclService;
 import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.service.UserService;
@@ -73,6 +74,16 @@ public class UserController {
 		log.info("Fetching User Profile with UserId: " + userId);
 
 		return ResponseDto.success("Found User Profile for User Id", UserAdapter.getAclUserProfileDTO(userService.getUserProfile(userId), aclService.getUserDeptLevelRoleNameUrlExpandedDtoFe(userId)));
+	}
+
+	@PostMapping("update")
+	public ResponseDto<UserDto> updateUser(@RequestBody @Valid UpdateUserRequestDto updateUserRequestDto) {
+
+		UserDto userDto = userService.updateUser(updateUserRequestDto);
+
+		log.info("Update user with id: " + userDto.getUuid());
+
+		return ResponseDto.success("User Updated", userDto);
 	}
 
 	@PostMapping("add")
@@ -144,6 +155,8 @@ public class UserController {
 		return ResponseDto.success("Found user Details with manager and role details.", userManagerAndRoleDto);
 	}
 
+	
+	
 	@PostMapping("update/usertype/department")
 	public ResponseDto<UserDto> updateUserTypeAndDepartment(@RequestBody @Valid UpdateDepartmentUserTypeDto updateDepartmentUserTypeDto) {
 

@@ -14,6 +14,7 @@ import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
+import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
 
 /**
  * @author naveen
@@ -43,5 +44,7 @@ public interface UserService {
 	List<UserEntity> getUserByEmail(String email);
 
 	boolean updateUserTypeAndDepartment(UpdateDepartmentUserTypeDto updateDepartmentUserTypeDto);
+
+	UserDto updateUser(UpdateUserRequestDto updateUserRequestDto);
 
 }

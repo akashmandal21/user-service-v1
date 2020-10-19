@@ -39,9 +39,8 @@ public class OtpDbServiceImpl extends AbstractJpaServiceImpl<OtpEntity, Long, Ot
 	public OtpEntity getOtpForMobile(String mobile, OtpType otpType, String isoCode) {
 		Pageable pageable = PageRequest.of(0, 1, Direction.DESC, "updatedAt");
 
-		List<OtpEntity> userOtps =
-				getJpaRepository()
-						.findByMobileAndOtpTypeAndIsoCode(PhoneNumberUtils.normalizeNumber(mobile), otpType, isoCode, pageable);
+		List<OtpEntity> userOtps = getJpaRepository()
+				.findByMobileAndOtpTypeAndIsoCode(PhoneNumberUtils.normalizeNumber(mobile), otpType, isoCode, pageable);
 
 		return CollectionUtils.isNotEmpty(userOtps) ? userOtps.get(0) : null;
 	}
