@@ -7,24 +7,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
-import com.stanzaliving.user.service.BlacklistUserService;
+import com.stanzaliving.user.service.PauseOtpService;
 
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @RestController
-@RequestMapping("/internal/blacklist")
-public class BlacklistController {
+@RequestMapping("/internal/pauseotp")
+public class PauseOtpController {
 
 	@Autowired
-	private BlacklistUserService blacklistUserService;
+	private PauseOtpService blacklistUserService;
 
 	@GetMapping("add/{mobile}")
 	public ResponseDto<Boolean> addUser(@PathVariable String mobile) {
 
 		log.info("add User with mobile: {}", mobile);
 
-		return ResponseDto.success("Added!!", blacklistUserService.addToBlacklist(mobile));
+		return ResponseDto.success("Added!!", blacklistUserService.pauseOtp(mobile));
 	}
 
 	@GetMapping("delete/{mobile}")
@@ -32,7 +32,7 @@ public class BlacklistController {
 
 		log.info("add User with mobile: {}", mobile);
 
-		return ResponseDto.success("Deleted", blacklistUserService.removeFromBlacklist(mobile));
+		return ResponseDto.success("Deleted", blacklistUserService.resumeOtp(mobile));
 	}
 
 	@GetMapping("check/{mobile}")
@@ -40,7 +40,7 @@ public class BlacklistController {
 
 		log.info("add User with mobile: {}", mobile);
 
-		return ResponseDto.success("Chcked", blacklistUserService.checkIfUserIsBlacklisted(mobile));
+		return ResponseDto.success("Chcked", blacklistUserService.checkIfNeedToStop(mobile));
 	}
 
 }

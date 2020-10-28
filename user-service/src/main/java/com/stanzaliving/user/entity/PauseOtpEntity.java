@@ -22,9 +22,9 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "blacklist_user")
-@Entity(name = "blacklist_user")
-public class BlacklistUserEntity extends AbstractJpaEntity {
+@Table(name = "pause_otp")
+@Entity(name = "pause_otp")
+public class PauseOtpEntity extends AbstractJpaEntity {
 
 	private static final long serialVersionUID = 2284651697599647979L;
 

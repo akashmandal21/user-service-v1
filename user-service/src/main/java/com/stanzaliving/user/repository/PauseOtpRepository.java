@@ -6,13 +6,13 @@ package com.stanzaliving.user.repository;
 import org.springframework.stereotype.Repository;
 
 import com.stanzaliving.core.sqljpa.repository.AbstractJpaRepository;
-import com.stanzaliving.user.entity.BlacklistUserEntity;
+import com.stanzaliving.user.entity.PauseOtpEntity;
 
 @Repository
-public interface BlacklistUserRepository extends AbstractJpaRepository<BlacklistUserEntity, Long> {
+public interface PauseOtpRepository extends AbstractJpaRepository<PauseOtpEntity, Long> {
 
 	boolean existsByMobileAndStatus(String mobile,boolean status);
 	
-	BlacklistUserEntity findByMobile(String mobile);	
+	PauseOtpEntity findByMobile(String mobile);	
 	
 }
