@@ -8,6 +8,6 @@ CREATE TABLE `user_service`.`pause_otp` (
   `updated_at` datetime DEFAULT NULL,
   `updated_by` char(40) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `UK_blacklist_user_uuid` (`uuid`),
-  KEY `Key_blacklist_user_mobile` (`mobile`)
+  UNIQUE KEY `UK_pause_otp_uuid` (`uuid`),
+  KEY `Key_pause_otp_mobile` (`mobile`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;

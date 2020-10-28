@@ -5,7 +5,7 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.stanzaliving.core.base.exception.StanzaException;
+import com.stanzaliving.core.base.exception.ApiValidationException;
 import com.stanzaliving.user.db.service.PauseOtpDbService;
 import com.stanzaliving.user.entity.PauseOtpEntity;
 import com.stanzaliving.user.service.PauseOtpService;
@@ -55,7 +55,7 @@ public class PauseOtpServiceImpl implements PauseOtpService {
 		if(Objects.nonNull(pauseOtpEntity)) {
 			pauseOtpEntity.setStatus(false);
 		}else {
-			throw new StanzaException("User not found");
+			throw new ApiValidationException("User not found");
 		}
 		
 		pauseOtpEntity = pauseOtpDbService.save(pauseOtpEntity);
