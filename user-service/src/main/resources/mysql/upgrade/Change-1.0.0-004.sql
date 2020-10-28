@@ -1,4 +1,4 @@
-CREATE TABLE `user_service`.`blacklist_user` (
+CREATE TABLE `user_service`.`pause_otp` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `uuid` char(40) NOT NULL,
   `mobile` varchar(15) DEFAULT NULL,
