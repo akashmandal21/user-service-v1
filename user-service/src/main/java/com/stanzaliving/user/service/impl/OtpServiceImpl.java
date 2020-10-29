@@ -32,6 +32,7 @@ import com.stanzaliving.user.db.service.OtpDbService;
 import com.stanzaliving.user.entity.OtpEntity;
 import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.kafka.service.KafkaUserService;
+import com.stanzaliving.user.service.PauseOtpService;
 import com.stanzaliving.user.service.OtpService;
 
 import lombok.extern.log4j.Log4j2;
@@ -68,6 +69,9 @@ public class OtpServiceImpl implements OtpService {
 
 	@Autowired
 	private KafkaUserService kafkaUserService;
+	
+	@Autowired
+	private PauseOtpService blacklistUserService;
 
 	@Override
 	public void sendLoginOtp(UserEntity userEntity) {
@@ -85,11 +89,11 @@ public class OtpServiceImpl implements OtpService {
 
 		log.info("Sending OTP: " + userOtp.getOtp() + " for User: " + userOtp.getUserId() + " for login");
 		
-		if(userEntity.getDepartment().equals(Department.WEB) && userEntity.getUserType().equals(UserType.CONSUMER)) {
-			return;
+		if(!blacklistUserService.checkIfNeedToStop(currentOtp.getMobile())) {
+			kafkaUserService.sendOtpToKafka(userOtp);
+		}else {
+			log.info("Not sending as user is blacklisted");
 		}
-		
-		kafkaUserService.sendOtpToKafka(userOtp);
 	}
 
 	private OtpEntity createOtpForUser(UserEntity user, OtpType otpType) {
