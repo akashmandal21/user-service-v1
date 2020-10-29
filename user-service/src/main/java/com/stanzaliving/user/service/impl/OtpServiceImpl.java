@@ -89,9 +89,6 @@ public class OtpServiceImpl implements OtpService {
 
 		log.info("Sending OTP: " + userOtp.getOtp() + " for User: " + userOtp.getUserId() + " for login");
 		
-		if(userEntity.getDepartment().equals(Department.WEB) && userEntity.getUserType().equals(UserType.CONSUMER)) {
-			return;
-		}
 		if(!blacklistUserService.checkIfNeedToStop(currentOtp.getMobile())) {
 			kafkaUserService.sendOtpToKafka(userOtp);
 		}else {
