@@ -89,7 +89,7 @@ public class OtpServiceImpl implements OtpService {
 
 		log.info("Sending OTP: " + userOtp.getOtp() + " for User: " + userOtp.getUserId() + " for login");
 		
-		if(!blacklistUserService.checkIfNeedToStop(currentOtp.getMobile())) {
+		if(!blacklistUserService.checkIfNeedToStop(userEntity.getMobile())) {
 			kafkaUserService.sendOtpToKafka(userOtp);
 		}else {
 			log.info("Not sending as user is blacklisted");
