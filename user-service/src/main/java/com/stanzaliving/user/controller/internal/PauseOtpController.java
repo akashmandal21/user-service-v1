@@ -1,7 +1,6 @@
 package com.stanzaliving.user.controller.internal;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,7 +28,7 @@ public class PauseOtpController {
 		return ResponseDto.success("Added!!", blacklistUserService.pauseOtp(mobile));
 	}
 
-	@DeleteMapping("delete/{mobile}")
+	@PostMapping("delete/{mobile}")
 	public ResponseDto<Boolean> deleteUser(@PathVariable String mobile) {
 
 		log.info("add User with mobile: {}", mobile);
