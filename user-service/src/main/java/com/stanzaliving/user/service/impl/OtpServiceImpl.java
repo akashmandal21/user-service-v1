@@ -25,12 +25,14 @@ import com.stanzaliving.core.user.constants.UserErrorCodes.Otp;
 import com.stanzaliving.core.user.enums.OtpType;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.LoginRequestDto;
+import com.stanzaliving.core.user.request.dto.MobileEmailOtpRequestDto;
 import com.stanzaliving.core.user.request.dto.MobileOtpRequestDto;
 import com.stanzaliving.core.user.request.dto.OtpValidateRequestDto;
 import com.stanzaliving.user.db.service.OtpDbService;
 import com.stanzaliving.user.entity.OtpEntity;
 import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.kafka.service.KafkaUserService;
+import com.stanzaliving.user.service.PauseOtpService;
 import com.stanzaliving.user.service.OtpService;
 
 import lombok.extern.log4j.Log4j2;
@@ -67,6 +69,9 @@ public class OtpServiceImpl implements OtpService {
 
 	@Autowired
 	private KafkaUserService kafkaUserService;
+	
+	@Autowired
+	private PauseOtpService blacklistUserService;
 
 	@Override
 	public void sendLoginOtp(UserEntity userEntity) {
@@ -84,31 +89,31 @@ public class OtpServiceImpl implements OtpService {
 
 		log.info("Sending OTP: " + userOtp.getOtp() + " for User: " + userOtp.getUserId() + " for login");
 		
-		if(userEntity.getDepartment().equals(Department.WEB) && userEntity.getUserType().equals(UserType.CONSUMER)) {
-			return;
+		if(!blacklistUserService.checkIfNeedToStop(userEntity.getMobile())) {
+			kafkaUserService.sendOtpToKafka(userOtp);
+		}else {
+			log.info("Not sending as user is blacklisted");
 		}
-		
-		kafkaUserService.sendOtpToKafka(userOtp);
 	}
 
 	private OtpEntity createOtpForUser(UserEntity user, OtpType otpType) {
 		OtpEntity userOtp = new OtpEntity();
 
 		userOtp.setUserId(user.getUuid());
-		userOtp.setEmail(user.getEmail());
-
 		userOtp.setUserType(user.getUserType());
 
-		return setMobileOtpDetailsAndSave(user.getMobile(), user.getIsoCode(), otpType, userOtp);
+		return setOtpDetailsAndSave(user.getMobile(), user.getIsoCode(), user.getEmail(), otpType, userOtp);
 	}
 
-	private OtpEntity setMobileOtpDetailsAndSave(String mobile, String isoCode, OtpType otpType, OtpEntity otpEntity) {
+	private OtpEntity setOtpDetailsAndSave(String mobile, String isoCode, String email, OtpType otpType, OtpEntity otpEntity) {
 
 		otpEntity.setMobile(PhoneNumberUtils.normalizeNumber(mobile));
 		otpEntity.setIsoCode(isoCode);
 
 		otpEntity.setOtp(generateOtp(otpEntity));
 		otpEntity.setOtpType(otpType);
+
+		otpEntity.setEmail(email);
 
 		otpEntity.setResendCount(0);
 		otpEntity = otpDbService.saveAndFlush(otpEntity);
@@ -189,7 +194,7 @@ public class OtpServiceImpl implements OtpService {
 		if (userOtp == null) {
 			throw new AuthException("No OTP exists for mobile", Otp.OTP_NOT_FOUND);
 		}
-		
+
 		if (!userOtp.isStatus()
 				|| userOtp.getUpdatedAt() == null
 				|| userOtp.getUpdatedAt().before(otpTime)
@@ -239,7 +244,7 @@ public class OtpServiceImpl implements OtpService {
 		}
 
 		userOtp.setResendCount(userOtp.getResendCount() + 1);
-		log.info("Updating OTP for Mobile: " + userOtp.getMobile());
+		log.info("Updating OTP for Mobile: {}", userOtp.getMobile());
 		userOtp = otpDbService.updateAndFlush(userOtp);
 
 		log.info("Re-Sending OTP: " + userOtp.getOtp() + " for Mobile: " + userOtp.getMobile() + " of Type " + otpType);
@@ -261,7 +266,7 @@ public class OtpServiceImpl implements OtpService {
 
 			mobileOtp = OtpEntity.builder().userType(mobileOtpRequestDto.getUserType()).build();
 
-			setMobileOtpDetailsAndSave(mobileOtpRequestDto.getMobile(), mobileOtpRequestDto.getIsoCode(), mobileOtpRequestDto.getOtpType(), mobileOtp);
+			setOtpDetailsAndSave(mobileOtpRequestDto.getMobile(), mobileOtpRequestDto.getIsoCode(), null, mobileOtpRequestDto.getOtpType(), mobileOtp);
 
 		} else {
 
@@ -269,8 +274,38 @@ public class OtpServiceImpl implements OtpService {
 			mobileOtp = updateUserOtp(currentOtp);
 		}
 
-		log.info("Sending OTP: " + mobileOtp.getOtp() + " for Mobile: " + mobileOtp.getMobile() + " for " + mobileOtpRequestDto.getOtpType());
+		log.info("Sending OTP: {} for Mobile: {} for ", mobileOtp.getOtp(), mobileOtp.getMobile(), mobileOtp.getOtpType());
 		kafkaUserService.sendOtpToKafka(mobileOtp);
 
 	}
+
+	@Override
+	public void sendOtp(MobileEmailOtpRequestDto mobileEmailOtpRequestDto) {
+
+		log.debug("Searching current OTP for Mobile: {}, ISO: {} of Type: {}",
+				mobileEmailOtpRequestDto.getMobile(), mobileEmailOtpRequestDto.getIsoCode(), mobileEmailOtpRequestDto.getOtpType());
+
+		OtpEntity currentOtp =
+				otpDbService.getOtpForMobile(mobileEmailOtpRequestDto.getMobile(), mobileEmailOtpRequestDto.getOtpType(), mobileEmailOtpRequestDto.getIsoCode());
+
+		OtpEntity otpEntity;
+
+		if (currentOtp == null) {
+
+			otpEntity = OtpEntity.builder().userType(mobileEmailOtpRequestDto.getUserType()).build();
+
+			setOtpDetailsAndSave(
+					mobileEmailOtpRequestDto.getMobile(), mobileEmailOtpRequestDto.getIsoCode(), mobileEmailOtpRequestDto.getEmail(), mobileEmailOtpRequestDto.getOtpType(), otpEntity);
+
+		} else {
+
+			currentOtp.setResendCount(0);
+			otpEntity = updateUserOtp(currentOtp);
+		}
+
+		log.info("Sending OTP: {} for Mobile: {} and Email: {} for ", otpEntity.getOtp(), otpEntity.getMobile(), otpEntity.getEmail(), otpEntity.getOtpType());
+		kafkaUserService.sendOtpToKafka(otpEntity);
+
+	}
+
 }

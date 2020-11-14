@@ -6,6 +6,7 @@ package com.stanzaliving.user.controller.internal;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -66,4 +67,15 @@ public class InternalUserController {
 		
 		return ResponseDto.success("Add User and Role Created");
 	}
+
+	@PostMapping("deactivate/{userId}")
+	public ResponseDto<Boolean> addUser(@PathVariable String userId) {
+
+		boolean status = userService.updateUserStatus(userId, false);
+
+		log.info("Deactivated user with id: " + userId);
+
+		return (status)?ResponseDto.success(status):ResponseDto.failure("Unable to deactivate user");
+	}
+	
 }
