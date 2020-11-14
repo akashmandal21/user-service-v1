@@ -4,6 +4,7 @@
 package com.stanzaliving.user.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
 import com.stanzaliving.core.base.exception.NoRecordException;
@@ -32,9 +34,11 @@ import com.stanzaliving.core.user.dto.UserFilterDto;
 import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
+import com.stanzaliving.core.user.request.dto.CreateUserAndRoleDto;
 import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
 import com.stanzaliving.user.acl.service.AclUserService;
+import com.stanzaliving.user.acl.service.RoleService;
 import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.db.service.UserDbService;
 import com.stanzaliving.user.entity.UserEntity;
@@ -64,6 +68,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private NotificationProducer notificationProducer;
+	
+	@Autowired
+	private RoleService roleService;
 	
 	@Value("${kafka.resident.detail.topic}")
 	private String kafkaResidentDetailTopic;
@@ -318,5 +325,22 @@ public class UserServiceImpl implements UserService {
 		return userProfileDto;
 	}
 
+	@Transactional
+	@Override
+	public void addUserAndRole(CreateUserAndRoleDto createUserAndRoleDto) {
+		
+		UserDto userDto = addUser(createUserAndRoleDto.getAddUserRequestDto());
+		
+		if(userDto != null) {
+			createUserAndRoleDto.getAddUserDeptLevelRoleDto().setUserUuid(userDto.getUuid());
+			
+			List<RoleDto> roleDto = 
+					roleService.findByDepartmentAndAccessLevel(createUserAndRoleDto.getAddUserDeptLevelRoleDto().getDepartment(), 
+					createUserAndRoleDto.getAddUserDeptLevelRoleDto().getAccessLevel());
+			
+			createUserAndRoleDto.getAddUserDeptLevelRoleDto().setRolesUuid(Arrays.asList(roleDto.get(0).getUuid()));
+			aclUserService.addRole(createUserAndRoleDto.getAddUserDeptLevelRoleDto());
+		}
 
+	}
 }
