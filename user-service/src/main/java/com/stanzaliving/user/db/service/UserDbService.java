@@ -23,4 +23,5 @@ public interface UserDbService extends AbstractJpaService<UserEntity, Long> {
 	Specification<UserEntity> getSearchQuery(UserFilterDto userFilterDto);
 
 	List<UserEntity> findByEmail(String email);
+
 }

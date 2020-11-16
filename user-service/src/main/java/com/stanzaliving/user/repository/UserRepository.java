@@ -35,4 +35,5 @@ public interface UserRepository extends AbstractJpaRepository<UserEntity, Long> 
 	List<UserEntity> searchByName(@Param("name") String nameStartsWith);
 
 	List<UserEntity> findByEmail(String email);
+	
 }

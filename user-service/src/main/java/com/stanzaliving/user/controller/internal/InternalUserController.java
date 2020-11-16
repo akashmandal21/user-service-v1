@@ -43,6 +43,17 @@ public class InternalUserController {
 		return ResponseDto.success("User Updated", userDto);
 	}
 
+	@PostMapping("update/mobile")
+	public ResponseDto<UserDto> updateUserMobile(@RequestBody @Valid UpdateUserRequestDto updateUserRequestDto) {
+
+		UserDto userDto = userService.updateUserMobile(updateUserRequestDto);
+
+		log.info("Update user with id: " + userDto.getUuid());
+
+		return ResponseDto.success("User Updated", userDto);
+	}
+
+	
 	@PostMapping("add")
 	public ResponseDto<UserDto> addUser(@RequestBody @Valid AddUserRequestDto addUserRequestDto) {
 

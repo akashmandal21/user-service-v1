@@ -47,4 +47,6 @@ public interface UserService {
 
 	UserDto updateUser(UpdateUserRequestDto updateUserRequestDto);
 
+	UserDto updateUserMobile(UpdateUserRequestDto updateUserRequestDto);
+
 }

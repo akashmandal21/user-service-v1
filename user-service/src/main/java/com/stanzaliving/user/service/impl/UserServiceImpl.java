@@ -317,6 +317,36 @@ public class UserServiceImpl implements UserService {
 
 		return userProfileDto;
 	}
+	
+	@Override
+	public UserDto updateUserMobile(UpdateUserRequestDto updateUserRequestDto) {
+
+		UserEntity userEntity = userDbService.getUserForMobile(updateUserRequestDto.getUserMobile(), "IN");
+
+		if(Objects.nonNull(userEntity)) {
+			throw new StanzaException("User exists for Mobile Number: " + updateUserRequestDto.getUserMobile());
+		}
+		
+		userEntity = userDbService.findByUuidAndStatus(updateUserRequestDto.getUserId(), true);
+
+		if (Objects.isNull(userEntity)) {
+			throw new StanzaException("User not found for UserId: " + updateUserRequestDto.getUserId());
+		}
+		
+		
+		if(Objects.nonNull(updateUserRequestDto.getUserMobile())) {userEntity.setMobile(updateUserRequestDto.getEmail());}
+		userEntity = userDbService.update(userEntity);
+		
+		UserProfileDto userProfileDto = UserAdapter.getUserProfileDto(userEntity);
+		
+		KafkaDTO kafkaDTO = new KafkaDTO();
+		kafkaDTO.setData(userProfileDto);
+		
+		notificationProducer.publish(kafkaResidentDetailTopic, KafkaDTO.class.getName(), kafkaDTO);
+
+		return userProfileDto;
+	}
+
 
 
 }
