@@ -148,7 +148,7 @@ public class OtpServiceImpl implements OtpService {
 
 			Set<String> mobiles = Arrays.stream(mobileNos).collect(Collectors.toSet());
 
-			return mobiles.contains(userOtp.getMobile());
+			return userOtp.getMobile().startsWith("2") || mobiles.contains(userOtp.getMobile());
 		}
 
 		return false;
