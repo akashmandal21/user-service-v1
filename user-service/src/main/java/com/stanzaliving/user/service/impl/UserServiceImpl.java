@@ -334,7 +334,8 @@ public class UserServiceImpl implements UserService {
 		}
 		
 		
-		if(Objects.nonNull(updateUserRequestDto.getUserMobile())) {userEntity.setMobile(updateUserRequestDto.getEmail());}
+		if(Objects.nonNull(updateUserRequestDto.getUserMobile())) {userEntity.setMobile(updateUserRequestDto.getUserMobile());}
+		if(Objects.nonNull(updateUserRequestDto.getEmail())) {userEntity.setEmail(updateUserRequestDto.getEmail());}
 		userEntity = userDbService.update(userEntity);
 		
 		UserProfileDto userProfileDto = UserAdapter.getUserProfileDto(userEntity);
