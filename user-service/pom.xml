@@ -62,6 +62,12 @@
 
 		<dependency>
 			<groupId>com.stanzaliving.core</groupId>
+			<artifactId>transformation-client</artifactId>
+			<version>${global.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.stanzaliving.core</groupId>
 			<artifactId>security</artifactId>
 			<version>${global.version}</version>
 		</dependency>
