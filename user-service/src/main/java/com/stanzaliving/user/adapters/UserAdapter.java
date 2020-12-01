@@ -126,7 +126,15 @@ public class UserAdapter {
 				.build();
 	}
 
-	public AclUserDto getAclUserDto(UserProfileDto userDto, List<UserDeptLevelRoleNameUrlExpandedDto> acl) {
+	public AclUserDto getAclUserDto(UserProfileDto userDto, List<UserDeptLevelRoleNameUrlExpandedDto> completeAcl) {
+
+		List<UserDeptLevelRoleNameUrlExpandedDto> acl = new ArrayList<>();
+		List<UserDeptLevelRoleNameUrlExpandedDto> locationAcl = new ArrayList<>();
+
+		if (CollectionUtils.isNotEmpty(completeAcl)) {
+			acl = completeAcl.stream().filter(row -> (null != row.getAccessLevel() && row.getAccessLevel().getLevelNum() > 0)).collect(Collectors.toList());
+			locationAcl = completeAcl.stream().filter(row -> (null != row.getAccessLevel() && row.getAccessLevel().getLevelNum() == 0)).collect(Collectors.toList());
+		}
 
 		return AclUserDto.builder()
 				.uuid(userDto.getUuid())
@@ -149,6 +157,7 @@ public class UserAdapter {
 				.arrivalDate(userDto.getArrivalDate())
 				.nextDestination(userDto.getNextDestination())
 				.acl(acl)
+				.locationAcl(locationAcl)
 				.build();
 	}
 
