@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ClientConfig {
 
-    @Value("${service.transformation.url}")
+    @Value("${service.transformationmaster.url}")
     private String transformationUrl;
 
     @Bean
