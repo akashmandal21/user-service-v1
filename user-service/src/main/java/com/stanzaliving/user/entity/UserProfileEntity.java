@@ -78,7 +78,7 @@ public class UserProfileEntity extends AbstractJpaEntity {
 	private String profilePicture;
 
 	@Column(name = "birthday", columnDefinition = "DATE")
-	//@Convert(converter = LocalDateAttributeConverter.class)
+	@Convert(converter = LocalDateAttributeConverter.class)
 	private LocalDate birthday;
 
 	@Enumerated(EnumType.STRING)
