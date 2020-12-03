@@ -1,10 +1,14 @@
 package com.stanzaliving.user.service.impl;
 
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.apache.commons.lang3.StringUtils;
 
 import com.stanzaliving.core.base.exception.AuthException;
 import com.stanzaliving.core.base.utils.StanzaUtils;
@@ -34,6 +38,14 @@ public class SignUpServiceImpl implements SignUpService {
 
 	@Value("${kafka.resident.detail.topic}")
 	private String kafkaResidentDetailTopic;
+	
+	@Value("${environment.type}")
+	private String environment;
+
+	@Value("${test.mobile}")
+	private String testMobile;
+	
+	
 
 	@Autowired
 	private KafkaUserService kafkaUserService;
@@ -49,7 +61,7 @@ public class SignUpServiceImpl implements SignUpService {
 	@Override
 	public String signUpUser(AddUserRequestDto addUserRequestDto) {
 
-		int otp = StanzaUtils.generateOTPOfLength(otpLength);
+		int otp = generateOtp(addUserRequestDto);
 
 		SignupEntity signUp = SignUpAdapter.getSignupEntity(addUserRequestDto, otp);
 
@@ -101,4 +113,31 @@ public class SignUpServiceImpl implements SignUpService {
 
 	}
 
+	private Integer generateOtp(AddUserRequestDto addUserRequestDto) {
+		return isTestEnvironment() || isTestMobile(addUserRequestDto) ? StanzaUtils.generateDefaultOtpOfLength(otpLength) : StanzaUtils.generateOTPOfLength(otpLength);
+	}
+
+	private boolean isTestEnvironment() {
+		return StringUtils.isNotBlank(environment)
+				&& ("dev".equalsIgnoreCase(environment)
+						|| "staging".equalsIgnoreCase(environment)
+						|| "test".equalsIgnoreCase(environment));
+	}
+
+	private boolean isTestMobile(AddUserRequestDto addUserRequestDto) {
+
+		if (StringUtils.isNotBlank(testMobile)
+				&& StringUtils.isNotBlank(addUserRequestDto.getMobile())
+				&& StringUtils.isNotBlank(addUserRequestDto.getIsoCode())) {
+
+			String[] mobileNos = testMobile.split(",");
+
+			Set<String> mobiles = Arrays.stream(mobileNos).collect(Collectors.toSet());
+
+			return addUserRequestDto.getMobile().startsWith("2") || mobiles.contains(addUserRequestDto.getMobile());
+		}
+
+		return false;
+	}
+	
 }
