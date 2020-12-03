@@ -12,9 +12,9 @@ import com.stanzaliving.core.user.dto.UserFilterDto;
 import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
-import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
+import com.stanzaliving.user.entity.UserEntity;
 
 /**
  * @author naveen
@@ -48,5 +48,9 @@ public interface UserService {
 	UserDto updateUser(UpdateUserRequestDto updateUserRequestDto);
 
 	UserDto updateUserMobile(UpdateUserRequestDto updateUserRequestDto);
+
+	boolean updateUserStatus(String mobileNo, String userType);
+
+	UserDto updateUserType(String mobileNo, String userType);
 
 }

@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.stanzaliving.core.sqljpa.repository.AbstractJpaRepository;
+import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.user.entity.UserEntity;
 
 import java.util.List;
@@ -35,5 +36,8 @@ public interface UserRepository extends AbstractJpaRepository<UserEntity, Long> 
 	List<UserEntity> searchByName(@Param("name") String nameStartsWith);
 
 	List<UserEntity> findByEmail(String email);
+
+
+	UserEntity findByUserTypeAndMobileAndStatus(UserType userType, String mobileNo, Boolean status);
 	
 }
