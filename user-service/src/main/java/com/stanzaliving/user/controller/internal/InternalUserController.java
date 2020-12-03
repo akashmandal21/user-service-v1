@@ -92,7 +92,7 @@ public class InternalUserController {
 
 		UserDto userDto = userService.updateUserType(mobileNo, userType);
 
-		log.info("Update user with id: " + userDto.getUuid());
+		log.info("Update userType: " + userDto.getUuid());
 
 		return ResponseDto.success("User Updated", userDto);
 	}
