@@ -33,7 +33,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @RestController
-@RequestMapping("sign")
+@RequestMapping("signup")
 public class SignUpController {
 
 	@Autowired
@@ -44,7 +44,7 @@ public class SignUpController {
 	@Autowired
 	AclService aclService;
 	
-	@PostMapping("createUser")
+	@PostMapping("signUpUser")
 	public ResponseDto<String> signUpUser(@RequestBody @Valid AddUserRequestDto addUserRequestDto) {
 
 		String userUuid = signUpService.signUpUser(addUserRequestDto);
@@ -70,7 +70,7 @@ public class SignUpController {
 
 		if (Objects.nonNull(userSessionEntity)) {
 			addTokenToResponse(request, response, token);
-			return ResponseDto.success("User Login Successfull", UserAdapter.getAclUserDto(userProfileDto, aclService.getUserDeptLevelRoleNameUrlExpandedDtoFe(userProfileDto.getUuid())));
+			return ResponseDto.success("User Login Successfull", UserAdapter.getAclUserDto(userProfileDto, null));
 		}
 		
 		return ResponseDto.failure("Failed to create user session");

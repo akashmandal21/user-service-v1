@@ -32,6 +32,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 				.addInterceptor(userAuthInterceptor)
 				.addPathPatterns("/**")
 				.excludePathPatterns(
+						"/signup/**",
 						"/auth/login",
 						"/auth/validateOtp",
 						"/auth/resendOtp")

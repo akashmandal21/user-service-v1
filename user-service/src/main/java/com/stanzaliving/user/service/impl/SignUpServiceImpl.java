@@ -95,7 +95,7 @@ public class SignUpServiceImpl implements SignUpService {
 		OtpEntity userOtp = OtpEntity.builder().otp(signUpOtp.getOtp()).mobile(signUpOtp.getMobile())
 				.userType(addUserRequestDto.getUserType()).status(Boolean.TRUE).build();
 
-		log.info("Sending Oto for Signup, {}", userOtp);
+		log.info("Sending Otp for Signup, {}", userOtp);
 
 		kafkaUserService.sendOtpToKafka(userOtp);
 
