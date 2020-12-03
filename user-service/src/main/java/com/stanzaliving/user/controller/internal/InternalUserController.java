@@ -75,8 +75,8 @@ public class InternalUserController {
 	}
 
 	@PutMapping("update/status/{mobileNo}/{userType}")
-	public ResponseDto<Boolean> updateUserStatus(@PathVariable("mobileNo") String mobileNo,
-			@PathVariable("userType") String userType) {
+	public ResponseDto<Boolean> updateUserStatus(@PathVariable(value="mobileNo",required=true) String mobileNo,
+			@PathVariable(value="userType",required=true) String userType) {
 
 		boolean status = userService.updateUserStatus(mobileNo, userType);
 
@@ -87,8 +87,8 @@ public class InternalUserController {
 	}
 
 	@PutMapping("update/userType/{mobileNo}/{userType}")
-	public ResponseDto<UserDto> updateUserType(@PathVariable("mobileNo") String mobileNo,
-			@PathVariable("userType") String userType) {
+	public ResponseDto<UserDto> updateUserType(@PathVariable(value="mobileNo",required=true) String mobileNo,
+			@PathVariable(value="userType",required=true) String userType) {
 
 		UserDto userDto = userService.updateUserType(mobileNo, userType);
 

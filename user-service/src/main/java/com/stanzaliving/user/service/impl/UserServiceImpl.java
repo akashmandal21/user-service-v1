@@ -408,10 +408,6 @@ public class UserServiceImpl implements UserService {
 			userEntity.setUserType(UserType.valueOf(userType));
 		}
 
-		userEntity = userDbService.update(userEntity);
-
-		UserProfileDto userProfileDto = UserAdapter.getUserProfileDto(userEntity);
-
-		return userProfileDto;
+		return UserAdapter.getUserProfileDto(userDbService.update(userEntity));
 	}
 }
