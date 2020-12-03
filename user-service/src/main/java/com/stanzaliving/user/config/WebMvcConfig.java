@@ -43,6 +43,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 				.excludePathPatterns(
 						"/internal/**",
 						"/pingMe",
+						"/sign/**",
 						"/acl/check",
 						"/user/urlList/**",
 						"/acl/user/fe/**",

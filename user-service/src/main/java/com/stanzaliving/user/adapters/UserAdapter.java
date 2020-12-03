@@ -221,5 +221,14 @@ public class UserAdapter {
 				.name(name)
 				.build();
 	}
+	
+	public  UserProfileDto getUserProfileDto(UserDto userDto) {
+		
+		UserProfileDto userProfileDto=UserProfileDto.builder()
+				
+				.build();
+		
+		return userProfileDto;
+	}
 
 }
