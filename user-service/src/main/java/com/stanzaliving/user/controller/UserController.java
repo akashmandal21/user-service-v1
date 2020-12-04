@@ -164,5 +164,5 @@ public class UserController {
 
 		return response ? ResponseDto.success("User type and department modified successfully") : ResponseDto.failure("User type and department not modified");
 	}
-	
+
 }
