@@ -31,7 +31,7 @@ import com.stanzaliving.core.kafka.dto.KafkaDTO;
 import com.stanzaliving.core.kafka.producer.NotificationProducer;
 import com.stanzaliving.core.sqljpa.adapter.AddressAdapter;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
-import com.stanzaliving.core.user.dto.CityRolesRequestDto;
+import com.stanzaliving.core.user.dto.AccessLevelRoleRequestDto;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserFilterDto;
 import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
@@ -369,7 +369,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public UserDto getListOfUserForCityAndRole(@Valid CityRolesRequestDto cityRolesRequestDto) {
+	public UserDto getUserForAccessLevelAndRole(@Valid AccessLevelRoleRequestDto cityRolesRequestDto) {
 		RoleDto roleDto = roleService.findByRoleNameAndDepartment(cityRolesRequestDto.getRoleName(), cityRolesRequestDto.getDepartment());
 		List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = userDepartmentLevelRoleService.findByRoleUuid(roleDto.getUuid());
 		

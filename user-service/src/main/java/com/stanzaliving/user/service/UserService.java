@@ -9,7 +9,7 @@ import java.util.Map;
 import javax.validation.Valid;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
-import com.stanzaliving.core.user.dto.CityRolesRequestDto;
+import com.stanzaliving.core.user.dto.AccessLevelRoleRequestDto;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserFilterDto;
 import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
@@ -52,6 +52,6 @@ public interface UserService {
 
 	UserDto updateUserMobile(UpdateUserRequestDto updateUserRequestDto);
 
-	UserDto getListOfUserForCityAndRole(@Valid CityRolesRequestDto cityRolesRequestDto);
+	UserDto getUserForAccessLevelAndRole(@Valid AccessLevelRoleRequestDto cityRolesRequestDto);
 
 }

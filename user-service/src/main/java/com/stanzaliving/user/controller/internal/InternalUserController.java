@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
-import com.stanzaliving.core.user.dto.CityRolesRequestDto;
+import com.stanzaliving.core.user.dto.AccessLevelRoleRequestDto;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
@@ -76,12 +76,12 @@ public class InternalUserController {
 		return (status)?ResponseDto.success(status):ResponseDto.failure("Unable to deactivate user");
 	}
 	
-	@PostMapping("list/users/role/city")
-	@ApiOperation(value = "Get list of users for particular access level and role")
-	public UserDto getListOfUserForRoleAndCity(@RequestBody @Valid CityRolesRequestDto cityRolesRequestDto) {
+	@PostMapping("user/role/accesslevel")
+	@ApiOperation(value = "Get user for particular access level and role")
+	public UserDto getUserForAccessLevelAndRole(@RequestBody @Valid AccessLevelRoleRequestDto cityRolesRequestDto) {
 
-//		log.info("Request received for getting list of users for city: " + cityRolesRequestDto.get+ " and role: " + cityRolesRequestDto.getRole());
-		UserDto userDto = userService.getListOfUserForCityAndRole(cityRolesRequestDto);
+		log.info("Request received for getting users for Role: " + cityRolesRequestDto.getRoleName()+ " and AccessLevel: " + cityRolesRequestDto.getAccessLevel() + " with AccessUuid: " + cityRolesRequestDto.getAccessLevelUuid());
+		UserDto userDto = userService.getUserForAccessLevelAndRole(cityRolesRequestDto);
 
 		return userDto;
 	}
