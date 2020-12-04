@@ -4,12 +4,16 @@
 package com.stanzaliving.user.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import javax.validation.Valid;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -27,6 +31,7 @@ import com.stanzaliving.core.kafka.dto.KafkaDTO;
 import com.stanzaliving.core.kafka.producer.NotificationProducer;
 import com.stanzaliving.core.sqljpa.adapter.AddressAdapter;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
+import com.stanzaliving.core.user.dto.CityRolesRequestDto;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserFilterDto;
 import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
@@ -34,7 +39,13 @@ import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
+import com.stanzaliving.user.acl.entity.RoleEntity;
+import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
+import com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity;
 import com.stanzaliving.user.acl.service.AclUserService;
+import com.stanzaliving.user.acl.service.RoleService;
+import com.stanzaliving.user.acl.service.UserDepartmentLevelRoleService;
+import com.stanzaliving.user.acl.service.UserDepartmentLevelService;
 import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.db.service.UserDbService;
 import com.stanzaliving.user.entity.UserEntity;
@@ -61,6 +72,15 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private AclUserService aclUserService;
+	
+	@Autowired
+	private RoleService roleService;
+	
+	@Autowired
+	private UserDepartmentLevelRoleService userDepartmentLevelRoleService;
+	
+	@Autowired
+	private UserDepartmentLevelService userDepartmentLevelService;
 
 	@Autowired
 	private NotificationProducer notificationProducer;
@@ -346,6 +366,27 @@ public class UserServiceImpl implements UserService {
 		notificationProducer.publish(kafkaResidentDetailTopic, KafkaDTO.class.getName(), kafkaDTO);
 
 		return userProfileDto;
+	}
+
+	@Override
+	public UserDto getListOfUserForCityAndRole(@Valid CityRolesRequestDto cityRolesRequestDto) {
+		RoleDto roleDto = roleService.findByRoleNameAndDepartment(cityRolesRequestDto.getRoleName(), cityRolesRequestDto.getDepartment());
+		List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = userDepartmentLevelRoleService.findByRoleUuid(roleDto.getUuid());
+		
+		if (CollectionUtils.isEmpty(userDepartmentLevelRoleEntityList)) {
+			return null;
+		}
+		
+		for(UserDepartmentLevelRoleEntity userDepartmentLevelRoleEntity: userDepartmentLevelRoleEntityList) {
+			UserDepartmentLevelEntity userDepartmentLevelEntity = userDepartmentLevelService.findByUuid(userDepartmentLevelRoleEntity.getUserDepartmentLevelUuid());
+			String csvStringOfUuids = userDepartmentLevelEntity.getCsvAccessLevelEntityUuid();
+			List<String> accessLevelEntityUuids = Arrays.asList(csvStringOfUuids.split(","));
+			if(accessLevelEntityUuids.contains(cityRolesRequestDto.getAccessLevelUuid())) {
+				UserEntity userEntity = userDbService.findByUuid(userDepartmentLevelEntity.getUserUuid());
+				return UserAdapter.getUserDto(userEntity);
+			}
+		}
+		return null;
 	}
 
 

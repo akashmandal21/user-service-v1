@@ -13,11 +13,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
+import com.stanzaliving.core.user.dto.CityRolesRequestDto;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
 import com.stanzaliving.user.service.UserService;
 
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -72,6 +74,16 @@ public class InternalUserController {
 		log.info("Deactivated user with id: " + userId);
 
 		return (status)?ResponseDto.success(status):ResponseDto.failure("Unable to deactivate user");
+	}
+	
+	@PostMapping("list/users/role/city")
+	@ApiOperation(value = "Get list of users for particular access level and role")
+	public UserDto getListOfUserForRoleAndCity(@RequestBody @Valid CityRolesRequestDto cityRolesRequestDto) {
+
+//		log.info("Request received for getting list of users for city: " + cityRolesRequestDto.get+ " and role: " + cityRolesRequestDto.getRole());
+		UserDto userDto = userService.getListOfUserForCityAndRole(cityRolesRequestDto);
+
+		return userDto;
 	}
 	
 }
