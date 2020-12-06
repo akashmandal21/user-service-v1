@@ -61,8 +61,7 @@ public class UserDepartmentLevelRoleServiceImpl implements UserDepartmentLevelRo
 	@Override
 	public List<UserDepartmentLevelRoleEntity> findByRoleUuid(String roleUuid){
 		
-		List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = new ArrayList<>();
-		userDepartmentLevelRoleEntityList = userDepartmentLevelRoleDbService.findByRoleUuid(roleUuid);
+		List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = userDepartmentLevelRoleDbService.findByRoleUuid(roleUuid);
 		
 		return userDepartmentLevelRoleEntityList;
 	}

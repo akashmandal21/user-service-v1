@@ -81,9 +81,8 @@ public class InternalUserController {
 	public UserDto getUserForAccessLevelAndRole(@RequestBody @Valid AccessLevelRoleRequestDto cityRolesRequestDto) {
 
 		log.info("Request received for getting users for Role: " + cityRolesRequestDto.getRoleName()+ " and AccessLevel: " + cityRolesRequestDto.getAccessLevel() + " with AccessUuid: " + cityRolesRequestDto.getAccessLevelUuid());
-		UserDto userDto = userService.getUserForAccessLevelAndRole(cityRolesRequestDto);
 
-		return userDto;
+		return userService.getUserForAccessLevelAndRole(cityRolesRequestDto);
 	}
 	
 }

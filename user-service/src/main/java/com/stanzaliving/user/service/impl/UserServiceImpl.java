@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -47,6 +48,7 @@ import com.stanzaliving.user.acl.service.RoleService;
 import com.stanzaliving.user.acl.service.UserDepartmentLevelRoleService;
 import com.stanzaliving.user.acl.service.UserDepartmentLevelService;
 import com.stanzaliving.user.adapters.UserAdapter;
+import com.stanzaliving.user.constants.UserConstants;
 import com.stanzaliving.user.db.service.UserDbService;
 import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.entity.UserProfileEntity;
@@ -380,11 +382,15 @@ public class UserServiceImpl implements UserService {
 		for(UserDepartmentLevelRoleEntity userDepartmentLevelRoleEntity: userDepartmentLevelRoleEntityList) {
 			UserDepartmentLevelEntity userDepartmentLevelEntity = userDepartmentLevelService.findByUuid(userDepartmentLevelRoleEntity.getUserDepartmentLevelUuid());
 			String csvStringOfUuids = userDepartmentLevelEntity.getCsvAccessLevelEntityUuid();
-			List<String> accessLevelEntityUuids = Arrays.asList(csvStringOfUuids.split(","));
-			if(accessLevelEntityUuids.contains(cityRolesRequestDto.getAccessLevelUuid())) {
-				UserEntity userEntity = userDbService.findByUuid(userDepartmentLevelEntity.getUserUuid());
-				return UserAdapter.getUserDto(userEntity);
+			
+			if(StringUtils.isNotEmpty(csvStringOfUuids)) {
+				List<String> accessLevelEntityUuids = Arrays.asList(csvStringOfUuids.split(UserConstants.DELIMITER_KEY));
+				if(accessLevelEntityUuids.contains(cityRolesRequestDto.getAccessLevelUuid())) {
+					UserEntity userEntity = userDbService.findByUuid(userDepartmentLevelEntity.getUserUuid());
+					return UserAdapter.getUserDto(userEntity);
+				}
 			}
+			
 		}
 		return null;
 	}
