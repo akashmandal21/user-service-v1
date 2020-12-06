@@ -80,7 +80,7 @@ public class InternalUserController {
 	@ApiOperation(value = "Get user for particular access level and role")
 	public UserDto getUserForAccessLevelAndRole(@RequestBody @Valid AccessLevelRoleRequestDto cityRolesRequestDto) {
 
-		log.info("Request received for getting users for Role: " + cityRolesRequestDto.getRoleName()+ " and AccessLevel: " + cityRolesRequestDto.getAccessLevel() + " with AccessUuid: " + cityRolesRequestDto.getAccessLevelUuid());
+		log.info("Request received for getting users for Role: {}  and AccessLevel: {}  with AccessUuid:{}", cityRolesRequestDto.getRoleName(), cityRolesRequestDto.getAccessLevel(), cityRolesRequestDto.getAccessLevelUuid());
 
 		return userService.getUserForAccessLevelAndRole(cityRolesRequestDto);
 	}
