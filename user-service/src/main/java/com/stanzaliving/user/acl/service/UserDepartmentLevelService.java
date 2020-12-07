@@ -9,4 +9,6 @@ public interface UserDepartmentLevelService {
     void delete(UserDepartmentLevelEntity userDepartmentLevelEntity);
 
     void revokeAccessLevelEntityForDepartmentOfLevel(AddUserDeptLevelRequestDto addUserDeptLevelRequestDto);
+
+	UserDepartmentLevelEntity findByUuid(String userDepartmentLevelUuid);
 }

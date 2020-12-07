@@ -87,4 +87,9 @@ public class UserDepartmentLevelServiceImpl implements UserDepartmentLevelServic
 		}
 
 	}
+
+	@Override
+	public UserDepartmentLevelEntity findByUuid(String userDepartmentLevelUuid) {
+		return userDepartmentLevelDbService.findByUuid(userDepartmentLevelUuid);
+	}
 }
