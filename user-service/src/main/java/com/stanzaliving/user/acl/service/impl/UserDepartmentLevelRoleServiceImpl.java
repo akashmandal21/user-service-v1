@@ -1,9 +1,13 @@
 package com.stanzaliving.user.acl.service.impl;
 
 import com.stanzaliving.core.base.exception.StanzaException;
+import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleListDto;
 import com.stanzaliving.user.acl.db.service.UserDepartmentLevelRoleDbService;
+import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity;
 import com.stanzaliving.user.acl.service.UserDepartmentLevelRoleService;
+import com.stanzaliving.user.acl.service.UserDepartmentLevelService;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +23,9 @@ public class UserDepartmentLevelRoleServiceImpl implements UserDepartmentLevelRo
 
 	@Autowired
 	private UserDepartmentLevelRoleDbService userDepartmentLevelRoleDbService;
+	
+	@Autowired
+	private UserDepartmentLevelService userDepartmentLevelService;
 
 	@Override
 	public List<UserDepartmentLevelRoleEntity> addRoles(String userDepartmentLevelUuid, List<String> rolesUuid) {
@@ -49,6 +56,14 @@ public class UserDepartmentLevelRoleServiceImpl implements UserDepartmentLevelRo
 
 		userDepartmentLevelRoleDbService.delete(userDepartmentLevelRoleEntityListExisting);
 
+	}
+	
+	@Override
+	public List<UserDepartmentLevelRoleEntity> findByRoleUuid(String roleUuid){
+		
+		List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = userDepartmentLevelRoleDbService.findByRoleUuid(roleUuid);
+		
+		return userDepartmentLevelRoleEntityList;
 	}
 
 }

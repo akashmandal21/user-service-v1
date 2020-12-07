@@ -14,11 +14,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
+import com.stanzaliving.core.user.dto.AccessLevelRoleRequestDto;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
 import com.stanzaliving.user.service.UserService;
 
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -97,4 +99,14 @@ public class InternalUserController {
 		return ResponseDto.success("User Updated", userDto);
 	}
 
+	
+	@PostMapping("user/role/accesslevel")
+	@ApiOperation(value = "Get user for particular access level and role")
+	public UserDto getUserForAccessLevelAndRole(@RequestBody @Valid AccessLevelRoleRequestDto cityRolesRequestDto) {
+
+		log.info("Request received for getting users for Role: {}  and AccessLevel: {}  with AccessUuid:{}", cityRolesRequestDto.getRoleName(), cityRolesRequestDto.getAccessLevel(), cityRolesRequestDto.getAccessLevelUuid());
+
+		return userService.getUserForAccessLevelAndRole(cityRolesRequestDto);
+	}
+	
 }

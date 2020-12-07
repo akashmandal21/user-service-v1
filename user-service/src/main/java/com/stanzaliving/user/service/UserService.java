@@ -6,7 +6,10 @@ package com.stanzaliving.user.service;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.Valid;
+
 import com.stanzaliving.core.base.common.dto.PageResponse;
+import com.stanzaliving.core.user.dto.AccessLevelRoleRequestDto;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserFilterDto;
 import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
@@ -52,5 +55,6 @@ public interface UserService {
 	boolean updateUserStatus(String mobileNo, String userType);
 
 	UserDto updateUserType(String mobileNo, String userType);
+	UserDto getUserForAccessLevelAndRole(@Valid AccessLevelRoleRequestDto cityRolesRequestDto);
 
 }
