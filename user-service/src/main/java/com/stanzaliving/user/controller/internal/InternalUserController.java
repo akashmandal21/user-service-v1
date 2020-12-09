@@ -18,6 +18,12 @@ import com.stanzaliving.user.service.UserService;
 
 import lombok.extern.log4j.Log4j2;
 
+/**
+ * @author naveen
+ *
+ * @date 10-Oct-2019
+ */
+
 @Log4j2
 @RestController
 @RequestMapping("internal")
