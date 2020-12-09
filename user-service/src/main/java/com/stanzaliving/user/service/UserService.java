@@ -48,6 +48,6 @@ public interface UserService {
 
 	UserDto updateUser(UpdateUserRequestDto updateUserRequestDto);
 
-	void addUserAndRole(CreateUserAndRoleDto createUserAndRoleDto);
+	UserDto addUserAndRole(CreateUserAndRoleDto createUserAndRoleDto);
 
 }

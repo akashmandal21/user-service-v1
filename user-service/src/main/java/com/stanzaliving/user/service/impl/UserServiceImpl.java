@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -68,10 +69,10 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private NotificationProducer notificationProducer;
-	
+
 	@Autowired
 	private RoleService roleService;
-	
+
 	@Value("${kafka.resident.detail.topic}")
 	private String kafkaResidentDetailTopic;
 
@@ -98,35 +99,29 @@ public class UserServiceImpl implements UserService {
 	public UserDto addUser(AddUserRequestDto addUserRequestDto) {
 
 		if (!PhoneNumberUtils.isValidMobileForCountry(addUserRequestDto.getMobile(), addUserRequestDto.getIsoCode())) {
-			log.error("Number: " + addUserRequestDto.getMobile() + " and ISO: " + addUserRequestDto.getIsoCode() + " doesn't appear to be a valid mobile combination");
+			log.error("Number: " + addUserRequestDto.getMobile() + " and ISO: " + addUserRequestDto.getIsoCode()
+					+ " doesn't appear to be a valid mobile combination");
 			throw new StanzaException("Mobile Number and ISO Code combination not valid");
 		}
 
-		UserEntity userEntity =
-				userDbService.getUserForMobile(addUserRequestDto.getMobile(), addUserRequestDto.getIsoCode());
+		UserEntity userEntity = userDbService.getUserForMobile(addUserRequestDto.getMobile(),
+				addUserRequestDto.getIsoCode());
 
 		if (Objects.nonNull(userEntity)) {
-			log.warn("User: " + userEntity.getUuid() + " already exists for Mobile: " + addUserRequestDto.getMobile() + ", ISO Code: " + addUserRequestDto.getIsoCode() + " of type: "
-					+ addUserRequestDto.getUserType());
+			log.warn("User: " + userEntity.getUuid() + " already exists for Mobile: " + addUserRequestDto.getMobile()
+					+ ", ISO Code: " + addUserRequestDto.getIsoCode() + " of type: " + addUserRequestDto.getUserType());
 			throw new StanzaException("User already exists with mobile");
 		}
 
-		log.info("Adding new User [Mobile: " + addUserRequestDto.getMobile() + ", ISOCode: " + addUserRequestDto.getIsoCode() + ", UserType: " + addUserRequestDto.getUserType() + "]");
+		log.info("Adding new User [Mobile: " + addUserRequestDto.getMobile() + ", ISOCode: "
+				+ addUserRequestDto.getIsoCode() + ", UserType: " + addUserRequestDto.getUserType() + "]");
 
 		UserProfileEntity profileEntity = UserAdapter.getUserProfileEntity(addUserRequestDto);
 
-		userEntity =
-				UserEntity.builder()
-						.userType(addUserRequestDto.getUserType())
-						.isoCode(addUserRequestDto.getIsoCode())
-						.mobile(addUserRequestDto.getMobile())
-						.mobileVerified(false)
-						.email(addUserRequestDto.getEmail())
-						.emailVerified(false)
-						.userProfile(profileEntity)
-						.status(true)
-						.department(addUserRequestDto.getDepartment())
-						.build();
+		userEntity = UserEntity.builder().userType(addUserRequestDto.getUserType())
+				.isoCode(addUserRequestDto.getIsoCode()).mobile(addUserRequestDto.getMobile()).mobileVerified(false)
+				.email(addUserRequestDto.getEmail()).emailVerified(false).userProfile(profileEntity).status(true)
+				.department(addUserRequestDto.getDepartment()).build();
 
 		profileEntity.setUser(userEntity);
 
@@ -135,11 +130,10 @@ public class UserServiceImpl implements UserService {
 		log.info("Added New User with Id: " + userEntity.getUuid());
 
 		UserDto userDto = UserAdapter.getUserDto(userEntity);
-		
-		
+
 		KafkaDTO kafkaDTO = new KafkaDTO();
 		kafkaDTO.setData(userDto);
-		
+
 		notificationProducer.publish(kafkaResidentDetailTopic, KafkaDTO.class.getName(), kafkaDTO);
 
 		return userDto;
@@ -195,11 +189,14 @@ public class UserServiceImpl implements UserService {
 
 		Integer pageNo = userFilterDto.getPageRequest().getPageNo();
 
-		log.info("Found " + userPage.getNumberOfElements() + " User Records on Page: " + pageNo + " for Search Criteria");
+		log.info("Found " + userPage.getNumberOfElements() + " User Records on Page: " + pageNo
+				+ " for Search Criteria");
 
-		List<UserProfileDto> userDtos = userPage.getContent().stream().map(UserAdapter::getUserProfileDto).collect(Collectors.toList());
+		List<UserProfileDto> userDtos = userPage.getContent().stream().map(UserAdapter::getUserProfileDto)
+				.collect(Collectors.toList());
 
-		return new PageResponse<>(pageNo, userPage.getNumberOfElements(), userPage.getTotalPages(), userPage.getTotalElements(), userDtos);
+		return new PageResponse<>(pageNo, userPage.getNumberOfElements(), userPage.getTotalPages(),
+				userPage.getTotalElements(), userDtos);
 
 	}
 
@@ -207,7 +204,8 @@ public class UserServiceImpl implements UserService {
 
 		Specification<UserEntity> specification = userDbService.getSearchQuery(userFilterDto);
 
-		Pageable pagination = getPaginationForSearchRequest(userFilterDto.getPageRequest().getPageNo(), userFilterDto.getPageRequest().getLimit());
+		Pageable pagination = getPaginationForSearchRequest(userFilterDto.getPageRequest().getPageNo(),
+				userFilterDto.getPageRequest().getLimit());
 
 		return userDbService.findAll(specification, pagination);
 	}
@@ -250,10 +248,7 @@ public class UserServiceImpl implements UserService {
 		UserProfileDto managerProfile = userManagerMappingService.getManagerProfileForUser(userUuid);
 		List<RoleDto> roleDtoList = aclUserService.getUserRoles(userUuid);
 
-		return UserManagerAndRoleDto.builder()
-				.userProfile(userProfile)
-				.manager(managerProfile)
-				.roles(roleDtoList)
+		return UserManagerAndRoleDto.builder().userProfile(userProfile).manager(managerProfile).roles(roleDtoList)
 				.build();
 	}
 
@@ -275,7 +270,8 @@ public class UserServiceImpl implements UserService {
 
 		log.info("Searching User by UserId: " + updateDepartmentUserTypeDto.getUserId());
 
-		UserEntity userEntity = userDbService.findByUuidAndStatus(updateDepartmentUserTypeDto.getUserId(), Boolean.TRUE);
+		UserEntity userEntity = userDbService.findByUuidAndStatus(updateDepartmentUserTypeDto.getUserId(),
+				Boolean.TRUE);
 
 		if (Objects.isNull(userEntity))
 			throw new StanzaException("User not found for UserId: " + updateDepartmentUserTypeDto.getUserId());
@@ -290,7 +286,7 @@ public class UserServiceImpl implements UserService {
 
 		return Boolean.FALSE;
 	}
-	
+
 	@Override
 	public UserDto updateUser(UpdateUserRequestDto updateUserRequestDto) {
 
@@ -299,27 +295,54 @@ public class UserServiceImpl implements UserService {
 		if (Objects.isNull(userEntity)) {
 			throw new StanzaException("User not found for UserId: " + updateUserRequestDto.getUserId());
 		}
-		
-		if(Objects.nonNull(updateUserRequestDto.getAddress())) {userEntity.getUserProfile().setAddress(AddressAdapter.getAddressEntity(updateUserRequestDto.getAddress()));}
-		if(Objects.nonNull(updateUserRequestDto.getBirthday())) {userEntity.getUserProfile().setBirthday(updateUserRequestDto.getBirthday());}
-		if(Objects.nonNull(updateUserRequestDto.getBloodGroup())) {userEntity.getUserProfile().setBloodGroup(updateUserRequestDto.getBloodGroup());}
-		if(Objects.nonNull(updateUserRequestDto.getEmail())) {userEntity.setEmail(updateUserRequestDto.getEmail());}
-		if(Objects.nonNull(updateUserRequestDto.getFirstName())) {userEntity.getUserProfile().setFirstName(updateUserRequestDto.getFirstName());}
-		if(Objects.nonNull(updateUserRequestDto.getGender())) {userEntity.getUserProfile().setGender(updateUserRequestDto.getGender());};
-		if(Objects.nonNull(updateUserRequestDto.getLastName())){userEntity.getUserProfile().setLastName(updateUserRequestDto.getLastName());}
-		if(Objects.nonNull(updateUserRequestDto.getNationality())){userEntity.getUserProfile().setNationality(updateUserRequestDto.getNationality());}
-		if(Objects.nonNull(updateUserRequestDto.getProfilePicture())){userEntity.getUserProfile().setProfilePicture(updateUserRequestDto.getProfilePicture());}
-		if(Objects.nonNull(updateUserRequestDto.getDateOfArrival())){userEntity.getUserProfile().setArrivalDate(updateUserRequestDto.getDateOfArrival());}
-		if(Objects.nonNull(updateUserRequestDto.getForiegnCountryCode())){userEntity.getUserProfile().setSecondaryIsoCode(updateUserRequestDto.getForiegnCountryCode());}
-		if(Objects.nonNull(updateUserRequestDto.getForiegnMobileNumber())){userEntity.getUserProfile().setProfilePicture(updateUserRequestDto.getForiegnMobileNumber());}
-		if(Objects.nonNull(updateUserRequestDto.getNextDestination())){userEntity.getUserProfile().setNextDestination(updateUserRequestDto.getNextDestination());}
+
+		if (Objects.nonNull(updateUserRequestDto.getAddress())) {
+			userEntity.getUserProfile().setAddress(AddressAdapter.getAddressEntity(updateUserRequestDto.getAddress()));
+		}
+		if (Objects.nonNull(updateUserRequestDto.getBirthday())) {
+			userEntity.getUserProfile().setBirthday(updateUserRequestDto.getBirthday());
+		}
+		if (Objects.nonNull(updateUserRequestDto.getBloodGroup())) {
+			userEntity.getUserProfile().setBloodGroup(updateUserRequestDto.getBloodGroup());
+		}
+		if (Objects.nonNull(updateUserRequestDto.getEmail())) {
+			userEntity.setEmail(updateUserRequestDto.getEmail());
+		}
+		if (Objects.nonNull(updateUserRequestDto.getFirstName())) {
+			userEntity.getUserProfile().setFirstName(updateUserRequestDto.getFirstName());
+		}
+		if (Objects.nonNull(updateUserRequestDto.getGender())) {
+			userEntity.getUserProfile().setGender(updateUserRequestDto.getGender());
+		}
+		;
+		if (Objects.nonNull(updateUserRequestDto.getLastName())) {
+			userEntity.getUserProfile().setLastName(updateUserRequestDto.getLastName());
+		}
+		if (Objects.nonNull(updateUserRequestDto.getNationality())) {
+			userEntity.getUserProfile().setNationality(updateUserRequestDto.getNationality());
+		}
+		if (Objects.nonNull(updateUserRequestDto.getProfilePicture())) {
+			userEntity.getUserProfile().setProfilePicture(updateUserRequestDto.getProfilePicture());
+		}
+		if (Objects.nonNull(updateUserRequestDto.getDateOfArrival())) {
+			userEntity.getUserProfile().setArrivalDate(updateUserRequestDto.getDateOfArrival());
+		}
+		if (Objects.nonNull(updateUserRequestDto.getForiegnCountryCode())) {
+			userEntity.getUserProfile().setSecondaryIsoCode(updateUserRequestDto.getForiegnCountryCode());
+		}
+		if (Objects.nonNull(updateUserRequestDto.getForiegnMobileNumber())) {
+			userEntity.getUserProfile().setProfilePicture(updateUserRequestDto.getForiegnMobileNumber());
+		}
+		if (Objects.nonNull(updateUserRequestDto.getNextDestination())) {
+			userEntity.getUserProfile().setNextDestination(updateUserRequestDto.getNextDestination());
+		}
 		userEntity = userDbService.update(userEntity);
-		
+
 		UserProfileDto userProfileDto = UserAdapter.getUserProfileDto(userEntity);
-		
+
 		KafkaDTO kafkaDTO = new KafkaDTO();
 		kafkaDTO.setData(userProfileDto);
-		
+
 		notificationProducer.publish(kafkaResidentDetailTopic, KafkaDTO.class.getName(), kafkaDTO);
 
 		return userProfileDto;
@@ -327,20 +350,36 @@ public class UserServiceImpl implements UserService {
 
 	@Transactional
 	@Override
-	public void addUserAndRole(CreateUserAndRoleDto createUserAndRoleDto) {
-		
-		UserDto userDto = addUser(createUserAndRoleDto.getAddUserRequestDto());
-		
-		if(userDto != null) {
-			createUserAndRoleDto.getAddUserDeptLevelRoleDto().setUserUuid(userDto.getUuid());
-			
-			List<RoleDto> roleDto = 
-					roleService.findByDepartmentAndAccessLevel(createUserAndRoleDto.getAddUserDeptLevelRoleDto().getDepartment(), 
-					createUserAndRoleDto.getAddUserDeptLevelRoleDto().getAccessLevel());
-			
-			createUserAndRoleDto.getAddUserDeptLevelRoleDto().setRolesUuid(Arrays.asList(roleDto.get(0).getUuid()));
-			aclUserService.addRole(createUserAndRoleDto.getAddUserDeptLevelRoleDto());
+	public UserDto addUserAndRole(CreateUserAndRoleDto createUserAndRoleDto) {
+
+		UserEntity userEntity = userDbService.getUserForMobile(createUserAndRoleDto.getAddUserRequestDto().getMobile(),
+				createUserAndRoleDto.getAddUserRequestDto().getIsoCode());
+		UserDto userDto = UserDto.builder().build();
+		if (Objects.isNull(userEntity)) {
+			userDto = addUser(createUserAndRoleDto.getAddUserRequestDto());
+		} else {
+			userDto = UserAdapter.getUserDto(userEntity);
 		}
+
+		createUserAndRoleDto.getAddUserDeptLevelRoleDto().setUserUuid(userDto.getUuid());
+
+		List<RoleDto> roleDto = roleService.findByDepartmentAndAccessLevel(
+				createUserAndRoleDto.getAddUserDeptLevelRoleDto().getDepartment(),
+				createUserAndRoleDto.getAddUserDeptLevelRoleDto().getAccessLevel());
+
+		if (CollectionUtils.isEmpty(roleDto)) {
+			log.error("Department: " + createUserAndRoleDto.getAddUserDeptLevelRoleDto().getDepartment()
+					+ " and Access Level: " + createUserAndRoleDto.getAddUserDeptLevelRoleDto().getAccessLevel()
+					+ " not available in role table.");
+
+			throw new StanzaException("Role not exists in Role Table.");
+		}
+		roleDto.forEach(role -> {
+			createUserAndRoleDto.getAddUserDeptLevelRoleDto().setRolesUuid(Arrays.asList(role.getUuid()));
+			aclUserService.addRole(createUserAndRoleDto.getAddUserDeptLevelRoleDto());
+		});
+
+		return userDto;
 
 	}
 }

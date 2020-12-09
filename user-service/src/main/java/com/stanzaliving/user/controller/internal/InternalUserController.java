@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.stanzaliving.user.controller.internal;
 
 import javax.validation.Valid;
@@ -17,16 +14,10 @@ import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.core.user.request.dto.CreateUserAndRoleDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
-import com.stanzaliving.user.acl.service.AclUserService;
 import com.stanzaliving.user.service.UserService;
 
 import lombok.extern.log4j.Log4j2;
 
-/**
- * @author naveen
- *
- * @date 10-Oct-2019
- */
 @Log4j2
 @RestController
 @RequestMapping("internal")
@@ -35,9 +26,6 @@ public class InternalUserController {
 	@Autowired
 	private UserService userService;
 
-	@Autowired
-	private AclUserService aclUserService;
-	
 	@PostMapping("update")
 	public ResponseDto<UserDto> updateUser(@RequestBody @Valid UpdateUserRequestDto updateUserRequestDto) {
 
@@ -61,11 +49,11 @@ public class InternalUserController {
 	@PostMapping("add/userandrole")
 	public ResponseDto<UserDto> addUserAndRole(@RequestBody @Valid CreateUserAndRoleDto createUserAndRoleDto) {
 
-				
 		log.info("Add user and create role {} ", createUserAndRoleDto);
-		userService.addUserAndRole(createUserAndRoleDto);
 		
-		return ResponseDto.success("Add User and Role Created");
+		UserDto userDto = userService.addUserAndRole(createUserAndRoleDto);
+
+		return ResponseDto.success("Add User and Role Created", userDto);
 	}
 
 	@PostMapping("deactivate/{userId}")
@@ -75,7 +63,7 @@ public class InternalUserController {
 
 		log.info("Deactivated user with id: " + userId);
 
-		return (status)?ResponseDto.success(status):ResponseDto.failure("Unable to deactivate user");
+		return (status) ? ResponseDto.success(status) : ResponseDto.failure("Unable to deactivate user");
 	}
-	
+
 }
