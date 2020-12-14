@@ -1,6 +1,7 @@
 package com.stanzaliving.user.acl.adapters;
 
 import com.stanzaliving.core.base.utils.StanzaUtils;
+import com.stanzaliving.core.transformation.client.cache.TransformationCache;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleNameUrlExpandedDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRequestDto;
@@ -12,6 +13,8 @@ import lombok.experimental.UtilityClass;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 @UtilityClass
@@ -38,11 +41,13 @@ public class UserDepartmentLevelRoleAdapter {
 	}
 
 	public static UserDeptLevelRoleNameUrlExpandedDto getUserDeptLevelRoleNameUrlExpandedDto(
-			UserDepartmentLevelEntity userDepartmentLevelEntity, List<RoleEntity> roleEntityList, List<ApiEntity> apiEntityList) {
+			UserDepartmentLevelEntity userDepartmentLevelEntity, List<RoleEntity> roleEntityList, List<ApiEntity> apiEntityList, TransformationCache transformationCache) {
 
 		List<String> roleNameList = roleEntityList.stream().map(entity -> entity.getRoleName()).collect(Collectors.toList());
 		List<String> actionUrlList = apiEntityList.stream().map(entity -> entity.getActionUrl()).collect(Collectors.toList());
-
+		List<String> accessLevelEntityListUuid = StanzaUtils.getSplittedListOnComma(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid());
+		TreeMap<String, String> accessLevelEntityNameUuidMap = new TreeMap<>();
+		accessLevelEntityListUuid.forEach(uuid -> accessLevelEntityNameUuidMap.put(transformationCache.getAccessLevelNameByUuid(uuid, userDepartmentLevelEntity.getAccessLevel().toString()), uuid));
 		Collections.sort(roleNameList);
 		Collections.sort(actionUrlList);
 
@@ -50,7 +55,8 @@ public class UserDepartmentLevelRoleAdapter {
 				.userUuid(userDepartmentLevelEntity.getUserUuid())
 				.department(userDepartmentLevelEntity.getDepartment())
 				.accessLevel(userDepartmentLevelEntity.getAccessLevel())
-				.accessLevelEntityListUuid(StanzaUtils.getSplittedListOnComma(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid()))
+				.accessLevelEntityListUuid(accessLevelEntityListUuid)
+				.accessLevelEntityNameUuidMap(accessLevelEntityNameUuidMap)
 				.rolesList(roleNameList)
 				.urlList(actionUrlList)
 				.build();
