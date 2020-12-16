@@ -116,4 +116,10 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 		return userRepository.findByUserTypeAndMobileAndStatus(userType, mobileNo, status);
 	}
 
+	@Override
+	public List<UserEntity> findByUserType(UserType userType) {
+		
+		return userRepository.findByUserType(userType);
+	}
+
 }

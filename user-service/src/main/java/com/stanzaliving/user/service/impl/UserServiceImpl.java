@@ -25,6 +25,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
+import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.exception.NoRecordException;
 import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.base.utils.PhoneNumberUtils;
@@ -32,6 +33,7 @@ import com.stanzaliving.core.kafka.dto.KafkaDTO;
 import com.stanzaliving.core.kafka.producer.NotificationProducer;
 import com.stanzaliving.core.sqljpa.adapter.AddressAdapter;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
+import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleRequestDto;
 import com.stanzaliving.core.user.dto.AccessLevelRoleRequestDto;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserFilterDto;
@@ -90,6 +92,12 @@ public class UserServiceImpl implements UserService {
 
 	@Value("${kafka.resident.detail.topic}")
 	private String kafkaResidentDetailTopic;
+	
+	@Value("${consumer.role}")
+	private String consumerUuid;
+	
+	@Value("${broker.role}")
+	private String brokerUuid;
 
 	@Override
 	public UserProfileDto getActiveUserByUserId(String userId) {
@@ -457,4 +465,49 @@ public class UserServiceImpl implements UserService {
 				return null;
 			}
 
+@Override
+	public boolean createRoleBaseUser(UserType userType, String roleUuid, String accessLevelUuid) {
+
+		List<UserEntity> userEntity = userDbService.findByUserType(userType);
+
+		if (CollectionUtils.isEmpty(userEntity)) {
+			log.error("user Type: " + userType + " not available in User table.");
+			throw new StanzaException("User Type not exists in user Table.");
+		}
+		userEntity.forEach(user -> {
+			AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetails(user, roleUuid,
+					accessLevelUuid);
+
+			aclUserService.addRole(addUserDeptLevelRoleRequestDto);
+
+		});
+
+		return Boolean.TRUE;
+	}
+
+	private AddUserDeptLevelRoleRequestDto getRoleDetails(UserEntity user, String roleUuid, String accessLevelUuid) {
+		AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = AddUserDeptLevelRoleRequestDto.builder()
+				.build();
+
+		addUserDeptLevelRoleRequestDto.setUserUuid(user.getUuid());
+		addUserDeptLevelRoleRequestDto.setAccessLevelEntityListUuid(Arrays.asList(accessLevelUuid));
+
+		if (user.getUserType().getTypeName().equalsIgnoreCase("Consumer")) {
+			addUserDeptLevelRoleRequestDto.setRolesUuid(Arrays.asList(consumerUuid));
+			addUserDeptLevelRoleRequestDto.setAccessLevel(AccessLevel.valueOf("COUNTRY"));
+			addUserDeptLevelRoleRequestDto.setDepartment(user.getDepartment());
+		} else if (user.getUserType().getTypeName().equalsIgnoreCase("External")) {
+			addUserDeptLevelRoleRequestDto.setRolesUuid(Arrays.asList(brokerUuid));
+			addUserDeptLevelRoleRequestDto.setAccessLevel(AccessLevel.valueOf("COUNTRY"));
+			addUserDeptLevelRoleRequestDto.setDepartment(user.getDepartment());
+		} else {
+			RoleDto roleDto = roleService.getRoleByUuid(roleUuid);
+
+			addUserDeptLevelRoleRequestDto.setRolesUuid(Arrays.asList(roleDto.getUuid()));
+			addUserDeptLevelRoleRequestDto.setAccessLevel(roleDto.getAccessLevel());
+			addUserDeptLevelRoleRequestDto.setDepartment(roleDto.getDepartment());
+		}
+
+		return addUserDeptLevelRoleRequestDto;
+	}
 }
