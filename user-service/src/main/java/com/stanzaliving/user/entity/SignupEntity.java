@@ -11,7 +11,6 @@ import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.user.acl.adapters.JpaConverterJson;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
