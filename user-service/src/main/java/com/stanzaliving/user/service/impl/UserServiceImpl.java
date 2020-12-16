@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
 import com.stanzaliving.core.base.enums.AccessLevel;
+import com.stanzaliving.core.base.exception.ApiValidationException;
 import com.stanzaliving.core.base.exception.NoRecordException;
 import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.base.utils.PhoneNumberUtils;
@@ -43,7 +44,6 @@ import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
-import com.stanzaliving.user.acl.entity.RoleEntity;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity;
 import com.stanzaliving.user.acl.service.AclUserService;
@@ -77,13 +77,13 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private AclUserService aclUserService;
-	
+
 	@Autowired
 	private RoleService roleService;
-	
+
 	@Autowired
 	private UserDepartmentLevelRoleService userDepartmentLevelRoleService;
-	
+
 	@Autowired
 	private UserDepartmentLevelService userDepartmentLevelService;
 
@@ -92,10 +92,10 @@ public class UserServiceImpl implements UserService {
 
 	@Value("${kafka.resident.detail.topic}")
 	private String kafkaResidentDetailTopic;
-	
+
 	@Value("${consumer.role}")
 	private String consumerUuid;
-	
+
 	@Value("${broker.role}")
 	private String brokerUuid;
 
@@ -405,13 +405,12 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public boolean updateUserStatus(String mobileNo, String userType) {
+	public boolean updateUserStatus(String mobileNo, UserType userType) {
 
-		UserEntity user = userDbService.findByUserTypeAndMobileAndStatus(UserType.valueOf(userType), mobileNo,
-				Boolean.FALSE);
+		UserEntity user = userDbService.findByMobileAndUserTypeAndStatus(mobileNo, userType, Boolean.FALSE);
 
 		if (user == null) {
-			throw new StanzaException("User either does not exist or user is already in desired state.");
+			throw new ApiValidationException("User either does not exist or user is already in desired state.");
 		}
 		UserProfileEntity userProfile = user.getUserProfile();
 
@@ -426,46 +425,50 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public UserDto updateUserType(String mobileNo, String userType) {
+	public UserDto updateUserType(String mobileNo,String isoCode, UserType userType) {
 
-
-		UserEntity userEntity = userDbService.getUserForMobile(mobileNo, "IN");
+		UserEntity userEntity = userDbService.getUserForMobile(mobileNo, isoCode);
 
 		if (Objects.isNull(userEntity)) {
-			throw new StanzaException("User does not exists for Mobile Number: " + mobileNo);
+			throw new ApiValidationException("User does not exists for Mobile Number: " + mobileNo+" and isoCode :"+ isoCode);
 		}
 
 		if (Objects.nonNull(userType)) {
-			userEntity.setUserType(UserType.valueOf(userType));
+			userEntity.setUserType(userType);
 		}
 
 		return UserAdapter.getUserProfileDto(userDbService.update(userEntity));
 	}
-			public UserDto getUserForAccessLevelAndRole(@Valid AccessLevelRoleRequestDto cityRolesRequestDto) {
-				RoleDto roleDto = roleService.findByRoleNameAndDepartment(cityRolesRequestDto.getRoleName(), cityRolesRequestDto.getDepartment());
-				List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = userDepartmentLevelRoleService.findByRoleUuid(roleDto.getUuid());
-				
-				if (CollectionUtils.isEmpty(userDepartmentLevelRoleEntityList)) {
-					return null;
+
+	public UserDto getUserForAccessLevelAndRole(@Valid AccessLevelRoleRequestDto cityRolesRequestDto) {
+		RoleDto roleDto = roleService.findByRoleNameAndDepartment(cityRolesRequestDto.getRoleName(),
+				cityRolesRequestDto.getDepartment());
+		List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = userDepartmentLevelRoleService
+				.findByRoleUuid(roleDto.getUuid());
+
+		if (CollectionUtils.isEmpty(userDepartmentLevelRoleEntityList)) {
+			return null;
+		}
+
+		for (UserDepartmentLevelRoleEntity userDepartmentLevelRoleEntity : userDepartmentLevelRoleEntityList) {
+			UserDepartmentLevelEntity userDepartmentLevelEntity = userDepartmentLevelService
+					.findByUuid(userDepartmentLevelRoleEntity.getUserDepartmentLevelUuid());
+			String csvStringOfUuids = userDepartmentLevelEntity.getCsvAccessLevelEntityUuid();
+
+			if (StringUtils.isNotEmpty(csvStringOfUuids)) {
+				List<String> accessLevelEntityUuids = Arrays
+						.asList(csvStringOfUuids.split(UserConstants.DELIMITER_KEY));
+				if (accessLevelEntityUuids.contains(cityRolesRequestDto.getAccessLevelUuid())) {
+					UserEntity userEntity = userDbService.findByUuid(userDepartmentLevelEntity.getUserUuid());
+					return UserAdapter.getUserDto(userEntity);
 				}
-				
-				for(UserDepartmentLevelRoleEntity userDepartmentLevelRoleEntity: userDepartmentLevelRoleEntityList) {
-					UserDepartmentLevelEntity userDepartmentLevelEntity = userDepartmentLevelService.findByUuid(userDepartmentLevelRoleEntity.getUserDepartmentLevelUuid());
-					String csvStringOfUuids = userDepartmentLevelEntity.getCsvAccessLevelEntityUuid();
-					
-					if(StringUtils.isNotEmpty(csvStringOfUuids)) {
-						List<String> accessLevelEntityUuids = Arrays.asList(csvStringOfUuids.split(UserConstants.DELIMITER_KEY));
-						if(accessLevelEntityUuids.contains(cityRolesRequestDto.getAccessLevelUuid())) {
-							UserEntity userEntity = userDbService.findByUuid(userDepartmentLevelEntity.getUserUuid());
-							return UserAdapter.getUserDto(userEntity);
-						}
-					}
-					
-				}
-				return null;
 			}
 
-@Override
+		}
+		return null;
+	}
+
+	@Override
 	public boolean createRoleBaseUser(UserType userType, String roleUuid, String accessLevelUuid) {
 
 		List<UserEntity> userEntity = userDbService.findByUserType(userType);

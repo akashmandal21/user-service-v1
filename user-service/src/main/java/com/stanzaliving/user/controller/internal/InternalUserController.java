@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.user.dto.AccessLevelRoleRequestDto;
 import com.stanzaliving.core.user.dto.UserDto;
+import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
 import com.stanzaliving.user.service.UserService;
@@ -78,7 +79,7 @@ public class InternalUserController {
 
 	@PutMapping("update/status/{mobileNo}/{userType}")
 	public ResponseDto<Boolean> updateUserStatus(@PathVariable(value="mobileNo",required=true) String mobileNo,
-			@PathVariable(value="userType",required=true) String userType) {
+			@PathVariable(value="userType",required=true) UserType userType) {
 
 		boolean status = userService.updateUserStatus(mobileNo, userType);
 
@@ -88,11 +89,14 @@ public class InternalUserController {
 				: ResponseDto.failure("Unable to Update user Status");
 	}
 
-	@PutMapping("update/userType/{mobileNo}/{userType}")
+	@PutMapping("update/userType/{mobileNo}/{isoCode}/{userType}")
 	public ResponseDto<UserDto> updateUserType(@PathVariable(value="mobileNo",required=true) String mobileNo,
-			@PathVariable(value="userType",required=true) String userType) {
+			@PathVariable(value="isoCode",required=true) String isoCode,
+			@PathVariable(value="userType",required=true) UserType userType
+			
+			) {
 
-		UserDto userDto = userService.updateUserType(mobileNo, userType);
+		UserDto userDto = userService.updateUserType(mobileNo,isoCode, userType);
 
 		log.info("Update userType: " + userDto.getUuid());
 

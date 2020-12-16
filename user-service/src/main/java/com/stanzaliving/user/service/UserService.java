@@ -6,9 +6,6 @@ package com.stanzaliving.user.service;
 import java.util.List;
 import java.util.Map;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-
 import com.stanzaliving.core.base.common.dto.PageResponse;
 import com.stanzaliving.core.user.dto.AccessLevelRoleRequestDto;
 import com.stanzaliving.core.user.dto.UserDto;
@@ -54,11 +51,12 @@ public interface UserService {
 
 	UserDto updateUserMobile(UpdateUserRequestDto updateUserRequestDto);
 
-	boolean updateUserStatus(String mobileNo, String userType);
+	boolean updateUserStatus(String mobileNo, UserType userType);
 
-	UserDto updateUserType(String mobileNo, String userType);
-	UserDto getUserForAccessLevelAndRole(@Valid AccessLevelRoleRequestDto cityRolesRequestDto);
+	UserDto updateUserType(String mobileNo, String isoCode, UserType userType);
 
-	boolean createRoleBaseUser(UserType userType,String roleUuid,String accessLevelUuid);
+	UserDto getUserForAccessLevelAndRole(AccessLevelRoleRequestDto cityRolesRequestDto);
+
+	boolean createRoleBaseUser(UserType userType, String roleUuid, String accessLevelUuid);
 
 }
