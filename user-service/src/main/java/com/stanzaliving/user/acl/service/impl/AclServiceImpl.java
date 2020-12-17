@@ -6,6 +6,7 @@ package com.stanzaliving.user.acl.service.impl;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.stanzaliving.core.transformation.client.cache.TransformationCache;
 import com.stanzaliving.user.entity.UserEntity;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +58,9 @@ public class AclServiceImpl implements AclService {
 
 	@Autowired
 	private UserDepartmentLevelRoleDbService userDepartmentLevelRoleDbService;
+
+	@Autowired
+	private TransformationCache transformationCache;
 
 	@Override
 	public boolean isAccessible(String userId, String url) {
@@ -126,7 +130,7 @@ public class AclServiceImpl implements AclService {
 			if (CollectionUtils.isNotEmpty(apiEntityList) || CollectionUtils.isNotEmpty(roleEntityList)) {
 
 				userDeptLevelRoleNameUrlExpandedDtoList.add(
-						UserDepartmentLevelRoleAdapter.getUserDeptLevelRoleNameUrlExpandedDto(userDepartmentLevelEntity, roleEntityList, apiEntityList));
+						UserDepartmentLevelRoleAdapter.getUserDeptLevelRoleNameUrlExpandedDto(userDepartmentLevelEntity, roleEntityList, apiEntityList, transformationCache));
 			}
 		}
 
