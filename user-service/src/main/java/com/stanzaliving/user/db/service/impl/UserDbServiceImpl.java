@@ -111,9 +111,9 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 	}
 
 	@Override
-	public UserEntity findByMobileAndUserTypeAndStatus(String mobileNo,UserType userType,  Boolean status) {
+	public UserEntity findByMobileAndUserType(String mobileNo,UserType userType) {
 
-		return userRepository.findByMobileAndUserTypeAndStatus(mobileNo,userType,  status);
+		return userRepository.findByMobileAndUserType(mobileNo,userType);
 	}
 
 	@Override

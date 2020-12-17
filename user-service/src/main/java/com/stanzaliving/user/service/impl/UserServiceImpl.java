@@ -405,32 +405,33 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public boolean updateUserStatus(String mobileNo, UserType userType) {
+	public boolean updateUserStatus(String mobileNo, UserType userType, Boolean enabled) {
 
-		UserEntity user = userDbService.findByMobileAndUserTypeAndStatus(mobileNo, userType, Boolean.FALSE);
+		UserEntity user = userDbService.findByMobileAndUserType(mobileNo, userType);
 
 		if (user == null) {
-			throw new ApiValidationException("User either does not exist or user is already in desired state.");
+			throw new ApiValidationException("User either does not exist.");
 		}
 		UserProfileEntity userProfile = user.getUserProfile();
 
 		if (userProfile != null) {
-			userProfile.setStatus(Boolean.TRUE);
+			userProfile.setStatus(enabled);
 			user.setUserProfile(userProfile);
 		}
 
-		user.setStatus(Boolean.TRUE);
+		user.setStatus(enabled);
 		userDbService.save(user);
 		return Boolean.TRUE;
 	}
 
 	@Override
-	public UserDto updateUserType(String mobileNo,String isoCode, UserType userType) {
+	public UserDto updateUserType(String mobileNo, String isoCode, UserType userType) {
 
 		UserEntity userEntity = userDbService.getUserForMobile(mobileNo, isoCode);
 
 		if (Objects.isNull(userEntity)) {
-			throw new ApiValidationException("User does not exists for Mobile Number: " + mobileNo+" and isoCode :"+ isoCode);
+			throw new ApiValidationException(
+					"User does not exists for Mobile Number: " + mobileNo + " and isoCode :" + isoCode);
 		}
 
 		if (Objects.nonNull(userType)) {

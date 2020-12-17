@@ -51,7 +51,7 @@ public interface UserService {
 
 	UserDto updateUserMobile(UpdateUserRequestDto updateUserRequestDto);
 
-	boolean updateUserStatus(String mobileNo, UserType userType);
+	boolean updateUserStatus(String mobileNo, UserType userType, Boolean enabled);
 
 	UserDto updateUserType(String mobileNo, String isoCode, UserType userType);
 

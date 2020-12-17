@@ -25,7 +25,7 @@ public interface UserDbService extends AbstractJpaService<UserEntity, Long> {
 
 	List<UserEntity> findByEmail(String email);
 
-	UserEntity findByMobileAndUserTypeAndStatus(String userMobile,UserType userType, Boolean status);
+	UserEntity findByMobileAndUserType(String userMobile,UserType userType);
 
 	List<UserEntity> findByUserType(UserType userType);
 

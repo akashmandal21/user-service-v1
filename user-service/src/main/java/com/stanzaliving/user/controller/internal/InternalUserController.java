@@ -1,4 +1,4 @@
-/**
+	/**
  * 
  */
 package com.stanzaliving.user.controller.internal;
@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
@@ -77,19 +78,21 @@ public class InternalUserController {
 		return (status) ? ResponseDto.success(status) : ResponseDto.failure("Unable to deactivate user");
 	}
 
-	@PutMapping("update/status/{mobileNo}/{userType}")
+	@PostMapping("update/status/{mobileNo}/{userType}/{enabled}")
 	public ResponseDto<Boolean> updateUserStatus(@PathVariable(value="mobileNo",required=true) String mobileNo,
-			@PathVariable(value="userType",required=true) UserType userType) {
+			@PathVariable(value="userType",required=true) UserType userType,
+			@PathVariable(name = "enabled", required = true) Boolean enabled
+			) {
 
-		boolean status = userService.updateUserStatus(mobileNo, userType);
+		boolean status = userService.updateUserStatus(mobileNo, userType,enabled);
 
-		log.info("Status Update true for Mobile No {} ", mobileNo);
+		log.info("Status Update {} for Mobile No {} ",enabled, mobileNo);
 
 		return (status) ? ResponseDto.success("Status Update Successfully", status)
 				: ResponseDto.failure("Unable to Update user Status");
 	}
 
-	@PutMapping("update/userType/{mobileNo}/{isoCode}/{userType}")
+	@PostMapping("update/userType/{mobileNo}/{isoCode}/{userType}")
 	public ResponseDto<UserDto> updateUserType(@PathVariable(value="mobileNo",required=true) String mobileNo,
 			@PathVariable(value="isoCode",required=true) String isoCode,
 			@PathVariable(value="userType",required=true) UserType userType
