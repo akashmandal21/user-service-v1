@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.apache.commons.lang3.StringUtils;
 
+import com.stanzaliving.core.base.StanzaConstants;
 import com.stanzaliving.core.base.exception.AuthException;
 import com.stanzaliving.core.base.utils.StanzaUtils;
 import com.stanzaliving.core.user.constants.UserErrorCodes.Otp;
@@ -63,6 +64,7 @@ public class SignUpServiceImpl implements SignUpService {
 
 		int otp = generateOtp(addUserRequestDto);
 
+		addUserRequestDto.setSignupFlow(true);
 		SignupEntity signUp = SignUpAdapter.getSignupEntity(addUserRequestDto, otp);
 
 		signUp = signUpDbService.save(signUp);
@@ -82,7 +84,7 @@ public class SignUpServiceImpl implements SignUpService {
 		if (Objects.isNull(userDto))
 			throw new AuthException("user Not created.");
 
-		UserEntity userEntity = userDbService.getUserForMobile(signup.getMobile(), "IN");
+		UserEntity userEntity = userDbService.getUserForMobile(signup.getMobile(), StanzaConstants.INDIA_ISO_CODE);
 
 		return UserAdapter.getUserProfileDto(userEntity);
 	}

@@ -127,12 +127,16 @@ public class UserServiceImpl implements UserService {
 			throw new StanzaException("Mobile Number and ISO Code combination not valid");
 		}
 
-		UserEntity userEntity = userDbService.getUserForMobile(addUserRequestDto.getMobile(),
-				addUserRequestDto.getIsoCode());
+		UserEntity userEntity = userDbService.getUserForMobile(addUserRequestDto.getMobile(), addUserRequestDto.getIsoCode());
 
 		if (Objects.nonNull(userEntity)) {
 			log.warn("User: " + userEntity.getUuid() + " already exists for Mobile: " + addUserRequestDto.getMobile()
 					+ ", ISO Code: " + addUserRequestDto.getIsoCode() + " of type: " + addUserRequestDto.getUserType());
+
+			if (addUserRequestDto.isSignupFlow()) {
+				return UserAdapter.getUserDto(userEntity);
+			}
+
 			throw new StanzaException("User already exists with mobile");
 		}
 
