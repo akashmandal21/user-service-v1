@@ -17,6 +17,7 @@ import com.stanzaliving.core.sqljpa.service.impl.AbstractJpaServiceImpl;
 import com.stanzaliving.core.sqljpa.specification.utils.CriteriaOperation;
 import com.stanzaliving.core.sqljpa.specification.utils.StanzaSpecificationBuilder;
 import com.stanzaliving.core.user.dto.UserFilterDto;
+import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.user.constants.UserQueryConstants;
 import com.stanzaliving.user.db.service.UserDbService;
 import com.stanzaliving.user.entity.UserEntity;
@@ -28,7 +29,8 @@ import com.stanzaliving.user.repository.UserRepository;
  * @date 10-Oct-2019
  */
 @Service
-public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, UserRepository> implements UserDbService {
+public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, UserRepository>
+		implements UserDbService {
 
 	@Autowired
 	private UserRepository userRepository;
@@ -58,7 +60,8 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 				specificationBuilder.with(UserQueryConstants.MOBILE, CriteriaOperation.EQ, userFilterDto.getMobile());
 
 				if (StringUtils.isNotBlank(userFilterDto.getIsoCode())) {
-					specificationBuilder.with(UserQueryConstants.ISO_CODE, CriteriaOperation.EQ, userFilterDto.getIsoCode());
+					specificationBuilder.with(UserQueryConstants.ISO_CODE, CriteriaOperation.EQ,
+							userFilterDto.getIsoCode());
 				}
 			}
 
@@ -67,7 +70,8 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 			}
 
 			if (Objects.nonNull(userFilterDto.getUserType())) {
-				specificationBuilder.with(UserQueryConstants.USER_TYPE, CriteriaOperation.ENUM_EQ, userFilterDto.getUserType());
+				specificationBuilder.with(UserQueryConstants.USER_TYPE, CriteriaOperation.ENUM_EQ,
+						userFilterDto.getUserType());
 			}
 
 			if (userFilterDto.getStatus() != null) {
@@ -80,7 +84,8 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 			}
 
 			if (Objects.nonNull(userFilterDto.getDepartment())) {
-				specificationBuilder.with(UserQueryConstants.DEPARTMENT, CriteriaOperation.ENUM_EQ, userFilterDto.getDepartment());
+				specificationBuilder.with(UserQueryConstants.DEPARTMENT, CriteriaOperation.ENUM_EQ,
+						userFilterDto.getDepartment());
 			}
 
 			if (StringUtils.isNotBlank(userFilterDto.getName())) {
@@ -100,9 +105,21 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 		return specificationBuilder.build();
 	}
 
-    @Override
-    public List<UserEntity> findByEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
+	@Override
+	public List<UserEntity> findByEmail(String email) {
+		return userRepository.findByEmail(email);
+	}
+
+	@Override
+	public UserEntity findByMobileAndUserType(String mobileNo,UserType userType) {
+
+		return userRepository.findByMobileAndUserType(mobileNo,userType);
+	}
+
+	@Override
+	public List<UserEntity> findByUserType(UserType userType) {
+		
+		return userRepository.findByUserType(userType);
+	}
 
 }

@@ -6,18 +6,17 @@ package com.stanzaliving.user.service;
 import java.util.List;
 import java.util.Map;
 
-import javax.validation.Valid;
-
 import com.stanzaliving.core.base.common.dto.PageResponse;
 import com.stanzaliving.core.user.dto.AccessLevelRoleRequestDto;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserFilterDto;
 import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
+import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
-import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
+import com.stanzaliving.user.entity.UserEntity;
 
 /**
  * @author naveen
@@ -52,6 +51,12 @@ public interface UserService {
 
 	UserDto updateUserMobile(UpdateUserRequestDto updateUserRequestDto);
 
-	UserDto getUserForAccessLevelAndRole(@Valid AccessLevelRoleRequestDto cityRolesRequestDto);
+	boolean updateUserStatus(String mobileNo, UserType userType, Boolean enabled);
+
+	UserDto updateUserType(String mobileNo, String isoCode, UserType userType);
+
+	UserDto getUserForAccessLevelAndRole(AccessLevelRoleRequestDto cityRolesRequestDto);
+
+	boolean createRoleBaseUser(UserType userType, String roleUuid, String accessLevelUuid);
 
 }
