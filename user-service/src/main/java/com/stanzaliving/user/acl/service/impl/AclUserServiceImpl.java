@@ -3,16 +3,17 @@ package com.stanzaliving.user.acl.service.impl;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.stanzaliving.core.kafka.producer.NotificationProducer;
+import com.stanzaliving.core.user.acl.dto.*;
+import com.stanzaliving.user.acl.service.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.base.exception.StanzaException;
-import com.stanzaliving.core.user.acl.dto.RoleDto;
-import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
-import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleListDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRequestDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleRequestDto;
 import com.stanzaliving.core.user.dto.response.UserContactDetailsResponseDto;
@@ -24,10 +25,6 @@ import com.stanzaliving.user.acl.db.service.UserDepartmentLevelRoleDbService;
 import com.stanzaliving.user.acl.entity.RoleEntity;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity;
-import com.stanzaliving.user.acl.service.AclUserService;
-import com.stanzaliving.user.acl.service.RoleService;
-import com.stanzaliving.user.acl.service.UserDepartmentLevelRoleService;
-import com.stanzaliving.user.acl.service.UserDepartmentLevelService;
 import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.db.service.UserDbService;
 import com.stanzaliving.user.entity.UserEntity;
@@ -63,6 +60,15 @@ public class AclUserServiceImpl implements AclUserService {
 	@Autowired
 	private UserDepartmentLevelRoleDbService userDepartmentLevelRoleDbService;
 
+	@Autowired
+	private AclService aclService;
+
+	@Autowired
+	private NotificationProducer notificationProducer;
+
+
+	@Value("${kafka.topic.role}")
+	private String roleTopic;
 
 	@Override
 	public void addRole(AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleDto) {
@@ -74,7 +80,7 @@ public class AclUserServiceImpl implements AclUserService {
 		UserDepartmentLevelEntity userDepartmentLevelEntity = userDepartmentLevelService.add(addUserDeptLevelRequestDto);
 
 		userDepartmentLevelRoleService.addRoles(userDepartmentLevelEntity.getUuid(), addUserDeptLevelRoleDto.getRolesUuid());
-
+		publishCurrentRoleSnapshot(addUserDeptLevelRoleDto.getUserUuid());
 	}
 
 	@Override
@@ -90,7 +96,7 @@ public class AclUserServiceImpl implements AclUserService {
 		for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
 			userDepartmentLevelService.delete(userDepartmentLevelEntity);
 		}
-
+		publishCurrentRoleSnapshot(userUuid);
 		return;
 
 	}
@@ -144,7 +150,7 @@ public class AclUserServiceImpl implements AclUserService {
 		for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
 			userDepartmentLevelService.delete(userDepartmentLevelEntity);
 		}
-
+		publishCurrentRoleSnapshot(userUuid);
 		return;
 	}
 
@@ -154,7 +160,7 @@ public class AclUserServiceImpl implements AclUserService {
 		userService.assertActiveUserByUserUuid(addUserDeptLevelRequestDto.getUserUuid());
 
 		userDepartmentLevelService.revokeAccessLevelEntityForDepartmentOfLevel(addUserDeptLevelRequestDto);
-
+		publishCurrentRoleSnapshot(addUserDeptLevelRequestDto.getUserUuid());
 	}
 
 	@Override
@@ -169,7 +175,7 @@ public class AclUserServiceImpl implements AclUserService {
 		}
 
 		userDepartmentLevelRoleService.revokeRoles(userDepartmentLevelEntity.getUuid(), userDeptLevelRoleListDto.getRolesUuid());
-
+		publishCurrentRoleSnapshot(userDeptLevelRoleListDto.getUserUuid());
 	}
 
 	@Override
@@ -231,5 +237,11 @@ public class AclUserServiceImpl implements AclUserService {
 		}
 
 		return userEntities.parallelStream().map(UserAdapter::convertToContactResponseDto).collect(Collectors.toList());
+	}
+
+	private void publishCurrentRoleSnapshot(String userUuid){
+		List<UserDeptLevelRoleNameUrlExpandedDto> data = aclService.getUserDeptLevelRoleNameUrlExpandedDtoBe(userUuid);
+		UserRoleSnapshot userRoleSnapshot = UserRoleSnapshot.builder().userUuid(userUuid).userDeptLevelRoles(data).build();
+		notificationProducer.publish(roleTopic,UserRoleSnapshot.class.getName(),userRoleSnapshot);
 	}
 }
