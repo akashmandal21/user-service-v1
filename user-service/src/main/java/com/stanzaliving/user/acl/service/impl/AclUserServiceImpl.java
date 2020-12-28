@@ -1,11 +1,16 @@
 package com.stanzaliving.user.acl.service.impl;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.stanzaliving.core.kafka.producer.NotificationProducer;
-import com.stanzaliving.core.user.acl.dto.*;
-import com.stanzaliving.user.acl.service.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,7 +18,13 @@ import org.springframework.stereotype.Service;
 
 import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
-import com.stanzaliving.core.base.exception.StanzaException;
+import com.stanzaliving.core.base.exception.ApiValidationException;
+import com.stanzaliving.core.kafka.producer.NotificationProducer;
+import com.stanzaliving.core.user.acl.dto.RoleDto;
+import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
+import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleListDto;
+import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleNameUrlExpandedDto;
+import com.stanzaliving.core.user.acl.dto.UserRoleSnapshot;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRequestDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleRequestDto;
 import com.stanzaliving.core.user.dto.response.UserContactDetailsResponseDto;
@@ -25,6 +36,11 @@ import com.stanzaliving.user.acl.db.service.UserDepartmentLevelRoleDbService;
 import com.stanzaliving.user.acl.entity.RoleEntity;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity;
+import com.stanzaliving.user.acl.service.AclService;
+import com.stanzaliving.user.acl.service.AclUserService;
+import com.stanzaliving.user.acl.service.RoleService;
+import com.stanzaliving.user.acl.service.UserDepartmentLevelRoleService;
+import com.stanzaliving.user.acl.service.UserDepartmentLevelService;
 import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.db.service.UserDbService;
 import com.stanzaliving.user.entity.UserEntity;
@@ -38,13 +54,13 @@ public class AclUserServiceImpl implements AclUserService {
 
 	@Autowired
 	private UserService userService;
-	
+
 	@Autowired
 	private RoleService roleService;
-	
+
 	@Autowired
 	private RoleDbService roleDbService;
-	
+
 	@Autowired
 	private UserDbService userDbService;
 
@@ -65,7 +81,6 @@ public class AclUserServiceImpl implements AclUserService {
 
 	@Autowired
 	private NotificationProducer notificationProducer;
-
 
 	@Value("${kafka.topic.role}")
 	private String roleTopic;
@@ -90,7 +105,7 @@ public class AclUserServiceImpl implements AclUserService {
 
 		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelDbService.findByUserUuidAndDepartment(userUuid, department);
 		if (CollectionUtils.isEmpty(userDepartmentLevelEntityList)) {
-			throw new StanzaException("User doesn't have any access in this department");
+			throw new ApiValidationException("User doesn't have any access in this department");
 		}
 
 		for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
@@ -144,7 +159,7 @@ public class AclUserServiceImpl implements AclUserService {
 
 		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelDbService.findByUserUuidAndDepartmentAndAccessLevel(userUuid, department, accessLevel);
 		if (CollectionUtils.isEmpty(userDepartmentLevelEntityList)) {
-			throw new StanzaException("User doesn't have any access in this department");
+			throw new ApiValidationException("User doesn't have any access in this department");
 		}
 
 		for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
@@ -171,7 +186,7 @@ public class AclUserServiceImpl implements AclUserService {
 				userDeptLevelRoleListDto.getDepartment(), userDeptLevelRoleListDto.getAccessLevel(), true);
 
 		if (null == userDepartmentLevelEntity) {
-			throw new StanzaException("Unable to revoke roles, User doesn't exist at this level in the department");
+			throw new ApiValidationException("Unable to revoke roles, User doesn't exist at this level in the department");
 		}
 
 		userDepartmentLevelRoleService.revokeRoles(userDepartmentLevelEntity.getUuid(), userDeptLevelRoleListDto.getRolesUuid());
@@ -205,14 +220,14 @@ public class AclUserServiceImpl implements AclUserService {
 
 						for (String accessLevelEntity : accessLevelEntityList) {
 							if (accessLevelUuids.contains(accessLevelEntity)) {
-							    List<String> accessLevelIds = userIdAccessLevelIdListMap.getOrDefault(entity.getUserUuid(), new ArrayList<>());
-                                accessLevelIds.add(accessLevelEntity);
+								List<String> accessLevelIds = userIdAccessLevelIdListMap.getOrDefault(entity.getUserUuid(), new ArrayList<>());
+								accessLevelIds.add(accessLevelEntity);
 								userIdAccessLevelIdListMap.put(entity.getUserUuid(), accessLevelIds);
 							}
 						}
-//						if (!Collections.disjoint(accessLevelEntityList, accessLevelUuids)) {
-//							userIds.add(entity.getUserUuid());
-//						}
+						// if (!Collections.disjoint(accessLevelEntityList, accessLevelUuids)) {
+						// userIds.add(entity.getUserUuid());
+						// }
 					});
 				}
 			}
@@ -239,9 +254,9 @@ public class AclUserServiceImpl implements AclUserService {
 		return userEntities.parallelStream().map(UserAdapter::convertToContactResponseDto).collect(Collectors.toList());
 	}
 
-	private void publishCurrentRoleSnapshot(String userUuid){
+	private void publishCurrentRoleSnapshot(String userUuid) {
 		List<UserDeptLevelRoleNameUrlExpandedDto> data = aclService.getUserDeptLevelRoleNameUrlExpandedDtoBe(userUuid);
 		UserRoleSnapshot userRoleSnapshot = UserRoleSnapshot.builder().userUuid(userUuid).userDeptLevelRoles(data).build();
-		notificationProducer.publish(roleTopic,UserRoleSnapshot.class.getName(),userRoleSnapshot);
+		notificationProducer.publish(roleTopic, UserRoleSnapshot.class.getName(), userRoleSnapshot);
 	}
 }

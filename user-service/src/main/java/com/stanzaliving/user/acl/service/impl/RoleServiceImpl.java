@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
+import com.stanzaliving.core.base.exception.ApiValidationException;
 import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
 import com.stanzaliving.core.user.acl.enums.RoleAccessType;
@@ -39,7 +40,7 @@ public class RoleServiceImpl implements RoleService {
 	@Override
 	public RoleDto addRole(AddRoleRequestDto addRoleRequestDto) {
 		if (roleDbService.isRoleExists(addRoleRequestDto.getRoleName(), addRoleRequestDto.getDepartment())) {
-			throw new StanzaException("Role already exists with given name " + addRoleRequestDto.getRoleName());
+			throw new ApiValidationException("Role already exists with given name " + addRoleRequestDto.getRoleName());
 		}
 
 		RoleEntity parentRoleEntity = roleDbService.findByUuid(addRoleRequestDto.getParentRoleUuid());
