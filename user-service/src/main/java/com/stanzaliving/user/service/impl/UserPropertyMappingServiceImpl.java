@@ -19,8 +19,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
+import com.stanzaliving.core.base.exception.ApiValidationException;
 import com.stanzaliving.core.base.exception.MappingNotFoundException;
-import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.sqljpa.specification.utils.CriteriaOperation;
 import com.stanzaliving.core.sqljpa.specification.utils.StanzaSpecificationBuilder;
 import com.stanzaliving.core.user.dto.UserPropertyMappingDto;
@@ -54,11 +54,11 @@ public class UserPropertyMappingServiceImpl implements UserPropertyMappingServic
 		for (UserPropertyMappingRequestDto requestDto : mappingRequestDtos) {
 
 			if (StringUtils.isBlank(requestDto.getUserId()) || StringUtils.isBlank(requestDto.getPropertyId())) {
-				throw new StanzaException("UserId and PropertyId must not be empty to create mapping");
+				throw new ApiValidationException("UserId and PropertyId must not be empty to create mapping");
 			}
 
 			if (userPropertyMappingDbService.isUserPropertyMappingExists(requestDto.getUserId(), requestDto.getPropertyId())) {
-				throw new StanzaException("User [" + requestDto.getUserId() + "] is already mapped to Property [" + requestDto.getPropertyId() + "]");
+				throw new ApiValidationException("User [" + requestDto.getUserId() + "] is already mapped to Property [" + requestDto.getPropertyId() + "]");
 			}
 
 			mappingEntities.add(UserPropertyMappingAdapter.getMappingEntityFromRequest(requestDto));

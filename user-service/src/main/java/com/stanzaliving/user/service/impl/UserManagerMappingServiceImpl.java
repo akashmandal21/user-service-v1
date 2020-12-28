@@ -13,7 +13,6 @@ import org.springframework.util.CollectionUtils;
 
 import com.stanzaliving.core.base.common.dto.PaginationRequest;
 import com.stanzaliving.core.base.exception.ApiValidationException;
-import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.user.dto.UserFilterDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.UserManagerMappingType;
@@ -43,7 +42,7 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 	public void createUserManagerMapping(UserManagerMappingRequestDto userManagerMappingDto) {
 
 		if (!isUserIdAndManagerIdValid(userManagerMappingDto.getUserId(), userManagerMappingDto.getManagerId())) {
-			throw new StanzaException("Invalid userId or managerId");
+			throw new ApiValidationException("Invalid userId or managerId");
 		}
 
 		UserManagerMappingEntity mappingEntity = userManagerMappingRepository.findByUserId(userManagerMappingDto.getUserId());
