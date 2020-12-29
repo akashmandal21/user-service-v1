@@ -133,11 +133,7 @@ public class UserServiceImpl implements UserService {
 			log.warn("User: " + userEntity.getUuid() + " already exists for Mobile: " + addUserRequestDto.getMobile()
 					+ ", ISO Code: " + addUserRequestDto.getIsoCode() + " of type: " + addUserRequestDto.getUserType());
 
-			if (addUserRequestDto.isSignupFlow()) {
 				return UserAdapter.getUserDto(userEntity);
-			}
-
-			throw new StanzaException("User already exists with mobile");
 		}
 
 		log.info("Adding new User [Mobile: " + addUserRequestDto.getMobile() + ", ISOCode: "
