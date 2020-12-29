@@ -28,7 +28,6 @@ import com.stanzaliving.core.base.common.dto.PageResponse;
 import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.exception.ApiValidationException;
 import com.stanzaliving.core.base.exception.NoRecordException;
-import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.base.utils.PhoneNumberUtils;
 import com.stanzaliving.core.kafka.dto.KafkaDTO;
 import com.stanzaliving.core.kafka.producer.NotificationProducer;
@@ -107,7 +106,7 @@ public class UserServiceImpl implements UserService {
 		UserEntity userEntity = userDbService.findByUuidAndStatus(userId, true);
 
 		if (Objects.isNull(userEntity)) {
-			throw new StanzaException("User not found for UserId: " + userId);
+			throw new ApiValidationException("User not found for UserId: " + userId);
 		}
 
 		return UserAdapter.getUserProfileDto(userEntity);
@@ -124,7 +123,7 @@ public class UserServiceImpl implements UserService {
 		if (!PhoneNumberUtils.isValidMobileForCountry(addUserRequestDto.getMobile(), addUserRequestDto.getIsoCode())) {
 			log.error("Number: " + addUserRequestDto.getMobile() + " and ISO: " + addUserRequestDto.getIsoCode()
 					+ " doesn't appear to be a valid mobile combination");
-			throw new StanzaException("Mobile Number and ISO Code combination not valid");
+			throw new ApiValidationException("Mobile Number and ISO Code combination not valid");
 		}
 
 		UserEntity userEntity = userDbService.getUserForMobile(addUserRequestDto.getMobile(), addUserRequestDto.getIsoCode());
@@ -134,6 +133,7 @@ public class UserServiceImpl implements UserService {
 					+ ", ISO Code: " + addUserRequestDto.getIsoCode() + " of type: " + addUserRequestDto.getUserType());
 
 				return UserAdapter.getUserDto(userEntity);
+
 		}
 
 		log.info("Adding new User [Mobile: " + addUserRequestDto.getMobile() + ", ISOCode: "
@@ -168,7 +168,7 @@ public class UserServiceImpl implements UserService {
 		UserEntity userEntity = userDbService.findByUuid(userId);
 
 		if (Objects.isNull(userEntity)) {
-			throw new StanzaException("User not found for UserId: " + userId);
+			throw new ApiValidationException("User not found for UserId: " + userId);
 		}
 
 		return UserAdapter.getUserProfileDto(userEntity);
@@ -189,7 +189,7 @@ public class UserServiceImpl implements UserService {
 		List<UserEntity> userEntities = userDbService.findByUuidIn(managerUuids);
 
 		if (Objects.isNull(userEntities)) {
-			throw new StanzaException("User not found for Uuids: " + managerUuids);
+			throw new ApiValidationException("User not found for Uuids: " + managerUuids);
 		}
 
 		userEntities.forEach(userEntity -> {
@@ -248,7 +248,7 @@ public class UserServiceImpl implements UserService {
 	public boolean updateUserStatus(String userId, Boolean status) {
 		UserEntity user = userDbService.findByUuidAndStatus(userId, !status);
 		if (user == null) {
-			throw new StanzaException("User either does not exist or user is already in desired state.");
+			throw new ApiValidationException("User either does not exist or user is already in desired state.");
 		}
 		UserProfileEntity userProfile = user.getUserProfile();
 
@@ -271,8 +271,7 @@ public class UserServiceImpl implements UserService {
 		UserProfileDto managerProfile = userManagerMappingService.getManagerProfileForUser(userUuid);
 		List<RoleDto> roleDtoList = aclUserService.getUserRoles(userUuid);
 
-		return UserManagerAndRoleDto.builder().userProfile(userProfile).manager(managerProfile).roles(roleDtoList)
-				.build();
+		return UserManagerAndRoleDto.builder().userProfile(userProfile).manager(managerProfile).roles(roleDtoList).build();
 	}
 
 	@Override
@@ -293,21 +292,18 @@ public class UserServiceImpl implements UserService {
 
 		log.info("Searching User by UserId: " + updateDepartmentUserTypeDto.getUserId());
 
-		UserEntity userEntity = userDbService.findByUuidAndStatus(updateDepartmentUserTypeDto.getUserId(),
-				Boolean.TRUE);
+		UserEntity userEntity = userDbService.findByUuidAndStatus(updateDepartmentUserTypeDto.getUserId(), Boolean.TRUE);
 
-		if (Objects.isNull(userEntity))
-			throw new StanzaException("User not found for UserId: " + updateDepartmentUserTypeDto.getUserId());
+		if (Objects.isNull(userEntity)) {
+			throw new ApiValidationException("User not found for UserId: " + updateDepartmentUserTypeDto.getUserId());
+		}
 
 		userEntity.setUserType(updateDepartmentUserTypeDto.getUserType());
 		userEntity.setDepartment(updateDepartmentUserTypeDto.getDepartment());
 
 		userEntity = userDbService.update(userEntity);
 
-		if (Objects.nonNull(userEntity))
-			return Boolean.TRUE;
-
-		return Boolean.FALSE;
+		return Objects.nonNull(userEntity);
 	}
 
 	@Override
@@ -316,7 +312,7 @@ public class UserServiceImpl implements UserService {
 		UserEntity userEntity = userDbService.findByUuidAndStatus(updateUserRequestDto.getUserId(), true);
 
 		if (Objects.isNull(userEntity)) {
-			throw new StanzaException("User not found for UserId: " + updateUserRequestDto.getUserId());
+			throw new ApiValidationException("User not found for UserId: " + updateUserRequestDto.getUserId());
 		}
 
 		if (Objects.nonNull(updateUserRequestDto.getAddress())) {
@@ -377,13 +373,13 @@ public class UserServiceImpl implements UserService {
 		UserEntity userEntity = userDbService.getUserForMobile(updateUserRequestDto.getUserMobile(), "IN");
 
 		if (Objects.nonNull(userEntity)) {
-			throw new StanzaException("User exists for Mobile Number: " + updateUserRequestDto.getUserMobile());
+			throw new ApiValidationException("User exists for Mobile Number: " + updateUserRequestDto.getUserMobile());
 		}
 
 		userEntity = userDbService.findByUuidAndStatus(updateUserRequestDto.getUserId(), true);
 
 		if (Objects.isNull(userEntity)) {
-			throw new StanzaException("User not found for UserId: " + updateUserRequestDto.getUserId());
+			throw new ApiValidationException("User not found for UserId: " + updateUserRequestDto.getUserId());
 		}
 
 		if (Objects.nonNull(updateUserRequestDto.getUserMobile())) {
@@ -476,11 +472,10 @@ public class UserServiceImpl implements UserService {
 
 		if (CollectionUtils.isEmpty(userEntity)) {
 			log.error("user Type: " + userType + " not available in User table.");
-			throw new StanzaException("User Type not exists in user Table.");
+			throw new ApiValidationException("User Type not exists in user Table.");
 		}
 		userEntity.forEach(user -> {
-			AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetails(user, roleUuid,
-					accessLevelUuid);
+			AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetails(user, roleUuid, accessLevelUuid);
 
 			aclUserService.addRole(addUserDeptLevelRoleRequestDto);
 
@@ -490,8 +485,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	private AddUserDeptLevelRoleRequestDto getRoleDetails(UserEntity user, String roleUuid, String accessLevelUuid) {
-		AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = AddUserDeptLevelRoleRequestDto.builder()
-				.build();
+		AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = AddUserDeptLevelRoleRequestDto.builder().build();
 
 		addUserDeptLevelRoleRequestDto.setUserUuid(user.getUuid());
 		addUserDeptLevelRoleRequestDto.setAccessLevelEntityListUuid(Arrays.asList(accessLevelUuid));
