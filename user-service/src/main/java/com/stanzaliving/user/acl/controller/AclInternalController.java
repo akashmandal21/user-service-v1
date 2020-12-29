@@ -7,10 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.stanzaliving.core.user.acl.dto.UserAccessLevelIdsByRoleNameDto;
 import com.stanzaliving.core.user.dto.response.UserContactDetailsResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -42,6 +45,14 @@ public class AclInternalController {
 		log.info("Fetching user by {},{},{}", department,roleName,accessLevelId);
 
 		return ResponseDto.success("Found User", aclUserService.getUsersForRoles(department, roleName, accessLevelId));
+	}
+	
+	@PostMapping("/useridAccessLevelIdByRoleName")
+	public ResponseDto<Map<String, List<String>>> getUseridAccessLevelIdByRoleName(@RequestBody UserAccessLevelIdsByRoleNameDto userAccessLevelIdsByRoleNameDto) {
+
+		log.info("Fetching user by {} ", userAccessLevelIdsByRoleNameDto);
+
+		return ResponseDto.success("Found User", aclUserService.getUsersForRoles(userAccessLevelIdsByRoleNameDto.getDepartment(), userAccessLevelIdsByRoleNameDto.getRoleName(), userAccessLevelIdsByRoleNameDto.getAccessLevelId()));
 	}
 
 	@GetMapping("/usercontactdetails/{department}/{roleName}/{accessLevelId}")
