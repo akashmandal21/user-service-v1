@@ -126,7 +126,8 @@ public class UserServiceImpl implements UserService {
 			throw new ApiValidationException("Mobile Number and ISO Code combination not valid");
 		}
 
-		UserEntity userEntity = userDbService.getUserForMobile(addUserRequestDto.getMobile(), addUserRequestDto.getIsoCode());
+		UserEntity userEntity = userDbService.getUserForMobile(addUserRequestDto.getMobile(),
+				addUserRequestDto.getIsoCode());
 
 		if (Objects.nonNull(userEntity)) {
 			log.warn("User: " + userEntity.getUuid() + " already exists for Mobile: " + addUserRequestDto.getMobile()
@@ -152,6 +153,11 @@ public class UserServiceImpl implements UserService {
 		profileEntity.setUser(userEntity);
 
 		userEntity = userDbService.saveAndFlush(userEntity);
+
+		AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetails(userEntity,
+				addUserRequestDto.getRoleUuid(), addUserRequestDto.getAccessLevelUuid());
+
+		aclUserService.addRole(addUserDeptLevelRoleRequestDto);
 
 		log.info("Added New User with Id: " + userEntity.getUuid());
 
@@ -274,7 +280,8 @@ public class UserServiceImpl implements UserService {
 		UserProfileDto managerProfile = userManagerMappingService.getManagerProfileForUser(userUuid);
 		List<RoleDto> roleDtoList = aclUserService.getUserRoles(userUuid);
 
-		return UserManagerAndRoleDto.builder().userProfile(userProfile).manager(managerProfile).roles(roleDtoList).build();
+		return UserManagerAndRoleDto.builder().userProfile(userProfile).manager(managerProfile).roles(roleDtoList)
+				.build();
 	}
 
 	@Override
@@ -295,7 +302,8 @@ public class UserServiceImpl implements UserService {
 
 		log.info("Searching User by UserId: " + updateDepartmentUserTypeDto.getUserId());
 
-		UserEntity userEntity = userDbService.findByUuidAndStatus(updateDepartmentUserTypeDto.getUserId(), Boolean.TRUE);
+		UserEntity userEntity = userDbService.findByUuidAndStatus(updateDepartmentUserTypeDto.getUserId(),
+				Boolean.TRUE);
 
 		if (Objects.isNull(userEntity)) {
 			throw new ApiValidationException("User not found for UserId: " + updateDepartmentUserTypeDto.getUserId());
@@ -478,7 +486,8 @@ public class UserServiceImpl implements UserService {
 			throw new ApiValidationException("User Type not exists in user Table.");
 		}
 		userEntity.forEach(user -> {
-			AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetails(user, roleUuid, accessLevelUuid);
+			AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetails(user, roleUuid,
+					accessLevelUuid);
 
 			aclUserService.addRole(addUserDeptLevelRoleRequestDto);
 
@@ -488,9 +497,11 @@ public class UserServiceImpl implements UserService {
 	}
 
 	private AddUserDeptLevelRoleRequestDto getRoleDetails(UserEntity user, String roleUuid, String accessLevelUuid) {
-		AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = AddUserDeptLevelRoleRequestDto.builder().build();
+		AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = AddUserDeptLevelRoleRequestDto.builder()
+				.build();
 
 		addUserDeptLevelRoleRequestDto.setUserUuid(user.getUuid());
+		if(Objects.nonNull(accessLevelUuid))
 		addUserDeptLevelRoleRequestDto.setAccessLevelEntityListUuid(Arrays.asList(accessLevelUuid));
 
 		if (user.getUserType().getTypeName().equalsIgnoreCase("Consumer")) {

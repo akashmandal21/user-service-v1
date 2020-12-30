@@ -135,7 +135,7 @@ public class UserAdapter {
 			acl = completeAcl.stream().filter(row -> (null != row.getAccessLevel() && row.getAccessLevel().getLevelNum() > 0)).collect(Collectors.toList());
 			locationAcl = completeAcl.stream().filter(row -> (null != row.getAccessLevel() && row.getAccessLevel().getLevelNum() == 0)).collect(Collectors.toList());
 		}
-
+		
 		return AclUserDto.builder()
 				.uuid(userDto.getUuid())
 				.createdAt(userDto.getCreatedAt())
