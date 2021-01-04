@@ -97,7 +97,10 @@ public class UserServiceImpl implements UserService {
 
 	@Value("${broker.role}")
 	private String brokerUuid;
-
+	
+	@Value("${country.uuid}")
+	private String countryUuid;
+	
 	@Override
 	public UserProfileDto getActiveUserByUserId(String userId) {
 
@@ -151,10 +154,9 @@ public class UserServiceImpl implements UserService {
 
 		userEntity = userDbService.saveAndFlush(userEntity);
 
-		AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetails(userEntity,
-				addUserRequestDto.getRoleUuid(), addUserRequestDto.getAccessLevelUuid());
-
-		aclUserService.addRole(addUserDeptLevelRoleRequestDto);
+		
+		addUserOrConsumerRole(userEntity);
+			
 
 		log.info("Added New User with Id: " + userEntity.getUuid());
 
@@ -311,6 +313,8 @@ public class UserServiceImpl implements UserService {
 
 		userEntity = userDbService.update(userEntity);
 
+		addUserOrConsumerRole(userEntity);
+		
 		return Objects.nonNull(userEntity);
 	}
 
@@ -367,12 +371,22 @@ public class UserServiceImpl implements UserService {
 
 		UserProfileDto userProfileDto = UserAdapter.getUserProfileDto(userEntity);
 
+		addUserOrConsumerRole(userEntity);
+		
 		KafkaDTO kafkaDTO = new KafkaDTO();
 		kafkaDTO.setData(userProfileDto);
 
 		notificationProducer.publish(kafkaResidentDetailTopic, KafkaDTO.class.getName(), kafkaDTO);
 
 		return userProfileDto;
+	}
+
+	private void addUserOrConsumerRole(UserEntity userEntity) {
+		if(userEntity.getUserType().equals(UserType.CONSUMER) || userEntity.getUserType().equals(UserType.EXTERNAL)) {
+			AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetails(userEntity);
+			
+			aclUserService.addRole(addUserDeptLevelRoleRequestDto);
+		}
 	}
 
 	@Override
@@ -442,7 +456,11 @@ public class UserServiceImpl implements UserService {
 			userEntity.setUserType(userType);
 		}
 
-		return UserAdapter.getUserProfileDto(userDbService.update(userEntity));
+		UserDto userDto = UserAdapter.getUserProfileDto(userDbService.update(userEntity));
+		
+		addUserOrConsumerRole(userEntity);
+
+		return userDto;
 	}
 
 	public UserDto getUserForAccessLevelAndRole(@Valid AccessLevelRoleRequestDto cityRolesRequestDto) {
@@ -474,7 +492,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public boolean createRoleBaseUser(UserType userType, String roleUuid, String accessLevelUuid) {
+	public boolean createRoleBaseUser(UserType userType) {
 
 		List<UserEntity> userEntity = userDbService.findByUserType(userType);
 
@@ -483,8 +501,7 @@ public class UserServiceImpl implements UserService {
 			throw new ApiValidationException("User Type not exists in user Table.");
 		}
 		userEntity.forEach(user -> {
-			AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetails(user, roleUuid,
-					accessLevelUuid);
+			AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetails(user);
 
 			aclUserService.addRole(addUserDeptLevelRoleRequestDto);
 
@@ -493,13 +510,14 @@ public class UserServiceImpl implements UserService {
 		return Boolean.TRUE;
 	}
 
-	private AddUserDeptLevelRoleRequestDto getRoleDetails(UserEntity user, String roleUuid, String accessLevelUuid) {
+	
+	
+	private AddUserDeptLevelRoleRequestDto getRoleDetails(UserEntity user) {
 		AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = AddUserDeptLevelRoleRequestDto.builder()
 				.build();
 
 		addUserDeptLevelRoleRequestDto.setUserUuid(user.getUuid());
-		if(Objects.nonNull(accessLevelUuid))
-		addUserDeptLevelRoleRequestDto.setAccessLevelEntityListUuid(Arrays.asList(accessLevelUuid));
+		addUserDeptLevelRoleRequestDto.setAccessLevelEntityListUuid(Arrays.asList(countryUuid));
 
 		if (user.getUserType().getTypeName().equalsIgnoreCase("Consumer")) {
 			addUserDeptLevelRoleRequestDto.setRolesUuid(Arrays.asList(consumerUuid));
@@ -509,12 +527,6 @@ public class UserServiceImpl implements UserService {
 			addUserDeptLevelRoleRequestDto.setRolesUuid(Arrays.asList(brokerUuid));
 			addUserDeptLevelRoleRequestDto.setAccessLevel(AccessLevel.valueOf("COUNTRY"));
 			addUserDeptLevelRoleRequestDto.setDepartment(user.getDepartment());
-		} else {
-			RoleDto roleDto = roleService.getRoleByUuid(roleUuid);
-
-			addUserDeptLevelRoleRequestDto.setRolesUuid(Arrays.asList(roleDto.getUuid()));
-			addUserDeptLevelRoleRequestDto.setAccessLevel(roleDto.getAccessLevel());
-			addUserDeptLevelRoleRequestDto.setDepartment(roleDto.getDepartment());
 		}
 
 		return addUserDeptLevelRoleRequestDto;

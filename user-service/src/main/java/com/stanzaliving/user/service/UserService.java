@@ -57,6 +57,6 @@ public interface UserService {
 
 	UserDto getUserForAccessLevelAndRole(AccessLevelRoleRequestDto cityRolesRequestDto);
 
-	boolean createRoleBaseUser(UserType userType, String roleUuid, String accessLevelUuid);
+	boolean createRoleBaseUser(UserType userType);
 
 }

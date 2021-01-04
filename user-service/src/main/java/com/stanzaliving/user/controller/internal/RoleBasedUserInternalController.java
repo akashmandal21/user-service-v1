@@ -6,10 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.common.base.Optional;
 import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.user.service.UserService;
@@ -28,13 +26,11 @@ public class RoleBasedUserInternalController {
 	@GetMapping("roleBaseUser/{userType}/{accessLevelUuid}")
 	@ApiOperation("Create Role Base User.")
 	public ResponseDto<Boolean> createRoleBaseUser(
-			@PathVariable(name = "userType") @NotBlank(message = "User user Type must not be blank") UserType userType,
-			@RequestParam(name = "roleUuid",required=false) String roleUuid,
-			@PathVariable(name = "accessLevelUuid") @NotBlank(message = "User access Level Uuid must not be blank") String accessLevelUuid) {
+			@PathVariable(name = "userType") @NotBlank(message = "User user Type must not be blank") UserType userType) {
 
 		log.info("Request received to createRoleBaseUser : " + userType);
 
-		boolean response =userService.createRoleBaseUser(userType, roleUuid, accessLevelUuid);
+		boolean response =userService.createRoleBaseUser(userType);
 
 		return ResponseDto.success("Role Base User Created Successfully.", response);
 
