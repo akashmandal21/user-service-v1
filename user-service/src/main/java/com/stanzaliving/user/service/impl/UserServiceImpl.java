@@ -495,15 +495,17 @@ public class UserServiceImpl implements UserService {
 	public boolean createRoleBaseUser(UserType userType) {
 
 		List<UserEntity> userEntity = userDbService.findByUserType(userType);
-
+		
 		if (CollectionUtils.isEmpty(userEntity)) {
 			log.error("user Type: " + userType + " not available in User table.");
 			throw new ApiValidationException("User Type not exists in user Table.");
 		}
 		userEntity.forEach(user -> {
-			AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetails(user);
-
-			aclUserService.addRole(addUserDeptLevelRoleRequestDto);
+			if(user.isStatus()) {
+				AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetails(user);
+				
+				aclUserService.addRole(addUserDeptLevelRoleRequestDto);
+			}
 
 		});
 
