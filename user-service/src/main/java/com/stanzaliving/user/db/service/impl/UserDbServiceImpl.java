@@ -126,7 +126,11 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 		
 		log.info("CHecking fr user type {}",userType);
 		
-		return userRepository.findAll().stream().filter(dto->dto.getUserType().equals(userType)).collect(Collectors.toList());
+		List<UserEntity> userEntities =  userRepository.findAll();
+		
+		log.info("user size is {}",userEntities.size());
+		
+		return userEntities.stream().filter(dto->dto.getUserType().equals(userType)).collect(Collectors.toList());
 	}
 
 }
