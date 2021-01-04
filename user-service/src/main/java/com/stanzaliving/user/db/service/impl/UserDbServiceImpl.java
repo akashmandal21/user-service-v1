@@ -4,8 +4,10 @@
 package com.stanzaliving.user.db.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -124,7 +126,7 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 		
 		log.info("CHecking fr user type {}",userType);
 		
-		return userRepository.findByUserType(userType);
+		return userRepository.findAll().stream().filter(dto->dto.getUserType().equals(userType)).collect(Collectors.toList());
 	}
 
 }
