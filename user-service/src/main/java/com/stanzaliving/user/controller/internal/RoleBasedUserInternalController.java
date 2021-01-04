@@ -23,7 +23,7 @@ public class RoleBasedUserInternalController {
 	@Autowired
 	private UserService userService;
 
-	@GetMapping("roleBaseUser/{userType}/{accessLevelUuid}")
+	@GetMapping("roleBaseUser/{userType}")
 	@ApiOperation("Create Role Base User.")
 	public ResponseDto<Boolean> createRoleBaseUser(
 			@PathVariable(name = "userType") @NotBlank(message = "User user Type must not be blank") UserType userType) {

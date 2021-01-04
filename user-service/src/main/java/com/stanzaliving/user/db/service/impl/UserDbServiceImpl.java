@@ -23,12 +23,15 @@ import com.stanzaliving.user.db.service.UserDbService;
 import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.repository.UserRepository;
 
+import lombok.extern.log4j.Log4j2;
+
 /**
  * @author naveen
  *
  * @date 10-Oct-2019
  */
 @Service
+@Log4j2
 public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, UserRepository>
 		implements UserDbService {
 
@@ -118,6 +121,8 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 
 	@Override
 	public List<UserEntity> findByUserType(UserType userType) {
+		
+		log.info("CHecking fr user type {}",userType);
 		
 		return userRepository.findByUserType(userType);
 	}
