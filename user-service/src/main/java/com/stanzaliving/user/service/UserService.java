@@ -59,4 +59,6 @@ public interface UserService {
 
 	boolean createRoleBaseUser(UserType userType);
 
+	boolean createRoleBaseUser(List<String> mobiles);
+
 }

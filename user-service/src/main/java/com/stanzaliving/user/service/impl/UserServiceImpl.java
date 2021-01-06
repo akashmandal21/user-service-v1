@@ -512,6 +512,20 @@ public class UserServiceImpl implements UserService {
 		return Boolean.TRUE;
 	}
 
+	@Override
+	public boolean createRoleBaseUser(List<String> mobiles) {
+		
+		for (String mobile : mobiles) {
+			UserEntity userEntity = userDbService.findByMobile(mobile);
+			if(Objects.nonNull(userEntity) && userEntity.isStatus()) {
+				AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetails(userEntity);
+				
+				aclUserService.addRole(addUserDeptLevelRoleRequestDto);
+			}
+		}
+		return Boolean.TRUE;
+	}
+
 	
 	
 	private AddUserDeptLevelRoleRequestDto getRoleDetails(UserEntity user) {
