@@ -135,8 +135,18 @@ public class UserServiceImpl implements UserService {
 		if (Objects.nonNull(userEntity)) {
 			log.warn("User: " + userEntity.getUuid() + " already exists for Mobile: " + addUserRequestDto.getMobile()
 					+ ", ISO Code: " + addUserRequestDto.getIsoCode() + " of type: " + addUserRequestDto.getUserType());
-
-				return UserAdapter.getUserDto(userEntity);
+			
+			if(addUserRequestDto.getUserType().equals(UserType.CONSUMER)) {
+				userEntity.setUserType(UserType.CONSUMER);
+				try {
+					addUserOrConsumerRole(userEntity);
+				}catch (Exception e) {
+					log.error("Got error while adding role",e);
+				}
+			}
+			
+			
+			return UserAdapter.getUserDto(userEntity);
 
 		}
 
