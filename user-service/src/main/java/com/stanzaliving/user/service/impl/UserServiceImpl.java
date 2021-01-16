@@ -133,6 +133,12 @@ public class UserServiceImpl implements UserService {
 				addUserRequestDto.getIsoCode());
 
 		if (Objects.nonNull(userEntity)) {
+
+			if(!userEntity.isStatus()){
+				userEntity.setStatus(true);
+				userDbService.update(userEntity);
+			}
+
 			log.warn("User: " + userEntity.getUuid() + " already exists for Mobile: " + addUserRequestDto.getMobile()
 					+ ", ISO Code: " + addUserRequestDto.getIsoCode() + " of type: " + addUserRequestDto.getUserType());
 			
