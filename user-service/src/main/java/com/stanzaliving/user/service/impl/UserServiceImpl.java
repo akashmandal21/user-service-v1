@@ -134,10 +134,26 @@ public class UserServiceImpl implements UserService {
 				addUserRequestDto.getIsoCode());
 
 		if (Objects.nonNull(userEntity)) {
+
+			if(!userEntity.isStatus()){
+				userEntity.setStatus(true);
+				userDbService.update(userEntity);
+			}
+
 			log.warn("User: " + userEntity.getUuid() + " already exists for Mobile: " + addUserRequestDto.getMobile()
 					+ ", ISO Code: " + addUserRequestDto.getIsoCode() + " of type: " + addUserRequestDto.getUserType());
-
-				return UserAdapter.getUserDto(userEntity);
+			
+			if(addUserRequestDto.getUserType().equals(UserType.CONSUMER)|| addUserRequestDto.getUserType().equals(UserType.EXTERNAL)) {
+				userEntity.setUserType(addUserRequestDto.getUserType());
+				try {
+					addUserOrConsumerRole(userEntity);
+				}catch (Exception e) {
+					log.error("Got error while adding role",e);
+				}
+			}
+			
+			
+			return UserAdapter.getUserDto(userEntity);
 
 		}
 
@@ -510,6 +526,20 @@ public class UserServiceImpl implements UserService {
 
 		});
 
+		return Boolean.TRUE;
+	}
+
+	@Override
+	public boolean createRoleBaseUser(List<String> mobiles) {
+		
+		for (String mobile : mobiles) {
+			UserEntity userEntity = userDbService.findByMobile(mobile);
+			if(Objects.nonNull(userEntity) && userEntity.isStatus()) {
+				AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetails(userEntity);
+				
+				aclUserService.addRole(addUserDeptLevelRoleRequestDto);
+			}
+		}
 		return Boolean.TRUE;
 	}
 

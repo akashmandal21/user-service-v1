@@ -1,11 +1,14 @@
 package com.stanzaliving.user.controller.internal;
 
+import java.util.Arrays;
+
 import javax.validation.constraints.NotBlank;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
@@ -31,6 +34,17 @@ public class RoleBasedUserInternalController {
 		log.info("Request received to createRoleBaseUser : " + userType);
 
 		boolean response =userService.createRoleBaseUser(userType);
+
+		return ResponseDto.success("Role Base User Created Successfully.", response);
+
+	}
+	
+	@GetMapping("roleBaseUser")
+	@ApiOperation("Create Role Base User.")
+	public ResponseDto<Boolean> createRoleBaseUserForMobile(
+			@RequestParam(name = "mobile") String mobiles) {
+
+		boolean response =userService.createRoleBaseUser(Arrays.asList(mobiles.split(",")));
 
 		return ResponseDto.success("Role Base User Created Successfully.", response);
 

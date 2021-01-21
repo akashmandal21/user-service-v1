@@ -62,4 +62,6 @@ public interface UserService {
 
 	Map<String, UserProfileDto> getUserProfileDto(Set<String> mobileNos);
 
+	boolean createRoleBaseUser(List<String> mobiles);
+
 }
