@@ -4,6 +4,8 @@
 package com.stanzaliving.user.controller;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -164,5 +166,22 @@ public class UserController {
 
 		return response ? ResponseDto.success("User type and department modified successfully") : ResponseDto.failure("User type and department not modified");
 	}
+	
+	
+
+	@PostMapping("/internal/search/get/userUuid")
+	public ResponseDto<Map<String,UserProfileDto>> getUserProfileDto(@RequestBody Set<String> mobileNos
+			) {
+
+		log.info("Request received for getting user details");
+		
+		Map<String,UserProfileDto> userlist = userService.getUserProfileDto(mobileNos);
+
+		log.info("Successfully fetched user details.");
+		
+		return ResponseDto.success("Found user Details with manager and role details.", userlist);
+	}
+	
+	
 
 }

@@ -90,6 +90,7 @@ public class UserAdapter {
 		}
 
 		return UserProfileDto.builder()
+				.id(userEntity.getId())
 				.uuid(userEntity.getUuid())
 				.createdAt(userEntity.getCreatedAt())
 				.updatedAt(userEntity.getUpdatedAt())

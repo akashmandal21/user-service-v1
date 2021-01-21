@@ -5,6 +5,7 @@ package com.stanzaliving.user.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
 import com.stanzaliving.core.user.dto.AccessLevelRoleRequestDto;
@@ -58,5 +59,7 @@ public interface UserService {
 	UserDto getUserForAccessLevelAndRole(AccessLevelRoleRequestDto cityRolesRequestDto);
 
 	boolean createRoleBaseUser(UserType userType);
+
+	Map<String, UserProfileDto> getUserProfileDto(Set<String> mobileNos);
 
 }

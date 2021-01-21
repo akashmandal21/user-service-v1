@@ -11,6 +11,7 @@ import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.user.entity.UserEntity;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author naveen
@@ -28,5 +29,7 @@ public interface UserDbService extends AbstractJpaService<UserEntity, Long> {
 	UserEntity findByMobileAndUserType(String userMobile,UserType userType);
 
 	List<UserEntity> findByUserType(UserType userType);
+
+	List<UserEntity> findByMobileIn(Set<String> mobileNos);
 
 }
