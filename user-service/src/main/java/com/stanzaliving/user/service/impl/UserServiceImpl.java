@@ -578,4 +578,18 @@ public class UserServiceImpl implements UserService {
 		
 		return userMap;
 	}
+
+	@Override
+	public UserProfileDto getUserDetails(String mobileNo) {
+
+			log.info("Searching User by UserId: " + mobileNo);
+
+			UserEntity userEntity = userDbService.findByMobile(mobileNo);
+
+			if (Objects.isNull(userEntity)) {
+				throw new ApiValidationException("User not found for mobileNo: " + mobileNo);
+			}
+
+			return UserAdapter.getUserProfileDto(userEntity);
+		}
 }

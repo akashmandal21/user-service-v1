@@ -64,4 +64,6 @@ public interface UserService {
 
 	boolean createRoleBaseUser(List<String> mobiles);
 
+	UserProfileDto getUserDetails(String mobileNo);
+
 }
