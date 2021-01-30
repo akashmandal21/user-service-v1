@@ -4,6 +4,7 @@
 package com.stanzaliving.user.kafka.service.impl;
 
 import com.stanzaliving.core.user.acl.dto.RoleDto;
+import com.stanzaliving.user.constants.NotificationKeys;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -69,6 +70,7 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 				.isoCode(otpEntity.getIsoCode())
 				.mobile(otpEntity.getMobile())
 				.text(getOtpMessageForUserType(otpEntity))
+				.templateId(getNotificationTemplateId(otpEntity))
 				.build();
 	}
 
@@ -168,6 +170,35 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 		message = message.replaceAll("<otp>", String.valueOf(otpEntity.getOtp()));
 
 		return message;
+	}
+
+	private String getNotificationTemplateId(OtpEntity otpEntity) {
+		if (OtpType.MOBILE_VERIFICATION == otpEntity.getOtpType()) {
+			return NotificationKeys.MOBILE_VERIFICATION_OTP_MSG;
+		} else if (OtpType.EMAIL_VERIFICATION == otpEntity.getOtpType()) {
+			return NotificationKeys.EMAIL_VERIFICATION_OTP_MSG;
+		} else if (OtpType.USER_VERFICATION == otpEntity.getOtpType()) {
+			return NotificationKeys.USER_VERIFICATION_OTP_MSG;
+		} else {
+			switch (otpEntity.getUserType()) {
+				case STUDENT:
+					return NotificationKeys.STUDENT_OTP_MSG;
+				case PARENT:
+					return NotificationKeys.PARENT_OTP_MSG;
+				case LEGAL:
+					return NotificationKeys.LEGAL_OTP_MSG;
+				case HR:
+					return NotificationKeys.HR_OTP_MSG;
+				case TECH:
+					return NotificationKeys.TECH_OTP_MSG;
+				case FINANCE:
+					return NotificationKeys.FINANCE_OTP_MSG;
+				case PROCUREMENT:
+					return NotificationKeys.PROCUREMENT_OTP_MSG;
+				default:
+					return NotificationKeys.DEFAULT_OTP_MSG;
+			}
+		}
 	}
 
 	public void sendNewRoleToKafka(RoleDto roleDto) {
