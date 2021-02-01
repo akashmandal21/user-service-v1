@@ -71,9 +71,9 @@ public class UserDepartmentLevelServiceImpl implements UserDepartmentLevelServic
 
 		log.info("userDepartmentLevelEntity found for user " + addUserDeptLevelRequestDto.getUserUuid() + " is " + userDepartmentLevelEntity);
 
-		if (StringUtils.isBlank(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid())) {
+		if (userDepartmentLevelEntity != null && StringUtils.isBlank(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid())) {
 			this.delete(userDepartmentLevelEntity);
-			throw new StanzaException("user doesn't have access to any entity for " + addUserDeptLevelRequestDto);
+			throw new StanzaException("user doesn't have access in department " + addUserDeptLevelRequestDto.getDepartment() + " at " + addUserDeptLevelRequestDto.getAccessLevel());
 		}
 
 		List<String> accessLevelEntityUuidList = StanzaUtils.getSplittedListOnComma(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid());
