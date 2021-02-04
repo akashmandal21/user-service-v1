@@ -105,7 +105,7 @@ public class AuthController {
 
 		UserProfileDto userProfileDto = authService.validateEmailVerificationOtp(emailOtpValidateRequestDto);
 		
-		log.info("Email OTP Successfully verified for User: " + userProfileDto.getUuid() + ". Creating User Session now");
+		log.info("Email OTP Successfully verified for User: " + userProfileDto.getUuid());
 
 		return ResponseDto.success("Email OTP Successfully verified for User: " + userProfileDto.getUuid() + "with Email: " + userProfileDto.getEmail());
 	}

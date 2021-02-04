@@ -48,8 +48,18 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 	public void sendOtpToKafka(OtpEntity otpEntity) {
 		try {
 			userExecutor.execute(() -> {
-				sendOtpOnMobile(otpEntity);
-				sendOtpOnMail(otpEntity);
+
+				switch (otpEntity.getOtpType()) {
+				
+				case EMAIL_VERIFICATION:
+					sendOtpOnMail(otpEntity);
+					break;
+
+				default:
+					sendOtpOnMobile(otpEntity);
+					sendOtpOnMail(otpEntity);
+					break;
+				}
 			});
 
 		} catch (Exception e) {
@@ -214,18 +224,5 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 	private void sendMessage(RoleDto roleDto) {
 		String topic = propertyManager.getProperty("kafka.topic.acl", "acl");
 		notificationProducer.publish(topic, RoleDto.class.getName(), roleDto);
-	}
-
-	@Override
-	public void sendEmailVerificationOtpToKafka(OtpEntity otpEntity) {
-		try {
-			userExecutor.execute(() -> {
-				sendOtpOnMail(otpEntity);
-			});
-
-		} catch (Exception e) {
-			log.error("OTP Queue Overflow : ", e);
-			throw new StanzaException(Otp.ERROR_SENDING_OTP, e);
-		}
 	}
 }

@@ -196,7 +196,7 @@ public class OtpServiceImpl implements OtpService {
 				LocalDateTime.now(StanzaConstants.IST_TIMEZONEID).atZone(StanzaConstants.IST_TIMEZONEID).toInstant().getEpochSecond() - (otpExpiryMinutes * 60000));
 
 		if (userOtp == null) {
-			throw new AuthException("No OTP exists for mobile", Otp.OTP_NOT_FOUND);
+			throw new AuthException("No OTP exists for mobile or email", Otp.OTP_NOT_FOUND);
 		}
 
 		if (!userOtp.isStatus()
@@ -204,14 +204,21 @@ public class OtpServiceImpl implements OtpService {
 				|| userOtp.getUpdatedAt().before(otpTime)
 				|| !userOtp.getOtp().toString().equals(otp)) {
 
-			throw new AuthException("Invalid OTP For User With Mobile " + userOtp.getMobile(), Otp.INVALID_OTP);
+			switch (userOtp.getOtpType()) {
+
+			case EMAIL_VERIFICATION:
+				throw new AuthException("Invalid Email verification OTP For User With Email: " + userOtp.getEmail(), Otp.INVALID_OTP);
+
+			default:
+				throw new AuthException("Invalid OTP For User With Mobile " + userOtp.getMobile(), Otp.INVALID_OTP);
+			}
 		}
 	}
 
 	private void expireOtp(OtpEntity otp) {
 		otp.setStatus(false);
 
-		log.debug("Marking OTP Expired for User [Id: {}, Mobile: {}]", otp.getUserId(), otp.getMobile());
+		log.debug("Marking OTP Expired for User [Id: {}, Mobile: {}, Email: {}]", otp.getUserId(), otp.getMobile(), otp.getEmail());
 
 		otpDbService.updateAndFlush(otp);
 	}
@@ -331,7 +338,7 @@ public class OtpServiceImpl implements OtpService {
 
 		log.info("Sending OTP: " + userOtp.getOtp() + " for User: " + userOtp.getUserId() + " for login");
 		
-		kafkaUserService.sendEmailVerificationOtpToKafka(userOtp);
+		kafkaUserService.sendOtpToKafka(userOtp);
 	}
 
 	@Override
@@ -391,6 +398,6 @@ public class OtpServiceImpl implements OtpService {
 		userOtp = otpDbService.updateAndFlush(userOtp);
 
 		log.info("Re-Sending OTP: " + userOtp.getOtp() + " for email: " + userOtp.getEmail() + " of Type " + otpType);
-		kafkaUserService.sendEmailVerificationOtpToKafka(userOtp);
+		kafkaUserService.sendOtpToKafka(userOtp);
 	}
 }

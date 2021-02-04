@@ -19,7 +19,4 @@ public interface KafkaUserService {
 	void sendSmsToKafka(SmsDto smsDto);
 
 	void sendNewRoleToKafka(RoleDto roleDto);
-
-	void sendEmailVerificationOtpToKafka(OtpEntity userOtp);
-
 }

@@ -130,7 +130,7 @@ public class AuthServiceImpl implements AuthService {
 
 	private UserEntity getActiveUserByUuidAndEmail(EmailVerificationRequestDto emailVerificationRequestDto) {
 		
-		UserEntity userEntity = userDbService.findByUuidAndEmail(emailVerificationRequestDto.getUserUuid(), emailVerificationRequestDto.getUserUuid());
+		UserEntity userEntity = userDbService.findByUuidAndEmail(emailVerificationRequestDto.getUserUuid(), emailVerificationRequestDto.getEmail());
 
 		if (Objects.isNull(userEntity)) {
 			
