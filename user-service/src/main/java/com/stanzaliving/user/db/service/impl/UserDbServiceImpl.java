@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -134,6 +135,10 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 	}
 
 	@Override
+	public List<UserEntity> findByMobileIn(Set<String> mobileNos) {
+		
+		return getJpaRepository().findByMobileIn(mobileNos);
+	}
 	public UserEntity findByMobile(String mobile) {
 		return userRepository.findByMobileAndIsoCode(mobile, "IN");
 	}
