@@ -10,6 +10,8 @@ import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.validation.Valid;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +26,8 @@ import com.stanzaliving.core.base.utils.StanzaUtils;
 import com.stanzaliving.core.user.constants.UserErrorCodes.Otp;
 import com.stanzaliving.core.user.enums.OtpType;
 import com.stanzaliving.core.user.enums.UserType;
+import com.stanzaliving.core.user.request.dto.EmailOtpValidateRequestDto;
+import com.stanzaliving.core.user.request.dto.EmailVerificationRequestDto;
 import com.stanzaliving.core.user.request.dto.LoginRequestDto;
 import com.stanzaliving.core.user.request.dto.MobileEmailOtpRequestDto;
 import com.stanzaliving.core.user.request.dto.MobileOtpRequestDto;
@@ -308,4 +312,85 @@ public class OtpServiceImpl implements OtpService {
 
 	}
 
+	@Override
+	public void sendEmailOtp(UserEntity userEntity) {
+
+		OtpEntity currentOtp = otpDbService.getUserOtpByUserId(userEntity.getUuid(), OtpType.EMAIL_VERIFICATION);
+		
+		OtpEntity userOtp;
+
+		if (currentOtp == null || !(userEntity.getEmail().equals(currentOtp.getEmail()))) {
+			
+			userOtp = createOtpForUser(userEntity, OtpType.EMAIL_VERIFICATION);
+		} else {
+
+			currentOtp.setResendCount(0);
+
+			userOtp = updateUserOtp(currentOtp);
+		}
+
+		log.info("Sending OTP: " + userOtp.getOtp() + " for User: " + userOtp.getUserId() + " for login");
+		
+		kafkaUserService.sendEmailVerificationOtpToKafka(userOtp);
+	}
+
+	@Override
+	public void validateEmailVerificationOtp(EmailOtpValidateRequestDto emailOtpValidateRequestDto) {
+		
+		validateEmailVerificationOtp(emailOtpValidateRequestDto.getEmail(), emailOtpValidateRequestDto.getOtp(), OtpType.EMAIL_VERIFICATION);
+	}
+
+	private void validateEmailVerificationOtp(String email, String otp, OtpType otpType) {
+		
+		OtpEntity userOtp = getLastActiveOtpForEmailVerification(email, otpType);
+
+		compareOTP(otp, userOtp);
+
+		log.debug("OTP verified for email: " + userOtp.getEmail());
+
+		expireOtp(userOtp);
+	}
+
+	private OtpEntity getLastActiveOtpForEmailVerification(String email, OtpType otpType) {
+		
+		return otpDbService.getActiveOtpForEmailVerification(email, otpType);
+	}
+
+	@Override
+	public void resendEmailVerificationOtp(@Valid EmailVerificationRequestDto emailVerificationRequestDto) {
+			
+		resendEmailOtp(emailVerificationRequestDto.getEmail(), OtpType.EMAIL_VERIFICATION);
+	}
+
+	private void resendEmailOtp(String email, OtpType otpType) {
+		
+		OtpEntity userOtp = getLastActiveOtpForEmailVerification(email, otpType);
+
+		if (userOtp == null) {
+
+			throw new AuthException("No OTP found for Email: " + email + ", OtpType: " + otpType, Otp.OTP_NOT_FOUND);
+
+		} else {
+
+			if (userOtp.getResendCount() >= otpMaxResendCount) {
+				throw new AuthException("Resend OTP can be used maximum " + otpMaxResendCount + " times.", Otp.OTP_RESEND_LIMIT_EXHAUSTED);
+			}
+			
+			LocalDateTime currentTime = LocalDateTime.now(StanzaConstants.IST_TIMEZONEID);
+			LocalDateTime otpResendEnableTime = DateUtil.convertToLocalDateTime(userOtp.getUpdatedAt()).plusSeconds(otpResendEnableSeconds);
+
+			if (currentTime.isBefore(otpResendEnableTime)) {
+
+				long secondsRemaining = ChronoUnit.SECONDS.between(currentTime, otpResendEnableTime);
+				throw new AuthException("OTP Can be Resent Only After " + secondsRemaining + " Seconds", Otp.OTP_RESEND_NOT_PERMITTED);
+			}
+		}
+
+		userOtp.setResendCount(userOtp.getResendCount() + 1);
+		log.info("Updating OTP for Mobile: {}", userOtp.getMobile());
+		userOtp = otpDbService.updateAndFlush(userOtp);
+
+		log.info("Re-Sending OTP: " + userOtp.getOtp() + " for email: " + userOtp.getEmail() + " of Type " + otpType);
+		kafkaUserService.sendEmailVerificationOtpToKafka(userOtp);
+	}
 }

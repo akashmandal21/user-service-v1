@@ -20,4 +20,6 @@ public interface KafkaUserService {
 
 	void sendNewRoleToKafka(RoleDto roleDto);
 
+	void sendEmailVerificationOtpToKafka(OtpEntity userOtp);
+
 }

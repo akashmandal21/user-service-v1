@@ -39,4 +39,5 @@ public interface UserRepository extends AbstractJpaRepository<UserEntity, Long> 
 
 	UserEntity findByMobileAndUserType(String mobileNo, UserType userType);
 
+	UserEntity findByUuidAndEmail(String userUuid, String email);
 }

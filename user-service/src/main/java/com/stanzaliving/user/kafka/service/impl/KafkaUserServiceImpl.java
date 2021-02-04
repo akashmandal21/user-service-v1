@@ -216,4 +216,16 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 		notificationProducer.publish(topic, RoleDto.class.getName(), roleDto);
 	}
 
+	@Override
+	public void sendEmailVerificationOtpToKafka(OtpEntity otpEntity) {
+		try {
+			userExecutor.execute(() -> {
+				sendOtpOnMail(otpEntity);
+			});
+
+		} catch (Exception e) {
+			log.error("OTP Queue Overflow : ", e);
+			throw new StanzaException(Otp.ERROR_SENDING_OTP, e);
+		}
+	}
 }

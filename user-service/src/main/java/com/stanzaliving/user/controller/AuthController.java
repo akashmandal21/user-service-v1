@@ -25,6 +25,8 @@ import com.stanzaliving.core.base.utils.SecureCookieUtil;
 import com.stanzaliving.core.base.utils.StanzaUtils;
 import com.stanzaliving.core.user.acl.dto.AclUserDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
+import com.stanzaliving.core.user.request.dto.EmailOtpValidateRequestDto;
+import com.stanzaliving.core.user.request.dto.EmailVerificationRequestDto;
 import com.stanzaliving.core.user.request.dto.LoginRequestDto;
 import com.stanzaliving.core.user.request.dto.OtpValidateRequestDto;
 import com.stanzaliving.user.acl.service.AclService;
@@ -61,7 +63,7 @@ public class AuthController {
 
 		return ResponseDto.success("OTP Sent for Login");
 	}
-
+	
 	@PostMapping("validateOtp")
 	public ResponseDto<AclUserDto> validateOtp(
 			@RequestBody @Valid OtpValidateRequestDto otpValidateRequestDto, HttpServletRequest request, HttpServletResponse response) {
@@ -80,6 +82,32 @@ public class AuthController {
 		}
 
 		return ResponseDto.failure("Failed to create user session");
+	}
+	
+	@PostMapping("sendEmailVerificationOtp")
+	public ResponseDto<Void> sendEmailVerificationOtp(@RequestBody @Valid EmailVerificationRequestDto emailVerificationRequestDto) {
+
+		authService.sendEmailOtp(emailVerificationRequestDto);
+
+		return ResponseDto.success("Email OTP Sent");
+	}
+	
+	@PostMapping("resendEmailVerificationOtp")
+	public ResponseDto<Void> resendEmailVerificationOtp(@RequestBody @Valid EmailVerificationRequestDto emailVerificationRequestDto) {
+
+		authService.resendEmailOtp(emailVerificationRequestDto);
+
+		return ResponseDto.success("OTP Successfully Resent");
+	}
+	
+	@PostMapping("validateEmailVerificationOtp")
+	public ResponseDto<String> validateEmailVerificationOtp(@RequestBody @Valid EmailOtpValidateRequestDto emailOtpValidateRequestDto, HttpServletRequest request, HttpServletResponse response) {
+
+		UserProfileDto userProfileDto = authService.validateEmailVerificationOtp(emailOtpValidateRequestDto);
+		
+		log.info("Email OTP Successfully verified for User: " + userProfileDto.getUuid() + ". Creating User Session now");
+
+		return ResponseDto.success("Email OTP Successfully verified for User: " + userProfileDto.getUuid() + "with Email: " + userProfileDto.getEmail());
 	}
 
 	@PostMapping("resendOtp")

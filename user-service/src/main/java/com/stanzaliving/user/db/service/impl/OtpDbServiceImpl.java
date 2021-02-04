@@ -64,4 +64,14 @@ public class OtpDbServiceImpl extends AbstractJpaServiceImpl<OtpEntity, Long, Ot
 
 		return CollectionUtils.isNotEmpty(userOtps) ? userOtps.get(0) : null;
 	}
+
+	@Override
+	public OtpEntity getActiveOtpForEmailVerification(String email, OtpType otpType) {
+		
+		Pageable pageable = PageRequest.of(0, 1, Direction.DESC, "updatedAt");
+
+		List<OtpEntity> userOtps = getJpaRepository().findByEmailAndOtpTypeAndStatus(email, otpType, true, pageable);
+
+		return CollectionUtils.isNotEmpty(userOtps) ? userOtps.get(0) : null;
+	}
 }

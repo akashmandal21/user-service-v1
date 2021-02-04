@@ -5,6 +5,8 @@ package com.stanzaliving.user.service.impl;
 
 import java.util.Objects;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,8 @@ import com.stanzaliving.core.base.exception.AuthException;
 import com.stanzaliving.core.user.constants.UserErrorCodes;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.UserType;
+import com.stanzaliving.core.user.request.dto.EmailOtpValidateRequestDto;
+import com.stanzaliving.core.user.request.dto.EmailVerificationRequestDto;
 import com.stanzaliving.core.user.request.dto.LoginRequestDto;
 import com.stanzaliving.core.user.request.dto.OtpValidateRequestDto;
 import com.stanzaliving.user.adapters.UserAdapter;
@@ -114,4 +118,54 @@ public class AuthServiceImpl implements AuthService {
 		otpService.resendLoginOtp(loginRequestDto);
 	}
 
+	@Override
+	public void sendEmailOtp(EmailVerificationRequestDto emailVerificationRequestDto) {
+
+		UserEntity userEntity = getActiveUserByUuidAndEmail(emailVerificationRequestDto);
+
+		otpService.sendEmailOtp(userEntity);
+
+		log.info("OTP sent for User: " + userEntity.getUuid() + " for Email Verification");
+	}
+
+	private UserEntity getActiveUserByUuidAndEmail(EmailVerificationRequestDto emailVerificationRequestDto) {
+		
+		UserEntity userEntity = userDbService.findByUuidAndEmail(emailVerificationRequestDto.getUserUuid(), emailVerificationRequestDto.getUserUuid());
+
+		if (Objects.isNull(userEntity)) {
+			
+			throw new AuthException("User Not Found with Uuid: " + emailVerificationRequestDto.getUserUuid() + " And Email: " + emailVerificationRequestDto.getEmail(), UserErrorCodes.USER_NOT_EXISTS);
+		}
+
+		if (!userEntity.isStatus()) {
+			
+			throw new AuthException("User Account is Disabled for Uuid " + emailVerificationRequestDto.getUserUuid(), UserErrorCodes.USER_ACCOUNT_INACTIVE);
+		}
+		
+		log.info("Found User: " + userEntity.getUuid() + " And Email: " + emailVerificationRequestDto.getEmail() + " of Type: " + userEntity.getUserType());
+		
+		return userEntity;
+	}
+
+	@Override
+	public UserProfileDto validateEmailVerificationOtp(@Valid EmailOtpValidateRequestDto emailOtpValidateRequestDto) {
+
+		UserEntity userEntity = getActiveUserByUuidAndEmail(emailOtpValidateRequestDto);
+
+		otpService.validateEmailVerificationOtp(emailOtpValidateRequestDto);
+
+		log.info("OTP verification completed for User: " + userEntity.getUuid());
+
+		userEntity.setEmailVerified(true);
+
+		userDbService.update(userEntity);
+
+		return UserAdapter.getUserProfileDto(userEntity);
+	}
+
+	@Override
+	public void resendEmailOtp(@Valid EmailVerificationRequestDto emailVerificationRequestDto) {
+		
+		otpService.resendEmailVerificationOtp(emailVerificationRequestDto);		
+	}
 }
