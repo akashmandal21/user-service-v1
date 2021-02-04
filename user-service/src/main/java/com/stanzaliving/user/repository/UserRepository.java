@@ -4,6 +4,7 @@
 package com.stanzaliving.user.repository;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -40,4 +41,6 @@ public interface UserRepository extends AbstractJpaRepository<UserEntity, Long> 
 	UserEntity findByMobileAndUserType(String mobileNo, UserType userType);
 
 	UserEntity findByUuidAndEmail(String userUuid, String email);
+
+	List<UserEntity> findByMobileIn(Set<String> mobileNos);
 }

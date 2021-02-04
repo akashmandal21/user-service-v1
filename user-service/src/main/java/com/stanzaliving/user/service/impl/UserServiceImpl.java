@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -563,4 +564,32 @@ public class UserServiceImpl implements UserService {
 
 		return addUserDeptLevelRoleRequestDto;
 	}
+
+	@Override
+	public Map<String, UserProfileDto> getUserProfileDto(Set<String> mobileNos) {
+		
+		Map<String, UserProfileDto> userMap = new HashMap<>();
+		
+		List<UserProfileDto> userProfileDto=UserAdapter.getUserProfileDtos(userDbService.findByMobileIn(mobileNos));
+
+		userProfileDto.forEach(user -> {
+			userMap.put(user.getMobile(), user);
+		});
+		
+		return userMap;
+	}
+
+	@Override
+	public UserProfileDto getUserDetails(String mobileNo) {
+
+			log.info("Searching User by UserId: " + mobileNo);
+
+			UserEntity userEntity = userDbService.findByMobile(mobileNo);
+
+			if (Objects.isNull(userEntity)) {
+				throw new ApiValidationException("User not found for mobileNo: " + mobileNo);
+			}
+
+			return UserAdapter.getUserProfileDto(userEntity);
+		}
 }

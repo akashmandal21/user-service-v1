@@ -3,6 +3,9 @@
  */
 package com.stanzaliving.user.controller.internal;
 
+import java.util.Map;
+import java.util.Set;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.user.dto.AccessLevelRoleRequestDto;
 import com.stanzaliving.core.user.dto.UserDto;
+import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
@@ -116,4 +120,17 @@ public class InternalUserController {
 		return userService.getUserForAccessLevelAndRole(cityRolesRequestDto);
 	}
 	
+
+	@PostMapping("/search/get/userUuid")
+	public ResponseDto<Map<String,UserProfileDto>> getUserProfileDto(@RequestBody Set<String> mobileNos
+			) {
+
+		log.info("Request received for getting user details");
+		
+		Map<String,UserProfileDto> userlist = userService.getUserProfileDto(mobileNos);
+
+		log.info("Successfully fetched user details.");
+		
+		return ResponseDto.success("Found user Details with manager and role details.", userlist);
+	}
 }
