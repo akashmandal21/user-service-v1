@@ -33,7 +33,7 @@ public interface OtpService {
 
 	void sendOtp(MobileEmailOtpRequestDto mobileEmailOtpRequestDto);
 
-	void sendEmailOtp(UserEntity userEntity);
+	void sendEmailOtp(UserEntity userEntity, String email);
 
 	void validateEmailVerificationOtp(EmailOtpValidateRequestDto emailOtpValidateRequestDto);
 

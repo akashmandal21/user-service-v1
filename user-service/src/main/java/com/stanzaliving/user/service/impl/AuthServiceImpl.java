@@ -120,28 +120,28 @@ public class AuthServiceImpl implements AuthService {
 	@Override
 	public void sendEmailOtp(EmailVerificationRequestDto emailVerificationRequestDto) {
 
-		UserEntity userEntity = getActiveUserByUuidAndEmail(emailVerificationRequestDto);
+		UserEntity userEntity = getActiveUserByUuid(emailVerificationRequestDto.getUserUuid());
 
-		otpService.sendEmailOtp(userEntity);
+		otpService.sendEmailOtp(userEntity, emailVerificationRequestDto.getEmail());
 
-		log.info("OTP sent for User: " + userEntity.getUuid() + " for Email Verification");
+		log.info("OTP sent for User: " + userEntity.getUuid() + " for Email Verification To Email id: " + emailVerificationRequestDto.getEmail());
 	}
 
-	private UserEntity getActiveUserByUuidAndEmail(EmailVerificationRequestDto emailVerificationRequestDto) {
+	private UserEntity getActiveUserByUuid(String userUuid) {
 		
-		UserEntity userEntity = userDbService.findByUuidAndEmail(emailVerificationRequestDto.getUserUuid(), emailVerificationRequestDto.getEmail());
+		UserEntity userEntity = userDbService.findByUuid(userUuid);
 
 		if (Objects.isNull(userEntity)) {
 			
-			throw new ApiValidationException("User Not Found with Uuid: " + emailVerificationRequestDto.getUserUuid() + " And Email: " + emailVerificationRequestDto.getEmail(), UserErrorCodes.USER_NOT_EXISTS);
+			throw new ApiValidationException("User Not Found with Uuid: " + userUuid, UserErrorCodes.USER_NOT_EXISTS);
 		}
 
 		if (!userEntity.isStatus()) {
 			
-			throw new ApiValidationException("User Account is Disabled for Uuid " + emailVerificationRequestDto.getUserUuid(), UserErrorCodes.USER_ACCOUNT_INACTIVE);
+			throw new ApiValidationException("User Account is Disabled for Uuid " + userUuid, UserErrorCodes.USER_ACCOUNT_INACTIVE);
 		}
 		
-		log.info("Found User: " + userEntity.getUuid() + " And Email: " + emailVerificationRequestDto.getEmail() + " of Type: " + userEntity.getUserType());
+		log.info("Found User: " + userEntity.getUuid() + " of Type: " + userEntity.getUserType());
 		
 		return userEntity;
 	}
@@ -149,7 +149,7 @@ public class AuthServiceImpl implements AuthService {
 	@Override
 	public UserProfileDto validateEmailVerificationOtp(EmailOtpValidateRequestDto emailOtpValidateRequestDto) {
 
-		UserEntity userEntity = getActiveUserByUuidAndEmail(emailOtpValidateRequestDto);
+		UserEntity userEntity = getActiveUserByUuid(emailOtpValidateRequestDto.getUserUuid());
 
 		otpService.validateEmailVerificationOtp(emailOtpValidateRequestDto);
 

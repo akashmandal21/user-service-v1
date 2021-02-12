@@ -302,15 +302,25 @@ public class OtpServiceImpl implements OtpService {
 	}
 
 	@Override
-	public void sendEmailOtp(UserEntity userEntity) {
+	public void sendEmailOtp(UserEntity userEntity, String email) {
 
-		OtpEntity currentOtp = otpDbService.getUserOtpByUserId(userEntity.getUuid(), OtpType.EMAIL_VERIFICATION);
+		OtpType otpType = OtpType.EMAIL_VERIFICATION;
+		
+		OtpEntity currentOtp = otpDbService.getUserOtpByUserId(userEntity.getUuid(), otpType);
 		
 		OtpEntity userOtp;
 
-		if (currentOtp == null || !(userEntity.getEmail().equals(currentOtp.getEmail()))) {
+		if (currentOtp == null 
+				|| !(email.equals(currentOtp.getEmail()))
+				|| !(userEntity.getMobile().equals(currentOtp.getMobile()) && userEntity.getIsoCode().equals(currentOtp.getIsoCode()))) {
+
+			userOtp = new OtpEntity();
+
+			userOtp.setUserId(userEntity.getUuid());
+			userOtp.setUserType(userEntity.getUserType());
+
+			userOtp = setOtpDetailsAndSave(userOtp.getMobile(), userEntity.getIsoCode(), email, otpType, userOtp);
 			
-			userOtp = createOtpForUser(userEntity, OtpType.EMAIL_VERIFICATION);
 		} else {
 
 			currentOtp.setResendCount(0);
@@ -318,7 +328,7 @@ public class OtpServiceImpl implements OtpService {
 			userOtp = updateUserOtp(currentOtp);
 		}
 
-		log.info("Sending OTP: " + userOtp.getOtp() + " for User: " + userOtp.getUserId() + " for email verification");
+		log.info("Sending OTP: " + userOtp.getOtp() + " for User: " + userOtp.getUserId() + " for email verification of email: " + email);
 		
 		kafkaUserService.sendOtpToKafka(userOtp);
 	}
@@ -364,7 +374,10 @@ public class OtpServiceImpl implements OtpService {
 		}
 
 		userOtp.setResendCount(userOtp.getResendCount() + 1);
-		log.info("Updating OTP for email: {}", email);
+		
+		userOtp.setOtp(generateOtp(userOtp));
+		
+		log.info("Updating OTP for email: {} new OTP is: {}", email, userOtp.getOtp()) ;
 		userOtp = otpDbService.updateAndFlush(userOtp);
 
 		log.info("Re-Sending OTP: " + userOtp.getOtp() + " for email: " + userOtp.getEmail() + " of Type " + otpType);
