@@ -364,7 +364,7 @@ public class OtpServiceImpl implements OtpService {
 	}
 
 	@Override
-	public void resendEmailVerificationOtp(@Valid EmailVerificationRequestDto emailVerificationRequestDto) {
+	public void resendEmailVerificationOtp(EmailVerificationRequestDto emailVerificationRequestDto) {
 			
 		resendEmailOtp(emailVerificationRequestDto.getEmail(), OtpType.EMAIL_VERIFICATION);
 	}
@@ -394,7 +394,7 @@ public class OtpServiceImpl implements OtpService {
 		}
 
 		userOtp.setResendCount(userOtp.getResendCount() + 1);
-		log.info("Updating OTP for Mobile: {}", userOtp.getMobile());
+		log.info("Updating OTP for email: {}", email);
 		userOtp = otpDbService.updateAndFlush(userOtp);
 
 		log.info("Re-Sending OTP: " + userOtp.getOtp() + " for email: " + userOtp.getEmail() + " of Type " + otpType);
