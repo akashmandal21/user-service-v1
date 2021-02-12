@@ -3,8 +3,6 @@
  */
 package com.stanzaliving.user.service;
 
-import javax.validation.Valid;
-
 import com.stanzaliving.core.user.enums.OtpType;
 import com.stanzaliving.core.user.request.dto.EmailOtpValidateRequestDto;
 import com.stanzaliving.core.user.request.dto.EmailVerificationRequestDto;
@@ -39,5 +37,5 @@ public interface OtpService {
 
 	void validateEmailVerificationOtp(EmailOtpValidateRequestDto emailOtpValidateRequestDto);
 
-	void resendEmailVerificationOtp(@Valid EmailVerificationRequestDto emailVerificationRequestDto);
+	void resendEmailVerificationOtp(EmailVerificationRequestDto emailVerificationRequestDto);
 }

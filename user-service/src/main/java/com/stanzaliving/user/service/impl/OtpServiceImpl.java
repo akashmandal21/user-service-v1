@@ -237,21 +237,7 @@ public class OtpServiceImpl implements OtpService {
 			throw new AuthException("No OTP found for Mobile: " + mobile + ", ISOCode: " + isoCode + ", OtpType: " + otpType, Otp.OTP_NOT_FOUND);
 
 		} else {
-
-			if (userOtp.getResendCount() >= otpMaxResendCount) {
-				throw new AuthException("Resend OTP can be used maximum " + otpMaxResendCount + " times.", Otp.OTP_RESEND_LIMIT_EXHAUSTED);
-			}
-			LocalDateTime currentTime = LocalDateTime.now(StanzaConstants.IST_TIMEZONEID);
-			LocalDateTime otpResendEnableTime = DateUtil.convertToLocalDateTime(userOtp.getUpdatedAt()).plusSeconds(otpResendEnableSeconds);
-
-			if (currentTime.isBefore(otpResendEnableTime)) {
-
-				long secondsRemaining = ChronoUnit.SECONDS.between(currentTime, otpResendEnableTime);
-
-				throw new AuthException(
-						"OTP Can be Resent Only After " + secondsRemaining + " Seconds", Otp.OTP_RESEND_NOT_PERMITTED);
-			}
-
+			checkForOtpResendConditions(userOtp);
 		}
 
 		userOtp.setResendCount(userOtp.getResendCount() + 1);
@@ -378,19 +364,7 @@ public class OtpServiceImpl implements OtpService {
 			throw new AuthException("No OTP found for Email: " + email + ", OtpType: " + otpType, Otp.OTP_NOT_FOUND);
 
 		} else {
-
-			if (userOtp.getResendCount() >= otpMaxResendCount) {
-				throw new AuthException("Resend OTP can be used maximum " + otpMaxResendCount + " times.", Otp.OTP_RESEND_LIMIT_EXHAUSTED);
-			}
-			
-			LocalDateTime currentTime = LocalDateTime.now(StanzaConstants.IST_TIMEZONEID);
-			LocalDateTime otpResendEnableTime = DateUtil.convertToLocalDateTime(userOtp.getUpdatedAt()).plusSeconds(otpResendEnableSeconds);
-
-			if (currentTime.isBefore(otpResendEnableTime)) {
-
-				long secondsRemaining = ChronoUnit.SECONDS.between(currentTime, otpResendEnableTime);
-				throw new AuthException("OTP Can be Resent Only After " + secondsRemaining + " Seconds", Otp.OTP_RESEND_NOT_PERMITTED);
-			}
+			checkForOtpResendConditions(userOtp);
 		}
 
 		userOtp.setResendCount(userOtp.getResendCount() + 1);
@@ -399,5 +373,21 @@ public class OtpServiceImpl implements OtpService {
 
 		log.info("Re-Sending OTP: " + userOtp.getOtp() + " for email: " + userOtp.getEmail() + " of Type " + otpType);
 		kafkaUserService.sendOtpToKafka(userOtp);
+	}
+
+	private void checkForOtpResendConditions(OtpEntity userOtp) {
+		
+		if (userOtp.getResendCount() >= otpMaxResendCount) {
+			throw new AuthException("Resend OTP can be used maximum " + otpMaxResendCount + " times.", Otp.OTP_RESEND_LIMIT_EXHAUSTED);
+		}
+		
+		LocalDateTime currentTime = LocalDateTime.now(StanzaConstants.IST_TIMEZONEID);
+		LocalDateTime otpResendEnableTime = DateUtil.convertToLocalDateTime(userOtp.getUpdatedAt()).plusSeconds(otpResendEnableSeconds);
+
+		if (currentTime.isBefore(otpResendEnableTime)) {
+
+			long secondsRemaining = ChronoUnit.SECONDS.between(currentTime, otpResendEnableTime);
+			throw new AuthException("OTP Can be Resent Only After " + secondsRemaining + " Seconds", Otp.OTP_RESEND_NOT_PERMITTED);
+		}
 	}
 }
