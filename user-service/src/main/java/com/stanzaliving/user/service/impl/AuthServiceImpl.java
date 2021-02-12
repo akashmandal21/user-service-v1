@@ -147,7 +147,7 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	@Override
-	public UserProfileDto validateEmailVerificationOtp(EmailOtpValidateRequestDto emailOtpValidateRequestDto) {
+	public UserEntity validateEmailVerificationOtpAndUpdateUserDetails(EmailOtpValidateRequestDto emailOtpValidateRequestDto) {
 
 		UserEntity userEntity = getActiveUserByUuid(emailOtpValidateRequestDto.getUserUuid());
 
@@ -159,13 +159,15 @@ public class AuthServiceImpl implements AuthService {
 		
 		userEntity.setEmailVerified(true);
 		
-		userEntity.getUserProfile().setFirstName(emailOtpValidateRequestDto.getFirstName());
+		if (Objects.nonNull(emailOtpValidateRequestDto.getFirstName()))
+			userEntity.getUserProfile().setFirstName(emailOtpValidateRequestDto.getFirstName());
 
-		userEntity.getUserProfile().setLastName(emailOtpValidateRequestDto.getLastName());
+		if (Objects.nonNull(emailOtpValidateRequestDto.getLastName()))
+			userEntity.getUserProfile().setLastName(emailOtpValidateRequestDto.getLastName());
 		
-		userDbService.update(userEntity);
+		userEntity = userDbService.update(userEntity);
 
-		return UserAdapter.getUserProfileDto(userEntity);
+		return userEntity;
 	}
 
 	@Override

@@ -8,6 +8,7 @@ import com.stanzaliving.core.user.request.dto.EmailOtpValidateRequestDto;
 import com.stanzaliving.core.user.request.dto.EmailVerificationRequestDto;
 import com.stanzaliving.core.user.request.dto.LoginRequestDto;
 import com.stanzaliving.core.user.request.dto.OtpValidateRequestDto;
+import com.stanzaliving.user.entity.UserEntity;
 
 /**
  * @author naveen
@@ -24,7 +25,7 @@ public interface AuthService {
 
 	void sendEmailOtp(EmailVerificationRequestDto emailVerificationRequestDto);
 
-	UserProfileDto validateEmailVerificationOtp(EmailOtpValidateRequestDto emailOtpValidateRequestDto);
+	UserEntity validateEmailVerificationOtpAndUpdateUserDetails(EmailOtpValidateRequestDto emailOtpValidateRequestDto);
 
 	void resendEmailOtp(EmailVerificationRequestDto emailVerificationRequestDto);
 

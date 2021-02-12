@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -319,7 +320,7 @@ public class OtpServiceImpl implements OtpService {
 			userOtp.setUserId(userEntity.getUuid());
 			userOtp.setUserType(userEntity.getUserType());
 
-			userOtp = setOtpDetailsAndSave(userOtp.getMobile(), userEntity.getIsoCode(), email, otpType, userOtp);
+			userOtp = setOtpDetailsAndSave(userEntity.getMobile(), userEntity.getIsoCode(), email, otpType, userOtp);
 			
 		} else {
 
@@ -336,38 +337,37 @@ public class OtpServiceImpl implements OtpService {
 	@Override
 	public void validateEmailVerificationOtp(EmailOtpValidateRequestDto emailOtpValidateRequestDto) {
 		
-		validateEmailVerificationOtp(emailOtpValidateRequestDto.getEmail(), emailOtpValidateRequestDto.getOtp(), OtpType.EMAIL_VERIFICATION);
-	}
+		OtpType otpType = OtpType.EMAIL_VERIFICATION;
 
-	private void validateEmailVerificationOtp(String email, String otp, OtpType otpType) {
+		OtpEntity userOtp = getLastActiveOtpForEmailVerification(emailOtpValidateRequestDto.getEmail(), emailOtpValidateRequestDto.getUserUuid(), otpType);
+
+		if (userOtp == null) {
+
+			throw new AuthException("No OTP found for Email: " + emailOtpValidateRequestDto.getEmail() + ", OtpType: " + otpType, Otp.OTP_NOT_FOUND);
+		}
 		
-		OtpEntity userOtp = getLastActiveOtpForEmailVerification(email, otpType);
-
-		compareOTP(otp, userOtp);
+		compareOTP(emailOtpValidateRequestDto.getOtp(), userOtp);
 
 		log.debug("OTP verified for email: " + userOtp.getEmail());
 
 		expireOtp(userOtp);
 	}
 
-	private OtpEntity getLastActiveOtpForEmailVerification(String email, OtpType otpType) {
+	private OtpEntity getLastActiveOtpForEmailVerification(String email, String userUuid, OtpType otpType) {
 		
-		return otpDbService.getActiveOtpForEmailVerification(email, otpType);
+		return otpDbService.getActiveOtpByEmailAndUserUuidAndOtpType(email, userUuid, otpType);
 	}
 
 	@Override
 	public void resendEmailVerificationOtp(EmailVerificationRequestDto emailVerificationRequestDto) {
 			
-		resendEmailOtp(emailVerificationRequestDto.getEmail(), OtpType.EMAIL_VERIFICATION);
-	}
-
-	private void resendEmailOtp(String email, OtpType otpType) {
+		OtpType otpType = OtpType.EMAIL_VERIFICATION;
 		
-		OtpEntity userOtp = getLastActiveOtpForEmailVerification(email, otpType);
+		OtpEntity userOtp = getLastActiveOtpForEmailVerification(emailVerificationRequestDto.getEmail(), emailVerificationRequestDto.getUserUuid(), otpType);
 
 		if (userOtp == null) {
 
-			throw new AuthException("No OTP found for Email: " + email + ", OtpType: " + otpType, Otp.OTP_NOT_FOUND);
+			throw new AuthException("No OTP found for Email: " + emailVerificationRequestDto.getEmail() + ", OtpType: " + otpType, Otp.OTP_NOT_FOUND);
 
 		} else {
 			checkForOtpResendConditions(userOtp);
@@ -377,7 +377,7 @@ public class OtpServiceImpl implements OtpService {
 		
 		userOtp.setOtp(generateOtp(userOtp));
 		
-		log.info("Updating OTP for email: {} new OTP is: {}", email, userOtp.getOtp()) ;
+		log.info("Updating OTP for email: {} new OTP is: {}", emailVerificationRequestDto.getEmail(), userOtp.getOtp()) ;
 		userOtp = otpDbService.updateAndFlush(userOtp);
 
 		log.info("Re-Sending OTP: " + userOtp.getOtp() + " for email: " + userOtp.getEmail() + " of Type " + otpType);

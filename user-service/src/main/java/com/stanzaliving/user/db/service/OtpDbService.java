@@ -20,6 +20,6 @@ public interface OtpDbService extends AbstractJpaService<OtpEntity, Long> {
 
 	OtpEntity getUserOtpByUserId(String userId, OtpType otpType);
 
-	OtpEntity getActiveOtpForEmailVerification(String email, OtpType otpType);
+	OtpEntity getActiveOtpByEmailAndUserUuidAndOtpType(String email, String userUuid, OtpType otpType);
 
 }

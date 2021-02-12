@@ -31,6 +31,7 @@ import com.stanzaliving.core.user.request.dto.LoginRequestDto;
 import com.stanzaliving.core.user.request.dto.OtpValidateRequestDto;
 import com.stanzaliving.user.acl.service.AclService;
 import com.stanzaliving.user.adapters.UserAdapter;
+import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.entity.UserSessionEntity;
 import com.stanzaliving.user.service.AuthService;
 import com.stanzaliving.user.service.SessionService;
@@ -101,13 +102,13 @@ public class AuthController {
 	}
 	
 	@PostMapping("validateEmailVerificationOtp")
-	public ResponseDto<String> validateEmailVerificationOtp(@RequestBody @Valid EmailOtpValidateRequestDto emailOtpValidateRequestDto) {
+	public ResponseDto<String> validateEmailVerificationOtp(@RequestBody EmailOtpValidateRequestDto emailOtpValidateRequestDto) {
 
-		UserProfileDto userProfileDto = authService.validateEmailVerificationOtp(emailOtpValidateRequestDto);
+		UserEntity userEntity = authService.validateEmailVerificationOtpAndUpdateUserDetails(emailOtpValidateRequestDto);
 		
-		log.info("Email OTP Successfully verified for User: " + userProfileDto.getUuid());
+		log.info("Email OTP Successfully verified for User: " + userEntity.getUuid());
 
-		return ResponseDto.success("Email OTP Successfully verified for User: " + userProfileDto.getUuid() + " with Email: " + userProfileDto.getEmail());
+		return ResponseDto.success("Email OTP Successfully verified for User: " + userEntity.getUuid() + " with Email: " + userEntity.getEmail() + " and User Details Updated Successfully.");
 	}
 
 	@PostMapping("resendOtp")
