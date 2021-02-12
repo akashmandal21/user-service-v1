@@ -3,8 +3,6 @@
  */
 package com.stanzaliving.user.service;
 
-import javax.validation.Valid;
-
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.request.dto.EmailOtpValidateRequestDto;
 import com.stanzaliving.core.user.request.dto.EmailVerificationRequestDto;
@@ -26,8 +24,8 @@ public interface AuthService {
 
 	void sendEmailOtp(EmailVerificationRequestDto emailVerificationRequestDto);
 
-	UserProfileDto validateEmailVerificationOtp(@Valid EmailOtpValidateRequestDto emailOtpValidateRequestDto);
+	UserProfileDto validateEmailVerificationOtp(EmailOtpValidateRequestDto emailOtpValidateRequestDto);
 
-	void resendEmailOtp(@Valid EmailVerificationRequestDto emailVerificationRequestDto);
+	void resendEmailOtp(EmailVerificationRequestDto emailVerificationRequestDto);
 
 }

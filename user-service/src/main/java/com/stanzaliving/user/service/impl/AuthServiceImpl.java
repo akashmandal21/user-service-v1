@@ -5,12 +5,11 @@ package com.stanzaliving.user.service.impl;
 
 import java.util.Objects;
 
-import javax.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.stanzaliving.core.base.enums.Department;
+import com.stanzaliving.core.base.exception.ApiValidationException;
 import com.stanzaliving.core.base.exception.AuthException;
 import com.stanzaliving.core.user.constants.UserErrorCodes;
 import com.stanzaliving.core.user.dto.UserProfileDto;
@@ -134,12 +133,12 @@ public class AuthServiceImpl implements AuthService {
 
 		if (Objects.isNull(userEntity)) {
 			
-			throw new AuthException("User Not Found with Uuid: " + emailVerificationRequestDto.getUserUuid() + " And Email: " + emailVerificationRequestDto.getEmail(), UserErrorCodes.USER_NOT_EXISTS);
+			throw new ApiValidationException("User Not Found with Uuid: " + emailVerificationRequestDto.getUserUuid() + " And Email: " + emailVerificationRequestDto.getEmail(), UserErrorCodes.USER_NOT_EXISTS);
 		}
 
 		if (!userEntity.isStatus()) {
 			
-			throw new AuthException("User Account is Disabled for Uuid " + emailVerificationRequestDto.getUserUuid(), UserErrorCodes.USER_ACCOUNT_INACTIVE);
+			throw new ApiValidationException("User Account is Disabled for Uuid " + emailVerificationRequestDto.getUserUuid(), UserErrorCodes.USER_ACCOUNT_INACTIVE);
 		}
 		
 		log.info("Found User: " + userEntity.getUuid() + " And Email: " + emailVerificationRequestDto.getEmail() + " of Type: " + userEntity.getUserType());
@@ -148,7 +147,7 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	@Override
-	public UserProfileDto validateEmailVerificationOtp(@Valid EmailOtpValidateRequestDto emailOtpValidateRequestDto) {
+	public UserProfileDto validateEmailVerificationOtp(EmailOtpValidateRequestDto emailOtpValidateRequestDto) {
 
 		UserEntity userEntity = getActiveUserByUuidAndEmail(emailOtpValidateRequestDto);
 
@@ -164,7 +163,7 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	@Override
-	public void resendEmailOtp(@Valid EmailVerificationRequestDto emailVerificationRequestDto) {
+	public void resendEmailOtp(EmailVerificationRequestDto emailVerificationRequestDto) {
 		
 		otpService.resendEmailVerificationOtp(emailVerificationRequestDto);		
 	}

@@ -101,13 +101,13 @@ public class AuthController {
 	}
 	
 	@PostMapping("validateEmailVerificationOtp")
-	public ResponseDto<String> validateEmailVerificationOtp(@RequestBody @Valid EmailOtpValidateRequestDto emailOtpValidateRequestDto, HttpServletRequest request, HttpServletResponse response) {
+	public ResponseDto<String> validateEmailVerificationOtp(@RequestBody @Valid EmailOtpValidateRequestDto emailOtpValidateRequestDto) {
 
 		UserProfileDto userProfileDto = authService.validateEmailVerificationOtp(emailOtpValidateRequestDto);
 		
 		log.info("Email OTP Successfully verified for User: " + userProfileDto.getUuid());
 
-		return ResponseDto.success("Email OTP Successfully verified for User: " + userProfileDto.getUuid() + "with Email: " + userProfileDto.getEmail());
+		return ResponseDto.success("Email OTP Successfully verified for User: " + userProfileDto.getUuid() + " with Email: " + userProfileDto.getEmail());
 	}
 
 	@PostMapping("resendOtp")

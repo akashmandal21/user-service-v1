@@ -336,7 +336,7 @@ public class OtpServiceImpl implements OtpService {
 			userOtp = updateUserOtp(currentOtp);
 		}
 
-		log.info("Sending OTP: " + userOtp.getOtp() + " for User: " + userOtp.getUserId() + " for login");
+		log.info("Sending OTP: " + userOtp.getOtp() + " for User: " + userOtp.getUserId() + " for email verification");
 		
 		kafkaUserService.sendOtpToKafka(userOtp);
 	}
