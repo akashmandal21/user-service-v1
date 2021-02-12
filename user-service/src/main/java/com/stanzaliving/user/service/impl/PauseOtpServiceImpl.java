@@ -18,48 +18,48 @@ public class PauseOtpServiceImpl implements PauseOtpService {
 
 	@Autowired
 	private PauseOtpDbService pauseOtpDbService;
-	
+
 	@Override
 	public boolean checkIfNeedToStop(String mobile) {
-		
-		log.info("Got request to check blacklist {}",mobile);
-		
+
+		log.info("Got request to check blacklist {}", mobile);
+
 		return pauseOtpDbService.checkIfMobileExist(mobile);
 	}
 
 	@Override
 	public boolean pauseOtp(String mobile) {
-		
-		log.info("Got request to add to blacklist {}",mobile);
-		
+
+		log.info("Got request to add to blacklist {}", mobile);
+
 		PauseOtpEntity pauseOtpEntity = pauseOtpDbService.findByMobileNumber(mobile);
-		
-		if(Objects.nonNull(pauseOtpEntity)) {
+
+		if (Objects.nonNull(pauseOtpEntity)) {
 			pauseOtpEntity.setStatus(true);
-		}else {
+		} else {
 			pauseOtpEntity = PauseOtpEntity.builder().mobile(mobile).status(true).build();
 		}
-		
+
 		pauseOtpEntity = pauseOtpDbService.save(pauseOtpEntity);
-		
+
 		return Objects.nonNull(pauseOtpEntity);
 	}
 
 	@Override
 	public boolean resumeOtp(String mobile) {
 
-		log.info("Got request to remove from blacklist {}",mobile);
+		log.info("Got request to remove from blacklist {}", mobile);
 
 		PauseOtpEntity pauseOtpEntity = pauseOtpDbService.findByMobileNumber(mobile);
-		
-		if(Objects.nonNull(pauseOtpEntity)) {
-			pauseOtpEntity.setStatus(false);
-		}else {
-			throw new ApiValidationException("User not found");
+
+		if (Objects.isNull(pauseOtpEntity) || !pauseOtpEntity.isStatus()) {
+			throw new ApiValidationException("OTP not paused for " + mobile);
 		}
-		
+
+		pauseOtpEntity.setStatus(false);
+
 		pauseOtpEntity = pauseOtpDbService.save(pauseOtpEntity);
-		
+
 		return Objects.nonNull(pauseOtpEntity);
 	}
 

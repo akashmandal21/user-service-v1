@@ -9,11 +9,11 @@ import com.stanzaliving.user.entity.PauseOtpEntity;
 import com.stanzaliving.user.repository.PauseOtpRepository;
 
 @Service
-public class PauseOtpDbServiceImpl extends AbstractJpaServiceImpl<PauseOtpEntity, Long, PauseOtpRepository>  implements PauseOtpDbService {
+public class PauseOtpDbServiceImpl extends AbstractJpaServiceImpl<PauseOtpEntity, Long, PauseOtpRepository> implements PauseOtpDbService {
 
 	@Autowired
 	private PauseOtpRepository pauseOtpRepository;
-	
+
 	@Override
 	public boolean checkIfMobileExist(String mobile) {
 		return getJpaRepository().existsByMobileAndStatus(mobile, true);
@@ -28,6 +28,5 @@ public class PauseOtpDbServiceImpl extends AbstractJpaServiceImpl<PauseOtpEntity
 	protected PauseOtpRepository getJpaRepository() {
 		return pauseOtpRepository;
 	}
-
 
 }

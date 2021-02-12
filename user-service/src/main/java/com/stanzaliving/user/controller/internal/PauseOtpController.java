@@ -21,27 +21,29 @@ public class PauseOtpController {
 	private PauseOtpService blacklistUserService;
 
 	@PostMapping("add/{mobile}")
-	public ResponseDto<Boolean> addUser(@PathVariable String mobile) {
+	public ResponseDto<Boolean> addUser(@PathVariable("mobile") String mobile) {
 
-		log.info("add User with mobile: {}", mobile);
+		log.info("Received request to pause OTP for mobile: {}", mobile);
 
-		return ResponseDto.success("Added!!", blacklistUserService.pauseOtp(mobile));
+		return ResponseDto.success("OTP Paused for " + mobile, blacklistUserService.pauseOtp(mobile));
 	}
 
 	@PostMapping("delete/{mobile}")
-	public ResponseDto<Boolean> deleteUser(@PathVariable String mobile) {
+	public ResponseDto<Boolean> deleteUser(@PathVariable("mobile") String mobile) {
 
-		log.info("add User with mobile: {}", mobile);
+		log.info("Received request to resume OTP for mobile: {}", mobile);
 
-		return ResponseDto.success("Deleted", blacklistUserService.resumeOtp(mobile));
+		return ResponseDto.success("OTP resumned for " + mobile, blacklistUserService.resumeOtp(mobile));
 	}
 
 	@GetMapping("check/{mobile}")
-	public ResponseDto<Boolean> checkUser(@PathVariable String mobile) {
+	public ResponseDto<Boolean> checkUser(@PathVariable("mobile") String mobile) {
 
-		log.info("add User with mobile: {}", mobile);
+		log.info("Received request to get pause OTP status for mobile: {}", mobile);
 
-		return ResponseDto.success("Chcked", blacklistUserService.checkIfNeedToStop(mobile));
+		boolean checkIfOtpPaused = blacklistUserService.checkIfNeedToStop(mobile);
+
+		return ResponseDto.success((checkIfOtpPaused ? "OTP currently paused" : "OTP currently going") + " for " + mobile, checkIfOtpPaused);
 	}
 
 }
