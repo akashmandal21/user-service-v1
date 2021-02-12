@@ -155,8 +155,14 @@ public class AuthServiceImpl implements AuthService {
 
 		log.info("OTP verification completed for User: " + userEntity.getUuid());
 
+		userEntity.setEmail(emailOtpValidateRequestDto.getEmail());
+		
 		userEntity.setEmailVerified(true);
+		
+		userEntity.getUserProfile().setFirstName(emailOtpValidateRequestDto.getFirstName());
 
+		userEntity.getUserProfile().setLastName(emailOtpValidateRequestDto.getLastName());
+		
 		userDbService.update(userEntity);
 
 		return UserAdapter.getUserProfileDto(userEntity);
