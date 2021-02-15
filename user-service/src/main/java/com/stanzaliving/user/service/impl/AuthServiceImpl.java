@@ -9,8 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.stanzaliving.core.base.enums.Department;
-import com.stanzaliving.core.base.exception.ApiValidationException;
 import com.stanzaliving.core.base.exception.AuthException;
+import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.user.constants.UserErrorCodes;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.UserType;
@@ -133,12 +133,12 @@ public class AuthServiceImpl implements AuthService {
 
 		if (Objects.isNull(userEntity)) {
 			
-			throw new ApiValidationException("User Not Found with Uuid: " + userUuid, UserErrorCodes.USER_NOT_EXISTS);
+			throw new StanzaException("User Not Found with Uuid: " + userUuid);
 		}
 
 		if (!userEntity.isStatus()) {
 			
-			throw new ApiValidationException("User Account is Disabled for Uuid " + userUuid, UserErrorCodes.USER_ACCOUNT_INACTIVE);
+			throw new StanzaException("User Account is Disabled for Uuid " + userUuid);
 		}
 		
 		log.info("Found User: " + userEntity.getUuid() + " of Type: " + userEntity.getUserType());

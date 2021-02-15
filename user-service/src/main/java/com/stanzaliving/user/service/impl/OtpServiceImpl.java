@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import com.stanzaliving.core.base.StanzaConstants;
 import com.stanzaliving.core.base.exception.AuthException;
+import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.base.utils.DateUtil;
 import com.stanzaliving.core.base.utils.PhoneNumberUtils;
 import com.stanzaliving.core.base.utils.StanzaUtils;
@@ -204,7 +204,7 @@ public class OtpServiceImpl implements OtpService {
 			switch (userOtp.getOtpType()) {
 
 			case EMAIL_VERIFICATION:
-				throw new AuthException("Invalid Email verification OTP For User With Email: " + userOtp.getEmail(), Otp.INVALID_OTP);
+				throw new StanzaException("Invalid Email verification OTP For User With Email: " + userOtp.getEmail());
 
 			default:
 				throw new AuthException("Invalid OTP For User With Mobile " + userOtp.getMobile(), Otp.INVALID_OTP);
@@ -367,7 +367,7 @@ public class OtpServiceImpl implements OtpService {
 
 		if (userOtp == null) {
 
-			throw new AuthException("No OTP found for Email: " + emailVerificationRequestDto.getEmail() + ", OtpType: " + otpType, Otp.OTP_NOT_FOUND);
+			throw new StanzaException("No OTP found for Email: " + emailVerificationRequestDto.getEmail() + ", OtpType: " + otpType);
 
 		} else {
 			checkForOtpResendConditions(userOtp);
