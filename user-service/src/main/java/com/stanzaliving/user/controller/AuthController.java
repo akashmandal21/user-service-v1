@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.base.constants.SecurityConstants;
+import com.stanzaliving.core.base.utils.ObjectMapperUtil;
 import com.stanzaliving.core.base.utils.SecureCookieUtil;
 import com.stanzaliving.core.base.utils.StanzaUtils;
 import com.stanzaliving.core.user.acl.dto.AclUserDto;
@@ -88,6 +89,8 @@ public class AuthController {
 	@PostMapping("sendEmailVerificationOtp")
 	public ResponseDto<Void> sendEmailVerificationOtp(@RequestBody @Valid EmailVerificationRequestDto emailVerificationRequestDto) {
 
+		log.info("Request received to send otp for email verification: {}", emailVerificationRequestDto);
+		
 		authService.sendEmailOtp(emailVerificationRequestDto);
 
 		return ResponseDto.success("Email OTP Sent");
@@ -96,6 +99,8 @@ public class AuthController {
 	@PostMapping("resendEmailVerificationOtp")
 	public ResponseDto<Void> resendEmailVerificationOtp(@RequestBody @Valid EmailVerificationRequestDto emailVerificationRequestDto) {
 
+		log.info("Request received to re-send otp for email verification: {}", emailVerificationRequestDto);
+		
 		authService.resendEmailOtp(emailVerificationRequestDto);
 
 		return ResponseDto.success("OTP Successfully Resent");
@@ -104,6 +109,8 @@ public class AuthController {
 	@PostMapping("validateEmailVerificationOtp")
 	public ResponseDto<String> validateEmailVerificationOtp(@RequestBody EmailOtpValidateRequestDto emailOtpValidateRequestDto) {
 
+		log.info("Request received to validate otp for email verification and update Deatils: {}", ObjectMapperUtil.getString(emailOtpValidateRequestDto));
+		
 		UserEntity userEntity = authService.validateEmailVerificationOtpAndUpdateUserDetails(emailOtpValidateRequestDto);
 		
 		log.info("Email OTP Successfully verified for User: " + userEntity.getUuid());
