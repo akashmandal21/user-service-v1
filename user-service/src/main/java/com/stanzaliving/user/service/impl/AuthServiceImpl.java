@@ -6,11 +6,14 @@ package com.stanzaliving.user.service.impl;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.base.exception.AuthException;
 import com.stanzaliving.core.base.exception.StanzaException;
+import com.stanzaliving.core.kafka.dto.KafkaDTO;
+import com.stanzaliving.core.kafka.producer.NotificationProducer;
 import com.stanzaliving.core.user.constants.UserErrorCodes;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.UserType;
@@ -41,6 +44,12 @@ public class AuthServiceImpl implements AuthService {
 
 	@Autowired
 	private UserDbService userDbService;
+	
+	@Value("${kafka.resident.detail.topic}")
+	private String kafkaResidentDetailTopic;
+	
+	@Autowired
+	private NotificationProducer notificationProducer;
 
 	@Override
 	public void login(LoginRequestDto loginRequestDto) {
@@ -166,6 +175,14 @@ public class AuthServiceImpl implements AuthService {
 			userEntity.getUserProfile().setLastName(emailOtpValidateRequestDto.getLastName());
 		
 		userEntity = userDbService.update(userEntity);
+		
+		UserProfileDto userProfileDto = UserAdapter.getUserProfileDto(userEntity);
+		
+		KafkaDTO kafkaDTO = new KafkaDTO();
+		kafkaDTO.setData(userProfileDto);
+
+		notificationProducer.publish(kafkaResidentDetailTopic, KafkaDTO.class.getName(), kafkaDTO);
+
 
 		return userEntity;
 	}
