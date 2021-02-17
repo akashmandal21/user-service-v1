@@ -37,5 +37,5 @@ public interface OtpService {
 
 	void validateEmailVerificationOtp(EmailOtpValidateRequestDto emailOtpValidateRequestDto);
 
-	void resendEmailVerificationOtp(EmailVerificationRequestDto emailVerificationRequestDto);
+	void resendEmailVerificationOtp(EmailVerificationRequestDto emailVerificationRequestDto, UserEntity userEntity);
 }

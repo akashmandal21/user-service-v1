@@ -190,6 +190,8 @@ public class AuthServiceImpl implements AuthService {
 	@Override
 	public void resendEmailOtp(EmailVerificationRequestDto emailVerificationRequestDto) {
 		
-		otpService.resendEmailVerificationOtp(emailVerificationRequestDto);		
+		UserEntity userEntity = getActiveUserByUuid(emailVerificationRequestDto.getUserUuid());
+		
+		otpService.resendEmailVerificationOtp(emailVerificationRequestDto, userEntity);		
 	}
 }

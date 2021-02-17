@@ -91,7 +91,7 @@ public class OtpServiceImpl implements OtpService {
 		log.info("Sending OTP: " + userOtp.getOtp() + " for User: " + userOtp.getUserId() + " for login");
 		
 		if(!blacklistUserService.checkIfNeedToStop(userEntity.getMobile())) {
-			kafkaUserService.sendOtpToKafka(userOtp);
+			kafkaUserService.sendOtpToKafka(userOtp, null);
 		}else {
 			log.info("Not sending as user is blacklisted");
 		}
@@ -242,7 +242,7 @@ public class OtpServiceImpl implements OtpService {
 		userOtp = otpDbService.updateAndFlush(userOtp);
 
 		log.info("Re-Sending OTP: " + userOtp.getOtp() + " for Mobile: " + userOtp.getMobile() + " of Type " + otpType);
-		kafkaUserService.sendOtpToKafka(userOtp);
+		kafkaUserService.sendOtpToKafka(userOtp, null);
 	}
 
 	@Override
@@ -269,7 +269,7 @@ public class OtpServiceImpl implements OtpService {
 		}
 
 		log.info("Sending OTP: {} for Mobile: {} for ", mobileOtp.getOtp(), mobileOtp.getMobile(), mobileOtp.getOtpType());
-		kafkaUserService.sendOtpToKafka(mobileOtp);
+		kafkaUserService.sendOtpToKafka(mobileOtp, null);
 
 	}
 
@@ -298,7 +298,7 @@ public class OtpServiceImpl implements OtpService {
 		}
 
 		log.info("Sending OTP: {} for Mobile: {} and Email: {} for ", otpEntity.getOtp(), otpEntity.getMobile(), otpEntity.getEmail(), otpEntity.getOtpType());
-		kafkaUserService.sendOtpToKafka(otpEntity);
+		kafkaUserService.sendOtpToKafka(otpEntity, null);
 
 	}
 
@@ -331,7 +331,7 @@ public class OtpServiceImpl implements OtpService {
 
 		log.info("Sending OTP: " + userOtp.getOtp() + " for User: " + userOtp.getUserId() + " for email verification of email: " + email);
 		
-		kafkaUserService.sendOtpToKafka(userOtp);
+		kafkaUserService.sendOtpToKafka(userOtp, userEntity);
 	}
 
 	@Override
@@ -359,7 +359,7 @@ public class OtpServiceImpl implements OtpService {
 	}
 
 	@Override
-	public void resendEmailVerificationOtp(EmailVerificationRequestDto emailVerificationRequestDto) {
+	public void resendEmailVerificationOtp(EmailVerificationRequestDto emailVerificationRequestDto, UserEntity userEntity) {
 			
 		OtpType otpType = OtpType.EMAIL_VERIFICATION;
 		
@@ -381,7 +381,7 @@ public class OtpServiceImpl implements OtpService {
 		userOtp = otpDbService.updateAndFlush(userOtp);
 
 		log.info("Re-Sending OTP: " + userOtp.getOtp() + " for email: " + userOtp.getEmail() + " of Type " + otpType);
-		kafkaUserService.sendOtpToKafka(userOtp);
+		kafkaUserService.sendOtpToKafka(userOtp, userEntity);
 	}
 
 	private void checkForOtpResendConditions(OtpEntity userOtp) {

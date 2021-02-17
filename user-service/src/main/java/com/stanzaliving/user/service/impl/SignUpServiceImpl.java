@@ -111,7 +111,7 @@ public class SignUpServiceImpl implements SignUpService {
 
 		log.info("Sending Otp for Signup, {}", userOtp);
 
-		kafkaUserService.sendOtpToKafka(userOtp);
+		kafkaUserService.sendOtpToKafka(userOtp, null);
 
 	}
 
