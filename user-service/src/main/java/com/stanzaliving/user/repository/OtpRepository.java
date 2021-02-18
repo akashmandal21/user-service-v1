@@ -25,4 +25,6 @@ public interface OtpRepository extends AbstractJpaRepository<OtpEntity, Long> {
 	List<OtpEntity> findByMobileAndOtpTypeAndIsoCodeAndStatus(String mobile, OtpType otpType, String isoCode, boolean status, Pageable pageable);
 
 	List<OtpEntity> findByUserIdAndOtpType(String userId, OtpType otpType, Pageable pageable);
+
+	List<OtpEntity> findByEmailAndOtpTypeAndUserIdAndStatus(String email, OtpType otpType, String userUuid, boolean status, Pageable pageable);
 }

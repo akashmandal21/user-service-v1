@@ -143,4 +143,10 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 		return userRepository.findByMobileAndIsoCode(mobile, "IN");
 	}
 
+	@Override
+	public UserEntity findByUuidAndEmail(String userUuid, String email) {
+		
+		return getJpaRepository().findByUuidAndEmail(userUuid, email);
+	}
+
 }

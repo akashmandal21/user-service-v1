@@ -6,13 +6,19 @@ package com.stanzaliving.user.service.impl;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.base.exception.AuthException;
+import com.stanzaliving.core.base.exception.StanzaException;
+import com.stanzaliving.core.kafka.dto.KafkaDTO;
+import com.stanzaliving.core.kafka.producer.NotificationProducer;
 import com.stanzaliving.core.user.constants.UserErrorCodes;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.UserType;
+import com.stanzaliving.core.user.request.dto.EmailOtpValidateRequestDto;
+import com.stanzaliving.core.user.request.dto.EmailVerificationRequestDto;
 import com.stanzaliving.core.user.request.dto.LoginRequestDto;
 import com.stanzaliving.core.user.request.dto.OtpValidateRequestDto;
 import com.stanzaliving.user.adapters.UserAdapter;
@@ -38,6 +44,12 @@ public class AuthServiceImpl implements AuthService {
 
 	@Autowired
 	private UserDbService userDbService;
+	
+	@Value("${kafka.resident.detail.topic}")
+	private String kafkaResidentDetailTopic;
+	
+	@Autowired
+	private NotificationProducer notificationProducer;
 
 	@Override
 	public void login(LoginRequestDto loginRequestDto) {
@@ -114,4 +126,72 @@ public class AuthServiceImpl implements AuthService {
 		otpService.resendLoginOtp(loginRequestDto);
 	}
 
+	@Override
+	public void sendEmailOtp(EmailVerificationRequestDto emailVerificationRequestDto) {
+
+		UserEntity userEntity = getActiveUserByUuid(emailVerificationRequestDto.getUserUuid());
+
+		otpService.sendEmailOtp(userEntity, emailVerificationRequestDto.getEmail());
+
+		log.info("OTP sent for User: " + userEntity.getUuid() + " for Email Verification To Email id: " + emailVerificationRequestDto.getEmail());
+	}
+
+	private UserEntity getActiveUserByUuid(String userUuid) {
+		
+		UserEntity userEntity = userDbService.findByUuid(userUuid);
+
+		if (Objects.isNull(userEntity)) {
+			
+			throw new StanzaException("User Not Found with Uuid: " + userUuid);
+		}
+
+		if (!userEntity.isStatus()) {
+			
+			throw new StanzaException("User Account is Disabled for Uuid " + userUuid);
+		}
+		
+		log.info("Found User: " + userEntity.getUuid() + " of Type: " + userEntity.getUserType());
+		
+		return userEntity;
+	}
+
+	@Override
+	public UserEntity validateEmailVerificationOtpAndUpdateUserDetails(EmailOtpValidateRequestDto emailOtpValidateRequestDto) {
+
+		UserEntity userEntity = getActiveUserByUuid(emailOtpValidateRequestDto.getUserUuid());
+
+		otpService.validateEmailVerificationOtp(emailOtpValidateRequestDto);
+
+		log.info("OTP verification completed for User: " + userEntity.getUuid());
+
+		userEntity.setEmail(emailOtpValidateRequestDto.getEmail());
+		
+		userEntity.setEmailVerified(true);
+		
+		if (Objects.nonNull(emailOtpValidateRequestDto.getFirstName()))
+			userEntity.getUserProfile().setFirstName(emailOtpValidateRequestDto.getFirstName());
+
+		if (Objects.nonNull(emailOtpValidateRequestDto.getLastName()))
+			userEntity.getUserProfile().setLastName(emailOtpValidateRequestDto.getLastName());
+		
+		userEntity = userDbService.update(userEntity);
+		
+		UserProfileDto userProfileDto = UserAdapter.getUserProfileDto(userEntity);
+		
+		KafkaDTO kafkaDTO = new KafkaDTO();
+		kafkaDTO.setData(userProfileDto);
+
+		notificationProducer.publish(kafkaResidentDetailTopic, KafkaDTO.class.getName(), kafkaDTO);
+
+
+		return userEntity;
+	}
+
+	@Override
+	public void resendEmailOtp(EmailVerificationRequestDto emailVerificationRequestDto) {
+		
+		UserEntity userEntity = getActiveUserByUuid(emailVerificationRequestDto.getUserUuid());
+		
+		otpService.resendEmailVerificationOtp(emailVerificationRequestDto, userEntity);		
+	}
 }

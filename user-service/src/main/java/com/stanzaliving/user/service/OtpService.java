@@ -4,6 +4,8 @@
 package com.stanzaliving.user.service;
 
 import com.stanzaliving.core.user.enums.OtpType;
+import com.stanzaliving.core.user.request.dto.EmailOtpValidateRequestDto;
+import com.stanzaliving.core.user.request.dto.EmailVerificationRequestDto;
 import com.stanzaliving.core.user.request.dto.LoginRequestDto;
 import com.stanzaliving.core.user.request.dto.MobileEmailOtpRequestDto;
 import com.stanzaliving.core.user.request.dto.MobileOtpRequestDto;
@@ -31,4 +33,9 @@ public interface OtpService {
 
 	void sendOtp(MobileEmailOtpRequestDto mobileEmailOtpRequestDto);
 
+	void sendEmailOtp(UserEntity userEntity, String email);
+
+	void validateEmailVerificationOtp(EmailOtpValidateRequestDto emailOtpValidateRequestDto);
+
+	void resendEmailVerificationOtp(EmailVerificationRequestDto emailVerificationRequestDto, UserEntity userEntity);
 }

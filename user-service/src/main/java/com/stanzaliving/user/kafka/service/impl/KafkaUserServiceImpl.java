@@ -5,6 +5,9 @@ package com.stanzaliving.user.kafka.service.impl;
 
 import com.stanzaliving.core.user.acl.dto.RoleDto;
 import com.stanzaliving.user.constants.NotificationKeys;
+
+import java.util.Objects;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -22,6 +25,8 @@ import com.stanzaliving.core.user.constants.UserErrorCodes.Otp;
 import com.stanzaliving.core.user.enums.OtpType;
 import com.stanzaliving.user.constants.UserConstants;
 import com.stanzaliving.user.entity.OtpEntity;
+import com.stanzaliving.user.entity.UserEntity;
+import com.stanzaliving.user.entity.UserProfileEntity;
 import com.stanzaliving.user.kafka.service.KafkaUserService;
 
 import lombok.extern.log4j.Log4j2;
@@ -45,11 +50,21 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 	private NotificationProducer notificationProducer;
 
 	@Override
-	public void sendOtpToKafka(OtpEntity otpEntity) {
+	public void sendOtpToKafka(OtpEntity otpEntity, UserEntity userEntity) {
 		try {
 			userExecutor.execute(() -> {
-				sendOtpOnMobile(otpEntity);
-				sendOtpOnMail(otpEntity);
+
+				switch (otpEntity.getOtpType()) {
+				
+				case EMAIL_VERIFICATION:
+					sendOtpOnMail(otpEntity, userEntity);
+					break;
+
+				default:
+					sendOtpOnMobile(otpEntity);
+					sendOtpOnMail(otpEntity, null);
+					break;
+				}
 			});
 
 		} catch (Exception e) {
@@ -69,7 +84,7 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 				.smsType(SmsType.OTP)
 				.isoCode(otpEntity.getIsoCode())
 				.mobile(otpEntity.getMobile())
-				.text(getOtpMessageForUserType(otpEntity))
+				.text(getOtpMessageForUserType(otpEntity, null))
 				.templateId(getNotificationTemplateId(otpEntity))
 				.build();
 	}
@@ -95,12 +110,12 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 		}
 	}
 
-	private void sendOtpOnMail(OtpEntity otpEntity) {
+	private void sendOtpOnMail(OtpEntity otpEntity, UserEntity userEntity) {
 		if (propertyManager.getPropertyAsBoolean("otp.email.enabled")
 				&& StringUtils.isNotBlank(otpEntity.getEmail())) {
 
 			try {
-				EmailDto emailDto = getEmail(otpEntity);
+				EmailDto emailDto = getEmail(otpEntity, userEntity);
 				log.debug("Sending OTP on Email for user: " + otpEntity.getUserId());
 				notificationProducer.publish(propertyManager.getProperty("kafka.topic.email.otp", "email_otp"), EmailDto.class.getName(), emailDto);
 			} catch (Exception e) {
@@ -109,7 +124,7 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 		}
 	}
 
-	private EmailDto getEmail(OtpEntity otpEntity) {
+	private EmailDto getEmail(OtpEntity otpEntity, UserEntity userEntity) {
 		EmailDto emailDto = new EmailDto();
 
 		emailDto.setFrom(propertyManager.getProperty("email.from"));
@@ -119,12 +134,12 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 
 		emailDto.setSubject("OTP to access Stanza Living");
 
-		emailDto.setContent(getOtpMessageForUserType(otpEntity));
+		emailDto.setContent(getOtpMessageForUserType(otpEntity, userEntity));
 
 		return emailDto;
 	}
 
-	private String getOtpMessageForUserType(OtpEntity otpEntity) {
+	private String getOtpMessageForUserType(OtpEntity otpEntity, UserEntity userEntity) {
 		String message;
 
 		if (OtpType.MOBILE_VERIFICATION == otpEntity.getOtpType()) {
@@ -134,6 +149,24 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 		} else if (OtpType.EMAIL_VERIFICATION == otpEntity.getOtpType()) {
 
 			message = propertyManager.getProperty("email.verification.otp.msg", UserConstants.EMAIL_VERIFICATION_OTP_TEXT);
+			
+			StringBuffer name = new StringBuffer("");
+			
+			if(Objects.nonNull(userEntity)) {
+				
+				UserProfileEntity userProfile = userEntity.getUserProfile();
+				
+				if(Objects.nonNull(userProfile)) {
+					
+					if(Objects.nonNull(userProfile.getFirstName()))
+						name = name.append(userProfile.getFirstName());
+					
+					if(Objects.nonNull(userProfile.getLastName()))
+						name = name.append(" ").append(userProfile.getLastName());
+				}
+			}
+			
+			message = message.replaceAll("<residentName>", name.toString());
 
 		} else if (OtpType.USER_VERFICATION == otpEntity.getOtpType()) {
 
@@ -168,7 +201,7 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 		}
 
 		message = message.replaceAll("<otp>", String.valueOf(otpEntity.getOtp()));
-
+		
 		return message;
 	}
 
@@ -215,5 +248,4 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 		String topic = propertyManager.getProperty("kafka.topic.acl", "acl");
 		notificationProducer.publish(topic, RoleDto.class.getName(), roleDto);
 	}
-
 }

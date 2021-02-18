@@ -17,8 +17,8 @@ public class UserConstants {
 
 	public static final String MOBILE_VERIFICATION_OTP_TEXT = "<otp> is OTP to verify your phone number with Stanza Living";
 
-	public static final String EMAIL_VERIFICATION_OTP_TEXT = "<otp> is OTP to verify your email with Stanza Living";
-	
+	public static final String EMAIL_VERIFICATION_OTP_TEXT = "Hi <residentName>" + System.lineSeparator() + "The OTP to verify your email with Stanza Living is <otp>." + System.lineSeparator() + "Please do not share this anyone including Stanza employees.";
+
 	public static final String USER_VERIFICATION_OTP_TEXT = "<otp> is your OTP to authenticate with Stanza Living";
 
 	public static final String DELIMITER_KEY = ",";

@@ -21,14 +21,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.base.constants.SecurityConstants;
+import com.stanzaliving.core.base.utils.ObjectMapperUtil;
 import com.stanzaliving.core.base.utils.SecureCookieUtil;
 import com.stanzaliving.core.base.utils.StanzaUtils;
 import com.stanzaliving.core.user.acl.dto.AclUserDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
+import com.stanzaliving.core.user.request.dto.EmailOtpValidateRequestDto;
+import com.stanzaliving.core.user.request.dto.EmailVerificationRequestDto;
 import com.stanzaliving.core.user.request.dto.LoginRequestDto;
 import com.stanzaliving.core.user.request.dto.OtpValidateRequestDto;
 import com.stanzaliving.user.acl.service.AclService;
 import com.stanzaliving.user.adapters.UserAdapter;
+import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.entity.UserSessionEntity;
 import com.stanzaliving.user.service.AuthService;
 import com.stanzaliving.user.service.SessionService;
@@ -61,7 +65,7 @@ public class AuthController {
 
 		return ResponseDto.success("OTP Sent for Login");
 	}
-
+	
 	@PostMapping("validateOtp")
 	public ResponseDto<AclUserDto> validateOtp(
 			@RequestBody @Valid OtpValidateRequestDto otpValidateRequestDto, HttpServletRequest request, HttpServletResponse response) {
@@ -80,6 +84,38 @@ public class AuthController {
 		}
 
 		return ResponseDto.failure("Failed to create user session");
+	}
+	
+	@PostMapping("sendEmailVerificationOtp")
+	public ResponseDto<Void> sendEmailVerificationOtp(@RequestBody @Valid EmailVerificationRequestDto emailVerificationRequestDto) {
+
+		log.info("Request received to send otp for email verification: {}", emailVerificationRequestDto);
+		
+		authService.sendEmailOtp(emailVerificationRequestDto);
+
+		return ResponseDto.success("Email OTP Sent");
+	}
+	
+	@PostMapping("resendEmailVerificationOtp")
+	public ResponseDto<Void> resendEmailVerificationOtp(@RequestBody @Valid EmailVerificationRequestDto emailVerificationRequestDto) {
+
+		log.info("Request received to re-send otp for email verification: {}", emailVerificationRequestDto);
+		
+		authService.resendEmailOtp(emailVerificationRequestDto);
+
+		return ResponseDto.success("OTP Successfully Resent");
+	}
+	
+	@PostMapping("validateEmailVerificationOtp")
+	public ResponseDto<String> validateEmailVerificationOtp(@RequestBody EmailOtpValidateRequestDto emailOtpValidateRequestDto) {
+
+		log.info("Request received to validate otp for email verification and update Deatils: {}", ObjectMapperUtil.getString(emailOtpValidateRequestDto));
+		
+		UserEntity userEntity = authService.validateEmailVerificationOtpAndUpdateUserDetails(emailOtpValidateRequestDto);
+		
+		log.info("Email OTP Successfully verified for User: " + userEntity.getUuid());
+
+		return ResponseDto.success("Email OTP Successfully verified for User: " + userEntity.getUuid() + " with Email: " + userEntity.getEmail() + " and User Details Updated Successfully.");
 	}
 
 	@PostMapping("resendOtp")

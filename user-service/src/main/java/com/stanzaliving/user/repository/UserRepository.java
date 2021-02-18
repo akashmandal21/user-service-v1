@@ -40,6 +40,7 @@ public interface UserRepository extends AbstractJpaRepository<UserEntity, Long> 
 
 	UserEntity findByMobileAndUserType(String mobileNo, UserType userType);
 
-	List<UserEntity> findByMobileIn(Set<String> mobileNos);
+	UserEntity findByUuidAndEmail(String userUuid, String email);
 
+	List<UserEntity> findByMobileIn(Set<String> mobileNos);
 }
