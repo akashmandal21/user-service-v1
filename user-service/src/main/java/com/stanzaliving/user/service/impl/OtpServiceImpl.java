@@ -204,7 +204,7 @@ public class OtpServiceImpl implements OtpService {
 			switch (userOtp.getOtpType()) {
 
 			case EMAIL_VERIFICATION:
-				throw new StanzaException("Invalid Email verification OTP For User With Email: " + userOtp.getEmail());
+				throw new StanzaException("OTP you've entered is incorrect. Please try again!");
 
 			default:
 				throw new AuthException("Invalid OTP For User With Mobile " + userOtp.getMobile(), Otp.INVALID_OTP);
