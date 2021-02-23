@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import com.stanzaliving.core.base.enums.Department;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -338,7 +339,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserDto updateUser(UpdateUserRequestDto updateUserRequestDto) {
 
-		UserEntity userEntity = userDbService.findByUuidAndStatus(updateUserRequestDto.getUserId(), true);
+		UserEntity userEntity = userDbService.findByUuid(updateUserRequestDto.getUserId());
 
 		if (Objects.isNull(userEntity)) {
 			throw new ApiValidationException("User not found for UserId: " + updateUserRequestDto.getUserId());
@@ -362,7 +363,6 @@ public class UserServiceImpl implements UserService {
 		if (Objects.nonNull(updateUserRequestDto.getGender())) {
 			userEntity.getUserProfile().setGender(updateUserRequestDto.getGender());
 		}
-		;
 		if (Objects.nonNull(updateUserRequestDto.getLastName())) {
 			userEntity.getUserProfile().setLastName(updateUserRequestDto.getLastName());
 		}
@@ -383,6 +383,21 @@ public class UserServiceImpl implements UserService {
 		}
 		if (Objects.nonNull(updateUserRequestDto.getNextDestination())) {
 			userEntity.getUserProfile().setNextDestination(updateUserRequestDto.getNextDestination());
+		}
+		if (Objects.nonNull(updateUserRequestDto.getUserMobile())) {
+			userEntity.setMobile(updateUserRequestDto.getUserMobile());
+		}
+		if (Objects.nonNull(updateUserRequestDto.getEmail())) {
+			userEntity.setEmail(updateUserRequestDto.getEmail());
+		}
+		if (Objects.nonNull(updateUserRequestDto.getDepartment())) {
+			userEntity.setDepartment(updateUserRequestDto.getDepartment());
+		}
+		if (Objects.nonNull(updateUserRequestDto.getUserType())) {
+			userEntity.setUserType(updateUserRequestDto.getUserType());
+		}
+		if (Objects.nonNull(updateUserRequestDto.getMiddleName())) {
+			userEntity.getUserProfile().setMiddleName(updateUserRequestDto.getMiddleName());
 		}
 		userEntity = userDbService.update(userEntity);
 
