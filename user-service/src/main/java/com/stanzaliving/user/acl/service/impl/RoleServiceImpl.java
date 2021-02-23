@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.base.exception.ApiValidationException;
-import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
 import com.stanzaliving.core.user.acl.enums.RoleAccessType;
 import com.stanzaliving.core.user.acl.request.dto.AddRoleAccessDto;
@@ -45,7 +44,7 @@ public class RoleServiceImpl implements RoleService {
 
 		RoleEntity parentRoleEntity = roleDbService.findByUuid(addRoleRequestDto.getParentRoleUuid());
 		if (!PARENT_UUID_TO_SKIP_PARENT_ROLE.equalsIgnoreCase(addRoleRequestDto.getParentRoleUuid()) && null == parentRoleEntity) {
-			throw new StanzaException("Parent role doesn't exist for parentUuid " + addRoleRequestDto.getParentRoleUuid());
+			throw new ApiValidationException("Parent role doesn't exist for parentUuid " + addRoleRequestDto.getParentRoleUuid());
 		}
 
 		RoleEntity roleEntity = RoleAdapter.getEntityFromRequest(addRoleRequestDto);
@@ -75,7 +74,7 @@ public class RoleServiceImpl implements RoleService {
 		RoleEntity roleEntity = roleDbService.findByUuid(roleUuid);
 
 		if (null == roleEntity) {
-			throw new StanzaException("Unable to find rule by uuid " + roleUuid);
+			throw new ApiValidationException("Unable to find rule by uuid " + roleUuid);
 		}
 
 		return RoleAdapter.getDto(roleEntity);
@@ -111,7 +110,7 @@ public class RoleServiceImpl implements RoleService {
 		RoleEntity roleEntity = roleDbService.findByRoleName(roleName);
 
 		if (null == roleEntity) {
-			throw new StanzaException("Unable to find rule by roleName " + roleName);
+			throw new ApiValidationException("Unable to find rule by roleName " + roleName);
 		}
 
 		return RoleAdapter.getDto(roleEntity);
@@ -125,7 +124,7 @@ public class RoleServiceImpl implements RoleService {
 		RoleEntity roleEntity = roleDbService.findByRoleNameAndDepartment(roleName, department);
 
 		if (null == roleEntity) {
-			throw new StanzaException("Unable to find rule by roleName " + roleName);
+			throw new ApiValidationException("Unable to find rule by roleName " + roleName);
 		}
 
 		return RoleAdapter.getDto(roleEntity);

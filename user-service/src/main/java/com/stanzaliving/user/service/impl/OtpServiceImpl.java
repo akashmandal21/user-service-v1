@@ -16,8 +16,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.stanzaliving.core.base.StanzaConstants;
+import com.stanzaliving.core.base.exception.ApiValidationException;
 import com.stanzaliving.core.base.exception.AuthException;
-import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.base.utils.DateUtil;
 import com.stanzaliving.core.base.utils.PhoneNumberUtils;
 import com.stanzaliving.core.base.utils.StanzaUtils;
@@ -204,7 +204,7 @@ public class OtpServiceImpl implements OtpService {
 			switch (userOtp.getOtpType()) {
 
 			case EMAIL_VERIFICATION:
-				throw new StanzaException("OTP you've entered is incorrect. Please try again!");
+				throw new ApiValidationException("OTP you've entered is incorrect. Please try again!");
 
 			default:
 				throw new AuthException("Invalid OTP For User With Mobile " + userOtp.getMobile(), Otp.INVALID_OTP);
@@ -367,7 +367,7 @@ public class OtpServiceImpl implements OtpService {
 
 		if (userOtp == null) {
 
-			throw new StanzaException("No OTP found for Email: " + emailVerificationRequestDto.getEmail() + ", OtpType: " + otpType);
+			throw new ApiValidationException("No OTP found for Email: " + emailVerificationRequestDto.getEmail() + ", OtpType: " + otpType);
 
 		} else {
 			checkForOtpResendConditions(userOtp);
