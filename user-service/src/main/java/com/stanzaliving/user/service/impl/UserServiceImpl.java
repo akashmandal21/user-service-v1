@@ -385,7 +385,7 @@ public class UserServiceImpl implements UserService {
 			userEntity.getUserProfile().setNextDestination(updateUserRequestDto.getNextDestination());
 		}
 		if (Objects.nonNull(updateUserRequestDto.getUserMobile())) {
-			if (Objects.nonNull(userDbService.findByMobile(updateUserRequestDto.getUserMobile()))) {
+			if (Objects.nonNull(userDbService.findByMobile(updateUserRequestDto.getUserMobile())) && !userEntity.getMobile().equals(updateUserRequestDto.getUserMobile())) {
 				throw new ApiValidationException("User exists for Mobile Number: " + updateUserRequestDto.getUserMobile());
 			}
 			userEntity.setMobile(updateUserRequestDto.getUserMobile());
