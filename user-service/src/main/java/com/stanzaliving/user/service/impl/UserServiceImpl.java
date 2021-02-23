@@ -385,7 +385,9 @@ public class UserServiceImpl implements UserService {
 			userEntity.getUserProfile().setNextDestination(updateUserRequestDto.getNextDestination());
 		}
 		if (Objects.nonNull(updateUserRequestDto.getUserMobile())) {
-			if (Objects.nonNull(userDbService.findByMobile(updateUserRequestDto.getUserMobile())) && !userEntity.getMobile().equals(updateUserRequestDto.getUserMobile())) {
+			//not allowing reuse of even inactive user's number.
+			//not checking ISO code
+			if ((!updateUserRequestDto.getUserMobile().equals(userEntity.getMobile())) && Objects.nonNull(userDbService.findByMobile(updateUserRequestDto.getUserMobile()))) {
 				throw new ApiValidationException("User exists for Mobile Number: " + updateUserRequestDto.getUserMobile());
 			}
 			userEntity.setMobile(updateUserRequestDto.getUserMobile());
@@ -423,35 +425,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public UserDto updateUserMobile(UpdateUserRequestDto updateUserRequestDto) {
-
-		UserEntity userEntity = userDbService.getUserForMobile(updateUserRequestDto.getUserMobile(), "IN");
-
-		if (Objects.nonNull(userEntity)) {
-			throw new ApiValidationException("User exists for Mobile Number: " + updateUserRequestDto.getUserMobile());
-		}
-
-		userEntity = userDbService.findByUuidAndStatus(updateUserRequestDto.getUserId(), true);
-
-		if (Objects.isNull(userEntity)) {
-			throw new ApiValidationException("User not found for UserId: " + updateUserRequestDto.getUserId());
-		}
-
-		if (Objects.nonNull(updateUserRequestDto.getUserMobile())) {
-			userEntity.setMobile(updateUserRequestDto.getUserMobile());
-		}
-		if (Objects.nonNull(updateUserRequestDto.getEmail())) {
-			userEntity.setEmail(updateUserRequestDto.getEmail());
-		}
-		userEntity = userDbService.update(userEntity);
-
-		UserProfileDto userProfileDto = UserAdapter.getUserProfileDto(userEntity);
-
-		KafkaDTO kafkaDTO = new KafkaDTO();
-		kafkaDTO.setData(userProfileDto);
-
-		notificationProducer.publish(kafkaResidentDetailTopic, KafkaDTO.class.getName(), kafkaDTO);
-
-		return userProfileDto;
+		return updateUser(updateUserRequestDto);
 	}
 
 	@Override
