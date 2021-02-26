@@ -56,7 +56,7 @@ public class AuthController {
 	private SessionService sessionService;
 
 	@Autowired
-	AclService aclService;
+	private AclService aclService;
 
 	@PostMapping("login")
 	public ResponseDto<Void> login(@RequestBody @Valid LoginRequestDto loginRequestDto) {

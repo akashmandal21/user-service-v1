@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.user.service.UserService;
-import com.stanzaliving.website.enums.Status;
 
 import lombok.extern.log4j.Log4j2;
 

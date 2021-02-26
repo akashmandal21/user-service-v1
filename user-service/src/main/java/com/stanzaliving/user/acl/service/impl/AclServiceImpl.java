@@ -103,7 +103,7 @@ public class AclServiceImpl implements AclService {
 	public List<UserDeptLevelRoleNameUrlExpandedDto> getUserDeptLevelRoleNameUrlExpandedDtoFeFromEmail(String email) {
 		List<UserEntity> userEntityList = userService.getUserByEmail(email.trim());
 		if (CollectionUtils.isEmpty(userEntityList)) {
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 		}
 		List<UserDeptLevelRoleNameUrlExpandedDto> userDeptLevelRoleNameUrlExpandedDtoList = new ArrayList<>();
 		for (UserEntity userEntity : userEntityList) {

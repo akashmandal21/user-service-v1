@@ -4,7 +4,6 @@
 package com.stanzaliving.user.db.service.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;

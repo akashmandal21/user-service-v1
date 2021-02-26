@@ -4,8 +4,6 @@
 package com.stanzaliving.user.controller;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -78,6 +76,15 @@ public class UserController {
 		return ResponseDto.success("Found User Profile for User Id", UserAdapter.getAclUserProfileDTO(userService.getUserProfile(userId), aclService.getUserDeptLevelRoleNameUrlExpandedDtoFe(userId)));
 	}
 
+	@GetMapping("profile/current")
+	public ResponseDto<UserProfileDto> getCurrentUserProfile(
+			@RequestAttribute(name = SecurityConstants.USER_ID) @NotBlank(message = "User Id is mandatory to get user profile") String userId) {
+
+		log.info("Fetching current User Profile with UserId: " + userId);
+
+		return ResponseDto.success("Found Current User Profile for User Id", userService.getUserProfile(userId));
+	}
+	
 	@PostMapping("update")
 	public ResponseDto<UserDto> updateUser(@RequestBody @Valid UpdateUserRequestDto updateUserRequestDto) {
 
@@ -156,8 +163,6 @@ public class UserController {
 		log.info("Successfully fetched user details along with manager and role details.");
 		return ResponseDto.success("Found user Details with manager and role details.", userManagerAndRoleDto);
 	}
-
-	
 	
 	@PostMapping("update/usertype/department")
 	public ResponseDto<UserDto> updateUserTypeAndDepartment(@RequestBody @Valid UpdateDepartmentUserTypeDto updateDepartmentUserTypeDto) {

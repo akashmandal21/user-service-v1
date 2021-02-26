@@ -1,5 +1,10 @@
 package com.stanzaliving.user.acl.adapters;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
+
 import com.stanzaliving.core.base.utils.StanzaUtils;
 import com.stanzaliving.core.transformation.client.cache.TransformationCache;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
@@ -9,13 +14,8 @@ import com.stanzaliving.user.acl.entity.ApiEntity;
 import com.stanzaliving.user.acl.entity.RoleEntity;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity;
-import lombok.experimental.UtilityClass;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
+import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class UserDepartmentLevelRoleAdapter {
