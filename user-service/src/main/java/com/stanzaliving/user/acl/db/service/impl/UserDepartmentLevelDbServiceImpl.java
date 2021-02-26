@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class UserDepartmentLevelDbServiceImpl extends AbstractJpaServiceImpl<UserDepartmentLevelEntity, Long, UserDepartmentLevelRepository> implements UserDepartmentLevelDbService {
@@ -51,4 +52,11 @@ public class UserDepartmentLevelDbServiceImpl extends AbstractJpaServiceImpl<Use
 	public List<UserDepartmentLevelEntity> findByUuidInAndAccessLevel(List<String> uuids, AccessLevel accessLevel) {
 		return getJpaRepository().findByUuidInAndAccessLevel(uuids, accessLevel);
 	}
+
+	@Override
+	public List<UserDepartmentLevelEntity> findByUserUuidAndUuidIn(String userUuid, Set<String> departmentUuids) {
+		
+		return getJpaRepository().findByUserUuidAndUuidIn(userUuid, departmentUuids);
+	}
+
 }

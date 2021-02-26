@@ -7,6 +7,7 @@ import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface UserDepartmentLevelRepository extends AbstractJpaRepository<UserDepartmentLevelEntity, Long> {
@@ -22,4 +23,6 @@ public interface UserDepartmentLevelRepository extends AbstractJpaRepository<Use
     List<UserDepartmentLevelEntity> findByUserUuidAndDepartmentAndAccessLevel(String userUuid, Department department, AccessLevel accessLevel);
 
     List<UserDepartmentLevelEntity> findByUuidInAndAccessLevel(List<String> uuids, AccessLevel accessLevel);
+
+	List<UserDepartmentLevelEntity> findByUserUuidAndUuidIn(String userUuid, Set<String> departmentUuids);
 }

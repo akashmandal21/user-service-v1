@@ -1,6 +1,7 @@
 package com.stanzaliving.user.acl.service.impl;
 
 import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -91,5 +92,11 @@ public class UserDepartmentLevelServiceImpl implements UserDepartmentLevelServic
 	@Override
 	public UserDepartmentLevelEntity findByUuid(String userDepartmentLevelUuid) {
 		return userDepartmentLevelDbService.findByUuid(userDepartmentLevelUuid);
+	}
+
+	@Override
+	public List<UserDepartmentLevelEntity> findByUserUuidAndUuidIn(String userUuid,Set<String> departmentUuids) {
+		
+		return userDepartmentLevelDbService.findByUserUuidAndUuidIn(userUuid,departmentUuids);
 	}
 }

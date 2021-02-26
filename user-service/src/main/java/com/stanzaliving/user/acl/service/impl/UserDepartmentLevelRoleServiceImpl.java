@@ -3,6 +3,7 @@ package com.stanzaliving.user.acl.service.impl;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -59,5 +60,4 @@ public class UserDepartmentLevelRoleServiceImpl implements UserDepartmentLevelRo
 
 		return userDepartmentLevelRoleEntityList;
 	}
-
 }

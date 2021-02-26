@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class UserDepartmentLevelRoleDbServiceImpl extends AbstractJpaServiceImpl<UserDepartmentLevelRoleEntity, Long, UserDepartmentLevelRoleRepository> implements UserDepartmentLevelRoleDbService {
@@ -38,5 +39,11 @@ public class UserDepartmentLevelRoleDbServiceImpl extends AbstractJpaServiceImpl
 	@Override
 	public List<UserDepartmentLevelRoleEntity> findByRoleUuid(String roleUuid) {
 		return getJpaRepository().findByRoleUuid(roleUuid);
+	}
+
+	@Override
+	public List<UserDepartmentLevelRoleEntity> findByRoleUuidIn(Set<String> roleUuids) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

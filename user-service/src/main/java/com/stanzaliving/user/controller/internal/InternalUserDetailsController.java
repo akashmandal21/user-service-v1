@@ -1,6 +1,7 @@
 package com.stanzaliving.user.controller.internal;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
+import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.user.service.UserService;
 import com.stanzaliving.website.enums.Status;
@@ -46,6 +48,16 @@ public class InternalUserDetailsController {
 		log.info("Fetching User with mobileNo: {}", mobileNo);
 
 		return ResponseDto.success("Found User for userUuid", userService.getUserDetails(mobileNo));
+	}
+	
+	@GetMapping("/getAccessLevel")
+	public ResponseDto<Map<String,List<AccessLevel>>> getUsergetAccessLevelDetails(
+			@RequestParam(name = "userUuid", required = true) String userUuid,
+			@RequestParam(name = "roleName", required = true) List<String> roleName) {
+
+		log.info("Fetching user access details with user: {} and roleName {}",userUuid,roleName);
+
+		return ResponseDto.success("Found User for userUuid", userService.getUsergetAccessLevelDetails(userUuid,roleName));
 	}
 
 }

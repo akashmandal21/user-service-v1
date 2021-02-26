@@ -6,6 +6,7 @@ import com.stanzaliving.core.sqljpa.service.AbstractJpaService;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
 
 import java.util.List;
+import java.util.Set;
 
 public interface UserDepartmentLevelDbService extends AbstractJpaService<UserDepartmentLevelEntity, Long> {
     List<UserDepartmentLevelEntity> findByUserUuidAndDepartmentAndStatus(String userUuid, Department department, boolean status);
@@ -19,4 +20,6 @@ public interface UserDepartmentLevelDbService extends AbstractJpaService<UserDep
     List<UserDepartmentLevelEntity> findByUserUuidAndDepartmentAndAccessLevel(String userUuid, Department department, AccessLevel accessLevel);
 
     List<UserDepartmentLevelEntity> findByUuidInAndAccessLevel(List<String> uuids, AccessLevel accessLevel);
+
+	List<UserDepartmentLevelEntity> findByUserUuidAndUuidIn(String userUuid, Set<String> departmentUuids);
 }

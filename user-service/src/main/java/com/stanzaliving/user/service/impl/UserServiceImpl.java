@@ -45,6 +45,7 @@ import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
+import com.stanzaliving.user.acl.entity.RoleEntity;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity;
 import com.stanzaliving.user.acl.service.AclUserService;
@@ -581,4 +582,40 @@ public class UserServiceImpl implements UserService {
 
 			return UserAdapter.getUserProfileDto(userEntity);
 		}
+
+	@Override
+	public Map<String, List<AccessLevel>> getUsergetAccessLevelDetails(String userUuid, List<String> roleName) {
+		
+		List<RoleEntity> roleEntity=roleService.findByRoleNameIn(roleName);
+		
+		Map<String, List<AccessLevel>> acessDetails=new HashMap<>();
+		
+	    for(RoleEntity role:roleEntity) {
+	
+			List<UserDepartmentLevelRoleEntity> departmentLevelUuid=userDepartmentLevelRoleService.findByRoleUuid(role.getUuid());
+
+			Set<String> departmentUids = departmentLevelUuid.stream().map(cr -> {
+				return cr.getUserDepartmentLevelUuid();
+			}).collect(Collectors.toSet());
+			
+			acessDetails.put(role.getRoleName(), getAcessDetails(userUuid,departmentUids));
+			
+		}
+				
+		return acessDetails;
+
+	}
+
+	private List<AccessLevel> getAcessDetails(String userUuid,Set<String> departmentUids) {
+		
+		log.info("userUid {} and departmentUuids {} ", userUuid, departmentUids);
+		
+		List<UserDepartmentLevelEntity> userDepartmentLevelEntity =userDepartmentLevelService.findByUserUuidAndUuidIn(userUuid,departmentUids);
+		
+		List<AccessLevel> accessDetails = userDepartmentLevelEntity.stream().map(cr -> {
+			return cr.getAccessLevel();
+		}).collect(Collectors.toList());
+		
+		return accessDetails;
+	}
 }

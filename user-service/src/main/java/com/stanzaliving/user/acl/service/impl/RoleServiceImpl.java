@@ -130,4 +130,9 @@ public class RoleServiceImpl implements RoleService {
 		return RoleAdapter.getDto(roleEntity);
 	}
 
+	@Override
+	public List<RoleEntity> findByRoleNameIn(List<String> roleName) {
+	
+		return roleDbService.findByRoleNameIn(roleName);
+	}
 }
