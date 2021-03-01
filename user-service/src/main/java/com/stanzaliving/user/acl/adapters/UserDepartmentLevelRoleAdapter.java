@@ -2,6 +2,7 @@ package com.stanzaliving.user.acl.adapters;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -43,6 +44,7 @@ public class UserDepartmentLevelRoleAdapter {
 	public static UserDeptLevelRoleNameUrlExpandedDto getUserDeptLevelRoleNameUrlExpandedDto(
 			UserDepartmentLevelEntity userDepartmentLevelEntity, List<RoleEntity> roleEntityList, List<ApiEntity> apiEntityList, TransformationCache transformationCache) {
 
+		Map<String, String> roleNameUuidMap = roleEntityList.stream().collect(Collectors.toMap(RoleEntity::getRoleName, RoleEntity::getUuid));
 		List<String> roleNameList = roleEntityList.stream().map(entity -> entity.getRoleName()).collect(Collectors.toList());
 		List<String> actionUrlList = apiEntityList.stream().map(entity -> entity.getActionUrl()).collect(Collectors.toList());
 		List<String> accessLevelEntityListUuid = StanzaUtils.getSplittedListOnComma(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid());
@@ -58,6 +60,7 @@ public class UserDepartmentLevelRoleAdapter {
 				.accessLevelEntityListUuid(accessLevelEntityListUuid)
 				.accessLevelEntityNameUuidMap(accessLevelEntityNameUuidMap)
 				.rolesList(roleNameList)
+				.roleNameUuidMap(roleNameUuidMap)
 				.urlList(actionUrlList)
 				.build();
 	}
