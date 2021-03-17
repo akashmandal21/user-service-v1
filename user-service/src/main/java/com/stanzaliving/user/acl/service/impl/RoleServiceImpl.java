@@ -38,9 +38,9 @@ public class RoleServiceImpl implements RoleService {
 
 	@Override
 	public RoleDto addRole(AddRoleRequestDto addRoleRequestDto) {
-		if (roleDbService.isRoleExists(addRoleRequestDto.getRoleName(), addRoleRequestDto.getDepartment())) {
-			throw new ApiValidationException("Role already exists with given name " + addRoleRequestDto.getRoleName());
-		}
+//		if (roleDbService.isRoleExists(addRoleRequestDto.getRoleName(), addRoleRequestDto.getDepartment())) {
+//			throw new ApiValidationException("Role already exists with given name " + addRoleRequestDto.getRoleName());
+//		}
 
 		RoleEntity parentRoleEntity = roleDbService.findByUuid(addRoleRequestDto.getParentRoleUuid());
 		if (!PARENT_UUID_TO_SKIP_PARENT_ROLE.equalsIgnoreCase(addRoleRequestDto.getParentRoleUuid()) && null == parentRoleEntity) {
