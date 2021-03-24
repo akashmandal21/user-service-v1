@@ -24,11 +24,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
 import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.exception.ApiValidationException;
 import com.stanzaliving.core.base.exception.NoRecordException;
+import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.base.utils.PhoneNumberUtils;
 import com.stanzaliving.core.kafka.dto.KafkaDTO;
 import com.stanzaliving.core.kafka.producer.NotificationProducer;
@@ -42,6 +44,7 @@ import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
+import com.stanzaliving.core.user.request.dto.CreateUserAndRoleDto;
 import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
@@ -580,4 +583,39 @@ public class UserServiceImpl implements UserService {
 
 			return UserAdapter.getUserProfileDto(userEntity);
 		}
+
+	
+	@Override
+	public UserDto addUserAndRole(CreateUserAndRoleDto createUserAndRoleDto) {
+
+		UserEntity userEntity = userDbService.getUserForMobile(createUserAndRoleDto.getAddUserRequestDto().getMobile(),
+				createUserAndRoleDto.getAddUserRequestDto().getIsoCode());
+		UserDto userDto = UserDto.builder().build();
+		if (Objects.isNull(userEntity)) {
+			userDto = addUser(createUserAndRoleDto.getAddUserRequestDto());
+		} else {
+			userDto = UserAdapter.getUserDto(userEntity);
+		}
+
+		createUserAndRoleDto.getAddUserDeptLevelRoleDto().setUserUuid(userDto.getUuid());
+
+		List<RoleDto> roleDto = roleService.findByDepartmentAndAccessLevel(
+				createUserAndRoleDto.getAddUserDeptLevelRoleDto().getDepartment(),
+				createUserAndRoleDto.getAddUserDeptLevelRoleDto().getAccessLevel());
+
+		if (CollectionUtils.isEmpty(roleDto)) {
+			log.error("Department: " + createUserAndRoleDto.getAddUserDeptLevelRoleDto().getDepartment()
+					+ " and Access Level: " + createUserAndRoleDto.getAddUserDeptLevelRoleDto().getAccessLevel()
+					+ " not available in role table.");
+
+			throw new StanzaException("Role not exists in Role Table.");
+		}
+		roleDto.forEach(role -> {
+			createUserAndRoleDto.getAddUserDeptLevelRoleDto().setRolesUuid(Arrays.asList(role.getUuid()));
+			aclUserService.addRole(createUserAndRoleDto.getAddUserDeptLevelRoleDto());
+		});
+
+		return userDto;
+
+	}
 }

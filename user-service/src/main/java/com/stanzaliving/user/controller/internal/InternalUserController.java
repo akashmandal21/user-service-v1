@@ -21,6 +21,7 @@ import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
+import com.stanzaliving.core.user.request.dto.CreateUserAndRoleDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
 import com.stanzaliving.user.service.UserService;
 
@@ -50,6 +51,16 @@ public class InternalUserController {
 		return ResponseDto.success("User Updated", userDto);
 	}
 
+	@PostMapping("add/userandrole")
+	public ResponseDto<UserDto> addUserAndRole(@RequestBody @Valid CreateUserAndRoleDto createUserAndRoleDto) {
+
+		log.info("Add user and create role {} ", createUserAndRoleDto);
+
+		UserDto userDto = userService.addUserAndRole(createUserAndRoleDto);
+
+		return ResponseDto.success("Add User and Role Created", userDto);
+	}
+	
 	@PostMapping("update/mobile")
 	public ResponseDto<UserDto> updateUserMobile(@RequestBody @Valid UpdateUserRequestDto updateUserRequestDto) {
 

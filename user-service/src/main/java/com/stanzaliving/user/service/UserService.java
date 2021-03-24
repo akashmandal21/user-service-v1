@@ -15,6 +15,7 @@ import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
+import com.stanzaliving.core.user.request.dto.CreateUserAndRoleDto;
 import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
 import com.stanzaliving.user.entity.UserEntity;
@@ -39,6 +40,8 @@ public interface UserService {
 	Map<String, UserProfileDto> getUserProfileIn(Map<String, String> userManagerUuidMap);
 
 	boolean updateUserStatus(String userId, Boolean status);
+	
+	UserDto addUserAndRole(CreateUserAndRoleDto createUserAndRoleDto);
 
 	UserManagerAndRoleDto getUserWithManagerAndRole(String userUuid);
 
