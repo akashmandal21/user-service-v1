@@ -31,4 +31,7 @@ public interface RoleDbService extends AbstractJpaService<RoleEntity, Long> {
 	List<RoleEntity> filter(RoleDto roleDto);
 
 	List<RoleEntity> findByRoleNameAndDepartment(List<String> roleName, Department department);
+
+	List<RoleEntity> findByDepartmentAndAccessLevelAndRoleName(Department department, AccessLevel accessLevel,
+			String roleName);
 }

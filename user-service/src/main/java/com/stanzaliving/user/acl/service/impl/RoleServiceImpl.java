@@ -85,6 +85,12 @@ public class RoleServiceImpl implements RoleService {
 		List<RoleEntity> roleEntityList = roleDbService.findByDepartmentAndAccessLevel(department, accessLevel);
 		return RoleAdapter.getDtoList(roleEntityList);
 	}
+	
+	@Override
+	public List<RoleDto> findByDepartmentAndAccessLevelAndRoleName(Department department, AccessLevel accessLevel,String roleName) {
+		List<RoleEntity> roleEntityList = roleDbService.findByDepartmentAndAccessLevelAndRoleName(department, accessLevel,roleName);
+		return RoleAdapter.getDtoList(roleEntityList);
+	}
 
 	@Override
 	public List<RoleDto> filter(String roleName, Department department, AccessLevel accessLevel) {

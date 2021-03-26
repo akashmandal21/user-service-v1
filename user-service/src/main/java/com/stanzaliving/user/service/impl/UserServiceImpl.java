@@ -599,9 +599,13 @@ public class UserServiceImpl implements UserService {
 
 		createUserAndRoleDto.getAddUserDeptLevelRoleDto().setUserUuid(userDto.getUuid());
 
-		List<RoleDto> roleDto = roleService.findByDepartmentAndAccessLevel(
+		/*List<RoleDto> roleDto = roleService.findByDepartmentAndAccessLevel(
 				createUserAndRoleDto.getAddUserDeptLevelRoleDto().getDepartment(),
-				createUserAndRoleDto.getAddUserDeptLevelRoleDto().getAccessLevel());
+				createUserAndRoleDto.getAddUserDeptLevelRoleDto().getAccessLevel());*/
+		
+		List<RoleDto> roleDto = roleService.findByDepartmentAndAccessLevelAndRoleName(
+				createUserAndRoleDto.getAddUserDeptLevelRoleDto().getDepartment(),
+				createUserAndRoleDto.getAddUserDeptLevelRoleDto().getAccessLevel(),createUserAndRoleDto.getAddUserDeptLevelRoleDto().getRoleName());
 
 		if (CollectionUtils.isEmpty(roleDto)) {
 			log.error("Department: " + createUserAndRoleDto.getAddUserDeptLevelRoleDto().getDepartment()
