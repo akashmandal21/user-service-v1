@@ -202,16 +202,12 @@ public class OtpServiceImpl implements OtpService {
 		if (userOtp == null) {
 			throw new AuthException("No OTP exists for mobile or email", Otp.OTP_NOT_FOUND);
 		}
-		
-		log.info("user otpTime {}",otpTime);
 
 		if (!userOtp.isStatus()
 				|| userOtp.getUpdatedAt() == null
 				|| userOtp.getUpdatedAt().before(otpTime)
 				|| !userOtp.getOtp().toString().equals(otp)) {
 
-			log.info("user otp {} updated date {} and otp time {}",userOtp.isStatus(),userOtp.getUpdatedAt(),otpTime);
-			
 			if (!userOtp.getOtp().toString().equals(otp)) {
 				
 				if (userOtp.getValidateCount() >= otpMaxValidateCount) {
