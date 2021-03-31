@@ -61,8 +61,6 @@ public class AuthController {
 	@PostMapping("login")
 	public ResponseDto<Void> login(@RequestBody @Valid LoginRequestDto loginRequestDto) {
 
-		log.info("loginRequestDto for login : {}",loginRequestDto); 
-		
 		authService.login(loginRequestDto);
 
 		return ResponseDto.success("OTP Sent for Login");
@@ -72,8 +70,6 @@ public class AuthController {
 	public ResponseDto<AclUserDto> validateOtp(
 			@RequestBody @Valid OtpValidateRequestDto otpValidateRequestDto, HttpServletRequest request, HttpServletResponse response) {
 
-		log.info("otpValidateRequestDto for validateOtp : {}",otpValidateRequestDto); 
-		
 		UserProfileDto userProfileDto = authService.validateOtp(otpValidateRequestDto);
 
 		log.info("OTP Successfully Validated for User: " + userProfileDto.getUuid() + ". Creating User Session now");
