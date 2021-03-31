@@ -208,6 +208,8 @@ public class OtpServiceImpl implements OtpService {
 				|| userOtp.getUpdatedAt().before(otpTime)
 				|| !userOtp.getOtp().toString().equals(otp)) {
 
+			log.info("user otp {} updated date {} and otp time {}",userOtp.isStatus(),userOtp.getUpdatedAt(),otpTime);
+			
 			if (!userOtp.getOtp().toString().equals(otp)) {
 				
 				if (userOtp.getValidateCount() >= otpMaxValidateCount) {
