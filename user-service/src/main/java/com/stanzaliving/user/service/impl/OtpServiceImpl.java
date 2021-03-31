@@ -211,10 +211,11 @@ public class OtpServiceImpl implements OtpService {
 			
 			if (!userOtp.getOtp().toString().equals(otp)) {
 				
-				if (userOtp.getValidateCount() >= otpMaxValidateCount)
-					throw new AuthException("Validate OTP can be used maximum " + otpMaxValidateCount + " times.",Otp.OTP_VALIDATE_LIMIT_EXHAUSTED);
-				else
+				if (userOtp.getValidateCount() >= otpMaxValidateCount) {
+					throw new AuthException("Oops! You've reached the max login attempt limit. Try again in a few hours.",Otp.OTP_VALIDATE_LIMIT_EXHAUSTED);
+				} else {
 					validateCount(userOtp);
+				}
 			}
 			
 			switch (userOtp.getOtpType()) {
