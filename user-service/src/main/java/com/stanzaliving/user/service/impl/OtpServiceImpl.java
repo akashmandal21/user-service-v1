@@ -29,6 +29,7 @@ import com.stanzaliving.core.user.request.dto.LoginRequestDto;
 import com.stanzaliving.core.user.request.dto.MobileEmailOtpRequestDto;
 import com.stanzaliving.core.user.request.dto.MobileOtpRequestDto;
 import com.stanzaliving.core.user.request.dto.OtpValidateRequestDto;
+import com.stanzaliving.user.constants.UserConstants;
 import com.stanzaliving.user.db.service.OtpDbService;
 import com.stanzaliving.user.entity.OtpEntity;
 import com.stanzaliving.user.entity.UserEntity;
@@ -64,6 +65,11 @@ public class OtpServiceImpl implements OtpService {
 
 	@Value("${otp.resend.enable.seconds:30}")
 	private int otpResendEnableSeconds;
+	
+	@Value("${otp.max.validate.count:5}")
+	private int otpMaxValidateCount;
+	
+	
 
 	@Autowired
 	private OtpDbService otpDbService;
@@ -84,7 +90,8 @@ public class OtpServiceImpl implements OtpService {
 				|| !(userEntity.getMobile().equals(currentOtp.getMobile()) && userEntity.getIsoCode().equals(currentOtp.getIsoCode()))) {
 			userOtp = createOtpForUser(userEntity, OtpType.LOGIN);
 		} else {
-			currentOtp.setResendCount(0);
+			currentOtp.setResendCount(UserConstants.ZERO);
+			currentOtp.setValidateCount(UserConstants.ZERO);
 			userOtp = updateUserOtp(currentOtp);
 		}
 
@@ -115,8 +122,8 @@ public class OtpServiceImpl implements OtpService {
 		otpEntity.setOtpType(otpType);
 
 		otpEntity.setEmail(email);
-
-		otpEntity.setResendCount(0);
+		otpEntity.setValidateCount(UserConstants.ZERO);
+		otpEntity.setResendCount(UserConstants.ZERO);
 		otpEntity = otpDbService.saveAndFlush(otpEntity);
 
 		return otpEntity;
@@ -201,6 +208,15 @@ public class OtpServiceImpl implements OtpService {
 				|| userOtp.getUpdatedAt().before(otpTime)
 				|| !userOtp.getOtp().toString().equals(otp)) {
 
+			
+			if (!userOtp.getOtp().toString().equals(otp)) {
+				
+				if (userOtp.getValidateCount() >= otpMaxValidateCount)
+					throw new AuthException("Validate OTP can be used maximum " + otpMaxValidateCount + " times.",Otp.OTP_VALIDATE_LIMIT_EXHAUSTED);
+				else
+					validateCount(userOtp);
+			}
+			
 			switch (userOtp.getOtpType()) {
 
 			case EMAIL_VERIFICATION:
@@ -238,6 +254,8 @@ public class OtpServiceImpl implements OtpService {
 		}
 
 		userOtp.setResendCount(userOtp.getResendCount() + 1);
+		userOtp.setValidateCount(UserConstants.ZERO);
+		
 		log.info("Updating OTP for Mobile: {}", userOtp.getMobile());
 		userOtp = otpDbService.updateAndFlush(userOtp);
 
@@ -398,5 +416,15 @@ public class OtpServiceImpl implements OtpService {
 			long secondsRemaining = ChronoUnit.SECONDS.between(currentTime, otpResendEnableTime);
 			throw new AuthException("OTP Can be Resent Only After " + secondsRemaining + " Seconds", Otp.OTP_RESEND_NOT_PERMITTED);
 		}
+	}
+
+	private void validateCount(OtpEntity otp) {
+
+		otp.setValidateCount(otp.getValidateCount() + 1);
+
+		log.debug("Increase validate count for User [Id: {}, Mobile: {}, Email: {}]", otp.getUserId(), otp.getMobile(),
+				otp.getEmail());
+
+		otpDbService.updateAndFlush(otp);
 	}
 }

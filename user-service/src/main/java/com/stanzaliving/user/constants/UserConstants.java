@@ -22,4 +22,6 @@ public class UserConstants {
 	public static final String USER_VERIFICATION_OTP_TEXT = "<otp> is your OTP to authenticate with Stanza Living";
 
 	public static final String DELIMITER_KEY = ",";
+	
+	public static final int ZERO = 0;
 }
