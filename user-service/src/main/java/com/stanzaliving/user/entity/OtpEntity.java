@@ -53,5 +53,8 @@ public class OtpEntity extends AbstractJpaEntity {
 
 	@Column(name = "resend_count", columnDefinition = "int(2)", nullable = false)
 	private int resendCount;
+	
+	@Column(name = "validate_count", columnDefinition = "int(2)", nullable = false)
+	private int validateCount;
 
 }
