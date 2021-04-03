@@ -570,14 +570,28 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserProfileDto getUserDetails(String mobileNo) {
 
-			log.info("Searching User by UserId: " + mobileNo);
+		log.info("Searching User by UserId: " + mobileNo);
 
-			UserEntity userEntity = userDbService.findByMobile(mobileNo);
+		UserEntity userEntity = userDbService.findByMobile(mobileNo);
 
-			if (Objects.isNull(userEntity)) {
-				throw new ApiValidationException("User not found for mobileNo: " + mobileNo);
-			}
-
-			return UserAdapter.getUserProfileDto(userEntity);
+		if (Objects.isNull(userEntity)) {
+			throw new ApiValidationException("User not found for mobileNo: " + mobileNo);
 		}
+
+		return UserAdapter.getUserProfileDto(userEntity);
+	}
+
+	@Override
+	public Map<String,UserProfileDto> getUserDetailsList(List<String> userUuids) {
+
+		Map<String, UserProfileDto> userMap = new HashMap<>();
+		
+		List<UserProfileDto> userProfileDto = UserAdapter.getUserProfileDtos(userDbService.findByUuidIn(userUuids));
+
+		userProfileDto.forEach(user -> {
+			userMap.put(user.getUuid(), user);
+		});
+		
+		return userMap;
+	}
 }

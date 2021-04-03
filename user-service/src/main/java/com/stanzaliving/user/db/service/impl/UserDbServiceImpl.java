@@ -19,6 +19,7 @@ import com.stanzaliving.core.sqljpa.service.impl.AbstractJpaServiceImpl;
 import com.stanzaliving.core.sqljpa.specification.utils.CriteriaOperation;
 import com.stanzaliving.core.sqljpa.specification.utils.StanzaSpecificationBuilder;
 import com.stanzaliving.core.user.dto.UserFilterDto;
+import com.stanzaliving.core.user.dto.UserManagerProfileRequestDto;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.user.constants.UserQueryConstants;
 import com.stanzaliving.user.db.service.UserDbService;
@@ -146,6 +147,12 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 	public UserEntity findByUuidAndEmail(String userUuid, String email) {
 		
 		return getJpaRepository().findByUuidAndEmail(userUuid, email);
+	}
+
+	@Override
+	public List<UserEntity> findByUuidIn(UserManagerProfileRequestDto userUuids) {
+		
+		return getJpaRepository().findByUuidIn(userUuids.getUserUuids());
 	}
 
 }

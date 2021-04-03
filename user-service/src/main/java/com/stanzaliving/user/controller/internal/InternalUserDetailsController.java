@@ -1,15 +1,21 @@
 package com.stanzaliving.user.controller.internal;
 
 import java.util.List;
+import java.util.Map;
+
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
+import com.stanzaliving.core.user.dto.UserManagerProfileRequestDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.user.service.UserService;
 
@@ -38,13 +44,24 @@ public class InternalUserDetailsController {
 
 		return ResponseDto.success("Found Users", userService.getAllUsers());
 	}
-	
+
 	@GetMapping("/mobile")
-	public ResponseDto<UserProfileDto> getUserDetails(@RequestParam(name = "mobileNo", required = true) String mobileNo) {
+	public ResponseDto<UserProfileDto> getUserDetails(
+			@RequestParam(name = "mobileNo", required = true) String mobileNo) {
 
 		log.info("Fetching User with mobileNo: {}", mobileNo);
 
 		return ResponseDto.success("Found User for userUuid", userService.getUserDetails(mobileNo));
+	}
+
+	@PostMapping("/userUuids")
+	public ResponseDto<Map<String,UserProfileDto>> getUserDetailsMap(
+			@RequestBody @Valid UserManagerProfileRequestDto userManagerProfileRequestDto) {
+
+		log.info("Fetching User with UserUuuids: {}", userManagerProfileRequestDto.getUserUuids());
+
+		return ResponseDto.success("Found User details for userUuids",
+				userService.getUserDetailsList(userManagerProfileRequestDto.getUserUuids()));
 	}
 
 }
