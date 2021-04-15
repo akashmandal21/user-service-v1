@@ -70,7 +70,7 @@ public class AuthServiceImpl implements AuthService {
 		}
 
 		if (!userEntity.isStatus()) {
-			throw new AuthException("User account is disabled for this number", UserErrorCodes.USER_ACCOUNT_INACTIVE);
+			throw new AuthException("The booking is disabled for this number", UserErrorCodes.USER_ACCOUNT_INACTIVE);
 		}
 
 		log.info("Found User: " + userEntity.getUuid() + " for Mobile: " + loginRequestDto.getMobile() + " of Type: " + userEntity.getUserType());
