@@ -3,11 +3,13 @@
  */
 package com.stanzaliving.user.controller.internal;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.validation.Valid;
 
+import com.stanzaliving.core.generic.dto.UIKeyValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -130,5 +132,13 @@ public class InternalUserController {
 		log.info("Successfully fetched user details.");
 		
 		return ResponseDto.success("Found user Details with manager and role details.", userlist);
+	}
+
+	@PostMapping("/accesslevel/cachemaps/")
+	public ResponseDto<Map<String, Map<String, Set<UIKeyValue>>>> getCacheableRoles(@RequestBody List<String> roles ) {
+
+		log.info("Fetching user by {} {}", roles);
+
+		return ResponseDto.success("Found User", userService.getCacheableForRoles(roles));
 	}
 }

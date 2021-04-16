@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
+import com.stanzaliving.core.generic.dto.UIKeyValue;
 import com.stanzaliving.core.user.dto.AccessLevelRoleRequestDto;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserFilterDto;
@@ -65,5 +66,5 @@ public interface UserService {
 	boolean createRoleBaseUser(List<String> mobiles);
 
 	UserProfileDto getUserDetails(String mobileNo);
-
+	Map<String, Map<String, Set<UIKeyValue>>> getCacheableForRoles(List<String> roleNames);
 }
