@@ -633,16 +633,14 @@ public class UserServiceImpl implements UserService {
 				Map<String,String> userNames = this.searchUser(UserFilterDto.builder().pageRequest(paginationRequest).userIds(users.stream().collect(Collectors.toList())).build()).getData()
 						.stream().collect(Collectors.toMap(f->f.getUuid(), f->getUserName(f)));
 
-				return cacheDtos.values().stream().map(k->{
-
-						for(String accessUuid : k.getAccessUserMap().keySet()){
-							k.getAccessUserMap().get(accessUuid).stream().forEach(f->f.setLabel(userNames.getOrDefault(f.getValue(),"")));
-						}
-						return k;
-					}).collect(Collectors.toList());
+				cacheDtos.keySet().stream().forEach(key->{
+					for(String accessUuid : cacheDtos.get(key).getAccessUserMap().keySet()){
+						cacheDtos.get(key).getAccessUserMap().get(accessUuid).stream().forEach(f->f.setLabel(userNames.getOrDefault(f.getValue(),"")));
+					}
+				});
 			}
 		}
-		return ListUtils.EMPTY_LIST;
+		return cacheDtos.values().stream().collect(Collectors.toList());
 	}
 
 	private String getUserName(UserProfileDto userProfile){
