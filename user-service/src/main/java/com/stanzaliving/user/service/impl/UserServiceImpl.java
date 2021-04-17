@@ -11,9 +11,11 @@ import javax.validation.Valid;
 import com.stanzaliving.core.base.common.dto.PaginationRequest;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.generic.dto.UIKeyValue;
+import com.stanzaliving.core.user.dto.*;
 import com.stanzaliving.user.acl.db.service.UserDepartmentLevelDbService;
 import com.stanzaliving.user.acl.db.service.UserDepartmentLevelRoleDbService;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,11 +36,6 @@ import com.stanzaliving.core.kafka.producer.NotificationProducer;
 import com.stanzaliving.core.sqljpa.adapter.AddressAdapter;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleRequestDto;
-import com.stanzaliving.core.user.dto.AccessLevelRoleRequestDto;
-import com.stanzaliving.core.user.dto.UserDto;
-import com.stanzaliving.core.user.dto.UserFilterDto;
-import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
-import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
@@ -587,10 +584,10 @@ public class UserServiceImpl implements UserService {
 		}
 
 	@Override
-	public Map<String, Map<String, Set<UIKeyValue>>> getCacheableForRoles(List<String> roleNames) {
+	public List<UserRoleCacheDto> getCacheableForRoles(List<String> roleNames) {
 
-		log.info("Got request to get list of userid by rolenames {} and department {}", roleNames);
-		Map<String, Map<String, Set<UIKeyValue>>> userIdAccessLevelIdListMap = new HashMap<>();
+		log.info("Got request to get list of userid by rolenames {}", roleNames);
+		Map<String,UserRoleCacheDto> cacheDtos = new HashMap<>(Department.values().length*roleNames.size());
 		for(Department department: Department.values()) {
 
 			List<RoleDto> roleDtos = roleService.findByRoleNameInAndDepartment(roleNames, department);
@@ -598,8 +595,6 @@ public class UserServiceImpl implements UserService {
 
 			Set<String> users = new HashSet<>();
 			for (RoleDto roleDto : roleDtos) {
-				String key = department.name() + roleDto.getRoleName();
-				userIdAccessLevelIdListMap.putIfAbsent(key, new HashMap<>());
 				if (Objects.nonNull(roleDtos) && roleDto.getDepartment().equals(department)) {
 
 					List<UserDepartmentLevelRoleEntity> departmentLevelRoleEntities = userDepartmentLevelRoleDbService.findByRoleUuid(roleDto.getUuid());
@@ -611,12 +606,13 @@ public class UserServiceImpl implements UserService {
 						List<UserDepartmentLevelEntity> departmentLevelEntities = userDepartmentLevelDbService.findByUuidInAndAccessLevel(uuids, roleDto.getAccessLevel());
 
 						if (CollectionUtils.isNotEmpty(departmentLevelEntities)) {
-
+							String key = roleDto.getRoleName()+""+department;
+							cacheDtos.putIfAbsent(key,UserRoleCacheDto.builder().roleName(roleDto.getRoleName()).department(department).accessUserMap(new HashMap<>()).build());
 							departmentLevelEntities.forEach(entity -> {
 
 								Arrays.asList((entity.getCsvAccessLevelEntityUuid().split(","))).stream().forEach(accessUuid -> {
-									userIdAccessLevelIdListMap.get(key).putIfAbsent(accessUuid, new HashSet<>());
-									userIdAccessLevelIdListMap.get(key).get(accessUuid).add(new UIKeyValue(entity.getUserUuid(), entity.getUserUuid()));
+									cacheDtos.get(key).getAccessUserMap().putIfAbsent(accessUuid, new ArrayList<>());
+									cacheDtos.get(key).getAccessUserMap().get(accessUuid).add(new UIKeyValue(entity.getUserUuid(), entity.getUserUuid()));
 									users.add(entity.getUserUuid());
 								});
 							});
@@ -630,17 +626,23 @@ public class UserServiceImpl implements UserService {
 				Map<String,String> userNames = this.searchUser(UserFilterDto.builder().pageRequest(paginationRequest).userIds(users.stream().collect(Collectors.toList())).build()).getData()
 						.stream().collect(Collectors.toMap(f->f.getUuid(), f->getUserName(f)));
 
-				userIdAccessLevelIdListMap.keySet().forEach(k->{
-					userIdAccessLevelIdListMap.get(k).keySet().forEach(v->{
-						userIdAccessLevelIdListMap.get(k).get(v).stream().forEach(u->u.setLabel(userNames.getOrDefault(u.getValue(),"")));
-					});
-				});
+				return cacheDtos.values().stream().map(k->{
 
+						for(String accessUuid : k.getAccessUserMap().keySet()){
+							k.getAccessUserMap().get(accessUuid).stream().forEach(f->f.setLabel(userNames.getOrDefault(f.getValue(),"")));
+						}
+						return k;
+					}).collect(Collectors.toList());
 			}
 		}
-
-		return userIdAccessLevelIdListMap;
+		return ListUtils.EMPTY_LIST;
 	}
+
+	private Map<String,String> getUserNames(Collection<String> user){
+
+	}
+
+
 
 	private String getUserName(UserProfileDto userProfile){
 		StringBuilder name = new StringBuilder();
