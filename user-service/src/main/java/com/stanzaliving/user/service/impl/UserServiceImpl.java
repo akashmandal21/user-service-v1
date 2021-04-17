@@ -590,8 +590,11 @@ public class UserServiceImpl implements UserService {
 		Map<String,UserRoleCacheDto> cacheDtos = new HashMap<>(Department.values().length*roleNames.size());
 		for(Department department: Department.values()) {
 
+			log.info("Department {}",department);
+
 			List<RoleDto> roleDtos = roleService.findByRoleNameInAndDepartment(roleNames, department);
 
+			log.info("Roles {}",roleDtos);
 
 			Set<String> users = new HashSet<>();
 			for (RoleDto roleDto : roleDtos) {
@@ -599,17 +602,21 @@ public class UserServiceImpl implements UserService {
 
 					List<UserDepartmentLevelRoleEntity> departmentLevelRoleEntities = userDepartmentLevelRoleDbService.findByRoleUuid(roleDto.getUuid());
 
+					log.info("Department Role Entity {}",departmentLevelRoleEntities);
+
 					if (CollectionUtils.isNotEmpty(departmentLevelRoleEntities)) {
 
 						List<String> uuids = departmentLevelRoleEntities.stream().map(UserDepartmentLevelRoleEntity::getUserDepartmentLevelUuid).collect(Collectors.toList());
 
 						List<UserDepartmentLevelEntity> departmentLevelEntities = userDepartmentLevelDbService.findByUuidInAndAccessLevel(uuids, roleDto.getAccessLevel());
 
+						log.info("Department Level Entity {}",departmentLevelEntities);
+
 						if (CollectionUtils.isNotEmpty(departmentLevelEntities)) {
 							String key = roleDto.getRoleName()+""+department;
 							cacheDtos.putIfAbsent(key,UserRoleCacheDto.builder().roleName(roleDto.getRoleName()).department(department).accessUserMap(new HashMap<>()).build());
 							departmentLevelEntities.forEach(entity -> {
-
+								log.info("Acccess Level {}",entity.getCsvAccessLevelEntityUuid());
 								Arrays.asList((entity.getCsvAccessLevelEntityUuid().split(","))).stream().forEach(accessUuid -> {
 									cacheDtos.get(key).getAccessUserMap().putIfAbsent(accessUuid, new ArrayList<>());
 									cacheDtos.get(key).getAccessUserMap().get(accessUuid).add(new UIKeyValue(entity.getUserUuid(), entity.getUserUuid()));
