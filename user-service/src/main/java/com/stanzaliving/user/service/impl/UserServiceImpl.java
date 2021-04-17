@@ -638,12 +638,6 @@ public class UserServiceImpl implements UserService {
 		return ListUtils.EMPTY_LIST;
 	}
 
-	private Map<String,String> getUserNames(Collection<String> user){
-
-	}
-
-
-
 	private String getUserName(UserProfileDto userProfile){
 		StringBuilder name = new StringBuilder();
 
