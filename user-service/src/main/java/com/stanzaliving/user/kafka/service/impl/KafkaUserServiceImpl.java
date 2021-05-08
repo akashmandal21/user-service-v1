@@ -53,7 +53,9 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 	public void sendOtpToKafka(OtpEntity otpEntity, UserEntity userEntity) {
 		try {
 			userExecutor.execute(() -> {
-
+				if(Objects.isNull(otpEntity.getOtpType())) {
+					otpEntity.setOtpType(OtpType.MOBILE_VERIFICATION);
+				}
 				switch (otpEntity.getOtpType()) {
 				
 				case EMAIL_VERIFICATION:

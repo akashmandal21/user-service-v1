@@ -16,6 +16,7 @@ import com.stanzaliving.core.base.utils.StanzaUtils;
 import com.stanzaliving.core.user.constants.UserErrorCodes.Otp;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
+import com.stanzaliving.core.user.enums.OtpType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.user.acl.adapters.SignUpAdapter;
 import com.stanzaliving.user.adapters.UserAdapter;
@@ -107,6 +108,7 @@ public class SignUpServiceImpl implements SignUpService {
 	private void sendOtp(AddUserRequestDto addUserRequestDto, SignupEntity signUpOtp) {
 
 		OtpEntity userOtp = OtpEntity.builder().otp(signUpOtp.getOtp()).mobile(signUpOtp.getMobile())
+				.otpType(OtpType.MOBILE_VERIFICATION)
 				.userType(addUserRequestDto.getUserType()).status(Boolean.TRUE).build();
 
 		log.info("Sending Otp for Signup, {}", userOtp);
