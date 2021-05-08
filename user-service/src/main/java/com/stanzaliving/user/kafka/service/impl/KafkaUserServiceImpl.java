@@ -54,6 +54,10 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 		try {
 			userExecutor.execute(() -> {
 
+				if(Objects.isNull(otpEntity.getOtpType())) {
+					otpEntity.setOtpType(OtpType.MOBILE_VERIFICATION);
+				}
+				
 				switch (otpEntity.getOtpType()) {
 				
 				case EMAIL_VERIFICATION:
@@ -61,7 +65,6 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 					break;
 
 				default:
-					log.error("sending default via mail and email");
 					sendOtpOnMobile(otpEntity);
 					sendOtpOnMail(otpEntity, null);
 					break;
@@ -97,7 +100,7 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 		if (SmsType.OTP == smsDto.getSmsType()) {
 			smsTopic = propertyManager.getProperty("kafka.topic.sms.otp", "sms_otp");
 		}
-		log.debug("Sending OTP for user: " + smsDto);
+
 		notificationProducer.publish(smsTopic, SmsDto.class.getName(), smsDto);
 	}
 
