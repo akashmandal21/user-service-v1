@@ -61,6 +61,7 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 					break;
 
 				default:
+					log.error("sending default via mail and email");
 					sendOtpOnMobile(otpEntity);
 					sendOtpOnMail(otpEntity, null);
 					break;
