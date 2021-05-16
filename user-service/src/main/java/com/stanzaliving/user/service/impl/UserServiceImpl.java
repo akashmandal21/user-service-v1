@@ -634,6 +634,7 @@ public class UserServiceImpl implements UserService {
 				PaginationRequest paginationRequest = PaginationRequest.builder().pageNo(1).limit(users.size()).build();
 				Map<String,String> userNames = this.searchUser(UserFilterDto.builder().pageRequest(paginationRequest).userIds(users.stream().collect(Collectors.toList())).build()).getData()
 						.stream().collect(Collectors.toMap(f->f.getUuid(), f->getUserName(f)));
+				log.info("Users {}",this.searchUser(UserFilterDto.builder().pageRequest(paginationRequest).userIds(users.stream().collect(Collectors.toList())).build()).getData());
 
 				cacheDtos.keySet().stream().forEach(key->{
 					for(String accessUuid : cacheDtos.get(key).getAccessUserMap().keySet()){
