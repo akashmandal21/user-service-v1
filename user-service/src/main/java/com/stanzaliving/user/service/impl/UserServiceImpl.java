@@ -638,7 +638,7 @@ public class UserServiceImpl implements UserService {
 			Map<String,String> userNames = this.searchUser(UserFilterDto.builder().pageRequest(paginationRequest).userIds(users.stream().collect(Collectors.toList())).build()).getData()
 					.stream().collect(Collectors.toMap(f->f.getUuid(), f->getUserName(f)));
 			log.info("User Names {}",userNames);
-			cacheDtos.values().stream().map(userRoleCacheDto -> {
+			return cacheDtos.values().stream().map(userRoleCacheDto -> {
 				log.info("User ex {}",userRoleCacheDto.getAccessUserMap());
 				for (Map.Entry<String, List<UIKeyValue>> entry : userRoleCacheDto.getAccessUserMap().entrySet()) {
 					entry.setValue(entry.getValue().stream().map(uiKeyValue -> new UIKeyValue(userNames.getOrDefault(uiKeyValue.getValue(),""),uiKeyValue.getValue())).collect(Collectors.toList()));
