@@ -592,11 +592,11 @@ public class UserServiceImpl implements UserService {
 		Set<String> users = new HashSet<>();
 		for(Department department: Department.values()) {
 
-			log.info("Department {}",department);
+//			log.info("Department {}",department);
 
 			List<RoleDto> roleDtos = roleService.findByRoleNameInAndDepartment(roleNames, department);
 
-			log.info("Roles {}",roleDtos);
+//			log.info("Roles {}",roleDtos);
 
 
 			for (RoleDto roleDto : roleDtos) {
@@ -604,7 +604,7 @@ public class UserServiceImpl implements UserService {
 
 					List<UserDepartmentLevelRoleEntity> departmentLevelRoleEntities = userDepartmentLevelRoleDbService.findByRoleUuid(roleDto.getUuid());
 
-					log.info("Department Role Entity {}",departmentLevelRoleEntities);
+//					log.info("Department Role Entity {}",departmentLevelRoleEntities);
 
 					if (CollectionUtils.isNotEmpty(departmentLevelRoleEntities)) {
 
@@ -612,17 +612,15 @@ public class UserServiceImpl implements UserService {
 
 						List<UserDepartmentLevelEntity> departmentLevelEntities = userDepartmentLevelDbService.findByUuidInAndAccessLevel(uuids, roleDto.getAccessLevel());
 
-						log.info("Department Level Entity {}",departmentLevelEntities);
+//						log.info("Department Level Entity {}",departmentLevelEntities);
 
 						if (CollectionUtils.isNotEmpty(departmentLevelEntities)) {
 							String key = roleDto.getRoleName()+""+department;
 							cacheDtos.putIfAbsent(key,UserRoleCacheDto.builder().roleName(roleDto.getRoleName()).department(department).accessUserMap(new HashMap<>()).build());
 							departmentLevelEntities.forEach(entity -> {
-								log.info("Access Level {}",entity.getCsvAccessLevelEntityUuid());
 								Arrays.asList((entity.getCsvAccessLevelEntityUuid().split(","))).stream().forEach(accessUuid -> {
 									cacheDtos.get(key).getAccessUserMap().putIfAbsent(accessUuid, new ArrayList<>());
 									cacheDtos.get(key).getAccessUserMap().get(accessUuid).add(new UIKeyValue(entity.getUserUuid(), entity.getUserUuid()));
-									log.info("Addding user {}",entity);
 									users.add(entity.getUserUuid());
 								});
 							});
@@ -637,9 +635,7 @@ public class UserServiceImpl implements UserService {
 			PaginationRequest paginationRequest = PaginationRequest.builder().pageNo(1).limit(users.size()).build();
 			Map<String,String> userNames = this.searchUser(UserFilterDto.builder().pageRequest(paginationRequest).userIds(users.stream().collect(Collectors.toList())).build()).getData()
 					.stream().collect(Collectors.toMap(f->f.getUuid(), f->getUserName(f)));
-			log.info("User Names {}",userNames);
 			return cacheDtos.values().stream().map(userRoleCacheDto -> {
-				log.info("User ex {}",userRoleCacheDto.getAccessUserMap());
 				for (Map.Entry<String, List<UIKeyValue>> entry : userRoleCacheDto.getAccessUserMap().entrySet()) {
 					entry.setValue(entry.getValue().stream().map(uiKeyValue -> new UIKeyValue(userNames.getOrDefault(uiKeyValue.getValue(),""),uiKeyValue.getValue())).collect(Collectors.toList()));
 				}
