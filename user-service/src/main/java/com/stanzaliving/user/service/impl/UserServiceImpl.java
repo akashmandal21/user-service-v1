@@ -242,8 +242,6 @@ public class UserServiceImpl implements UserService {
 		log.info("Found " + userPage.getNumberOfElements() + " User Records on Page: " + pageNo
 				+ " for Search Criteria");
 
-		log.info("Check {}",userPage.getContent());
-
 		List<UserProfileDto> userDtos = userPage.getContent().stream().map(UserAdapter::getUserProfileDto)
 				.collect(Collectors.toList());
 
@@ -634,11 +632,13 @@ public class UserServiceImpl implements UserService {
 				PaginationRequest paginationRequest = PaginationRequest.builder().pageNo(1).limit(users.size()).build();
 				Map<String,String> userNames = this.searchUser(UserFilterDto.builder().pageRequest(paginationRequest).userIds(users.stream().collect(Collectors.toList())).build()).getData()
 						.stream().collect(Collectors.toMap(f->f.getUuid(), f->getUserName(f)));
-				log.info("Users {}",this.searchUser(UserFilterDto.builder().pageRequest(paginationRequest).userIds(users.stream().collect(Collectors.toList())).build()).getData());
-
+				log.info("User Names {}",userNames);
 				cacheDtos.keySet().stream().forEach(key->{
 					for(String accessUuid : cacheDtos.get(key).getAccessUserMap().keySet()){
-						cacheDtos.get(key).getAccessUserMap().get(accessUuid).stream().forEach(f->f.setLabel(userNames.getOrDefault(f.getValue(),"")));
+						cacheDtos.get(key).getAccessUserMap().get(accessUuid).stream().forEach(f->{
+							log.info("User Uuid {}",f);
+							f.setLabel(userNames.getOrDefault(f.getValue(),""));
+						});
 					}
 				});
 			}
