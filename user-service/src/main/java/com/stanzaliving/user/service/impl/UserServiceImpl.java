@@ -618,16 +618,16 @@ public class UserServiceImpl implements UserService {
 							String key = roleDto.getRoleName()+""+department;
 							cacheDtos.putIfAbsent(key,UserRoleCacheDto.builder().roleName(roleDto.getRoleName()).department(department).accessUserMap(new HashMap<>()).build());
 							departmentLevelEntities.forEach(entity -> {
-								log.info("Acccess Level {}",entity.getCsvAccessLevelEntityUuid());
+								log.info("Access Level {}",entity.getCsvAccessLevelEntityUuid());
 								Arrays.asList((entity.getCsvAccessLevelEntityUuid().split(","))).stream().forEach(accessUuid -> {
 									cacheDtos.get(key).getAccessUserMap().putIfAbsent(accessUuid, new ArrayList<>());
 									cacheDtos.get(key).getAccessUserMap().get(accessUuid).add(new UIKeyValue(entity.getUserUuid(), entity.getUserUuid()));
+									log.info("Addding user {}",entity);
 									users.add(entity.getUserUuid());
 								});
 							});
 						}
 					}
-
 				}
 			}
 
