@@ -24,6 +24,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
@@ -588,6 +589,7 @@ public class UserServiceImpl implements UserService {
 
 		log.info("Got request to get list of userid by rolenames {}", roleNames);
 		Map<String,UserRoleCacheDto> cacheDtos = new HashMap<>(Department.values().length*roleNames.size());
+		Set<String> users = new HashSet<>();
 		for(Department department: Department.values()) {
 
 			log.info("Department {}",department);
@@ -596,7 +598,7 @@ public class UserServiceImpl implements UserService {
 
 			log.info("Roles {}",roleDtos);
 
-			Set<String> users = new HashSet<>();
+
 			for (RoleDto roleDto : roleDtos) {
 				if (Objects.nonNull(roleDtos) && roleDto.getDepartment().equals(department)) {
 
@@ -628,22 +630,25 @@ public class UserServiceImpl implements UserService {
 
 				}
 			}
-			if(CollectionUtils.isNotEmpty(users)){
-				PaginationRequest paginationRequest = PaginationRequest.builder().pageNo(1).limit(users.size()).build();
-				Map<String,String> userNames = this.searchUser(UserFilterDto.builder().pageRequest(paginationRequest).userIds(users.stream().collect(Collectors.toList())).build()).getData()
-						.stream().collect(Collectors.toMap(f->f.getUuid(), f->getUserName(f)));
-				log.info("User Names {}",userNames);
-				cacheDtos.keySet().stream().forEach(key->{
-					for(String accessUuid : cacheDtos.get(key).getAccessUserMap().keySet()){
-						cacheDtos.get(key).getAccessUserMap().get(accessUuid).stream().forEach(f->{
-							log.info("User Uuid {} {}",f,userNames.get(f.getValue()));
-							f.setLabel(userNames.getOrDefault(f.getValue(),""));
-						});
-					}
-				});
-			}
+
 		}
-		return cacheDtos.values().stream().collect(Collectors.toList());
+
+		if(CollectionUtils.isNotEmpty(users)){
+			PaginationRequest paginationRequest = PaginationRequest.builder().pageNo(1).limit(users.size()).build();
+			Map<String,String> userNames = this.searchUser(UserFilterDto.builder().pageRequest(paginationRequest).userIds(users.stream().collect(Collectors.toList())).build()).getData()
+					.stream().collect(Collectors.toMap(f->f.getUuid(), f->getUserName(f)));
+			log.info("User Names {}",userNames);
+			cacheDtos.values().stream().map(userRoleCacheDto -> {
+				log.info("User ex {}",userRoleCacheDto.getAccessUserMap());
+				for (Map.Entry<String, List<UIKeyValue>> entry : userRoleCacheDto.getAccessUserMap().entrySet()) {
+					entry.setValue(entry.getValue().stream().map(uiKeyValue -> new UIKeyValue(userNames.getOrDefault(uiKeyValue.getValue(),""),uiKeyValue.getValue())).collect(Collectors.toList()));
+				}
+				return userRoleCacheDto;
+			}).collect(Collectors.toList());
+
+
+		}
+		return ListUtils.EMPTY_LIST;
 	}
 
 	private String getUserName(UserProfileDto userProfile){
