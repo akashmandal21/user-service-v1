@@ -636,7 +636,7 @@ public class UserServiceImpl implements UserService {
 				cacheDtos.keySet().stream().forEach(key->{
 					for(String accessUuid : cacheDtos.get(key).getAccessUserMap().keySet()){
 						cacheDtos.get(key).getAccessUserMap().get(accessUuid).stream().forEach(f->{
-							log.info("User Uuid {}",f);
+							log.info("User Uuid {} {}",f,userNames.get(f.getValue()));
 							f.setLabel(userNames.getOrDefault(f.getValue(),""));
 						});
 					}
