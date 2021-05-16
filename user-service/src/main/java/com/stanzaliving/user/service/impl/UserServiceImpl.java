@@ -242,6 +242,8 @@ public class UserServiceImpl implements UserService {
 		log.info("Found " + userPage.getNumberOfElements() + " User Records on Page: " + pageNo
 				+ " for Search Criteria");
 
+		log.info("Check {}",userPage.getContent());
+
 		List<UserProfileDto> userDtos = userPage.getContent().stream().map(UserAdapter::getUserProfileDto)
 				.collect(Collectors.toList());
 
