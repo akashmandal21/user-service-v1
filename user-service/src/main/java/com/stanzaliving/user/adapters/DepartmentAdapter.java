@@ -27,4 +27,15 @@ public class DepartmentAdapter {
 		
 		return data;
 	}
+	
+	public List<EnumListing<Department>> getDepartmentEnumAsEnumListingSorted() {
+
+		List<EnumListing<Department>> data = new ArrayList<>();
+
+		for (Department department : Department.getDepartments()) {
+			data.add(EnumListing.of(department, department.getDepartmentName()));
+		}
+
+		return data;
+	}
 }
