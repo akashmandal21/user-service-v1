@@ -52,6 +52,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 						"/user/urlList/**",
 						"/acl/user/fe/**",
 						"/acl/role/getRole/**",
+						"/acl/role/getRolesByDepartmentAndNames/**",
 						"/acl/user/be/**",
 						"/v2/api-docs",
 						"/configuration/ui",

@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -65,12 +67,12 @@ public class RoleController {
 		return ResponseDto.success("Found Role with Department: " + department + " level: " + accessLevel, roleService.findByDepartmentAndAccessLevel(department, accessLevel));
 	}
 
-	@GetMapping("getRole/{department}/{roleName}")
-	public ResponseDto<RoleDto> getRoleByDepartmentAndRoleName(
-			@PathVariable(name = "department", required = false) Department department,
-			@PathVariable(name = "roleName", required = false) String roleName) {
-		log.info("Checked role {} is present in Department {} ",roleName,department);
-		return ResponseDto.success("Role exist in Department: " + department,roleService.findByRoleNameAndDepartment(roleName,department) );
+	@GetMapping("getRolesByDepartmentAndNames")
+	public ResponseDto<List<RoleDto>> getRoleByDepartmentAndRoleName(
+			@RequestParam(name = "department", required = false) Department department,
+			@RequestParam(name = "roleNames", required = false) String roleNames) {
+		log.info("Checked role {} is present in Department {} ",roleNames,department);
+		return ResponseDto.success("Role exist in Department: " + department,roleService.findByRoleNameInAndDepartment(new ArrayList<>(Arrays.asList(roleNames.split(","))),department) );
 	}
 
 	@GetMapping("list")
