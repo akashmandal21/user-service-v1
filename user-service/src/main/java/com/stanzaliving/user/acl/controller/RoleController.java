@@ -65,6 +65,14 @@ public class RoleController {
 		return ResponseDto.success("Found Role with Department: " + department + " level: " + accessLevel, roleService.findByDepartmentAndAccessLevel(department, accessLevel));
 	}
 
+	@GetMapping("getRole/{department}/{roleName}")
+	public ResponseDto<RoleDto> getRoleByDepartmentAndRoleName(
+			@PathVariable(name = "department", required = false) Department department,
+			@PathVariable(name = "roleName", required = false) String roleName) {
+		log.info("Checked role {} is present in Department {} ",roleName,department);
+		return ResponseDto.success("Role exist in Department: " + department,roleService.findByRoleNameAndDepartment(roleName,department) );
+	}
+
 	@GetMapping("list")
 	public ResponseDto<List<RoleDto>> filterRoles(
 			@RequestParam(name = "department", required = false) Department department,
