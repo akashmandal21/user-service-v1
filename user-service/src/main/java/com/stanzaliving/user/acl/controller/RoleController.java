@@ -10,6 +10,7 @@ import com.stanzaliving.core.user.acl.dto.RoleAccessDto;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
 import com.stanzaliving.core.user.acl.request.dto.AddRoleAccessDto;
 import com.stanzaliving.core.user.acl.request.dto.AddRoleRequestDto;
+import com.stanzaliving.core.user.acl.request.dto.CheckRoleNamesDto;
 import com.stanzaliving.core.user.acl.request.dto.UpdateRoleAccessDto;
 import com.stanzaliving.core.user.enums.EnumListing;
 import com.stanzaliving.user.acl.adapters.RoleAccessAdapter;
@@ -67,12 +68,10 @@ public class RoleController {
 		return ResponseDto.success("Found Role with Department: " + department + " level: " + accessLevel, roleService.findByDepartmentAndAccessLevel(department, accessLevel));
 	}
 
-	@GetMapping("getRolesByDepartmentAndNames")
-	public ResponseDto<List<RoleDto>> getRoleByDepartmentAndRoleName(
-			@RequestParam(name = "department", required = false) Department department,
-			@RequestParam(name = "roleNames", required = false) String roleNames) {
-		log.info("Checked role {} is present in Department {} ",roleNames,department);
-		return ResponseDto.success("Role exist in Department: " + department,roleService.findByRoleNameInAndDepartment(new ArrayList<>(Arrays.asList(roleNames.split(","))),department) );
+	@PostMapping("getRolesByDepartmentAndNames")
+	public ResponseDto<List<RoleDto>> getRoleByDepartmentAndRoleName(@RequestBody CheckRoleNamesDto checkRoleNamesDto) {
+		log.info("Checked roles are present in Department {} ",checkRoleNamesDto.getDepartment());
+		return ResponseDto.success("Roles exist in Department: " + checkRoleNamesDto.getDepartment(),roleService.findByRoleNameInAndDepartment(checkRoleNamesDto.getRoleNames(),checkRoleNamesDto.getDepartment()));
 	}
 
 	@GetMapping("list")
