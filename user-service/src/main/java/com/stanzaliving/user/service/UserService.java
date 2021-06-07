@@ -66,4 +66,6 @@ public interface UserService {
 
 	UserProfileDto getUserDetails(String mobileNo);
 
+	Map<String, UserProfileDto> getUserProfileForUserIn(List<String> userUuids);
+
 }
