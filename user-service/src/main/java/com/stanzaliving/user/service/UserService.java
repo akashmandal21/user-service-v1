@@ -40,6 +40,8 @@ public interface UserService {
 	UserManagerAndRoleDto getUserWithManagerAndRole(String userUuid);
 
 	List<UserProfileDto> getAllUsers();
+	
+	List<UserProfileDto> getAllUsersByUuidInAndStatus(List<String> uuids);
 
 	List<UserEntity> getUserByEmail(String email);
 

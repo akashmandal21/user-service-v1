@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,6 +39,17 @@ public class InternalUserDetailsController {
 		log.info("Fetching All User");
 
 		return ResponseDto.success("Found Users", userService.getAllUsers());
+		
+	}
+	
+	@PostMapping("user/all")
+	public ResponseDto<List<UserProfileDto>> getAllUsersByUuidInAndStatus(@RequestBody List<String> uuids) {
+
+		log.info("Fetching All User");
+
+		return ResponseDto.success("Found Users", userService.getAllUsersByUuidInAndStatus(uuids));
+		
+
 	}
 	
 	@GetMapping("/mobile")

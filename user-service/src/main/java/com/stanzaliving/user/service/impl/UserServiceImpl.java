@@ -307,6 +307,14 @@ public class UserServiceImpl implements UserService {
 	public List<UserProfileDto> getAllUsers() {
 
 		List<UserEntity> userEntities = userDbService.findAll();
+		
+		return UserAdapter.getUserProfileDtos(userEntities);
+	}
+	
+	@Override
+	public List<UserProfileDto> getAllUsersByUuidInAndStatus(List<String> uuids) {
+		
+		List<UserEntity> userEntities = userDbService.findByUuidInAndStatus(uuids, true);
 
 		return UserAdapter.getUserProfileDtos(userEntities);
 	}
