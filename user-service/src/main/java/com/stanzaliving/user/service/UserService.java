@@ -41,7 +41,7 @@ public interface UserService {
 
 	List<UserProfileDto> getAllUsers();
 	
-	List<UserProfileDto> getAllUsersByUuidInAndStatus(List<String> uuids);
+	List<UserProfileDto> getAllUsersByUuidInAndStatus(Set<String> uuids);
 
 	List<UserEntity> getUserByEmail(String email);
 
