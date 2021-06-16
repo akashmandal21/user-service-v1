@@ -1,7 +1,7 @@
 package com.stanzaliving.user.controller.internal;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
+import com.stanzaliving.core.user.request.dto.ActiveUserRequestDto;
 import com.stanzaliving.user.service.UserService;
 
 import lombok.extern.log4j.Log4j2;
@@ -44,13 +45,11 @@ public class InternalUserDetailsController {
 	}
 	
 	@PostMapping("user/all")
-	public ResponseDto<List<UserProfileDto>> getAllUsersByUuidInAndStatus(@RequestBody Set<String> uuids) {
+	public ResponseDto<List<UserProfileDto>> getAllActiveUsersByUuidIn(@RequestBody ActiveUserRequestDto activeUserRequestDto) {
 
 		log.info("Fetching All User");
 
-		return ResponseDto.success("Found Users", userService.getAllUsersByUuidInAndStatus(uuids));
-		
-
+		return ResponseDto.success("Found Users", userService.getAllActiveUsersByUuidIn(activeUserRequestDto));
 	}
 	
 	@GetMapping("/mobile")

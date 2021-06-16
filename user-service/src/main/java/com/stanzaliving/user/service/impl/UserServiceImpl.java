@@ -47,6 +47,7 @@ import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.dto.UserRoleCacheDto;
 import com.stanzaliving.core.user.enums.UserType;
+import com.stanzaliving.core.user.request.dto.ActiveUserRequestDto;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
@@ -323,9 +324,9 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	@Override
-	public List<UserProfileDto> getAllUsersByUuidInAndStatus(Set<String> uuids) {
+	public List<UserProfileDto> getAllActiveUsersByUuidIn(ActiveUserRequestDto activeUserRequestDto) {
 		
-		List<UserEntity> userEntities = userDbService.findByUuidInAndStatus(uuids, true);
+		List<UserEntity> userEntities = userDbService.findByUuidInAndStatus(activeUserRequestDto.getUserIds(), true);
 
 		return UserAdapter.getUserProfileDtos(userEntities);
 	}
