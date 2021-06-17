@@ -8,11 +8,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
-import com.stanzaliving.core.user.dto.AccessLevelRoleRequestDto;
-import com.stanzaliving.core.user.dto.UserDto;
-import com.stanzaliving.core.user.dto.UserFilterDto;
-import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
-import com.stanzaliving.core.user.dto.UserProfileDto;
+import com.stanzaliving.core.generic.dto.UIKeyValue;
+import com.stanzaliving.core.user.dto.*;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
@@ -65,7 +62,9 @@ public interface UserService {
 	boolean createRoleBaseUser(List<String> mobiles);
 
 	UserProfileDto getUserDetails(String mobileNo);
-
+    
 	Map<String, UserProfileDto> getUserProfileForUserIn(List<String> userUuids);
+    
+	List<UserRoleCacheDto> getCacheableForRoles(List<String> roleNames);
 
 }

@@ -10,6 +10,7 @@ import com.stanzaliving.core.user.acl.dto.RoleAccessDto;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
 import com.stanzaliving.core.user.acl.request.dto.AddRoleAccessDto;
 import com.stanzaliving.core.user.acl.request.dto.AddRoleRequestDto;
+import com.stanzaliving.core.user.acl.request.dto.CheckRoleNamesDto;
 import com.stanzaliving.core.user.acl.request.dto.UpdateRoleAccessDto;
 import com.stanzaliving.core.user.enums.EnumListing;
 import com.stanzaliving.user.acl.adapters.RoleAccessAdapter;
@@ -21,6 +22,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -63,6 +66,12 @@ public class RoleController {
 		log.info("Fetching roles by Department {} And Level {} ", department, accessLevel);
 
 		return ResponseDto.success("Found Role with Department: " + department + " level: " + accessLevel, roleService.findByDepartmentAndAccessLevel(department, accessLevel));
+	}
+
+	@PostMapping("getRolesByDepartmentAndNames")
+	public ResponseDto<List<RoleDto>> getRoleByDepartmentAndRoleName(@RequestBody CheckRoleNamesDto checkRoleNamesDto) {
+		log.info("Checked roles are present in Department {} ",checkRoleNamesDto.getDepartment());
+		return ResponseDto.success("Roles exist in Department: " + checkRoleNamesDto.getDepartment(),roleService.findByRoleNameInAndDepartment(checkRoleNamesDto.getRoleNames(),checkRoleNamesDto.getDepartment()));
 	}
 
 	@GetMapping("list")

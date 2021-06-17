@@ -1,6 +1,7 @@
 package com.stanzaliving.user.acl.service.impl;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -128,6 +129,20 @@ public class RoleServiceImpl implements RoleService {
 		}
 
 		return RoleAdapter.getDto(roleEntity);
+	}
+
+	@Override
+	public List<RoleDto> findByRoleNameInAndDepartment(List<String> roleNames, Department department) {
+
+		log.info("Searching roles by name: {}", roleNames);
+
+		List<RoleEntity> roleEntity = roleDbService.findByRoleNameAndDepartment(roleNames, department);
+
+		if (null == roleEntity) {
+			throw new ApiValidationException("Unable to find rule by roleNames ");
+		}
+
+		return roleEntity.stream().map(f->RoleAdapter.getDto(f)).collect(Collectors.toList());
 	}
 
 }
