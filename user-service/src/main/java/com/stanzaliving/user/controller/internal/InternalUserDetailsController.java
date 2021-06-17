@@ -1,15 +1,20 @@
 package com.stanzaliving.user.controller.internal;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
+import com.stanzaliving.core.user.dto.UserManagerProfileRequestDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.user.service.UserService;
 
@@ -45,6 +50,16 @@ public class InternalUserDetailsController {
 		log.info("Fetching User with mobileNo: {}", mobileNo);
 
 		return ResponseDto.success("Found User for userUuid", userService.getUserDetails(mobileNo));
+	}
+	
+	@PostMapping("/userProfiles")
+	public ResponseDto<Map<String, UserProfileDto>> getUserProfileByUserID(@RequestBody UserManagerProfileRequestDto profileRequestDto) {
+		log.info("get user profiles by " + profileRequestDto.getUserUuids());
+
+		Map<String, UserProfileDto> userProfileMap = userService.getUserProfileForUserIn(profileRequestDto.getUserUuids());
+		
+		return Objects.nonNull(userProfileMap)? ResponseDto.success("User Profile Found!", userProfileMap):
+			ResponseDto.failure("User Profiles Not Found");
 	}
 
 }

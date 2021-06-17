@@ -62,5 +62,9 @@ public interface UserService {
 	boolean createRoleBaseUser(List<String> mobiles);
 
 	UserProfileDto getUserDetails(String mobileNo);
+    
+	Map<String, UserProfileDto> getUserProfileForUserIn(List<String> userUuids);
+    
 	List<UserRoleCacheDto> getCacheableForRoles(List<String> roleNames);
+
 }

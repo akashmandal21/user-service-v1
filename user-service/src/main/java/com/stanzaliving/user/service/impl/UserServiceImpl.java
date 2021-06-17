@@ -584,6 +584,21 @@ public class UserServiceImpl implements UserService {
 			return UserAdapter.getUserProfileDto(userEntity);
 		}
 
+
+		@Override
+		public Map<String, UserProfileDto> getUserProfileForUserIn(List<String> userUuids) {
+			
+			Map<String, UserProfileDto> userMap = new HashMap<>();
+
+			List<UserProfileDto> userProfileDto = UserAdapter.getUserProfileDtos(userDbService.findByUuidIn(userUuids));
+
+			userProfileDto.forEach(user -> {
+				userMap.put(user.getUuid(), user);
+			});
+
+			return userMap;
+		}
+
 	@Override
 	public List<UserRoleCacheDto> getCacheableForRoles(List<String> roleNames) {
 
@@ -657,4 +672,5 @@ public class UserServiceImpl implements UserService {
 		}
 		return name.toString();
 	}
+
 }
