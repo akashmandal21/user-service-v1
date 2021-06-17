@@ -2,6 +2,7 @@ package com.stanzaliving.user.controller.internal;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -56,11 +57,9 @@ public class InternalUserDetailsController {
 		log.info("get user profiles by " + profileRequestDto.getUserUuids());
 
 		Map<String, UserProfileDto> userProfileMap = userService.getUserProfileForUserIn(profileRequestDto.getUserUuids());
-
-		if (userProfileMap == null)
-			return ResponseDto.failure("User Profiles Not Found");
-
-		return ResponseDto.success("User Profile Found!", userProfileMap);
+		
+		return Objects.nonNull(userProfileMap)? ResponseDto.success("User Profile Found!", userProfileMap):
+			ResponseDto.failure("User Profiles Not Found");
 	}
 
 }
