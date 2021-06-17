@@ -51,9 +51,9 @@ public class InternalUserDetailsController {
 		return ResponseDto.success("Found User for userUuid", userService.getUserDetails(mobileNo));
 	}
 	
-	@PostMapping("/userprofiles")
+	@PostMapping("/userProfiles")
 	public ResponseDto<Map<String, UserProfileDto>> getUserProfileByUserID(@RequestBody UserManagerProfileRequestDto profileRequestDto) {
-		log.info(" Get manager profiles by " + profileRequestDto.getUserUuids());
+		log.info("get user profiles by " + profileRequestDto.getUserUuids());
 
 		Map<String, UserProfileDto> userProfileMap = userService.getUserProfileForUserIn(profileRequestDto.getUserUuids());
 
