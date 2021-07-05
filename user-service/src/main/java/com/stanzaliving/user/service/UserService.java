@@ -3,6 +3,7 @@
  */
 package com.stanzaliving.user.service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -11,6 +12,7 @@ import com.stanzaliving.core.base.common.dto.PageResponse;
 import com.stanzaliving.core.generic.dto.UIKeyValue;
 import com.stanzaliving.core.user.dto.*;
 import com.stanzaliving.core.user.enums.UserType;
+import com.stanzaliving.core.user.request.dto.ActiveUserRequestDto;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
@@ -40,6 +42,8 @@ public interface UserService {
 	UserManagerAndRoleDto getUserWithManagerAndRole(String userUuid);
 
 	List<UserProfileDto> getAllUsers();
+	
+	List<UserProfileDto> getAllActiveUsersByUuidIn(ActiveUserRequestDto activeUserRequestDto);
 
 	List<UserEntity> getUserByEmail(String email);
 
