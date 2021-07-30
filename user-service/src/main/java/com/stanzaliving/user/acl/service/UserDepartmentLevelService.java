@@ -12,7 +12,7 @@ public interface UserDepartmentLevelService {
 
     void delete(UserDepartmentLevelEntity userDepartmentLevelEntity);
 
-	void delete(Collection<UserDepartmentLevelEntity> userDepartmentLevelEntityIds);
+	void delete(Collection<UserDepartmentLevelEntity> userDepartmentLevelEntityList);
 
     void revokeAccessLevelEntityForDepartmentOfLevel(AddUserDeptLevelRequestDto addUserDeptLevelRequestDto);
 

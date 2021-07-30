@@ -75,7 +75,7 @@ public class UserDepartmentLevelServiceImpl implements UserDepartmentLevelServic
 
 			List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = userDepartmentLevelRoleDbService.findByUserDepartmentLevelUuidIn(userDepartmentLevelEntityIds);
 
-			log.info("Deleting userDepartmentLevelRoleEntityList " + userDepartmentLevelRoleEntityList);
+			log.info("Deleting userDepartmentLevelRoleEntityList: {} ", userDepartmentLevelRoleEntityList);
 
 			if (CollectionUtils.isNotEmpty(userDepartmentLevelRoleEntityList)) {
 				userDepartmentLevelRoleDbService.deleteInBatch(userDepartmentLevelRoleEntityList);
