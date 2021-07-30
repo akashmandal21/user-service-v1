@@ -298,8 +298,17 @@ public class UserServiceImpl implements UserService {
 		}
 
 		user.setStatus(status);
-		userDbService.save(user);
+		user = userDbService.save(user);
+
+		revokeAllAccess(user);
+
 		return true;
+	}
+
+	private void revokeAllAccess(UserEntity user) {
+		if (Objects.nonNull(user) && !user.isStatus()) {
+			aclUserService.revokeAllRoles(user.getUuid());
+		}
 	}
 
 	@Override
@@ -466,7 +475,11 @@ public class UserServiceImpl implements UserService {
 		}
 
 		user.setStatus(enabled);
-		userDbService.save(user);
+
+		user = userDbService.save(user);
+
+		revokeAllAccess(user);
+
 		return Boolean.TRUE;
 	}
 

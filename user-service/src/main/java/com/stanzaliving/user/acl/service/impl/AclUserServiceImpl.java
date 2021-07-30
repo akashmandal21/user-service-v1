@@ -11,6 +11,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.stanzaliving.core.sqljpa.entity.AbstractJpaEntity;
+import com.stanzaliving.user.service.UserManagerMappingService;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,6 +49,7 @@ import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.service.UserService;
 
 import lombok.extern.log4j.Log4j2;
+import org.springframework.transaction.annotation.Transactional;
 
 @Log4j2
 @Service
@@ -66,6 +69,9 @@ public class AclUserServiceImpl implements AclUserService {
 
 	@Autowired
 	private UserDepartmentLevelService userDepartmentLevelService;
+
+	@Autowired
+	private UserManagerMappingService userManagerMappingService;
 
 	@Autowired
 	private UserDepartmentLevelDbService userDepartmentLevelDbService;
@@ -151,6 +157,26 @@ public class AclUserServiceImpl implements AclUserService {
 			roleDtoList.addAll(RoleAdapter.getDtoList(roleEntities));
 		}
 		return roleDtoList;
+	}
+
+	@Override
+	@Transactional
+	public void revokeAllRoles(String userUuid) {
+
+		userService.assertActiveUserByUserUuid(userUuid);
+
+		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelDbService.findByUserUuid(userUuid);
+
+		if (CollectionUtils.isEmpty(userDepartmentLevelEntityList)) {
+			throw new ApiValidationException("User doesn't have any access");
+		}
+
+		userDepartmentLevelService.delete(userDepartmentLevelEntityList);
+
+		userManagerMappingService.deleteManagerMappingForUser(userUuid);
+
+		publishCurrentRoleSnapshot(userUuid);
+
 	}
 
 	@Override

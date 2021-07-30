@@ -19,4 +19,6 @@ public interface UserDepartmentLevelDbService extends AbstractJpaService<UserDep
     List<UserDepartmentLevelEntity> findByUserUuidAndDepartmentAndAccessLevel(String userUuid, Department department, AccessLevel accessLevel);
 
     List<UserDepartmentLevelEntity> findByUuidInAndAccessLevel(List<String> uuids, AccessLevel accessLevel);
+
+	List<UserDepartmentLevelEntity> findByUserUuid(String userUuid);
 }

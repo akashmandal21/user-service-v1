@@ -1,9 +1,12 @@
 package com.stanzaliving.user.acl.service.impl;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import com.stanzaliving.core.sqljpa.entity.AbstractJpaEntity;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +64,25 @@ public class UserDepartmentLevelServiceImpl implements UserDepartmentLevelServic
 
 		log.info("Deleting userDepartmentLevelEntity " + userDepartmentLevelEntity);
 		userDepartmentLevelDbService.delete(userDepartmentLevelEntity);
+	}
+
+	@Override
+	public void delete(Collection<UserDepartmentLevelEntity> userDepartmentLevelEntityList) {
+
+		if (CollectionUtils.isNotEmpty(userDepartmentLevelEntityList)) {
+
+			Set<String> userDepartmentLevelEntityIds = userDepartmentLevelEntityList.stream().map(AbstractJpaEntity::getUuid).collect(Collectors.toSet());
+
+			List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = userDepartmentLevelRoleDbService.findByUserDepartmentLevelUuidIn(userDepartmentLevelEntityIds);
+
+			log.info("Deleting userDepartmentLevelRoleEntityList " + userDepartmentLevelRoleEntityList);
+
+			if (CollectionUtils.isNotEmpty(userDepartmentLevelRoleEntityList)) {
+				userDepartmentLevelRoleDbService.deleteInBatch(userDepartmentLevelRoleEntityList);
+			}
+
+			userDepartmentLevelDbService.deleteInBatch(userDepartmentLevelEntityList);
+		}
 	}
 
 	@Override

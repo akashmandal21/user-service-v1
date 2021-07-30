@@ -189,6 +189,18 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 		userManagerMappingRepository.delete(userManagerMappingEntity);
 	}
 
+	@Override
+	public void deleteManagerMappingForUser(String userUuid) {
+
+		UserManagerMappingEntity userManagerMappingEntity = userManagerMappingRepository.findByUserId(userUuid);
+
+		if (Objects.nonNull(userManagerMappingEntity)) {
+			log.info("Deleting user manager mapping entity: {}", userManagerMappingEntity);
+			userManagerMappingRepository.delete(userManagerMappingEntity);
+		}
+
+	}
+
 	private Map<String, UserProfileDto> getUserDetails(List<UserManagerMappingEntity> userManagerMappingEntities) {
 		if (!CollectionUtils.isEmpty(userManagerMappingEntities)) {
 			Map<String, String> userManagerUuidMap = new HashMap<>();

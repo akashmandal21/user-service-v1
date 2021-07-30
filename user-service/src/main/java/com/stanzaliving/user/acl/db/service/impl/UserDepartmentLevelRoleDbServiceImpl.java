@@ -7,6 +7,7 @@ import com.stanzaliving.user.acl.repository.UserDepartmentLevelRoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -39,4 +40,10 @@ public class UserDepartmentLevelRoleDbServiceImpl extends AbstractJpaServiceImpl
 	public List<UserDepartmentLevelRoleEntity> findByRoleUuid(String roleUuid) {
 		return getJpaRepository().findByRoleUuid(roleUuid);
 	}
+
+	@Override
+	public List<UserDepartmentLevelRoleEntity> findByUserDepartmentLevelUuidIn(Collection<String> userDepartmentLevelEntityIds) {
+		return getJpaRepository().findByUserDepartmentLevelUuidIn(userDepartmentLevelEntityIds);
+	}
+
 }

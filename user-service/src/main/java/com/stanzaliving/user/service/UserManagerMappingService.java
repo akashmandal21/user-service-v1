@@ -31,4 +31,6 @@ public interface UserManagerMappingService {
 	List<UserProfileDto> getPeopleReportingToManager( String managerId );
 
 	void deleteManagerMapping(String uuid);
+
+	void deleteManagerMappingForUser(String userUuid);
 }

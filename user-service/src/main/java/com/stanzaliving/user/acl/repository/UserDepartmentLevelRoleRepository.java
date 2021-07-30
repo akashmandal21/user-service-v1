@@ -4,6 +4,7 @@ import com.stanzaliving.core.sqljpa.repository.AbstractJpaRepository;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 
 @Repository
@@ -16,4 +17,6 @@ public interface UserDepartmentLevelRoleRepository extends AbstractJpaRepository
     List<UserDepartmentLevelRoleEntity> findByRoleUuid(String roleUuid);
 
     List<UserDepartmentLevelRoleEntity> findByUserDepartmentLevelUuidAndRoleUuidInAndStatus(String userDepartmentLevelUuid, List<String> rolesUuid, boolean status);
+
+	List<UserDepartmentLevelRoleEntity> findByUserDepartmentLevelUuidIn(Collection<String> userDepartmentLevelEntityIds);
 }
