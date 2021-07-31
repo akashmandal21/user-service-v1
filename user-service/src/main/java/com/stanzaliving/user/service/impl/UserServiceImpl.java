@@ -693,4 +693,16 @@ public class UserServiceImpl implements UserService {
 		return name.toString();
 	}
 
+	@Override
+	public UserProfileDto getUserProfileDtoByEmail(String email) {
+
+		log.info("Searching User by email: " + email);
+
+		UserEntity userEntity = userDbService.findTop1ByEmailOrderByCreatedAtDesc(email);
+
+		if (Objects.isNull(userEntity))
+			throw new ApiValidationException("User not found for email: " + email);
+
+		return UserAdapter.getUserProfileDto(userEntity);
+	}
 }
