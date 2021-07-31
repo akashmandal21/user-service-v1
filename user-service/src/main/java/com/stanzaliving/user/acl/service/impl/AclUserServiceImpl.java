@@ -167,10 +167,6 @@ public class AclUserServiceImpl implements AclUserService {
 
 		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelDbService.findByUserUuid(userUuid);
 
-		if (CollectionUtils.isEmpty(userDepartmentLevelEntityList)) {
-			throw new ApiValidationException("User doesn't have any access");
-		}
-
 		userDepartmentLevelService.delete(userDepartmentLevelEntityList);
 
 		userManagerMappingService.deleteManagerMappingForUser(userUuid);
