@@ -163,7 +163,9 @@ public class AclUserServiceImpl implements AclUserService {
 	@Transactional
 	public void revokeAllRoles(String userUuid) {
 
-		userService.assertActiveUserByUserUuid(userUuid);
+		if (!userDbService.existsByUuid(userUuid)) {
+			throw new ApiValidationException("No such user exist");
+		};
 
 		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelDbService.findByUserUuid(userUuid);
 
