@@ -37,8 +37,8 @@ public class InternalUserDetailsController {
 		return ResponseDto.success("Found User for userUuid", userService.getActiveUserByUserId(userUuid));
 	}
 	
-	@GetMapping("/by/email/{email}")
-	public ResponseDto<UserProfileDto> getUserProfileDtoByEmail(@PathVariable String email) {
+	@GetMapping("/by")
+	public ResponseDto<UserProfileDto> getUserProfileDtoByEmail(@RequestParam(name = "email", required = true) String email) {
 
 		log.info("Fetching User with userUuid: {}", email);
 
