@@ -700,8 +700,9 @@ public class UserServiceImpl implements UserService {
 
 		UserEntity userEntity = userDbService.findTop1ByEmailOrderByCreatedAtDesc(email);
 
-		if (Objects.isNull(userEntity))
+		if (Objects.isNull(userEntity)) {
 			throw new ApiValidationException("User not found for email: " + email);
+		}
 
 		return UserAdapter.getUserProfileDto(userEntity);
 	}
