@@ -3,14 +3,17 @@
  */
 package com.stanzaliving.user.service;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
-import com.stanzaliving.core.generic.dto.UIKeyValue;
-import com.stanzaliving.core.user.dto.*;
+import com.stanzaliving.core.user.dto.AccessLevelRoleRequestDto;
+import com.stanzaliving.core.user.dto.UserDto;
+import com.stanzaliving.core.user.dto.UserFilterDto;
+import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
+import com.stanzaliving.core.user.dto.UserProfileDto;
+import com.stanzaliving.core.user.dto.UserRoleCacheDto;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.ActiveUserRequestDto;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
@@ -71,4 +74,5 @@ public interface UserService {
     
 	List<UserRoleCacheDto> getCacheableForRoles(List<String> roleNames);
 
+	UserProfileDto getUserProfileDtoByEmail(String email);
 }

@@ -1,6 +1,5 @@
 package com.stanzaliving.user.controller.internal;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -36,6 +35,14 @@ public class InternalUserDetailsController {
 		log.info("Fetching User with userUuid: {}", userUuid);
 
 		return ResponseDto.success("Found User for userUuid", userService.getActiveUserByUserId(userUuid));
+	}
+	
+	@GetMapping("email")
+	public ResponseDto<UserProfileDto> getUserProfileDtoByEmail(@RequestParam(name = "email", required = true) String email) {
+
+		log.info("Fetching User with userUuid: {}", email);
+
+		return ResponseDto.success("Found User for email", userService.getUserProfileDtoByEmail(email));
 	}
 
 	@GetMapping("all")

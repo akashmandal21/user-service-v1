@@ -148,4 +148,10 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 		return getJpaRepository().findByUuidAndEmail(userUuid, email);
 	}
 
+	@Override
+	public UserEntity findTop1ByEmailOrderByCreatedAtDesc(String email) {
+		
+		return getJpaRepository().findTop1ByEmailOrderByCreatedAtDesc(email);
+	}
+
 }
