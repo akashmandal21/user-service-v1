@@ -23,6 +23,7 @@ import com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity;
 import com.stanzaliving.user.acl.service.UserDepartmentLevelService;
 
 import lombok.extern.log4j.Log4j2;
+import org.springframework.transaction.annotation.Transactional;
 
 @Log4j2
 @Service
@@ -67,6 +68,7 @@ public class UserDepartmentLevelServiceImpl implements UserDepartmentLevelServic
 	}
 
 	@Override
+	@Transactional
 	public void delete(Collection<UserDepartmentLevelEntity> userDepartmentLevelEntityList) {
 
 		if (CollectionUtils.isNotEmpty(userDepartmentLevelEntityList)) {
