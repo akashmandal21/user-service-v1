@@ -42,6 +42,13 @@ public class AclUserController {
 
     }
 
+    @PostMapping("revoke/user/{userUuid}/all")
+    public ResponseDto<Void> revokeAllAccess(@PathVariable("userUuid") String userUuid) {
+        log.info("Received request to revoke all roles & access of the user: {}", userUuid);
+        aclUserService.revokeAllRoles(userUuid);
+        return ResponseDto.success("Successfully revoked user access");
+    }
+
     @PostMapping("revoke/department/roles/all")
     public ResponseDto<Void> revokeAllRolesForDepartment(@RequestParam String userUuid,
                                                   @RequestParam Department department) {
