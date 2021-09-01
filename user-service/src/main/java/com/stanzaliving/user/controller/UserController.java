@@ -105,7 +105,7 @@ public class UserController {
 		return ResponseDto.success("New User Created", userDto);
 	}
 
-	@GetMapping("search/{pageNo}/{limit}")
+	@PostMapping("search/user/{pageNo}/{limit}")
 	public ResponseDto<PageResponse<UserProfileDto>> searchUsers(
 			@PathVariable(name = "pageNo") @Min(value = 1, message = "Page No must be greater than 0") int pageNo,
 			@PathVariable(name = "limit") @Min(value = 1, message = "Limit must be greater than 0") int limit,
@@ -118,7 +118,7 @@ public class UserController {
 			@RequestParam(name = "department", required = false) Department department,
 			@RequestParam(name = "name", required = false) String name) {
 
-		log.info("Received User Search Request With Parameters [Page: " + pageNo + ", Limit: " + limit + ", Mobile: " + mobile + ", ISO: " + isoCode + ", Email: " + email + ", UserType: " + userType
+		log.info("Received User Search Post Request With Parameters [Page: " + pageNo + ", Limit: " + limit + ", Mobile: " + mobile + ", ISO: " + isoCode + ", Email: " + email + ", UserType: " + userType
 				+ ", Status: " + status + ", UserIds: {" + CSVConverter.getCSVString(userIds) + "} ]");
 
 		PaginationRequest paginationRequest = PaginationRequest.builder().pageNo(pageNo).limit(limit).build();
@@ -172,4 +172,37 @@ public class UserController {
 		return response ? ResponseDto.success("User type and department modified successfully") : ResponseDto.failure("User type and department not modified");
 	}
 
+	
+	@GetMapping("search/{pageNo}/{limit}")
+	public ResponseDto<PageResponse<UserProfileDto>> searchUsersDetail(
+			@PathVariable(name = "pageNo") @Min(value = 1, message = "Page No must be greater than 0") int pageNo,
+			@PathVariable(name = "limit") @Min(value = 1, message = "Limit must be greater than 0") int limit,
+			@RequestParam(name = "userIds", required = false) List<String> userIds,
+			@RequestParam(name = "mobile", required = false) String mobile,
+			@RequestParam(name = "isoCode", required = false) String isoCode,
+			@RequestParam(name = "email", required = false) String email,
+			@RequestParam(name = "userType", required = false) UserType userType,
+			@RequestParam(name = "status", required = false) Boolean status,
+			@RequestParam(name = "department", required = false) Department department,
+			@RequestParam(name = "name", required = false) String name) {
+
+		log.info("Received User Search Request With Parameters [Page: " + pageNo + ", Limit: " + limit + ", Mobile: " + mobile + ", ISO: " + isoCode + ", Email: " + email + ", UserType: " + userType
+				+ ", Status: " + status + ", UserIds: {" + CSVConverter.getCSVString(userIds) + "} ]");
+
+		PaginationRequest paginationRequest = PaginationRequest.builder().pageNo(pageNo).limit(limit).build();
+		UserFilterDto userFilterDto = UserFilterDto.builder()
+				.userIds(userIds)
+				.mobile(mobile)
+				.isoCode(isoCode)
+				.email(email)
+				.userType(userType)
+				.status(status)
+				.department(department)
+				.name(name)
+				.pageRequest(paginationRequest)
+				.build();
+		PageResponse<UserProfileDto> userDtos = userService.searchUser(userFilterDto);
+
+		return ResponseDto.success("Found " + userDtos.getRecords() + " Users for Search Criteria", userDtos);
+	}
 }
