@@ -35,6 +35,7 @@ import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
+import com.stanzaliving.core.user.request.dto.UserRequestDto;
 import com.stanzaliving.core.user.request.dto.UserStatusRequestDto;
 import com.stanzaliving.user.acl.service.AclService;
 import com.stanzaliving.user.adapters.UserAdapter;
@@ -172,4 +173,25 @@ public class UserController {
 		return response ? ResponseDto.success("User type and department modified successfully") : ResponseDto.failure("User type and department not modified");
 	}
 
+	@PostMapping("search/user")
+	public ResponseDto<PageResponse<UserProfileDto>> searchUsersDetail(@RequestBody UserRequestDto userRequestDto) {
+
+		log.info("Post Request recived search user detail UserRequestDto {} ", userRequestDto);
+
+		PaginationRequest paginationRequest = PaginationRequest.builder().pageNo(userRequestDto.getPageNo()).limit(userRequestDto.getLimit()).build();
+		UserFilterDto userFilterDto = UserFilterDto.builder()
+				.userIds(userRequestDto.getUserIds())
+				.mobile(userRequestDto.getMobile())
+				.isoCode(userRequestDto.getIsoCode())
+				.email(userRequestDto.getEmail())
+				.userType(userRequestDto.getUserType())
+				.status(userRequestDto.getStatus())
+				.department(userRequestDto.getDepartment())
+				.name(userRequestDto.getName())
+				.pageRequest(paginationRequest)
+				.build();
+		PageResponse<UserProfileDto> userDtos = userService.searchUser(userFilterDto);
+
+		return ResponseDto.success("Found " + userDtos.getRecords() + " Users for Search Criteria", userDtos);
+	}
 }
