@@ -181,8 +181,6 @@ public class OtpServiceImpl implements OtpService {
 	public void validateMobileOtp(String mobile, String isoCode, String otp, OtpType otpType) {
 		OtpEntity userOtp = getLastActiveOtp(mobile, isoCode, otpType);
 
-		log.info("=========>user otp OTP 1: {}", userOtp);
-		
 		compareOTP(otp, userOtp);
 
 		log.debug("OTP validated for mobile: " + userOtp.getMobile());
