@@ -13,10 +13,14 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.validation.Valid;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.ListUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -104,6 +108,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private NotificationProducer notificationProducer;
+
+	@PersistenceContext
+	private EntityManager entityManager;
 
 	@Value("${kafka.resident.detail.topic}")
 	private String kafkaResidentDetailTopic;
@@ -705,5 +712,25 @@ public class UserServiceImpl implements UserService {
 		}
 
 		return UserAdapter.getUserProfileDto(userEntity);
+	}
+
+	@Override
+	public Map<String, String> getUserUuidEmailMap() {
+
+		Query query = entityManager.createNativeQuery("SELECT uuid, email from user");
+		List<Object[]> data =  query.getResultList();
+
+		if(Objects.nonNull(data) && CollectionUtils.isNotEmpty(data)){
+
+			Map<String, String> responseMap = new HashMap<>();
+			for(Object[] obj: data){
+
+				if(Objects.nonNull(obj))
+					responseMap.put((String) obj[0], (String) obj[1]);
+			}
+			return responseMap;
+		}
+
+		return MapUtils.EMPTY_MAP;
 	}
 }

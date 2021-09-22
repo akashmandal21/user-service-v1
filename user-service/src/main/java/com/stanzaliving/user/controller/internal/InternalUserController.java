@@ -12,11 +12,7 @@ import javax.validation.Valid;
 import com.stanzaliving.core.generic.dto.UIKeyValue;
 import com.stanzaliving.core.user.dto.UserRoleCacheDto;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.user.dto.AccessLevelRoleRequestDto;
@@ -142,4 +138,12 @@ public class InternalUserController {
 
 		return ResponseDto.success("Found User", userService.getCacheableForRoles(roles));
 	}
+
+
+	@GetMapping("/all-users/uuid-email")
+	public ResponseDto<Map<String, String>> getAllUsersUuidEmailMap(){
+
+		return ResponseDto.success("done",userService.getUserUuidEmailMap());
+	}
+
 }
