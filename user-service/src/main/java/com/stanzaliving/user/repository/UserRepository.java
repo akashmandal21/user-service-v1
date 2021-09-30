@@ -56,6 +56,6 @@ public interface UserRepository extends AbstractJpaRepository<UserEntity, Long> 
 //	List<UserView> getUuidByEmailAndDept(@Param("emails") List<String> emails, @Param("dept") Department department);
 
 
-	List<UserView> findByEmailIn(List<String> emails);
+	List<UserView> findByEmailInAndStatus(List<String> emails, Boolean status);
 
 }

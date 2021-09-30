@@ -6,7 +6,6 @@ package com.stanzaliving.user.db.service.impl;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.user.Projections.UserView;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -156,7 +155,7 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 	@Override
 	public Map<String, String> getUuidByEmail(List<String> emails) {
 
-		List<UserView> viewList = getJpaRepository().findByEmailIn(emails);
+		List<UserView> viewList = getJpaRepository().findByEmailInAndStatus(emails, true);
 		Map<String,String > response = new HashMap<>();
 		viewList.forEach(userView -> response.put(userView.getEmail(), userView.getUuid()));
 		return response;
