@@ -3,12 +3,11 @@
  */
 package com.stanzaliving.user.db.service.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.stanzaliving.core.base.enums.Department;
+import com.stanzaliving.user.Projections.UserView;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -152,6 +151,15 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 	public UserEntity findTop1ByEmailOrderByCreatedAtDesc(String email) {
 		
 		return getJpaRepository().findTop1ByEmailOrderByCreatedAtDesc(email);
+	}
+
+	@Override
+	public Map<String, String> getUuidByEmail(List<String> emails) {
+
+		List<UserView> viewList = getJpaRepository().findByEmailIn(emails);
+		Map<String,String > response = new HashMap<>();
+		viewList.forEach(userView -> response.put(userView.getEmail(), userView.getUuid()));
+		return response;
 	}
 
 }

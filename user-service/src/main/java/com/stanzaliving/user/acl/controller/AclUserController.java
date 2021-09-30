@@ -6,6 +6,7 @@ import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleListDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRequestDto;
+import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleByEmailRequestDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleRequestDto;
 import com.stanzaliving.user.acl.service.AclUserService;
 import lombok.extern.log4j.Log4j2;
@@ -71,6 +72,13 @@ public class AclUserController {
         log.info("Received request to revoke role list for user " + userDeptLevelRoleListDto);
         aclUserService.revokeRolesForDepartmentOfLevel(userDeptLevelRoleListDto);
         return ResponseDto.success("Roles Revocation successful");
+    }
+
+    @PostMapping("/bulk/add/role")
+    public ResponseDto<Void> bulkAddRole(@RequestBody @Valid AddUserDeptLevelRoleByEmailRequestDto addUserDeptLevelRoleByEmailRequestDto) {
+        log.info("Received request to add role " + addUserDeptLevelRoleByEmailRequestDto);
+        aclUserService.bulkAddRole(addUserDeptLevelRoleByEmailRequestDto);
+        return ResponseDto.success("Bulk Role Assignment successful");
     }
 
 }
