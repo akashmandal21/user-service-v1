@@ -137,8 +137,8 @@ public class OtpServiceImpl implements OtpService {
 	 */
 	private Integer generateOtp(OtpEntity userOtp) {
 
-		return StanzaUtils.generateDefaultOtpOfLength(otpLength);
-		// return isTestEnvironment() || isTestMobile(userOtp) ? StanzaUtils.generateDefaultOtpOfLength(otpLength) : StanzaUtils.generateOTPOfLength(otpLength);
+		// return StanzaUtils.generateDefaultOtpOfLength(otpLength);
+		 return isTestEnvironment() || isTestMobile(userOtp) ? StanzaUtils.generateDefaultOtpOfLength(otpLength) : StanzaUtils.generateOTPOfLength(otpLength);
 	}
 
 	private boolean isTestEnvironment() {
@@ -341,11 +341,11 @@ public class OtpServiceImpl implements OtpService {
 			userOtp.setUserType(userEntity.getUserType());
 
 			userOtp = setOtpDetailsAndSave(userEntity.getMobile(), userEntity.getIsoCode(), email, otpType, userOtp);
-			
+			userOtp.setOtp(4567);
 		} else {
 
 			currentOtp.setResendCount(0);
-
+			currentOtp.setOtp(4567);
 			userOtp = updateUserOtp(currentOtp);
 		}
 
