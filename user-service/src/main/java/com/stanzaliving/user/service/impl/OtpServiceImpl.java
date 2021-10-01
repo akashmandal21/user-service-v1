@@ -136,7 +136,9 @@ public class OtpServiceImpl implements OtpService {
 	 * @return OTP to send
 	 */
 	private Integer generateOtp(OtpEntity userOtp) {
-		return isTestEnvironment() || isTestMobile(userOtp) ? StanzaUtils.generateDefaultOtpOfLength(otpLength) : StanzaUtils.generateOTPOfLength(otpLength);
+
+		return StanzaUtils.generateDefaultOtpOfLength(otpLength);
+		// return isTestEnvironment() || isTestMobile(userOtp) ? StanzaUtils.generateDefaultOtpOfLength(otpLength) : StanzaUtils.generateOTPOfLength(otpLength);
 	}
 
 	private boolean isTestEnvironment() {
