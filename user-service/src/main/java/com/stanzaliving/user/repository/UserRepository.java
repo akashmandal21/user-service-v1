@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.stanzaliving.core.base.enums.Department;
-import com.stanzaliving.core.user.acl.dto.UuidByEmailDto;
 import com.stanzaliving.user.Projections.UserView;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
