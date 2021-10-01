@@ -138,7 +138,7 @@ public class OtpServiceImpl implements OtpService {
 	private Integer generateOtp(OtpEntity userOtp) {
 
 		// return StanzaUtils.generateDefaultOtpOfLength(otpLength);
-		 return isTestEnvironment() || isTestMobile(userOtp) ? StanzaUtils.generateDefaultOtpOfLength(otpLength) : StanzaUtils.generateOTPOfLength(otpLength);
+		 return isTestEnvironment() || isTestMobile(userOtp) || userOtp.getOtpType().equals(OtpType.EMAIL_VERIFICATION) ? StanzaUtils.generateDefaultOtpOfLength(otpLength) : StanzaUtils.generateOTPOfLength(otpLength);
 	}
 
 	private boolean isTestEnvironment() {
