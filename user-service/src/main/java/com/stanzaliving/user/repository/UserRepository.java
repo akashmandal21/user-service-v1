@@ -4,8 +4,11 @@
 package com.stanzaliving.user.repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import com.stanzaliving.core.base.enums.Department;
+import com.stanzaliving.user.Projections.UserView;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -45,4 +48,13 @@ public interface UserRepository extends AbstractJpaRepository<UserEntity, Long> 
 	List<UserEntity> findByMobileIn(Set<String> mobileNos);
 
 	UserEntity findTop1ByEmailOrderByCreatedAtDesc(String email);
+
+//	@Query("SELECT new com.stanzaliving.core.user.acl.dto.UuidByEmailDto(user.email, user.uuid) " +
+//			"FROM UserEntity user " +
+//			"WHERE user.department = :dept AND user.email IN (:emails)")
+//	List<UserView> getUuidByEmailAndDept(@Param("emails") List<String> emails, @Param("dept") Department department);
+
+
+	List<UserView> findByEmailInAndStatus(List<String> emails, Boolean status);
+
 }

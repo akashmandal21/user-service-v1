@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleByEmailRequestDto;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -252,6 +253,33 @@ public class AclUserServiceImpl implements AclUserService {
 		}
 
 		return userEntities.parallelStream().map(UserAdapter::convertToContactResponseDto).collect(Collectors.toList());
+	}
+
+	@Override
+	public void bulkAddRole(AddUserDeptLevelRoleByEmailRequestDto addUserDeptLevelRoleByEmailRequestDto) {
+		Map<String,String> userUuids = userDbService.getUuidByEmail(addUserDeptLevelRoleByEmailRequestDto.getEmails());
+
+		addUserDeptLevelRoleByEmailRequestDto.getEmails()
+						.forEach(email->{
+							if (!userUuids.keySet().contains(email)){
+								throw new ApiValidationException("No user exists with email id: "+email);
+							}
+						});
+
+		userUuids
+				.forEach((email,uuid) -> {
+							addRole(
+									AddUserDeptLevelRoleRequestDto
+											.builder()
+											.rolesUuid(addUserDeptLevelRoleByEmailRequestDto.getRolesUuid())
+											.userUuid(uuid)
+											.department(addUserDeptLevelRoleByEmailRequestDto.getDepartment())
+											.accessLevel(addUserDeptLevelRoleByEmailRequestDto.getAccessLevel())
+											.accessLevelEntityListUuid(addUserDeptLevelRoleByEmailRequestDto.getAccessLevelEntityListUuid())
+											.build()
+							);
+						}
+				);
 	}
 
 	private void publishCurrentRoleSnapshot(String userUuid) {

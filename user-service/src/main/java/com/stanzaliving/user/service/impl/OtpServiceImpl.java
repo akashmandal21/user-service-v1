@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -138,7 +139,7 @@ public class OtpServiceImpl implements OtpService {
 	private Integer generateOtp(OtpEntity userOtp) {
 
 		// return StanzaUtils.generateDefaultOtpOfLength(otpLength);
-		 return isTestEnvironment() || isTestMobile(userOtp) ? StanzaUtils.generateDefaultOtpOfLength(otpLength) : StanzaUtils.generateOTPOfLength(otpLength);
+		 return isTestEnvironment() || isTestMobile(userOtp)  ? StanzaUtils.generateDefaultOtpOfLength(otpLength) : StanzaUtils.generateOTPOfLength(otpLength);
 	}
 
 	private boolean isTestEnvironment() {
@@ -341,11 +342,11 @@ public class OtpServiceImpl implements OtpService {
 			userOtp.setUserType(userEntity.getUserType());
 
 			userOtp = setOtpDetailsAndSave(userEntity.getMobile(), userEntity.getIsoCode(), email, otpType, userOtp);
-			userOtp.setOtp(4567);
+			//userOtp.setOtp(4567);
 		} else {
 
 			currentOtp.setResendCount(0);
-			currentOtp.setOtp(4567);
+			//currentOtp.setOtp(4567);
 			userOtp = updateUserOtp(currentOtp);
 		}
 
