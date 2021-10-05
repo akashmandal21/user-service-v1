@@ -6,6 +6,7 @@ package com.stanzaliving.user.service;
 import java.util.List;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
+import com.stanzaliving.core.user.dto.UserPropertyAndProfileMappingDto;
 import com.stanzaliving.core.user.dto.UserPropertyMappingDto;
 import com.stanzaliving.core.user.request.dto.UserPropertyMappingRequestDto;
 
@@ -23,5 +24,7 @@ public interface UserPropertyMappingService {
 	PageResponse<UserPropertyMappingDto> searchUserPropertyMappings(String userId, String propertyId, int pageNo, int limit);
 
 	void deleteMapping(String mappingId);
+	
+	List<UserPropertyAndProfileMappingDto> getUsersMappedToProperty(String propertyId);
 
 }

@@ -5,6 +5,7 @@ package com.stanzaliving.user.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -23,12 +24,15 @@ import com.stanzaliving.core.base.exception.ApiValidationException;
 import com.stanzaliving.core.base.exception.MappingNotFoundException;
 import com.stanzaliving.core.sqljpa.specification.utils.CriteriaOperation;
 import com.stanzaliving.core.sqljpa.specification.utils.StanzaSpecificationBuilder;
+import com.stanzaliving.core.user.dto.UserProfileDto;
+import com.stanzaliving.core.user.dto.UserPropertyAndProfileMappingDto;
 import com.stanzaliving.core.user.dto.UserPropertyMappingDto;
 import com.stanzaliving.core.user.request.dto.UserPropertyMappingRequestDto;
 import com.stanzaliving.user.adapters.UserPropertyMappingAdapter;
 import com.stanzaliving.user.db.service.UserPropertyMappingDbService;
 import com.stanzaliving.user.entity.UserPropertyMappingEntity;
 import com.stanzaliving.user.service.UserPropertyMappingService;
+import com.stanzaliving.user.service.UserService;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -43,6 +47,9 @@ public class UserPropertyMappingServiceImpl implements UserPropertyMappingServic
 
 	@Autowired
 	private UserPropertyMappingDbService userPropertyMappingDbService;
+	
+	@Autowired
+	private UserService userService;
 
 	@Override
 	public void createUserPropertyMapping(List<UserPropertyMappingRequestDto> mappingRequestDtos) {
@@ -148,6 +155,40 @@ public class UserPropertyMappingServiceImpl implements UserPropertyMappingServic
 		}
 
 		return pagination;
+	}
+
+	@Override
+	public List<UserPropertyAndProfileMappingDto> getUsersMappedToProperty(String propertyId) {
+
+		List<UserPropertyMappingEntity> mappingEntities = userPropertyMappingDbService.getActiveUserPropertyMappingsByPropertyId(propertyId);
+
+		if (CollectionUtils.isEmpty(mappingEntities)) {
+			log.error("Property [" + propertyId + "] is not mapped to any user");
+			throw new MappingNotFoundException("Property is not mapped to any user");
+		}
+
+		log.info("Property: " + propertyId + " is mapped to  " + mappingEntities.size() + " Users");
+
+		List<UserPropertyMappingDto> mappingDtos = UserPropertyMappingAdapter.getMappingDtos(mappingEntities);
+
+		List<String> userIds = mappingDtos.stream().map(UserPropertyMappingDto::getUserId).collect(Collectors.toList());
+		
+		Map<String, UserProfileDto> userProfileForUserIn = userService.getUserProfileForUserIn(userIds);
+		
+		List<UserPropertyAndProfileMappingDto> userPropertyAndProfileMappingDtos = new ArrayList<>();
+		
+		userProfileForUserIn.forEach((id, userProfileDto) -> {
+
+			userPropertyAndProfileMappingDtos.add(UserPropertyAndProfileMappingDto.builder()
+					.userId(id)
+					.propertyId(propertyId)
+					.arrivalDate(userProfileDto.getArrivalDate())
+					.build());
+
+		});
+		
+
+		return userPropertyAndProfileMappingDtos;
 	}
 
 }

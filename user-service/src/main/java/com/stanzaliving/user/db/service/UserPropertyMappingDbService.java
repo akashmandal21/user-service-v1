@@ -20,4 +20,6 @@ public interface UserPropertyMappingDbService extends AbstractJpaService<UserPro
 	List<UserPropertyMappingEntity> getActiveUserPropertyMappings(String userId);
 
 	boolean isUserPropertyMappingExists(String userId, String propertyId);
+
+	List<UserPropertyMappingEntity> getActiveUserPropertyMappingsByPropertyId(String propertyId);
 }

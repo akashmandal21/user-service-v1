@@ -47,4 +47,9 @@ public class UserPropertyMappingDbServiceImpl
 		return getJpaRepository().existsByUserIdAndPropertyId(userId, propertyId);
 	}
 
+	@Override
+	public List<UserPropertyMappingEntity> getActiveUserPropertyMappingsByPropertyId(String propertyId) {
+		return getJpaRepository().findByPropertyIdAndStatus(propertyId, true);
+	}
+
 }

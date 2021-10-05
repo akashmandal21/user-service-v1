@@ -24,4 +24,6 @@ public interface UserPropertyMappingRepository extends AbstractJpaRepository<Use
 	List<UserPropertyMappingEntity> findByUserIdAndStatus(String userId, boolean status, Pageable pageable);
 
 	boolean existsByUserIdAndPropertyId(String userId, String propertyId);
+
+	List<UserPropertyMappingEntity> findByPropertyIdAndStatus(String propertyId, boolean status);
 }
