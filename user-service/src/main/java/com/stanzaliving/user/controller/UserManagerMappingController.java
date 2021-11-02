@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
+import com.stanzaliving.core.user.request.dto.UserUuidRequestDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
@@ -107,9 +108,9 @@ public class UserManagerMappingController {
 		return ResponseDto.success("Manager Mapping Found!", managerProfile);
 	}
 
-	@PostMapping("remove/{uuid}")
-	public ResponseDto<Void> removeManager(@RequestParam("uuid") String mappingUuid) {
-		userManagerMappingService.deleteManagerMapping(mappingUuid);
+	@PostMapping("remove/")
+	public ResponseDto<Void> removeManager(@RequestBody UserUuidRequestDto userUuidRequestDto) {
+		userManagerMappingService.deleteManagerMapping(userUuidRequestDto.getUserUuid());
 		return ResponseDto.success("Manager removed successfully.");
 	}
 }

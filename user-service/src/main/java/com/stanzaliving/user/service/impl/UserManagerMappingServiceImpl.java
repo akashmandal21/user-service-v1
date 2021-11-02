@@ -181,10 +181,10 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 	}
 
 	@Override
-	public void deleteManagerMapping(String uuid) {
-		UserManagerMappingEntity userManagerMappingEntity = userManagerMappingRepository.findFirstByUuid(uuid);
+	public void deleteManagerMapping(String userUuid) {
+		UserManagerMappingEntity userManagerMappingEntity = userManagerMappingRepository.findFirstByUserId(userUuid);
 		if (userManagerMappingEntity == null) {
-			throw new ApiValidationException("Manager mapping does not exist for id: " + uuid);
+			throw new ApiValidationException("Manager mapping does not exist for id: " + userUuid);
 		}
 		userManagerMappingRepository.delete(userManagerMappingEntity);
 	}
