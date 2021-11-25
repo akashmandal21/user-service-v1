@@ -1,6 +1,8 @@
 package com.stanzaliving.user.acl.adapters;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -44,10 +46,13 @@ public class UserDepartmentLevelRoleAdapter {
 	public static UserDeptLevelRoleNameUrlExpandedDto getUserDeptLevelRoleNameUrlExpandedDto(
 			UserDepartmentLevelEntity userDepartmentLevelEntity, List<RoleEntity> roleEntityList, List<ApiEntity> apiEntityList, TransformationCache transformationCache) {
 
-		Map<String, String> roleNameUuidMap = roleEntityList.stream().collect(Collectors.toMap(RoleEntity::getRoleName, RoleEntity::getUuid));
-		List<String> roleNameList = roleEntityList.stream().map(entity -> entity.getRoleName()).collect(Collectors.toList());
+		Map<String, String> roleNameUuidMap = new HashMap<>();
+		roleEntityList.forEach(role -> roleNameUuidMap.put(role.getRoleName(), role.getUuid()));
+		
+		List<String> roleNameList = new ArrayList<>(roleNameUuidMap.keySet());
 		List<String> actionUrlList = apiEntityList.stream().map(entity -> entity.getActionUrl()).collect(Collectors.toList());
 		List<String> accessLevelEntityListUuid = StanzaUtils.getSplittedListOnComma(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid());
+		
 		TreeMap<String, String> accessLevelEntityNameUuidMap = new TreeMap<>();
 		accessLevelEntityListUuid.forEach(uuid -> accessLevelEntityNameUuidMap.put(transformationCache.getAccessLevelNameByUuid(uuid, userDepartmentLevelEntity.getAccessLevel().toString()), uuid));
 		Collections.sort(roleNameList);
