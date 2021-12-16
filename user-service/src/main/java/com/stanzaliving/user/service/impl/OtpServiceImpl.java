@@ -430,4 +430,16 @@ public class OtpServiceImpl implements OtpService {
 
 		otpDbService.updateAndFlush(otp);
 	}
+
+	@Override
+	public int getOtp(String mobile, String isoCode, OtpType otpType) {
+
+		OtpEntity otpEntity = getLastActiveOtp(mobile, isoCode, otpType);
+
+		if (Objects.isNull(otpEntity)) {
+			throw new AuthException("No OTP exists for mobile", Otp.OTP_NOT_FOUND);
+		}
+
+		return otpEntity.getOtp();
+	}
 }

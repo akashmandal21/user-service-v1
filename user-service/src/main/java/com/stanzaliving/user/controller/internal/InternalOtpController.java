@@ -3,13 +3,16 @@ package com.stanzaliving.user.controller.internal;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.base.exception.AuthException;
+import com.stanzaliving.core.user.enums.OtpType;
 import com.stanzaliving.core.user.request.dto.MobileEmailOtpRequestDto;
 import com.stanzaliving.core.user.request.dto.MobileOtpRequestDto;
 import com.stanzaliving.core.user.request.dto.MobileOtpValidateRequestDto;
@@ -81,6 +84,14 @@ public class InternalOtpController {
 		otpService.sendOtp(mobileEmailOtpRequestDto);
 
 		return ResponseDto.success("OTP sent to mobile & email");
+	}
+	
+	@GetMapping("get")
+	public ResponseDto<Integer> getOtp(@RequestParam(value = "mobile", required = true) String mobile,
+			@RequestParam(value = "isoCode", required = true, defaultValue = "IN") String isoCode,
+			@RequestParam(value = "otpType", defaultValue = "LOGIN") OtpType otpType) {
+
+		return ResponseDto.success("OTP is", otpService.getOtp(mobile, isoCode, otpType));
 	}
 
 }
