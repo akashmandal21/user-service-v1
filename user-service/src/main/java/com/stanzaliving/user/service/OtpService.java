@@ -10,6 +10,7 @@ import com.stanzaliving.core.user.request.dto.LoginRequestDto;
 import com.stanzaliving.core.user.request.dto.MobileEmailOtpRequestDto;
 import com.stanzaliving.core.user.request.dto.MobileOtpRequestDto;
 import com.stanzaliving.core.user.request.dto.OtpValidateRequestDto;
+import com.stanzaliving.user.entity.OtpEntity;
 import com.stanzaliving.user.entity.UserEntity;
 
 /**
@@ -38,4 +39,6 @@ public interface OtpService {
 	void validateEmailVerificationOtp(EmailOtpValidateRequestDto emailOtpValidateRequestDto);
 
 	void resendEmailVerificationOtp(EmailVerificationRequestDto emailVerificationRequestDto, UserEntity userEntity);
+
+	int getOtp(String mobile, String isoCode, OtpType otpType);
 }
