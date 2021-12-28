@@ -726,9 +726,6 @@ public class UserServiceImpl implements UserService {
 		UserDepartmentLevelEntity entity = userDepartmentLevelRepository.findByDepartment(refDept);
 		UserDepartmentLevelEntity entityNewDept = userDepartmentLevelRepository.findByDepartment(newDept);
 
-		if(Objects.nonNull(entityNewDept))
-			throw new StanzaException("already configured for new department in entity UserDepartmentLevelEntity");
-
 		if (Objects.nonNull(entity)) {
 			UserDepartmentLevelEntity userDepartmentLevelEntity = UserDepartmentLevelEntity.builder()
 					.department(newDept)
