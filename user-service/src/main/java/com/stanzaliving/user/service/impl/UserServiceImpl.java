@@ -720,18 +720,20 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	@Transactional
-	public void saveUserDeptLevelForNewDept(Department newDept, Department refDept){
+	public void saveUserDeptLevelForNewDept(Department newDept, Department refDept) {
 
 		UserDepartmentLevelEntity entity = userDepartmentLevelRepository.findByDepartment(refDept);
 
-		UserDepartmentLevelEntity userDepartmentLevelEntity = UserDepartmentLevelEntity.builder()
-				.department(newDept)
-				.accessLevel(entity.getAccessLevel())
-				.userUuid(entity.getUserUuid())
-				.csvAccessLevelEntityUuid(entity.getCsvAccessLevelEntityUuid())
-				.status(entity.isStatus()).build();
+		if (Objects.nonNull(entity)) {
+			UserDepartmentLevelEntity userDepartmentLevelEntity = UserDepartmentLevelEntity.builder()
+					.department(newDept)
+					.accessLevel(entity.getAccessLevel())
+					.userUuid(entity.getUserUuid())
+					.csvAccessLevelEntityUuid(entity.getCsvAccessLevelEntityUuid())
+					.status(entity.isStatus()).build();
 
 			userDepartmentLevelRepository.save(userDepartmentLevelEntity);
 		}
+	}
 
 }
