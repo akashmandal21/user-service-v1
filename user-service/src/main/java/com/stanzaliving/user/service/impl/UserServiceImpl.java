@@ -722,24 +722,14 @@ public class UserServiceImpl implements UserService {
 	@Transactional
 	public void saveUserDeptLevelForNewDept(Department newDept, Department refDept){
 
-		StringBuilder queryString = new StringBuilder();
-			queryString = queryString.append("select * from user_department_level where department = '" +refDept +"'");
+		UserDepartmentLevelEntity entity = userDepartmentLevelRepository.findByDepartment(refDept);
 
-			log.info("queryString : {}", queryString);
-		Query query = entityManager.createNativeQuery(queryString.toString());
-		List<Object[]> data = query.getResultList();
-
-		UserDepartmentLevelEntity userDepartmentLevelEntity = new UserDepartmentLevelEntity();
-
-		if(CollectionUtils.isNotEmpty(data)) {
-			for (Object[] obj : data) {
-
-				userDepartmentLevelEntity.setDepartment(newDept);
-				userDepartmentLevelEntity.setAccessLevel((AccessLevel) obj[7]);
-				userDepartmentLevelEntity.setUserUuid((String) obj[10]);
-				userDepartmentLevelEntity.setCsvAccessLevelEntityUuid((String) obj[8]);
-				userDepartmentLevelEntity.setStatus((boolean) obj[3]);
-			}
+		UserDepartmentLevelEntity userDepartmentLevelEntity = UserDepartmentLevelEntity.builder()
+				.department(newDept)
+				.accessLevel(entity.getAccessLevel())
+				.userUuid(entity.getUserUuid())
+				.csvAccessLevelEntityUuid(entity.getCsvAccessLevelEntityUuid())
+				.status(entity.isStatus()).build();
 
 			userDepartmentLevelRepository.save(userDepartmentLevelEntity);
 		}
