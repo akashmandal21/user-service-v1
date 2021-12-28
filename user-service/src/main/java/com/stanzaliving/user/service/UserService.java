@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
+import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.user.dto.AccessLevelRoleRequestDto;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserFilterDto;
@@ -75,4 +76,6 @@ public interface UserService {
 	List<UserRoleCacheDto> getCacheableForRoles(List<String> roleNames);
 
 	UserProfileDto getUserProfileDtoByEmail(String email);
+
+	void saveUserDeptLevelForNewDept(Department newDept, Department refDept);
 }

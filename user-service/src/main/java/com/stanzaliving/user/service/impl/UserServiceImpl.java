@@ -13,8 +13,12 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.validation.Valid;
 
+import com.stanzaliving.user.acl.repository.UserDepartmentLevelRepository;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -68,6 +72,7 @@ import com.stanzaliving.user.service.UserManagerMappingService;
 import com.stanzaliving.user.service.UserService;
 
 import lombok.extern.log4j.Log4j2;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author naveen
@@ -104,6 +109,12 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private NotificationProducer notificationProducer;
+
+	@Autowired
+	private UserDepartmentLevelRepository userDepartmentLevelRepository;
+
+	@PersistenceContext
+	private EntityManager entityManager;
 
 	@Value("${kafka.resident.detail.topic}")
 	private String kafkaResidentDetailTopic;
@@ -705,5 +716,32 @@ public class UserServiceImpl implements UserService {
 		}
 
 		return UserAdapter.getUserProfileDto(userEntity);
+	}
+
+	@Override
+	@Transactional
+	public void saveUserDeptLevelForNewDept(Department newDept, Department refDept){
+
+		StringBuilder queryString = new StringBuilder();
+			queryString = queryString.append("select * from user_department_level where department = '" +refDept +"'");
+
+			log.info("queryString : {}", queryString);
+		Query query = entityManager.createNativeQuery(queryString.toString());
+		List<Object[]> data = query.getResultList();
+
+		UserDepartmentLevelEntity userDepartmentLevelEntity = new UserDepartmentLevelEntity();
+
+		if(CollectionUtils.isNotEmpty(data)) {
+			for (Object[] obj : data) {
+
+				userDepartmentLevelEntity.setDepartment(newDept);
+				userDepartmentLevelEntity.setAccessLevel((AccessLevel) obj[7]);
+				userDepartmentLevelEntity.setUserUuid((String) obj[10]);
+				userDepartmentLevelEntity.setCsvAccessLevelEntityUuid((String) obj[8]);
+				userDepartmentLevelEntity.setStatus((boolean) obj[3]);
+			}
+
+			userDepartmentLevelRepository.save(userDepartmentLevelEntity);
+		}
 	}
 }

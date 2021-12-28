@@ -9,6 +9,7 @@ import java.util.Set;
 
 import javax.validation.Valid;
 
+import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.generic.dto.UIKeyValue;
 import com.stanzaliving.core.user.dto.UserRoleCacheDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -142,4 +143,15 @@ public class InternalUserController {
 
 		return ResponseDto.success("Found User", userService.getCacheableForRoles(roles));
 	}
+
+	@PostMapping("/save/userDeptLevel/{newDepartment}/{refDepartment}")
+	public ResponseDto<String> saveUserDeptLevelForNewDept(@PathVariable Department newDept, @PathVariable Department refDept) {
+
+		log.info("saving UserDeptLevelForNewDept ");
+		userService.saveUserDeptLevelForNewDept(newDept, refDept);
+		return ResponseDto.success("saved data");
+	}
+
+
+
 }
