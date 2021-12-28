@@ -18,6 +18,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.validation.Valid;
 
+import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.user.acl.repository.UserDepartmentLevelRepository;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.ListUtils;
@@ -723,6 +724,10 @@ public class UserServiceImpl implements UserService {
 	public void saveUserDeptLevelForNewDept(Department newDept, Department refDept) {
 
 		UserDepartmentLevelEntity entity = userDepartmentLevelRepository.findByDepartment(refDept);
+		UserDepartmentLevelEntity entityNewDept = userDepartmentLevelRepository.findByDepartment(newDept);
+
+		if(Objects.nonNull(entityNewDept))
+			throw new StanzaException("already configured for new department in entity UserDepartmentLevelEntity");
 
 		if (Objects.nonNull(entity)) {
 			UserDepartmentLevelEntity userDepartmentLevelEntity = UserDepartmentLevelEntity.builder()
