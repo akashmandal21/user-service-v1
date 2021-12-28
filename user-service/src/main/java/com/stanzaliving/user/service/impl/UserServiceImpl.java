@@ -733,5 +733,5 @@ public class UserServiceImpl implements UserService {
 
 			userDepartmentLevelRepository.save(userDepartmentLevelEntity);
 		}
-	}
+
 }
