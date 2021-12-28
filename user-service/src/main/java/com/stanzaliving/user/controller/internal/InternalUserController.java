@@ -145,10 +145,10 @@ public class InternalUserController {
 	}
 
 	@PostMapping("/save/userDeptLevel/{newDepartment}/{refDepartment}")
-	public ResponseDto<String> saveUserDeptLevelForNewDept(@PathVariable Department newDept, @PathVariable Department refDept) {
+	public ResponseDto<String> saveUserDeptLevelForNewDept(@PathVariable Department newDepartment, @PathVariable Department refDepartment) {
 
 		log.info("saving UserDeptLevelForNewDept ");
-		userService.saveUserDeptLevelForNewDept(newDept, refDept);
+		userService.saveUserDeptLevelForNewDept(newDepartment, refDepartment);
 		return ResponseDto.success("saved data");
 	}
 
