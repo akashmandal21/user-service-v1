@@ -726,8 +726,11 @@ public class UserServiceImpl implements UserService {
 		List<UserDepartmentLevelEntity> entityList = userDepartmentLevelRepository.findByDepartment(refDept);
 		List<UserDepartmentLevelEntity> entityListNewDept = userDepartmentLevelRepository.findByDepartment(newDept);
 
-		if(CollectionUtils.isNotEmpty(entityListNewDept))
+		if(CollectionUtils.isNotEmpty(entityListNewDept)){
+
+			userDepartmentLevelRepository.deleteAll(entityListNewDept);
 			return;
+		}
 
 		if (CollectionUtils.isNotEmpty(entityList)) {
 			List<UserDepartmentLevelEntity> list = entityList.stream().map(entity ->
