@@ -152,6 +152,13 @@ public class InternalUserController {
 		return ResponseDto.success("saved data");
 	}
 
+	@PostMapping("/roll-back/userDeptLevel/{newDepartment}")
+	public ResponseDto<String> rollBack(@PathVariable Department newDepartment) {
+
+		log.info("rolling back UserDeptLevelForNewDept ");
+		userService.rollBack(newDepartment);
+		return ResponseDto.success("saved data");
+	}
 
 
 }

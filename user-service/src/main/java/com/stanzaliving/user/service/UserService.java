@@ -78,4 +78,6 @@ public interface UserService {
 	UserProfileDto getUserProfileDtoByEmail(String email);
 
 	void saveUserDeptLevelForNewDept(Department newDept, Department refDept);
+
+	void rollBack(Department newDepartment);
 }

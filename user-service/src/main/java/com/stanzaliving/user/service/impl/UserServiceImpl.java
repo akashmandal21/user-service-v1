@@ -724,13 +724,6 @@ public class UserServiceImpl implements UserService {
 	public void saveUserDeptLevelForNewDept(Department newDept, Department refDept) {
 
 		List<UserDepartmentLevelEntity> entityList = userDepartmentLevelRepository.findByDepartment(refDept);
-		List<UserDepartmentLevelEntity> entityListNewDept = userDepartmentLevelRepository.findByDepartment(newDept);
-
-		if(CollectionUtils.isNotEmpty(entityListNewDept)){
-
-			userDepartmentLevelRepository.deleteAll(entityListNewDept);
-			return;
-		}
 
 		if (CollectionUtils.isNotEmpty(entityList)) {
 			List<UserDepartmentLevelEntity> list = entityList.stream().map(entity ->
@@ -741,8 +734,19 @@ public class UserServiceImpl implements UserService {
 							.csvAccessLevelEntityUuid(entity.getCsvAccessLevelEntityUuid())
 							.status(entity.isStatus()).build()).collect(Collectors.toList());
 
-
 			userDepartmentLevelRepository.saveAll(list);
+		}
+	}
+
+	@Override
+	@Transactional
+	public void rollBack(Department newDepartment) {
+
+		List<UserDepartmentLevelEntity> entityListNewDept = userDepartmentLevelRepository.findByDepartment(newDepartment);
+
+		if(CollectionUtils.isNotEmpty(entityListNewDept)){
+
+			userDepartmentLevelRepository.deleteAll(entityListNewDept);
 		}
 	}
 
