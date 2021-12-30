@@ -724,6 +724,14 @@ public class UserServiceImpl implements UserService {
 	public void saveUserDeptLevelForNewDept(Department newDept, Department refDept) {
 
 		List<UserDepartmentLevelEntity> entityList = userDepartmentLevelRepository.findByDepartment(refDept);
+		List<UserDepartmentLevelEntity> entityListNewDept = userDepartmentLevelRepository.findByDepartment(newDept);
+
+		//handled for duplicate entries
+		if(CollectionUtils.isNotEmpty(entityListNewDept)){
+
+			log.info("already configured for new department: {}", newDept);
+			return;
+		}
 
 		if (CollectionUtils.isNotEmpty(entityList)) {
 			List<UserDepartmentLevelEntity> list = entityList.stream().map(entity ->
