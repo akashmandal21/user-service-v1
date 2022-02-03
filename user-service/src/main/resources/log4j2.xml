@@ -19,35 +19,27 @@
 	<Loggers>
 		<Logger name="com.stanzaliving" level="debug" additivity="false">
 			<AppenderRef ref="LogToFile" />
-			<AppenderRef ref="LogToConsole" />
 		</Logger>
 		<Logger name="org.springframework" level="error" additivity="false">
 			<AppenderRef ref="LogToFile" />
-			<AppenderRef ref="LogToConsole" />
 		</Logger>
 		<Logger name="org.apache" level="error" additivity="false">
 			<AppenderRef ref="LogToFile" />
-			<AppenderRef ref="LogToConsole" />
 		</Logger>
 		<Logger name="org.hibernate" level="error" additivity="false">
 			<AppenderRef ref="LogToFile" />
-			<AppenderRef ref="LogToConsole" />
 		</Logger>
 		<Logger name="springfox.documentation" level="error" additivity="false">
 			<AppenderRef ref="LogToFile" />
-			<AppenderRef ref="LogToConsole" />
 		</Logger>
 		<Logger name="com.mchange" level="error" additivity="false">
 			<AppenderRef ref="LogToFile" />
-			<AppenderRef ref="LogToConsole" />
 		</Logger>
 		<Logger name="org.elasticsearch" level="error" additivity="false">
 			<AppenderRef ref="LogToFile" />
-			<AppenderRef ref="LogToConsole" />
 		</Logger>
 		<Root level="error">
 			<AppenderRef ref="LogToFile" />
-			<AppenderRef ref="LogToConsole" />
 		</Root>
 	</Loggers>
 </Configuration>
