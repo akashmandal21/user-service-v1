@@ -46,6 +46,14 @@ public class AclInternalController {
 
 		return ResponseDto.success("Found User", aclUserService.getUsersForRoles(department, roleName, accessLevelId));
 	}
+
+	@GetMapping("/activeUseridAccessLevelIdByRoleName/{department}/{roleName}/{accessLevelId}")
+	public ResponseDto<Map<String, List<String>>> activeUseridAccessLevelIdByRoleName(@PathVariable Department department, @PathVariable String roleName, @PathVariable List<String> accessLevelId ) {
+
+		log.info("Fetching user by {},{},{}", department,roleName,accessLevelId);
+
+		return ResponseDto.success("Found User", aclUserService.getActiveUsersForRoles(department, roleName, accessLevelId));
+	}
 	
 	@PostMapping("/useridAccessLevelIdByRoleName")
 	public ResponseDto<Map<String, List<String>>> getUseridAccessLevelIdByRoleName(@RequestBody UserAccessLevelIdsByRoleNameDto userAccessLevelIdsByRoleNameDto) {
@@ -53,6 +61,14 @@ public class AclInternalController {
 		log.info("Fetching user by {} ", userAccessLevelIdsByRoleNameDto);
 
 		return ResponseDto.success("Found User", aclUserService.getUsersForRoles(userAccessLevelIdsByRoleNameDto.getDepartment(), userAccessLevelIdsByRoleNameDto.getRoleName(), userAccessLevelIdsByRoleNameDto.getAccessLevelId()));
+	}
+
+	@PostMapping("/activeUseridAccessLevelIdByRoleName")
+	public ResponseDto<Map<String, List<String>>> getActiveUseridAccessLevelIdByRoleName(@RequestBody UserAccessLevelIdsByRoleNameDto userAccessLevelIdsByRoleNameDto) {
+
+		log.info("Fetching user by {} ", userAccessLevelIdsByRoleNameDto);
+
+		return ResponseDto.success("Found User", aclUserService.getActiveUsersForRoles(userAccessLevelIdsByRoleNameDto.getDepartment(), userAccessLevelIdsByRoleNameDto.getRoleName(), userAccessLevelIdsByRoleNameDto.getAccessLevelId()));
 	}
 
 	@GetMapping("/usercontactdetails/{department}/{roleName}/{accessLevelId}")

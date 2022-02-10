@@ -32,6 +32,8 @@ public interface AclUserService {
 
     Map<String, List<String>> getUsersForRoles(Department department,String roleName,List<String> accessLevelEntity);
 
+	Map<String, List<String>> getActiveUsersForRoles(Department department,String roleName,List<String> accessLevelEntity);
+
 	List<UserContactDetailsResponseDto> getUserContactDetails(Department department, String roleName, List<String> accessLevelEntity);
 
 	void bulkAddRole(AddUserDeptLevelRoleByEmailRequestDto addUserDeptLevelRoleByEmailRequestDto);
