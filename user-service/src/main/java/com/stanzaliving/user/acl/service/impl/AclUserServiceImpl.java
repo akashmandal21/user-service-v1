@@ -260,6 +260,54 @@ public class AclUserServiceImpl implements AclUserService {
 	}
 
 	@Override
+	public Map<String, List<String>> getActiveUsersForRoles(Department department, String roleName, List<String> accessLevelEntityList) {
+
+		log.info("Got request to get list of userid by rolename {} and department {}", roleName, department);
+
+		RoleDto roleDto = roleService.findByRoleNameAndDepartment(roleName, department);
+
+		Map<String, List<String>> userIdAccessLevelIdListMap = new HashMap<>();
+
+		if (Objects.nonNull(roleDto) && roleDto.getDepartment().equals(department)) {
+
+			List<UserDepartmentLevelRoleEntity> departmentLevelRoleEntities = userDepartmentLevelRoleDbService.findByRoleUuid(roleDto.getUuid());
+
+			if (CollectionUtils.isNotEmpty(departmentLevelRoleEntities)) {
+
+				List<String> uuids = departmentLevelRoleEntities.stream().map(UserDepartmentLevelRoleEntity::getUserDepartmentLevelUuid).collect(Collectors.toList());
+
+				List<UserDepartmentLevelEntity> departmentLevelEntities = userDepartmentLevelDbService.findByUuidInAndAccessLevel(uuids, roleDto.getAccessLevel());
+
+				if (CollectionUtils.isNotEmpty(departmentLevelEntities)) {
+
+					departmentLevelEntities.forEach(entity -> {
+
+						UserEntity user = userDbService.findByUuid(entity.getUserUuid());
+
+						if(user.isStatus()) {
+							Set<String> accessLevelUuids = new HashSet<>(Arrays.asList((entity.getCsvAccessLevelEntityUuid().split(","))));
+
+							for (String accessLevelEntity : accessLevelEntityList) {
+								if (accessLevelUuids.contains(accessLevelEntity)) {
+									List<String> accessLevelIds = userIdAccessLevelIdListMap.getOrDefault(entity.getUserUuid(), new ArrayList<>());
+									accessLevelIds.add(accessLevelEntity);
+									userIdAccessLevelIdListMap.put(entity.getUserUuid(), accessLevelIds);
+								}
+							}
+						}
+						// if (!Collections.disjoint(accessLevelEntityList, accessLevelUuids)) {
+						// userIds.add(entity.getUserUuid());
+						// }
+					});
+				}
+			}
+
+		}
+
+		return userIdAccessLevelIdListMap;
+	}
+
+	@Override
 	public List<UserContactDetailsResponseDto> getUserContactDetails(Department department, String roleName, List<String> accessLevelEntity) {
 		List<String> userUuids = new ArrayList<>(getUsersForRoles(department, roleName, accessLevelEntity).keySet());
 
