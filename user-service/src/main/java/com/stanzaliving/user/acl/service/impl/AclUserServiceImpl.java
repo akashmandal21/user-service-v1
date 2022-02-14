@@ -104,6 +104,7 @@ public class AclUserServiceImpl implements AclUserService {
 	@Autowired
 	private RoleRepository roleRepository;
 
+	@Autowired
 	private UserDepartmentLevelRoleRepository userDepartmentLevelRoleRepository;
 
 	@Override
@@ -313,20 +314,6 @@ public class AclUserServiceImpl implements AclUserService {
 
 		log.info("Got request to get list of userid by rolename {} and department {}", requestDto.getRoleName(), requestDto.getDepartment());
 		log.info("UserAccessLevelIdsByRoleNameWithFiltersDto : {}", requestDto);
-		UsersByFiltersRequestDto usersByFiltersRequestDto = UsersByFiltersRequestDto.builder().accessLevel(requestDto.getAccessLevel())
-			.cityFilterUuids(requestDto.getCityFilterUuids()).micromarketFilterUuids(requestDto.getMicromarketFilterUuids())
-			.residenceFilterUuids(requestDto.getResidenceFilterUuids()).cityLeadFilterUuids(requestDto.getCityLeadFilterUuids())
-			.clusterManagerFilterUuids(requestDto.getClusterManagerFilterUuids()).salesAssociateFilterUuids(requestDto.getSalesAssociateFilterUuids()).build();
-
-		UsersByFiltersResponseDto usersByFiltersResponseDto = getUsersWithFilters(usersByFiltersRequestDto);
-		List<String> userUuidsWithFilters = new ArrayList<>();
-		if (usersByFiltersRequestDto.getAccessLevel() == AccessLevel.CITY && Objects.nonNull(usersByFiltersResponseDto)) {
-			userUuidsWithFilters = usersByFiltersResponseDto.getCityHeadUuids();
-		} else if (usersByFiltersRequestDto.getAccessLevel() == AccessLevel.MICROMARKET && Objects.nonNull(usersByFiltersResponseDto)) {
-			userUuidsWithFilters = usersByFiltersResponseDto.getClusterManagerUuids();
-		} else if (usersByFiltersRequestDto.getAccessLevel() == AccessLevel.RESIDENCE && Objects.nonNull(usersByFiltersResponseDto)) {
-			userUuidsWithFilters = usersByFiltersResponseDto.getSalesAssociateUuids();
-		}
 
 		RoleDto roleDto = roleService.findByRoleNameAndDepartment(requestDto.getRoleName(), requestDto.getDepartment());
 
@@ -360,11 +347,32 @@ public class AclUserServiceImpl implements AclUserService {
 			}
 
 		}
-		Map<String, List<String>> userIdAccessLevelIdListMapWithFilters = new HashMap<>();
-		for (String uuid : userIdAccessLevelIdListMap.keySet()) {
-			if (CollectionUtils.isNotEmpty(userUuidsWithFilters) && userUuidsWithFilters.contains(uuid)) {
-				userIdAccessLevelIdListMapWithFilters.put(uuid, userIdAccessLevelIdListMap.get(uuid));
+		if (CollectionUtils.isNotEmpty(requestDto.getCityFilterUuids()) || CollectionUtils.isNotEmpty(requestDto.getMicromarketFilterUuids())
+			|| CollectionUtils.isNotEmpty(requestDto.getResidenceFilterUuids()) || CollectionUtils.isNotEmpty(requestDto.getCityLeadFilterUuids())
+			|| CollectionUtils.isNotEmpty(requestDto.getClusterManagerFilterUuids())
+			|| CollectionUtils.isNotEmpty(requestDto.getSalesAssociateFilterUuids())) {
+
+			UsersByFiltersRequestDto usersByFiltersRequestDto = UsersByFiltersRequestDto.builder().accessLevel(requestDto.getAccessLevel())
+				.cityFilterUuids(requestDto.getCityFilterUuids()).micromarketFilterUuids(requestDto.getMicromarketFilterUuids())
+				.residenceFilterUuids(requestDto.getResidenceFilterUuids()).cityLeadFilterUuids(requestDto.getCityLeadFilterUuids())
+				.clusterManagerFilterUuids(requestDto.getClusterManagerFilterUuids()).salesAssociateFilterUuids(requestDto.getSalesAssociateFilterUuids()).build();
+
+			UsersByFiltersResponseDto usersByFiltersResponseDto = getUsersWithFilters(usersByFiltersRequestDto);
+			List<String> userUuidsWithFilters = new ArrayList<>();
+			if (usersByFiltersRequestDto.getAccessLevel() == AccessLevel.CITY && Objects.nonNull(usersByFiltersResponseDto)) {
+				userUuidsWithFilters = usersByFiltersResponseDto.getCityHeadUuids();
+			} else if (usersByFiltersRequestDto.getAccessLevel() == AccessLevel.MICROMARKET && Objects.nonNull(usersByFiltersResponseDto)) {
+				userUuidsWithFilters = usersByFiltersResponseDto.getClusterManagerUuids();
+			} else if (usersByFiltersRequestDto.getAccessLevel() == AccessLevel.RESIDENCE && Objects.nonNull(usersByFiltersResponseDto)) {
+				userUuidsWithFilters = usersByFiltersResponseDto.getSalesAssociateUuids();
 			}
+			Map<String, List<String>> userIdAccessLevelIdListMapWithFilters = new HashMap<>();
+			for (String uuid : userIdAccessLevelIdListMap.keySet()) {
+				if (CollectionUtils.isNotEmpty(userUuidsWithFilters) && userUuidsWithFilters.contains(uuid)) {
+					userIdAccessLevelIdListMapWithFilters.put(uuid, userIdAccessLevelIdListMap.get(uuid));
+				}
+			}
+			return userIdAccessLevelIdListMapWithFilters;
 		}
 		return userIdAccessLevelIdListMap;
 	}
@@ -415,13 +423,14 @@ public class AclUserServiceImpl implements AclUserService {
 			}
 		}
 		usersByFiltersResponseDto.setCityHeadUuids(allCityLeads);
+		log.info("Users by filters : {}", usersByFiltersResponseDto);
 		return usersByFiltersResponseDto;
 	}
 
     private UsersByFiltersResponseDto getClusterManagersWithFilters(UsersByFiltersRequestDto filtersRequestDto) {
         log.info("Get Cluster Managers with Filters");
-        List<String> micromarketUuidsWithEntityFilters = getCityUuidsWithEntityFilters(filtersRequestDto);
-        List<String> micromarketUuidsWithUserFilters = getCityUuidsWithUserFilters(filtersRequestDto);
+        List<String> micromarketUuidsWithEntityFilters = getMicromarketUuidsWithEntityFilters(filtersRequestDto);
+        List<String> micromarketUuidsWithUserFilters = getMicromarketUuidsWithUserFilters(filtersRequestDto);
         List<String> micromarketFilters = new ArrayList<>();
         if (CollectionUtils.isEmpty(micromarketUuidsWithEntityFilters) && CollectionUtils.isNotEmpty(micromarketUuidsWithUserFilters)) {
             micromarketFilters = micromarketUuidsWithUserFilters;
@@ -449,6 +458,7 @@ public class AclUserServiceImpl implements AclUserService {
             }
         }
         usersByFiltersResponseDto.setClusterManagerUuids(allClusterManagers);
+		log.info("Users by filters : {}", usersByFiltersResponseDto);
         return usersByFiltersResponseDto;
     }
 
@@ -483,6 +493,7 @@ public class AclUserServiceImpl implements AclUserService {
             }
         }
         usersByFiltersResponseDto.setSalesAssociateUuids(allSalesAssociates);
+		log.info("Users by filters : {}", usersByFiltersResponseDto);
         return usersByFiltersResponseDto;
     }
 
@@ -505,6 +516,7 @@ public class AclUserServiceImpl implements AclUserService {
 			cityUuids.addAll(filtersRequestDto.getCityFilterUuids());
 			filtersRequestDto.setCityFilterUuids(cityUuids);
 		}
+		log.info("City Uuids with entity filters : {}", cityUuids);
 		return cityUuids;
 	}
 
@@ -515,22 +527,27 @@ public class AclUserServiceImpl implements AclUserService {
 			List<String> accessLevelIds = new ArrayList<>();
 			List<UserAccessLevelListDto> allSalesAssociates = getAllResidenceLeadManagers();
 			for (UserAccessLevelListDto userAccessLevelListDto : allSalesAssociates) {
-				accessLevelIds.addAll(userAccessLevelListDto.getAccessLevelIds());
+				if (filtersRequestDto.getSalesAssociateFilterUuids().contains(userAccessLevelListDto.getUserUuid())) {
+					accessLevelIds.addAll(userAccessLevelListDto.getAccessLevelIds());
+				}
 			}
 			for (String residenceUuid : accessLevelIds) {
 				cityUuids.add(transformationCache.getCityUuidByResidenceUuid(residenceUuid));
 			}
 		}
-		if (CollectionUtils.isEmpty(cityUuids) && CollectionUtils.isNotEmpty(filtersRequestDto.getMicromarketFilterUuids())) {
+		if (CollectionUtils.isEmpty(cityUuids) && CollectionUtils.isNotEmpty(filtersRequestDto.getClusterManagerFilterUuids())) {
 			List<String> accessLevelIds = new ArrayList<>();
 			List<UserAccessLevelListDto> allClusterManagers = getAllMicromarketLeadManagers();
 			for (UserAccessLevelListDto userAccessLevelListDto : allClusterManagers) {
-				accessLevelIds.addAll(userAccessLevelListDto.getAccessLevelIds());
+				if (filtersRequestDto.getClusterManagerFilterUuids().contains(userAccessLevelListDto.getUserUuid())) {
+					accessLevelIds.addAll(userAccessLevelListDto.getAccessLevelIds());
+				}
 			}
 			for (String micromarketUuid : accessLevelIds) {
 				cityUuids.add(transformationCache.getCityUuidByMicromarketUuid(micromarketUuid));
 			}
 		}
+		log.info("City Uuids with user filters : {}", cityUuids);
 		return cityUuids;
 	}
 
@@ -553,6 +570,7 @@ public class AclUserServiceImpl implements AclUserService {
             }
             filtersRequestDto.setMicromarketFilterUuids(micromarketUuids);
         }
+		log.info("Micromarket Uuids with entity filters : {}", micromarketUuids);
         return micromarketUuids;
     }
 
@@ -563,7 +581,9 @@ public class AclUserServiceImpl implements AclUserService {
             List<String> accessLevelIds = new ArrayList<>();
             List<UserAccessLevelListDto> allSalesAssociates = getAllResidenceLeadManagers();
             for (UserAccessLevelListDto userAccessLevelListDto : allSalesAssociates) {
-                accessLevelIds.addAll(userAccessLevelListDto.getAccessLevelIds());
+            	if (filtersRequestDto.getSalesAssociateFilterUuids().contains(userAccessLevelListDto.getUserUuid())) {
+					accessLevelIds.addAll(userAccessLevelListDto.getAccessLevelIds());
+				}
             }
             for (String residenceUuid : accessLevelIds) {
                 micromarketUuids.add(transformationCache.getMicromarketUuidByResidenceUuid(residenceUuid));
@@ -573,12 +593,15 @@ public class AclUserServiceImpl implements AclUserService {
             List<String> accessLevelIds = new ArrayList<>();
             List<UserAccessLevelListDto> allCityLeads = getAllCityLeadManagers();
             for (UserAccessLevelListDto userAccessLevelListDto : allCityLeads) {
-                accessLevelIds.addAll(userAccessLevelListDto.getAccessLevelIds());
+				if (filtersRequestDto.getCityLeadFilterUuids().contains(userAccessLevelListDto.getUserUuid())) {
+					accessLevelIds.addAll(userAccessLevelListDto.getAccessLevelIds());
+				}
             }
             for (String cityUuid : accessLevelIds) {
                 micromarketUuids.addAll(transformationCache.getMicromarketUuidsByCityUuid(cityUuid));
             }
         }
+		log.info("MM Uuids with user filters : {}", micromarketUuids);
         return micromarketUuids;
     }
 
@@ -601,17 +624,20 @@ public class AclUserServiceImpl implements AclUserService {
             }
             filtersRequestDto.setResidenceFilterUuids(residenceUuids);
         }
+		log.info("Residence Uuids with entity filters : {}", residenceUuids);
         return residenceUuids;
     }
 
     private List<String> getResidenceUuidsWithUserFilters(UsersByFiltersRequestDto filtersRequestDto) {
         log.info("Get Residence uuids with user filters");
         List<String> residenceUuids = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(filtersRequestDto.getMicromarketFilterUuids())) {
+        if (CollectionUtils.isNotEmpty(filtersRequestDto.getClusterManagerFilterUuids())) {
             List<String> accessLevelIds = new ArrayList<>();
             List<UserAccessLevelListDto> allClusterManagers = getAllMicromarketLeadManagers();
             for (UserAccessLevelListDto userAccessLevelListDto : allClusterManagers) {
-                accessLevelIds.addAll(userAccessLevelListDto.getAccessLevelIds());
+            	if (filtersRequestDto.getClusterManagerFilterUuids().contains(userAccessLevelListDto.getUserUuid())) {
+					accessLevelIds.addAll(userAccessLevelListDto.getAccessLevelIds());
+				}
             }
             for (String micromarketUuid : accessLevelIds) {
                 residenceUuids.addAll(transformationCache.getResidenceUuidsByMicromarketUuid(micromarketUuid));
@@ -621,12 +647,15 @@ public class AclUserServiceImpl implements AclUserService {
             List<String> accessLevelIds = new ArrayList<>();
             List<UserAccessLevelListDto> allCityLeads = getAllCityLeadManagers();
             for (UserAccessLevelListDto userAccessLevelListDto : allCityLeads) {
-                accessLevelIds.addAll(userAccessLevelListDto.getAccessLevelIds());
+				if (filtersRequestDto.getCityLeadFilterUuids().contains(userAccessLevelListDto.getUserUuid())) {
+					accessLevelIds.addAll(userAccessLevelListDto.getAccessLevelIds());
+				}
             }
             for (String cityUuid : accessLevelIds) {
                 residenceUuids.addAll(transformationCache.getResidenceUuidsByCityUuid(cityUuid));
             }
         }
+		log.info("Residence Uuids with user filters : {}", residenceUuids);
         return residenceUuids;
     }
 
@@ -639,7 +668,7 @@ public class AclUserServiceImpl implements AclUserService {
 		for (RoleEntity roleEntity : roleEntityList) {
             List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntities = userDepartmentLevelRoleRepository.findByRoleUuid(roleEntity.getUuid());
             if (CollectionUtils.isNotEmpty(userDepartmentLevelRoleEntities)) {
-                userDepartmentLevelRoleEntityList.addAll(userDepartmentLevelRoleEntityList);
+                userDepartmentLevelRoleEntityList.addAll(userDepartmentLevelRoleEntities);
             }
 		}
 		if (CollectionUtils.isNotEmpty(userDepartmentLevelRoleEntityList)) {
@@ -673,7 +702,7 @@ public class AclUserServiceImpl implements AclUserService {
         for (RoleEntity roleEntity : roleEntityList) {
             List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntities = userDepartmentLevelRoleRepository.findByRoleUuid(roleEntity.getUuid());
             if (CollectionUtils.isNotEmpty(userDepartmentLevelRoleEntities)) {
-                userDepartmentLevelRoleEntityList.addAll(userDepartmentLevelRoleEntityList);
+                userDepartmentLevelRoleEntityList.addAll(userDepartmentLevelRoleEntities);
             }
         }
         if (CollectionUtils.isNotEmpty(userDepartmentLevelRoleEntityList)) {
@@ -707,7 +736,7 @@ public class AclUserServiceImpl implements AclUserService {
         for (RoleEntity roleEntity : roleEntityList) {
             List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntities = userDepartmentLevelRoleRepository.findByRoleUuid(roleEntity.getUuid());
             if (CollectionUtils.isNotEmpty(userDepartmentLevelRoleEntities)) {
-                userDepartmentLevelRoleEntityList.addAll(userDepartmentLevelRoleEntityList);
+                userDepartmentLevelRoleEntityList.addAll(userDepartmentLevelRoleEntities);
             }
         }
         if (CollectionUtils.isNotEmpty(userDepartmentLevelRoleEntityList)) {
