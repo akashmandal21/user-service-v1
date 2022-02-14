@@ -661,92 +661,46 @@ public class AclUserServiceImpl implements AclUserService {
 
 	private List<UserAccessLevelListDto> getAllCityLeadManagers() {
 		log.info("Get All City Lead Managers");
-        List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = new ArrayList<>();
-        List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = new ArrayList<>();
-		List<RoleEntity> roleEntityList = roleRepository.findByRoleNameInAndDepartment(Arrays.asList(Role.CITY_LEAD_MANAGER.getRoleName(), Role.CITY_APARTMENT_LEAD_MANAGER.getRoleName()),
-			Department.SALES);
-		for (RoleEntity roleEntity : roleEntityList) {
-            List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntities = userDepartmentLevelRoleRepository.findByRoleUuid(roleEntity.getUuid());
-            if (CollectionUtils.isNotEmpty(userDepartmentLevelRoleEntities)) {
-                userDepartmentLevelRoleEntityList.addAll(userDepartmentLevelRoleEntities);
-            }
-		}
-		if (CollectionUtils.isNotEmpty(userDepartmentLevelRoleEntityList)) {
-		    for (UserDepartmentLevelRoleEntity userDepartmentLevelRoleEntity : userDepartmentLevelRoleEntityList) {
-		        UserDepartmentLevelEntity userDepartmentLevelEntity = userDepartmentLevelRepository.findByUuid(userDepartmentLevelRoleEntity.getUserDepartmentLevelUuid());
-		        if (Objects.nonNull(userDepartmentLevelEntity)) {
-                    userDepartmentLevelEntityList.add(userDepartmentLevelEntity);
-                }
-            }
-        }
-		List<UserAccessLevelListDto> userAccessLevelListDtoList = new ArrayList<>();
-		if (CollectionUtils.isNotEmpty(userDepartmentLevelEntityList)) {
-			for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
-				String[] accessLevelIdArray = userDepartmentLevelEntity.getCsvAccessLevelEntityUuid().split(",");
-				UserAccessLevelListDto userAccessLevelListDto = new UserAccessLevelListDto();
-				userAccessLevelListDto.setUserUuid(userDepartmentLevelEntity.getUserUuid());
-				userAccessLevelListDto.setAccessLevelIds(Arrays.asList(accessLevelIdArray));
-				userAccessLevelListDtoList.add(userAccessLevelListDto);
-			}
-		}
+        List<UserAccessLevelListDto> userAccessLevelListDtoList = getSalesUsersAndAccessLevelsByRole(Arrays.asList(Role.CITY_LEAD_MANAGER.getRoleName(),
+			Role.CITY_APARTMENT_LEAD_MANAGER.getRoleName()));
 		log.info("Number of City Lead Managers : {}", userAccessLevelListDtoList.size());
 		return userAccessLevelListDtoList;
 	}
 
 	private List<UserAccessLevelListDto> getAllMicromarketLeadManagers() {
 		log.info("Get All Micromarket Lead Managers");
-        List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = new ArrayList<>();
-        List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = new ArrayList<>();
-        List<RoleEntity> roleEntityList = roleRepository.findByRoleNameInAndDepartment(Arrays.asList(Role.MICROMARKET_LEAD_MANAGER.getRoleName(), Role.MICROMARKET_APARTMENT_LEAD_MANAGER.getRoleName()),
-            Department.SALES);
-        for (RoleEntity roleEntity : roleEntityList) {
-            List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntities = userDepartmentLevelRoleRepository.findByRoleUuid(roleEntity.getUuid());
-            if (CollectionUtils.isNotEmpty(userDepartmentLevelRoleEntities)) {
-                userDepartmentLevelRoleEntityList.addAll(userDepartmentLevelRoleEntities);
-            }
-        }
-        if (CollectionUtils.isNotEmpty(userDepartmentLevelRoleEntityList)) {
-            for (UserDepartmentLevelRoleEntity userDepartmentLevelRoleEntity : userDepartmentLevelRoleEntityList) {
-                UserDepartmentLevelEntity userDepartmentLevelEntity = userDepartmentLevelRepository.findByUuid(userDepartmentLevelRoleEntity.getUserDepartmentLevelUuid());
-                if (Objects.nonNull(userDepartmentLevelEntity)) {
-                    userDepartmentLevelEntityList.add(userDepartmentLevelEntity);
-                }
-            }
-        }
-		List<UserAccessLevelListDto> userAccessLevelListDtoList = new ArrayList<>();
-		if (CollectionUtils.isNotEmpty(userDepartmentLevelEntityList)) {
-			for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
-				String[] accessLevelIdArray = userDepartmentLevelEntity.getCsvAccessLevelEntityUuid().split(",");
-				UserAccessLevelListDto userAccessLevelListDto = new UserAccessLevelListDto();
-				userAccessLevelListDto.setUserUuid(userDepartmentLevelEntity.getUserUuid());
-				userAccessLevelListDto.setAccessLevelIds(Arrays.asList(accessLevelIdArray));
-				userAccessLevelListDtoList.add(userAccessLevelListDto);
-			}
-		}
+        List<UserAccessLevelListDto> userAccessLevelListDtoList = getSalesUsersAndAccessLevelsByRole(Arrays.asList(Role.MICROMARKET_LEAD_MANAGER.getRoleName(),
+			Role.MICROMARKET_APARTMENT_LEAD_MANAGER.getRoleName()));
 		log.info("Number of Micromarket Lead Managers : {}", userAccessLevelListDtoList.size());
 		return userAccessLevelListDtoList;
 	}
 
 	private List<UserAccessLevelListDto> getAllResidenceLeadManagers() {
 		log.info("Get All Residence Lead Managers");
-        List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = new ArrayList<>();
-        List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = new ArrayList<>();
-        List<RoleEntity> roleEntityList = roleRepository.findByRoleNameInAndDepartment(Arrays.asList(Role.RESIDENCE_LEAD_MANAGER.getRoleName(), Role.RESIDENCE_APARTMENT_LEAD_MANAGER.getRoleName()),
-            Department.SALES);
-        for (RoleEntity roleEntity : roleEntityList) {
-            List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntities = userDepartmentLevelRoleRepository.findByRoleUuid(roleEntity.getUuid());
-            if (CollectionUtils.isNotEmpty(userDepartmentLevelRoleEntities)) {
-                userDepartmentLevelRoleEntityList.addAll(userDepartmentLevelRoleEntities);
-            }
-        }
-        if (CollectionUtils.isNotEmpty(userDepartmentLevelRoleEntityList)) {
-            for (UserDepartmentLevelRoleEntity userDepartmentLevelRoleEntity : userDepartmentLevelRoleEntityList) {
-                UserDepartmentLevelEntity userDepartmentLevelEntity = userDepartmentLevelRepository.findByUuid(userDepartmentLevelRoleEntity.getUserDepartmentLevelUuid());
-                if (Objects.nonNull(userDepartmentLevelEntity)) {
-                    userDepartmentLevelEntityList.add(userDepartmentLevelEntity);
-                }
-            }
-        }
+		List<UserAccessLevelListDto> userAccessLevelListDtoList = getSalesUsersAndAccessLevelsByRole(Arrays.asList(Role.RESIDENCE_LEAD_MANAGER.getRoleName(),
+			Role.RESIDENCE_APARTMENT_LEAD_MANAGER.getRoleName()));
+		log.info("Number of Residence Lead Managers : {}", userAccessLevelListDtoList.size());
+		return userAccessLevelListDtoList;
+	}
+
+	private List<UserAccessLevelListDto> getSalesUsersAndAccessLevelsByRole(List<String> rolesList) {
+		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = new ArrayList<>();
+		List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = new ArrayList<>();
+		List<RoleEntity> roleEntityList = roleRepository.findByRoleNameInAndDepartment(rolesList, Department.SALES);
+		for (RoleEntity roleEntity : roleEntityList) {
+			List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntities = userDepartmentLevelRoleRepository.findByRoleUuid(roleEntity.getUuid());
+			if (CollectionUtils.isNotEmpty(userDepartmentLevelRoleEntities)) {
+				userDepartmentLevelRoleEntityList.addAll(userDepartmentLevelRoleEntities);
+			}
+		}
+		if (CollectionUtils.isNotEmpty(userDepartmentLevelRoleEntityList)) {
+			for (UserDepartmentLevelRoleEntity userDepartmentLevelRoleEntity : userDepartmentLevelRoleEntityList) {
+				UserDepartmentLevelEntity userDepartmentLevelEntity = userDepartmentLevelRepository.findByUuid(userDepartmentLevelRoleEntity.getUserDepartmentLevelUuid());
+				if (Objects.nonNull(userDepartmentLevelEntity)) {
+					userDepartmentLevelEntityList.add(userDepartmentLevelEntity);
+				}
+			}
+		}
 		List<UserAccessLevelListDto> userAccessLevelListDtoList = new ArrayList<>();
 		if (CollectionUtils.isNotEmpty(userDepartmentLevelEntityList)) {
 			for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
@@ -757,7 +711,6 @@ public class AclUserServiceImpl implements AclUserService {
 				userAccessLevelListDtoList.add(userAccessLevelListDto);
 			}
 		}
-		log.info("Number of Residence Lead Managers : {}", userAccessLevelListDtoList.size());
 		return userAccessLevelListDtoList;
 	}
 }
