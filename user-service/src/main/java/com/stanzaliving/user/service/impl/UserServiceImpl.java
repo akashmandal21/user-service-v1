@@ -132,6 +132,26 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public UserDto getActiveUserByUuid(String userUuid) {
+
+		UserEntity userEntity = userDbService.findByUuid(userUuid);
+
+		if (Objects.isNull(userEntity)) {
+
+			throw new ApiValidationException("User Not Found with Uuid: " + userUuid);
+		}
+
+		if (!userEntity.isStatus()) {
+
+			throw new ApiValidationException("User Account is Disabled for Uuid " + userUuid);
+		}
+
+		log.info("Found User: " + userEntity.getUuid() + " of Type: " + userEntity.getUserType());
+
+		return UserAdapter.getUserDto(userEntity);
+	}
+
+	@Override
 	public void assertActiveUserByUserUuid(String userUuid) {
 		this.getActiveUserByUserId(userUuid);
 	}

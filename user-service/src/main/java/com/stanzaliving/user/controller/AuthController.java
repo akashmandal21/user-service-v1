@@ -91,10 +91,10 @@ public class AuthController {
 	}
 
 	@GetMapping("refresh")
-	public ResponseDto<AclUserDto> refreshToken(
+	public ResponseDto<AclUserDto> refreshSession(
 			@CookieValue(name = SecurityConstants.TOKEN_HEADER_NAME) String token, HttpServletRequest request, HttpServletResponse response) {
 
-		UserSessionEntity userSessionEntity = sessionService.refreshUserSession(token);
+		UserSessionEntity userSessionEntity = sessionService.validateUserSession(token);
 
 		if (Objects.nonNull(userSessionEntity)) {
 			addTokenToResponse(request, response, token);

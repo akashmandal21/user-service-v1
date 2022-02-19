@@ -64,7 +64,7 @@ public class SessionServiceImpl implements SessionService {
 	}
 
 	@Override
-	public UserSessionEntity refreshUserSession(String token) {
+	public UserSessionEntity validateUserSession(String token) {
 
 		UserSessionEntity userSessionEntity = getUserSessionByToken(token);
 
@@ -72,13 +72,9 @@ public class SessionServiceImpl implements SessionService {
 			throw new AuthException("No User Session Found!! Please Login!!", UserErrorCodes.SESSION_NOT_FOUND);
 		}
 
-		log.info("Refresh User Session: " + userSessionEntity.getUuid() + " for User: " + userSessionEntity.getUserId());
+		UserDto user = userService.getActiveUserByUuid(userSessionEntity.getUserId());
 
-		String newToken = StanzaUtils.generateUniqueId();
-
-		userSessionEntity.setToken(getBcryptPassword(newToken));
-		userSessionEntity.setStatus(true);
-		userSessionEntity = userSessionDbService.updateAndFlush(userSessionEntity);
+		log.info("Refresh User Session: " + userSessionEntity.getUuid() + " for User: " + user.getUuid());
 
 		return userSessionEntity;
 	}
