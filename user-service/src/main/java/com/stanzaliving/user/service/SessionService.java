@@ -16,6 +16,8 @@ public interface SessionService {
 
 	UserSessionEntity createUserSession(UserDto userDto, String token);
 
+	UserSessionEntity refreshUserSession(String token);
+
 	UserSessionEntity getUserSessionByToken(String token);
 
 	void removeUserSession(String token);
