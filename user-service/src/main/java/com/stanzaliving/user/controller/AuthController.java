@@ -94,10 +94,10 @@ public class AuthController {
 	public ResponseDto<AclUserDto> refreshSession(
 			@CookieValue(name = SecurityConstants.TOKEN_HEADER_NAME) String token, HttpServletRequest request, HttpServletResponse response) {
 
-		UserSessionEntity userSessionEntity = sessionService.validateUserSession(token);
+		UserSessionEntity userSessionEntity = sessionService.refreshUserSession(token);
 
 		if (Objects.nonNull(userSessionEntity)) {
-			addTokenToResponse(request, response, token);
+			addTokenToResponse(request, response, userSessionEntity.getToken());
 			return ResponseDto.success("Token refreshed Successfull", UserAdapter.getAclUserDto(userService.getUserProfile(userSessionEntity.getUserId()), aclService.getUserDeptLevelRoleNameUrlExpandedDtoFe(userSessionEntity.getUserId())));
 		}
 
