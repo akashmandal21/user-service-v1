@@ -64,7 +64,7 @@ public class SessionServiceImpl implements SessionService {
 	}
 
 	@Override
-	public UserSessionEntity validateUserSession(String token) {
+	public UserSessionEntity refreshUserSession(String token) {
 
 		UserSessionEntity userSessionEntity = getUserSessionByToken(token);
 
@@ -75,6 +75,12 @@ public class SessionServiceImpl implements SessionService {
 		UserDto user = userService.getActiveUserByUuid(userSessionEntity.getUserId());
 
 		log.info("Refresh User Session: " + userSessionEntity.getUuid() + " for User: " + user.getUuid());
+
+		String newToken = StanzaUtils.generateUniqueId();
+
+		userSessionEntity.setToken(newToken);
+		userSessionEntity.setStatus(true);
+		userSessionEntity = userSessionDbService.updateAndFlush(userSessionEntity);
 
 		return userSessionEntity;
 	}
