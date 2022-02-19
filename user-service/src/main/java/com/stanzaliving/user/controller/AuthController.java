@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.stanzaliving.user.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -56,6 +57,9 @@ public class AuthController {
 	private SessionService sessionService;
 
 	@Autowired
+	private UserService userService;
+
+	@Autowired
 	private AclService aclService;
 
 	@PostMapping("login")
@@ -84,6 +88,20 @@ public class AuthController {
 		}
 
 		return ResponseDto.failure("Failed to create user session");
+	}
+
+	@GetMapping("refresh")
+	public ResponseDto<AclUserDto> refreshSession(
+			@CookieValue(name = SecurityConstants.TOKEN_HEADER_NAME) String token, HttpServletRequest request, HttpServletResponse response) {
+
+		UserSessionEntity userSessionEntity = sessionService.validateUserSession(token);
+
+		if (Objects.nonNull(userSessionEntity)) {
+			addTokenToResponse(request, response, token);
+			return ResponseDto.success("Token refreshed Successfull", UserAdapter.getAclUserDto(userService.getUserProfile(userSessionEntity.getUserId()), aclService.getUserDeptLevelRoleNameUrlExpandedDtoFe(userSessionEntity.getUserId())));
+		}
+
+		return ResponseDto.failure("Failed to refresh user session");
 	}
 	
 	@PostMapping("sendEmailVerificationOtp")

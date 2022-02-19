@@ -6,6 +6,7 @@ package com.stanzaliving.user.service.impl;
 import java.util.List;
 import java.util.Objects;
 
+import com.stanzaliving.core.base.utils.StanzaUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,6 +59,22 @@ public class SessionServiceImpl implements SessionService {
 		userSessionEntity = userSessionDbService.saveAndFlush(userSessionEntity);
 
 		log.info("Created Session: " + userSessionEntity.getUuid() + " for User: " + userDto.getUuid());
+
+		return userSessionEntity;
+	}
+
+	@Override
+	public UserSessionEntity validateUserSession(String token) {
+
+		UserSessionEntity userSessionEntity = getUserSessionByToken(token);
+
+		if (Objects.isNull(userSessionEntity)) {
+			throw new AuthException("No User Session Found!! Please Login!!", UserErrorCodes.SESSION_NOT_FOUND);
+		}
+
+		UserDto user = userService.getActiveUserByUuid(userSessionEntity.getUserId());
+
+		log.info("Refresh User Session: " + userSessionEntity.getUuid() + " for User: " + user.getUuid());
 
 		return userSessionEntity;
 	}

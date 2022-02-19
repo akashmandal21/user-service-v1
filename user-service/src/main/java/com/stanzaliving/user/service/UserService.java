@@ -30,6 +30,8 @@ public interface UserService {
 
 	UserProfileDto getActiveUserByUserId(String userId);
 
+	UserDto getActiveUserByUuid(String userUuid);
+
 	void assertActiveUserByUserUuid(String userId);
 
 	UserDto addUser(AddUserRequestDto addUserRequestDto);
