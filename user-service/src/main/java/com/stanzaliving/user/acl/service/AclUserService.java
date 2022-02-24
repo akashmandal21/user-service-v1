@@ -12,6 +12,7 @@ import com.stanzaliving.core.user.dto.response.UserContactDetailsResponseDto;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface AclUserService {
 	void addRole(AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleDto);
@@ -37,4 +38,6 @@ public interface AclUserService {
 	List<UserContactDetailsResponseDto> getUserContactDetails(Department department, String roleName, List<String> accessLevelEntity);
 
 	void bulkAddRole(AddUserDeptLevelRoleByEmailRequestDto addUserDeptLevelRoleByEmailRequestDto);
+
+	Set<String> getAccessLevelIds(Department department, String roleName);
 }

@@ -335,4 +335,20 @@ public class AclUserServiceImpl implements AclUserService {
 		UserRoleSnapshot userRoleSnapshot = UserRoleSnapshot.builder().userUuid(userUuid).userDeptLevelRoles(data).build();
 		notificationProducer.publish(roleTopic, UserRoleSnapshot.class.getName(), userRoleSnapshot);
 	}
+
+	@Override
+	public Set<String> getAccessLevelIds(Department department, String roleName) {
+		log.info("Got request to get list of userid by rolename {} and department {}", roleName, department);
+		RoleDto roleDto = roleService.findByRoleNameAndDepartment(roleName, department);
+		Set<String> access_level_entity_uuids =new HashSet<>();
+		if (Objects.nonNull(roleDto) && roleDto.getDepartment().equals(department)) {
+			List<UserDepartmentLevelRoleEntity> departmentLevelRoleEntities = userDepartmentLevelRoleDbService.findByRoleUuid(roleDto.getUuid());
+			if (CollectionUtils.isNotEmpty(departmentLevelRoleEntities)) {
+				List<String> user_department_level_uuids = departmentLevelRoleEntities.stream().map(UserDepartmentLevelRoleEntity::getUserDepartmentLevelUuid).collect(Collectors.toList());
+				List<UserDepartmentLevelEntity> departmentLevelEntities = userDepartmentLevelDbService.findByUuidInAndDepartmentAndAccessLevel(user_department_level_uuids, roleDto.getDepartment(),roleDto.getAccessLevel());
+				access_level_entity_uuids = departmentLevelEntities.stream().map(UserDepartmentLevelEntity::getCsvAccessLevelEntityUuid).collect(Collectors.toSet());
+			}
+		}
+		return access_level_entity_uuids;
+	}
 }
