@@ -197,6 +197,7 @@ public class UserAdapter {
 				.arrivalDate(userProfileDto.getArrivalDate())
 				.nextDestination(userProfileDto.getNextDestination())
 				.acl(acl)
+				.fcmEnabled(true)
 				.build();
 
 	}
