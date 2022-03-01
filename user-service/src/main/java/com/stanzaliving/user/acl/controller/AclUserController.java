@@ -8,8 +8,10 @@ import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleListDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRequestDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleByEmailRequestDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleRequestDto;
+import com.stanzaliving.core.user.dto.response.UserAccessModuleDto;
 import com.stanzaliving.user.acl.service.AclUserService;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -79,6 +81,17 @@ public class AclUserController {
         log.info("Received request to add role " + addUserDeptLevelRoleByEmailRequestDto);
         aclUserService.bulkAddRole(addUserDeptLevelRoleByEmailRequestDto);
         return ResponseDto.success("Bulk Role Assignment successful");
+    }
+
+    @GetMapping("/accessModule/{userUuid}")
+    public ResponseDto<List<UserAccessModuleDto>> getUserAccessModulesByUserUuid(@PathVariable @NotBlank(message = "User uuid must not be blank") String userUuid) {
+
+        List<UserAccessModuleDto> userAccessModuleDtoList = aclUserService.getUserAccessModulesByUserUuid(userUuid);
+        if (CollectionUtils.isNotEmpty(userAccessModuleDtoList)) {
+            return ResponseDto.success("List of Modules that the user has access to", userAccessModuleDtoList);
+        } else {
+            return ResponseDto.failure("Access to modules denied");
+        }
     }
 
 }

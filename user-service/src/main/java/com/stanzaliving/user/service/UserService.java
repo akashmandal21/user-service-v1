@@ -14,7 +14,6 @@ import com.stanzaliving.core.user.dto.UserFilterDto;
 import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.dto.UserRoleCacheDto;
-import com.stanzaliving.core.user.dto.response.UserAccessModuleDto;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.ActiveUserRequestDto;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
@@ -78,6 +77,4 @@ public interface UserService {
 	List<UserRoleCacheDto> getCacheableForRoles(List<String> roleNames);
 
 	UserProfileDto getUserProfileDtoByEmail(String email);
-
-	List<UserAccessModuleDto> getUserAccessModulesByUserUuid(String userUuid);
 }

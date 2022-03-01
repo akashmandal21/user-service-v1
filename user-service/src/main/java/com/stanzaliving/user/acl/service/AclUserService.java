@@ -8,6 +8,7 @@ import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleListDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRequestDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleByEmailRequestDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleRequestDto;
+import com.stanzaliving.core.user.dto.response.UserAccessModuleDto;
 import com.stanzaliving.core.user.dto.response.UserContactDetailsResponseDto;
 
 import java.util.List;
@@ -37,4 +38,6 @@ public interface AclUserService {
 	List<UserContactDetailsResponseDto> getUserContactDetails(Department department, String roleName, List<String> accessLevelEntity);
 
 	void bulkAddRole(AddUserDeptLevelRoleByEmailRequestDto addUserDeptLevelRoleByEmailRequestDto);
+
+	List<UserAccessModuleDto> getUserAccessModulesByUserUuid(String userUuid);
 }
