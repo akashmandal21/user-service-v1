@@ -8,10 +8,19 @@ import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleListDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRequestDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleByEmailRequestDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleRequestDto;
+import com.stanzaliving.core.user.dto.response.UserAccessModuleDto;
 import com.stanzaliving.user.acl.service.AclUserService;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
@@ -45,7 +54,7 @@ public class AclUserController {
 
     @PostMapping("revoke/department/roles/all")
     public ResponseDto<Void> revokeAllRolesForDepartment(@RequestParam String userUuid,
-                                                  @RequestParam Department department) {
+                                                         @RequestParam Department department) {
         log.info("Received request to revoke all roles for user {} of department {}", userUuid, department);
         aclUserService.revokeAllRolesOfDepartment(userUuid, department);
         return ResponseDto.success("Role Revocation successful");
@@ -53,8 +62,8 @@ public class AclUserController {
 
     @PostMapping("revoke/department/level/roles/all")
     public ResponseDto<Void> revokeAllRolesForDepartmentOfLevel(@RequestParam @NotEmpty String userUuid,
-                                                  @RequestParam @NotNull Department department,
-                                                  @RequestParam @NotNull AccessLevel accessLevel) {
+                                                                @RequestParam @NotNull Department department,
+                                                                @RequestParam @NotNull AccessLevel accessLevel) {
         log.info("Received request to revoke all roles for user {} of department {} of level {}", userUuid, department, accessLevel);
         aclUserService.revokeAllRolesOfDepartmentOfLevel(userUuid, department, accessLevel);
         return ResponseDto.success("Role Revocation successful");
@@ -81,4 +90,16 @@ public class AclUserController {
         return ResponseDto.success("Bulk Role Assignment successful");
     }
 
+    @GetMapping("/accessModule/{userUuid}")
+    public ResponseDto<List<UserAccessModuleDto>> getUserAccessModulesByUserUuid(@PathVariable @NotBlank(message = "User uuid must not be blank") String userUuid) {
+
+        List<UserAccessModuleDto> userAccessModuleDtoList = aclUserService.getUserAccessModulesByUserUuid(userUuid);
+        if (CollectionUtils.isNotEmpty(userAccessModuleDtoList)) {
+            return ResponseDto.success("List of Modules that the user has access to", userAccessModuleDtoList);
+        } else {
+            ResponseDto responseDto = new ResponseDto();
+            responseDto.setHttpStatusCode(HttpStatus.FORBIDDEN.value());
+            return responseDto.failure("Access to modules denied");
+        }
+    }
 }

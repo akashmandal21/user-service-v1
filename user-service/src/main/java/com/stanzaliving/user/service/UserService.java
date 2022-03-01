@@ -78,6 +78,4 @@ public interface UserService {
 	List<UserRoleCacheDto> getCacheableForRoles(List<String> roleNames);
 
 	UserProfileDto getUserProfileDtoByEmail(String email);
-
-	List<UserAccessModuleDto> getUserAccessModulesByUserUuid(String userUuid);
 }

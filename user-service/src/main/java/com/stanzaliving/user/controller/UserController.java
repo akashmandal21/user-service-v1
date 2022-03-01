@@ -9,8 +9,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 
-import com.stanzaliving.core.user.dto.response.UserAccessModuleDto;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -195,16 +193,5 @@ public class UserController {
 		PageResponse<UserProfileDto> userDtos = userService.searchUser(userFilterDto);
 
 		return ResponseDto.success("Found " + userDtos.getRecords() + " Users for Search Criteria", userDtos);
-	}
-
-	@GetMapping("/accessModule/{userUuid}")
-	public ResponseDto<List<UserAccessModuleDto>> getUserAccessModulesByUserUuid(@PathVariable @NotBlank(message = "User uuid must not be blank") String userUuid) {
-
-		List<UserAccessModuleDto> userAccessModuleDtoList = userService.getUserAccessModulesByUserUuid(userUuid);
-		if (CollectionUtils.isNotEmpty(userAccessModuleDtoList)) {
-			return ResponseDto.success("List of Modules that the user has access to", userAccessModuleDtoList);
-		} else {
-			return ResponseDto.failure("Access to modules denied");
-		}
 	}
 }
