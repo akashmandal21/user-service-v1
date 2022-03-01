@@ -19,6 +19,7 @@ import com.stanzaliving.core.user.acl.dto.UsersByFiltersResponseDto;
 import com.stanzaliving.core.user.acl.enums.Role;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleByEmailRequestDto;
 import com.stanzaliving.user.acl.repository.RoleRepository;
+import com.stanzaliving.user.acl.repository.RoleAccessModuleRepository;
 import com.stanzaliving.user.acl.repository.UserDepartmentLevelRepository;
 import com.stanzaliving.user.acl.repository.UserDepartmentLevelRoleRepository;
 import org.apache.commons.collections.CollectionUtils;

@@ -10,6 +10,7 @@ import com.stanzaliving.core.user.acl.dto.UsersByFiltersRequestDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRequestDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleByEmailRequestDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleRequestDto;
+import com.stanzaliving.core.user.dto.response.UserAccessModuleDto;
 import com.stanzaliving.core.user.dto.response.UserContactDetailsResponseDto;
 
 import java.util.List;

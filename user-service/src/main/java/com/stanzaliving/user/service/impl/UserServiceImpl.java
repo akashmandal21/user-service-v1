@@ -15,6 +15,11 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import com.stanzaliving.core.base.enums.AccessModule;
+import com.stanzaliving.core.user.dto.response.UserAccessModuleDto;
+import com.stanzaliving.user.acl.repository.RoleAccessModuleRepository;
+import com.stanzaliving.user.acl.repository.UserDepartmentLevelRepository;
+import com.stanzaliving.user.acl.repository.UserDepartmentLevelRoleRepository;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -116,6 +121,14 @@ public class UserServiceImpl implements UserService {
 	
 	@Value("${country.uuid}")
 	private String countryUuid;
+
+	@Autowired
+	private UserDepartmentLevelRepository userDepartmentLevelRepository;
+
+	private UserDepartmentLevelRoleRepository userDepartmentLevelRoleRepository;
+
+	@Autowired
+	private RoleAccessModuleRepository roleAccessModuleRepository;
 	
 	@Override
 	public UserProfileDto getActiveUserByUserId(String userId) {
@@ -725,5 +738,34 @@ public class UserServiceImpl implements UserService {
 		}
 
 		return UserAdapter.getUserProfileDto(userEntity);
+	}
+
+	@Override
+	public List<UserAccessModuleDto> getUserAccessModulesByUserUuid(String userUuid) {
+
+		log.info("Search for access modules for user : {}", userUuid);
+		List<UserAccessModuleDto> userAccessModuleDtoList = new ArrayList<>();
+		List<String> roleUuids = new ArrayList<>();
+		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelRepository.findByUserUuidAndStatus(userUuid, true);
+		if (CollectionUtils.isNotEmpty(userDepartmentLevelEntityList)) {
+			for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
+				List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = userDepartmentLevelRoleRepository.findByUserDepartmentLevelUuidAndStatus(userDepartmentLevelEntity.getUuid(), true);
+				if (CollectionUtils.isNotEmpty(userDepartmentLevelRoleEntityList)) {
+					for (UserDepartmentLevelRoleEntity userDepartmentLevelRoleEntity : userDepartmentLevelRoleEntityList) {
+						roleUuids.add(userDepartmentLevelRoleEntity.getRoleUuid());
+					}
+				}
+			}
+		}
+		if (CollectionUtils.isNotEmpty(roleUuids)) {
+			List<AccessModule> accessModuleList = roleAccessModuleRepository.findAccessModuleByRoleUuidInAndStatus(roleUuids, true);
+			for (AccessModule accessModule : accessModuleList) {
+				UserAccessModuleDto userAccessModuleDto = new UserAccessModuleDto();
+				userAccessModuleDto.setAccessModule(accessModule);
+				userAccessModuleDto.setAccessModuleName(accessModule.getName());
+				userAccessModuleDtoList.add(userAccessModuleDto);
+			}
+		}
+		return userAccessModuleDtoList;
 	}
 }
