@@ -125,6 +125,7 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private UserDepartmentLevelRepository userDepartmentLevelRepository;
 
+	@Autowired
 	private UserDepartmentLevelRoleRepository userDepartmentLevelRoleRepository;
 
 	@Autowired
