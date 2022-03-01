@@ -11,9 +11,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.stanzaliving.core.base.enums.AccessModule;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleByEmailRequestDto;
-import com.stanzaliving.core.user.dto.response.UserAccessModuleDto;
 import com.stanzaliving.user.acl.repository.RoleAccessModuleRepository;
 import com.stanzaliving.user.acl.repository.UserDepartmentLevelRepository;
 import com.stanzaliving.user.acl.repository.UserDepartmentLevelRoleRepository;
@@ -90,14 +88,6 @@ public class AclUserServiceImpl implements AclUserService {
 
 	@Value("${kafka.topic.role}")
 	private String roleTopic;
-
-	@Autowired
-	private UserDepartmentLevelRepository userDepartmentLevelRepository;
-
-	private UserDepartmentLevelRoleRepository userDepartmentLevelRoleRepository;
-
-	@Autowired
-	private RoleAccessModuleRepository roleAccessModuleRepository;
 
 	@Override
 	public void addRole(AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleDto) {
@@ -347,34 +337,5 @@ public class AclUserServiceImpl implements AclUserService {
 		List<UserDeptLevelRoleNameUrlExpandedDto> data = aclService.getUserDeptLevelRoleNameUrlExpandedDtoBe(userUuid);
 		UserRoleSnapshot userRoleSnapshot = UserRoleSnapshot.builder().userUuid(userUuid).userDeptLevelRoles(data).build();
 		notificationProducer.publish(roleTopic, UserRoleSnapshot.class.getName(), userRoleSnapshot);
-	}
-
-	@Override
-	public List<UserAccessModuleDto> getUserAccessModulesByUserUuid(String userUuid) {
-
-		log.info("Search for access modules for user : {}", userUuid);
-		List<UserAccessModuleDto> userAccessModuleDtoList = new ArrayList<>();
-		List<String> roleUuids = new ArrayList<>();
-		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelRepository.findByUserUuidAndStatus(userUuid, true);
-		if (CollectionUtils.isNotEmpty(userDepartmentLevelEntityList)) {
-			for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
-				List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = userDepartmentLevelRoleRepository.findByUserDepartmentLevelUuidAndStatus(userDepartmentLevelEntity.getUuid(), true);
-				if (CollectionUtils.isNotEmpty(userDepartmentLevelRoleEntityList)) {
-					for (UserDepartmentLevelRoleEntity userDepartmentLevelRoleEntity : userDepartmentLevelRoleEntityList) {
-						roleUuids.add(userDepartmentLevelRoleEntity.getRoleUuid());
-					}
-				}
-			}
-		}
-		if (CollectionUtils.isNotEmpty(roleUuids)) {
-			List<AccessModule> accessModuleList = roleAccessModuleRepository.findAccessModuleByRoleUuidInAndStatus(roleUuids, true);
-			for (AccessModule accessModule : accessModuleList) {
-				UserAccessModuleDto userAccessModuleDto = new UserAccessModuleDto();
-				userAccessModuleDto.setAccessModule(accessModule);
-				userAccessModuleDto.setAccessModuleName(accessModule.getName());
-				userAccessModuleDtoList.add(userAccessModuleDto);
-			}
-		}
-		return userAccessModuleDtoList;
 	}
 }

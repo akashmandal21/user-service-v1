@@ -38,6 +38,4 @@ public interface AclUserService {
 	List<UserContactDetailsResponseDto> getUserContactDetails(Department department, String roleName, List<String> accessLevelEntity);
 
 	void bulkAddRole(AddUserDeptLevelRoleByEmailRequestDto addUserDeptLevelRoleByEmailRequestDto);
-
-	List<UserAccessModuleDto> getUserAccessModulesByUserUuid(String userUuid);
 }
