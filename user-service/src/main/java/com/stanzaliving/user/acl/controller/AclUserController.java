@@ -9,6 +9,7 @@ import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRequestDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleByEmailRequestDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleRequestDto;
 import com.stanzaliving.core.user.dto.response.UserAccessModuleDto;
+import com.stanzaliving.transformations.pojo.CityMetadataDto;
 import com.stanzaliving.user.acl.service.AclUserService;
 import com.stanzaliving.user.service.UserService;
 import lombok.extern.log4j.Log4j2;
@@ -101,9 +102,18 @@ public class AclUserController {
         if (CollectionUtils.isNotEmpty(userAccessModuleDtoList)) {
             return ResponseDto.success("List of Modules that the user has access to", userAccessModuleDtoList);
         } else {
-            ResponseDto responseDto = new ResponseDto();
-            responseDto.setHttpStatusCode(HttpStatus.FORBIDDEN.value());
-            return responseDto.failure("Access to modules denied");
+            return ResponseDto.failure("Access to modules denied");
+        }
+    }
+
+    @GetMapping("/cities/{userUuid}/{department}")
+    public ResponseDto<List<CityMetadataDto>> getCitiesByUserAcessAndDepartment(@PathVariable @NotBlank(message = "User uuid must not be blank") String userUuid,
+                                                                                @PathVariable @NotBlank(message = "Department must not be blank") Department department) {
+        List<CityMetadataDto> cityMetadataDtoList = userService.getCitiesByUserAcessAndDepartment(userUuid, department);
+        if (CollectionUtils.isNotEmpty(cityMetadataDtoList)) {
+            return ResponseDto.success("List of cities", cityMetadataDtoList);
+        } else {
+            return ResponseDto.failure("No access to cities found");
         }
     }
 }
