@@ -827,10 +827,10 @@ public class UserServiceImpl implements UserService {
                     .findByUuidInAndAccessLevel(userDepartmentLevelUuids, AccessLevel.CITY);
 				UsersByAccessModulesAndCitiesResponseDto responseDto = new UsersByAccessModulesAndCitiesResponseDto();
 				responseDto.setAccessLevelEntityUuid(cityUuid);
+				responseDto.setAccessLevelEntityName(transformationCache.getCityByUuid(cityUuid).getCityName());
 				List<UserProfileDto> userProfileDtoList = new ArrayList<>();
 	            if (CollectionUtils.isNotEmpty(userDepartmentLevelEntityList)) {
 	                for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
-						responseDto.setAccessLevelEntityName(transformationCache.getCityByUuid(cityUuid).getCityName());
 	                    if (Arrays.asList(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid().split(",")).contains(cityUuid)) {
                             UserProfileDto userProfileDto = getActiveUserByUserId(userDepartmentLevelEntity.getUserUuid());
                             userProfileDtoList.add(userProfileDto);
@@ -850,6 +850,7 @@ public class UserServiceImpl implements UserService {
                     .findByUuidInAndAccessLevel(userDepartmentLevelUuids, AccessLevel.MICROMARKET);
 				UsersByAccessModulesAndCitiesResponseDto responseDto = new UsersByAccessModulesAndCitiesResponseDto();
 				responseDto.setAccessLevelEntityUuid(micromarketUuid);
+				responseDto.setAccessLevelEntityName(transformationCache.getMicromarketByUuid(micromarketUuid).getMicroMarketName());
 				List<UserProfileDto> userProfileDtoList = new ArrayList<>();
                 if (CollectionUtils.isNotEmpty(userDepartmentLevelEntityList)) {
                     for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
@@ -876,6 +877,7 @@ public class UserServiceImpl implements UserService {
                     .findByUuidInAndAccessLevel(userDepartmentLevelUuids, AccessLevel.RESIDENCE);
 				UsersByAccessModulesAndCitiesResponseDto responseDto = new UsersByAccessModulesAndCitiesResponseDto();
 				responseDto.setAccessLevelEntityUuid(entry.getKey());
+				responseDto.setAccessLevelEntityName(transformationCache.getMicromarketByUuid(entry.getKey()).getMicroMarketName());
 				List<UserProfileDto> userProfileDtoList = new ArrayList<>();
                 if (CollectionUtils.isNotEmpty(userDepartmentLevelEntityList)) {
                     for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
