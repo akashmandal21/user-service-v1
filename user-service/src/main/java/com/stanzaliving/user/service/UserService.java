@@ -9,13 +9,15 @@ import java.util.Set;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
 import com.stanzaliving.core.base.enums.Department;
+import com.stanzaliving.core.user.acl.dto.UserAccessModuleDto;
+import com.stanzaliving.core.user.acl.dto.UsersByAccessModulesAndCitiesRequestDto;
+import com.stanzaliving.core.user.acl.dto.UsersByAccessModulesAndCitiesResponseDto;
 import com.stanzaliving.core.user.dto.AccessLevelRoleRequestDto;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserFilterDto;
 import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.dto.UserRoleCacheDto;
-import com.stanzaliving.core.user.dto.response.UserAccessModuleDto;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.ActiveUserRequestDto;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
@@ -84,4 +86,6 @@ public interface UserService {
 	List<UserAccessModuleDto> getUserAccessModulesByUserUuid(String userUuid);
 
 	List<CityMetadataDto> getCitiesByUserAcessAndDepartment(String userUuid, Department department);
+
+	List<UsersByAccessModulesAndCitiesResponseDto> getUsersByAccessModulesAndCitites(UsersByAccessModulesAndCitiesRequestDto usersByAccessModulesAndCitiesRequestDto);
 }

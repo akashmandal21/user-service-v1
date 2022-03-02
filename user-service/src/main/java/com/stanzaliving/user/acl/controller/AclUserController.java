@@ -3,19 +3,20 @@ package com.stanzaliving.user.acl.controller;
 import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
+import com.stanzaliving.core.user.acl.dto.UserAccessModuleDto;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleListDto;
+import com.stanzaliving.core.user.acl.dto.UsersByAccessModulesAndCitiesRequestDto;
+import com.stanzaliving.core.user.acl.dto.UsersByAccessModulesAndCitiesResponseDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRequestDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleByEmailRequestDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleRequestDto;
-import com.stanzaliving.core.user.dto.response.UserAccessModuleDto;
 import com.stanzaliving.transformations.pojo.CityMetadataDto;
 import com.stanzaliving.user.acl.service.AclUserService;
 import com.stanzaliving.user.service.UserService;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -98,6 +99,7 @@ public class AclUserController {
     @GetMapping("/accessModule/{userUuid}")
     public ResponseDto<List<UserAccessModuleDto>> getUserAccessModulesByUserUuid(@PathVariable @NotBlank(message = "User uuid must not be blank") String userUuid) {
 
+        log.info("Get Access Modules for user : {]", userUuid);
         List<UserAccessModuleDto> userAccessModuleDtoList = userService.getUserAccessModulesByUserUuid(userUuid);
         if (CollectionUtils.isNotEmpty(userAccessModuleDtoList)) {
             return ResponseDto.success("List of Modules that the user has access to", userAccessModuleDtoList);
@@ -109,11 +111,24 @@ public class AclUserController {
     @GetMapping("/cities/{userUuid}/{department}")
     public ResponseDto<List<CityMetadataDto>> getCitiesByUserAcessAndDepartment(@PathVariable @NotBlank(message = "User uuid must not be blank") String userUuid,
                                                                                 @PathVariable @NotBlank(message = "Department must not be blank") Department department) {
+        log.info("Get Cities for User : {}, and Department : {}", userUuid, department);
         List<CityMetadataDto> cityMetadataDtoList = userService.getCitiesByUserAcessAndDepartment(userUuid, department);
         if (CollectionUtils.isNotEmpty(cityMetadataDtoList)) {
             return ResponseDto.success("List of cities", cityMetadataDtoList);
         } else {
             return ResponseDto.failure("No access to cities found");
+        }
+    }
+
+    @PostMapping("accessModules/cities")
+    public ResponseDto<List<UsersByAccessModulesAndCitiesResponseDto>> getUsersByAccessModulesAndCitites(
+        @RequestBody UsersByAccessModulesAndCitiesRequestDto requestDto) {
+        log.info("Get Users by access modules and cities : {}", requestDto);
+        List<UsersByAccessModulesAndCitiesResponseDto> responseDtos = userService.getUsersByAccessModulesAndCitites(requestDto);
+        if (CollectionUtils.isNotEmpty(responseDtos)) {
+            return ResponseDto.success("Users by Access Modules, Cities and Access Level", responseDtos);
+        } else {
+            return ResponseDto.failure("Can't find Users by Access Modules, Cities and Access Level");
         }
     }
 }

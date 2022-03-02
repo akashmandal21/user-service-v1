@@ -16,4 +16,6 @@ public interface RoleAccessModuleRepository extends AbstractJpaRepository<RoleAc
         "WHERE r.roleUuid IN :roleUuids " +
         "AND r.status = :status")
     List<AccessModule> findAccessModuleByRoleUuidInAndStatus(List<String> roleUuids, boolean status);
+
+    List<String> findRoleUuidByAccessModuleIn(List<AccessModule> accessModules);
 }

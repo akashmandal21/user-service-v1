@@ -3,40 +3,10 @@
  */
 package com.stanzaliving.user.service.impl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.validation.Valid;
-
-import com.stanzaliving.core.base.enums.AccessModule;
-import com.stanzaliving.core.transformation.client.cache.TransformationCache;
-import com.stanzaliving.core.user.dto.response.UserAccessModuleDto;
-import com.stanzaliving.transformations.pojo.CityMetadataDto;
-import com.stanzaliving.user.acl.repository.RoleAccessModuleRepository;
-import com.stanzaliving.user.acl.repository.UserDepartmentLevelRepository;
-import com.stanzaliving.user.acl.repository.UserDepartmentLevelRoleRepository;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.ListUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
-
 import com.stanzaliving.core.base.common.dto.PageResponse;
 import com.stanzaliving.core.base.common.dto.PaginationRequest;
 import com.stanzaliving.core.base.enums.AccessLevel;
+import com.stanzaliving.core.base.enums.AccessModule;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.base.exception.ApiValidationException;
 import com.stanzaliving.core.base.exception.NoRecordException;
@@ -45,7 +15,11 @@ import com.stanzaliving.core.generic.dto.UIKeyValue;
 import com.stanzaliving.core.kafka.dto.KafkaDTO;
 import com.stanzaliving.core.kafka.producer.NotificationProducer;
 import com.stanzaliving.core.sqljpa.adapter.AddressAdapter;
+import com.stanzaliving.core.transformation.client.cache.TransformationCache;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
+import com.stanzaliving.core.user.acl.dto.UserAccessModuleDto;
+import com.stanzaliving.core.user.acl.dto.UsersByAccessModulesAndCitiesRequestDto;
+import com.stanzaliving.core.user.acl.dto.UsersByAccessModulesAndCitiesResponseDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleRequestDto;
 import com.stanzaliving.core.user.dto.AccessLevelRoleRequestDto;
 import com.stanzaliving.core.user.dto.UserDto;
@@ -58,10 +32,15 @@ import com.stanzaliving.core.user.request.dto.ActiveUserRequestDto;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
+import com.stanzaliving.transformations.pojo.CityMetadataDto;
 import com.stanzaliving.user.acl.db.service.UserDepartmentLevelDbService;
 import com.stanzaliving.user.acl.db.service.UserDepartmentLevelRoleDbService;
+import com.stanzaliving.user.acl.entity.RoleAccessModuleMappingEntity;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity;
+import com.stanzaliving.user.acl.repository.RoleAccessModuleRepository;
+import com.stanzaliving.user.acl.repository.UserDepartmentLevelRepository;
+import com.stanzaliving.user.acl.repository.UserDepartmentLevelRoleRepository;
 import com.stanzaliving.user.acl.service.AclUserService;
 import com.stanzaliving.user.acl.service.RoleService;
 import com.stanzaliving.user.acl.service.UserDepartmentLevelRoleService;
@@ -73,8 +52,30 @@ import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.entity.UserProfileEntity;
 import com.stanzaliving.user.service.UserManagerMappingService;
 import com.stanzaliving.user.service.UserService;
-
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.ListUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+
+import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author naveen
@@ -703,7 +704,7 @@ public class UserServiceImpl implements UserService {
 				}
 			}
 
-		}
+        }
 
 		if(CollectionUtils.isNotEmpty(users)){
 			PaginationRequest paginationRequest = PaginationRequest.builder().pageNo(1).limit(users.size()).build();
@@ -746,8 +747,8 @@ public class UserServiceImpl implements UserService {
 		return UserAdapter.getUserProfileDto(userEntity);
 	}
 
-	@Override
-	public List<UserAccessModuleDto> getUserAccessModulesByUserUuid(String userUuid) {
+    @Override
+    public List<UserAccessModuleDto> getUserAccessModulesByUserUuid(String userUuid) {
 
 		log.info("Search for access modules for user : {}", userUuid);
 		List<UserAccessModuleDto> userAccessModuleDtoList = new ArrayList<>();
@@ -775,11 +776,13 @@ public class UserServiceImpl implements UserService {
 		return userAccessModuleDtoList;
 	}
 
-	public List<CityMetadataDto> getCitiesByUserAcessAndDepartment(String userUuid, Department department) {
-		UserDepartmentLevelEntity userDepartmentLevelEntitiesByCountry = userDepartmentLevelRepository
-			.findByUserUuidAndDepartmentAndAccessLevelAndStatus(userUuid, department, AccessLevel.COUNTRY, true);
-		if (Objects.nonNull(userDepartmentLevelEntitiesByCountry)) {
-		    return transformationCache.getAllCities();
+    @Override
+    public List<CityMetadataDto> getCitiesByUserAcessAndDepartment(String userUuid, Department department) {
+        log.info("Get cities for user : {} and department : {}", userUuid, department);
+        UserDepartmentLevelEntity userDepartmentLevelEntitiesByCountry = userDepartmentLevelRepository
+            .findByUserUuidAndDepartmentAndAccessLevelAndStatus(userUuid, department, AccessLevel.COUNTRY, true);
+        if (Objects.nonNull(userDepartmentLevelEntitiesByCountry)) {
+            return transformationCache.getAllCities();
         } else {
             UserDepartmentLevelEntity userDepartmentLevelEntitiesByCity = userDepartmentLevelRepository
                 .findByUserUuidAndDepartmentAndAccessLevelAndStatus(userUuid, department, AccessLevel.CITY, true);
@@ -793,6 +796,91 @@ public class UserServiceImpl implements UserService {
             } else {
                 return null;
             }
-		}
-	}
+        }
+    }
+
+    @Override
+    public List<UsersByAccessModulesAndCitiesResponseDto> getUsersByAccessModulesAndCitites(UsersByAccessModulesAndCitiesRequestDto requestDto) {
+
+        log.info("Get Users by access modules and cities : {}", requestDto);
+        List<String> roleUuids = roleAccessModuleRepository.findRoleUuidByAccessModuleIn(requestDto.getAccessModuleList());
+        if (CollectionUtils.isNotEmpty(roleUuids)) {
+            List<String> userDepartmentLevelUuids = userDepartmentLevelRoleRepository.findUserDepartmentLevelUuidByRoleUuidIn(roleUuids);
+            if (CollectionUtils.isNotEmpty(userDepartmentLevelUuids)) {
+                return getUsersByCities(requestDto, userDepartmentLevelUuids);
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    private List<UsersByAccessModulesAndCitiesResponseDto> getUsersByCities(UsersByAccessModulesAndCitiesRequestDto requestDto,
+                                                                            List<String> userDepartmentLevelUuids) {
+	    log.info("User Department Level Uuids found with access modules {}", userDepartmentLevelUuids);
+        List<UsersByAccessModulesAndCitiesResponseDto> responseDtoList = new ArrayList<>();
+	    if (requestDto.getAccessLevel() == AccessLevel.CITY) {
+	        for (String cityUuid : requestDto.getCityUuids()) {
+	            List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelRepository
+                    .findByUuidInAndAccessLevel(userDepartmentLevelUuids, AccessLevel.CITY);
+	            if (CollectionUtils.isNotEmpty(userDepartmentLevelEntityList)) {
+	                for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
+	                    if (Arrays.asList(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid().split(",")).contains(cityUuid)) {
+                            UsersByAccessModulesAndCitiesResponseDto responseDto = new UsersByAccessModulesAndCitiesResponseDto();
+                            responseDto.setAccessLevelEntityUuid(cityUuid);
+                            responseDto.setAccessLevelEntityName(transformationCache.getCityByUuid(cityUuid).getCityName());
+                            responseDto.setUserProfileDto(getActiveUserByUserId(userDepartmentLevelEntity.getUserUuid()));
+                            responseDtoList.add(responseDto);
+                        }
+                    }
+                }
+            }
+        } else if (requestDto.getAccessLevel() == AccessLevel.MICROMARKET) {
+	        List<String> micromarketUuids = new ArrayList<>();
+	        for (String cityUuid : requestDto.getCityUuids()) {
+	            micromarketUuids.addAll(transformationCache.getMicromarketUuidsByCityUuid(cityUuid));
+            }
+            for (String micromarketUuid : micromarketUuids) {
+                List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelRepository
+                    .findByUuidInAndAccessLevel(userDepartmentLevelUuids, AccessLevel.MICROMARKET);
+                if (CollectionUtils.isNotEmpty(userDepartmentLevelEntityList)) {
+                    for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
+                        if (Arrays.asList(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid().split(",")).contains(micromarketUuid)) {
+                            UsersByAccessModulesAndCitiesResponseDto responseDto = new UsersByAccessModulesAndCitiesResponseDto();
+                            responseDto.setAccessLevelEntityUuid(micromarketUuid);
+                            responseDto.setAccessLevelEntityName(transformationCache.getMicromarketByUuid(micromarketUuid).getMicroMarketName());
+                            responseDto.setUserProfileDto(getActiveUserByUserId(userDepartmentLevelEntity.getUserUuid()));
+                            responseDtoList.add(responseDto);
+                        }
+                    }
+                }
+            }
+	    } else if (requestDto.getAccessLevel() == AccessLevel.RESIDENCE) {
+            List<String> micromarketUuids = new ArrayList<>();
+            Map<String, List<String>> micromarketResidenceMap = new HashMap<>();
+            for (String cityUuid : requestDto.getCityUuids()) {
+                micromarketUuids.addAll(transformationCache.getMicromarketUuidsByCityUuid(cityUuid));
+            }
+            for (String micromarketUuid : micromarketUuids) {
+                micromarketResidenceMap.put(micromarketUuid, transformationCache.getResidenceUuidsByMicromarketUuid(micromarketUuid));
+            }
+            for (Map.Entry<String, List<String>> entry : micromarketResidenceMap.entrySet()) {
+                List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelRepository
+                    .findByUuidInAndAccessLevel(userDepartmentLevelUuids, AccessLevel.RESIDENCE);
+                if (CollectionUtils.isNotEmpty(userDepartmentLevelEntityList)) {
+                    for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
+                        if (!Collections.disjoint(Arrays.asList(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid().split(",")), entry.getValue())) {
+                            UsersByAccessModulesAndCitiesResponseDto responseDto = new UsersByAccessModulesAndCitiesResponseDto();
+                            responseDto.setAccessLevelEntityUuid(entry.getKey());
+                            responseDto.setAccessLevelEntityName(transformationCache.getMicromarketByUuid(entry.getKey()).getMicroMarketName());
+                            responseDto.setUserProfileDto(getActiveUserByUserId(userDepartmentLevelEntity.getUserUuid()));
+                            responseDtoList.add(responseDto);
+                        }
+                    }
+                }
+            }
+        }
+	    return responseDtoList;
+    }
 }
