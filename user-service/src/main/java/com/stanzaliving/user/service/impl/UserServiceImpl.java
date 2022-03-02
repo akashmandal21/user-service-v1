@@ -805,7 +805,8 @@ public class UserServiceImpl implements UserService {
         log.info("Get Users by access modules and cities : {}", requestDto);
         List<String> roleUuids = roleAccessModuleRepository.findRoleUuidByAccessModuleIn(requestDto.getAccessModuleList());
         if (CollectionUtils.isNotEmpty(roleUuids)) {
-            List<String> userDepartmentLevelUuids = userDepartmentLevelRoleRepository.findUserDepartmentLevelUuidByRoleUuidIn(roleUuids);
+        	log.info("Role uuids : {}", roleUuids);
+            List<String> userDepartmentLevelUuids = userDepartmentLevelRoleRepository.findUserDepartmentLevelUuidByRoleUuidInAndStatus(roleUuids, true);
             if (CollectionUtils.isNotEmpty(userDepartmentLevelUuids)) {
                 return getUsersByCities(requestDto, userDepartmentLevelUuids);
             } else {
@@ -824,19 +825,22 @@ public class UserServiceImpl implements UserService {
 	        for (String cityUuid : requestDto.getCityUuids()) {
 	            List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelRepository
                     .findByUuidInAndAccessLevel(userDepartmentLevelUuids, AccessLevel.CITY);
+				UsersByAccessModulesAndCitiesResponseDto responseDto = new UsersByAccessModulesAndCitiesResponseDto();
+				responseDto.setAccessLevelEntityUuid(cityUuid);
+				List<UserProfileDto> userProfileDtoList = new ArrayList<>();
 	            if (CollectionUtils.isNotEmpty(userDepartmentLevelEntityList)) {
 	                for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
+						responseDto.setAccessLevelEntityName(transformationCache.getCityByUuid(cityUuid).getCityName());
 	                    if (Arrays.asList(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid().split(",")).contains(cityUuid)) {
-                            UsersByAccessModulesAndCitiesResponseDto responseDto = new UsersByAccessModulesAndCitiesResponseDto();
-                            responseDto.setAccessLevelEntityUuid(cityUuid);
-                            responseDto.setAccessLevelEntityName(transformationCache.getCityByUuid(cityUuid).getCityName());
-                            responseDto.setUserProfileDto(getActiveUserByUserId(userDepartmentLevelEntity.getUserUuid()));
-                            responseDtoList.add(responseDto);
+                            UserProfileDto userProfileDto = getActiveUserByUserId(userDepartmentLevelEntity.getUserUuid());
+                            userProfileDtoList.add(userProfileDto);
                         }
                     }
                 }
+				responseDto.setUserProfileDtoList(userProfileDtoList);
+	            responseDtoList.add(responseDto);
             }
-        } else if (requestDto.getAccessLevel() == AccessLevel.MICROMARKET) {
+       } else if (requestDto.getAccessLevel() == AccessLevel.MICROMARKET) {
 	        List<String> micromarketUuids = new ArrayList<>();
 	        for (String cityUuid : requestDto.getCityUuids()) {
 	            micromarketUuids.addAll(transformationCache.getMicromarketUuidsByCityUuid(cityUuid));
@@ -844,17 +848,19 @@ public class UserServiceImpl implements UserService {
             for (String micromarketUuid : micromarketUuids) {
                 List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelRepository
                     .findByUuidInAndAccessLevel(userDepartmentLevelUuids, AccessLevel.MICROMARKET);
+				UsersByAccessModulesAndCitiesResponseDto responseDto = new UsersByAccessModulesAndCitiesResponseDto();
+				responseDto.setAccessLevelEntityUuid(micromarketUuid);
+				List<UserProfileDto> userProfileDtoList = new ArrayList<>();
                 if (CollectionUtils.isNotEmpty(userDepartmentLevelEntityList)) {
                     for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
                         if (Arrays.asList(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid().split(",")).contains(micromarketUuid)) {
-                            UsersByAccessModulesAndCitiesResponseDto responseDto = new UsersByAccessModulesAndCitiesResponseDto();
-                            responseDto.setAccessLevelEntityUuid(micromarketUuid);
-                            responseDto.setAccessLevelEntityName(transformationCache.getMicromarketByUuid(micromarketUuid).getMicroMarketName());
-                            responseDto.setUserProfileDto(getActiveUserByUserId(userDepartmentLevelEntity.getUserUuid()));
-                            responseDtoList.add(responseDto);
+							UserProfileDto userProfileDto = getActiveUserByUserId(userDepartmentLevelEntity.getUserUuid());
+							userProfileDtoList.add(userProfileDto);
                         }
                     }
                 }
+				responseDto.setUserProfileDtoList(userProfileDtoList);
+				responseDtoList.add(responseDto);
             }
 	    } else if (requestDto.getAccessLevel() == AccessLevel.RESIDENCE) {
             List<String> micromarketUuids = new ArrayList<>();
@@ -868,17 +874,19 @@ public class UserServiceImpl implements UserService {
             for (Map.Entry<String, List<String>> entry : micromarketResidenceMap.entrySet()) {
                 List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelRepository
                     .findByUuidInAndAccessLevel(userDepartmentLevelUuids, AccessLevel.RESIDENCE);
+				UsersByAccessModulesAndCitiesResponseDto responseDto = new UsersByAccessModulesAndCitiesResponseDto();
+				responseDto.setAccessLevelEntityUuid(entry.getKey());
+				List<UserProfileDto> userProfileDtoList = new ArrayList<>();
                 if (CollectionUtils.isNotEmpty(userDepartmentLevelEntityList)) {
                     for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
                         if (!Collections.disjoint(Arrays.asList(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid().split(",")), entry.getValue())) {
-                            UsersByAccessModulesAndCitiesResponseDto responseDto = new UsersByAccessModulesAndCitiesResponseDto();
-                            responseDto.setAccessLevelEntityUuid(entry.getKey());
-                            responseDto.setAccessLevelEntityName(transformationCache.getMicromarketByUuid(entry.getKey()).getMicroMarketName());
-                            responseDto.setUserProfileDto(getActiveUserByUserId(userDepartmentLevelEntity.getUserUuid()));
-                            responseDtoList.add(responseDto);
+							UserProfileDto userProfileDto = getActiveUserByUserId(userDepartmentLevelEntity.getUserUuid());
+							userProfileDtoList.add(userProfileDto);
                         }
                     }
                 }
+				responseDto.setUserProfileDtoList(userProfileDtoList);
+				responseDtoList.add(responseDto);
             }
         }
 	    return responseDtoList;

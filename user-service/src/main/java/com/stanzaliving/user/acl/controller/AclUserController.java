@@ -1,6 +1,7 @@
 package com.stanzaliving.user.acl.controller;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
+import com.stanzaliving.core.base.constants.SecurityConstants;
 import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.user.acl.dto.UserAccessModuleDto;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -96,8 +98,8 @@ public class AclUserController {
         return ResponseDto.success("Bulk Role Assignment successful");
     }
 
-    @GetMapping("/accessModule/{userUuid}")
-    public ResponseDto<List<UserAccessModuleDto>> getUserAccessModulesByUserUuid(@PathVariable @NotBlank(message = "User uuid must not be blank") String userUuid) {
+    @GetMapping("/accessModule")
+    public ResponseDto<List<UserAccessModuleDto>> getUserAccessModulesByUserUuid(@RequestAttribute(name = SecurityConstants.USER_ID) @NotBlank(message = "User Id is mandatory to get user profile") String userUuid) {
 
         log.info("Get Access Modules for user : {]", userUuid);
         List<UserAccessModuleDto> userAccessModuleDtoList = userService.getUserAccessModulesByUserUuid(userUuid);
@@ -108,8 +110,8 @@ public class AclUserController {
         }
     }
 
-    @GetMapping("/cities/{userUuid}/{department}")
-    public ResponseDto<List<CityMetadataDto>> getCitiesByUserAcessAndDepartment(@PathVariable @NotBlank(message = "User uuid must not be blank") String userUuid,
+    @GetMapping("/cities/{department}")
+    public ResponseDto<List<CityMetadataDto>> getCitiesByUserAcessAndDepartment(@RequestAttribute(name = SecurityConstants.USER_ID) @NotBlank(message = "User Id is mandatory to get user profile") String userUuid,
                                                                                 @PathVariable @NotBlank(message = "Department must not be blank") Department department) {
         log.info("Get Cities for User : {}, and Department : {}", userUuid, department);
         List<CityMetadataDto> cityMetadataDtoList = userService.getCitiesByUserAcessAndDepartment(userUuid, department);

@@ -17,5 +17,8 @@ public interface RoleAccessModuleRepository extends AbstractJpaRepository<RoleAc
         "AND r.status = :status")
     List<AccessModule> findAccessModuleByRoleUuidInAndStatus(List<String> roleUuids, boolean status);
 
+    @Query(value = "SELECT r.roleUuid " +
+        "FROM com.stanzaliving.user.acl.entity.RoleAccessModuleMappingEntity r " +
+        "WHERE r.accessModule IN :accessModules")
     List<String> findRoleUuidByAccessModuleIn(List<AccessModule> accessModules);
 }
