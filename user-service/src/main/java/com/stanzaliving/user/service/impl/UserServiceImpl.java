@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.stanzaliving.user.service.impl;
 
@@ -16,7 +16,9 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 
 import com.stanzaliving.core.base.enums.AccessModule;
+import com.stanzaliving.core.transformation.client.cache.TransformationCache;
 import com.stanzaliving.core.user.dto.response.UserAccessModuleDto;
+import com.stanzaliving.transformations.pojo.CityMetadataDto;
 import com.stanzaliving.user.acl.repository.RoleAccessModuleRepository;
 import com.stanzaliving.user.acl.repository.UserDepartmentLevelRepository;
 import com.stanzaliving.user.acl.repository.UserDepartmentLevelRoleRepository;
@@ -118,7 +120,7 @@ public class UserServiceImpl implements UserService {
 
 	@Value("${broker.role}")
 	private String brokerUuid;
-	
+
 	@Value("${country.uuid}")
 	private String countryUuid;
 
@@ -130,7 +132,10 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private RoleAccessModuleRepository roleAccessModuleRepository;
-	
+
+	@Autowired
+	private TransformationCache transformationCache;
+
 	@Override
 	public UserProfileDto getActiveUserByUserId(String userId) {
 
@@ -191,7 +196,7 @@ public class UserServiceImpl implements UserService {
 
 			log.warn("User: " + userEntity.getUuid() + " already exists for Mobile: " + addUserRequestDto.getMobile()
 					+ ", ISO Code: " + addUserRequestDto.getIsoCode() + " of type: " + addUserRequestDto.getUserType());
-			
+
 			if(addUserRequestDto.getUserType().equals(UserType.CONSUMER)|| addUserRequestDto.getUserType().equals(UserType.EXTERNAL)) {
 				userEntity.setUserType(addUserRequestDto.getUserType());
 				try {
@@ -200,8 +205,8 @@ public class UserServiceImpl implements UserService {
 					log.error("Got error while adding role",e);
 				}
 			}
-			
-			
+
+
 			return UserAdapter.getUserDto(userEntity);
 
 		}
@@ -220,9 +225,9 @@ public class UserServiceImpl implements UserService {
 
 		userEntity = userDbService.saveAndFlush(userEntity);
 
-		
+
 		addUserOrConsumerRole(userEntity);
-			
+
 
 		log.info("Added New User with Id: " + userEntity.getUuid());
 
@@ -353,13 +358,13 @@ public class UserServiceImpl implements UserService {
 	public List<UserProfileDto> getAllUsers() {
 
 		List<UserEntity> userEntities = userDbService.findAll();
-		
+
 		return UserAdapter.getUserProfileDtos(userEntities);
 	}
-	
+
 	@Override
 	public List<UserProfileDto> getAllActiveUsersByUuidIn(ActiveUserRequestDto activeUserRequestDto) {
-		
+
 		List<UserEntity> userEntities = userDbService.findByUuidInAndStatus(activeUserRequestDto.getUserIds(), true);
 
 		return UserAdapter.getUserProfileDtos(userEntities);
@@ -388,7 +393,7 @@ public class UserServiceImpl implements UserService {
 		userEntity = userDbService.update(userEntity);
 
 		addUserOrConsumerRole(userEntity);
-		
+
 		return Objects.nonNull(userEntity);
 	}
 
@@ -462,7 +467,7 @@ public class UserServiceImpl implements UserService {
 		UserProfileDto userProfileDto = UserAdapter.getUserProfileDto(userEntity);
 
 		addUserOrConsumerRole(userEntity);
-		
+
 		KafkaDTO kafkaDTO = new KafkaDTO();
 		kafkaDTO.setData(userProfileDto);
 
@@ -474,7 +479,7 @@ public class UserServiceImpl implements UserService {
 	private void addUserOrConsumerRole(UserEntity userEntity) {
 		if(userEntity.getUserType().equals(UserType.CONSUMER) || userEntity.getUserType().equals(UserType.EXTERNAL)) {
 			AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetails(userEntity);
-			
+
 			aclUserService.addRole(addUserDeptLevelRoleRequestDto);
 		}
 	}
@@ -519,7 +524,7 @@ public class UserServiceImpl implements UserService {
 		}
 
 		UserDto userDto = UserAdapter.getUserProfileDto(userDbService.update(userEntity));
-		
+
 		addUserOrConsumerRole(userEntity);
 
 		return userDto;
@@ -557,7 +562,7 @@ public class UserServiceImpl implements UserService {
 	public boolean createRoleBaseUser(UserType userType) {
 
 		List<UserEntity> userEntity = userDbService.findByUserType(userType);
-		
+
 		if (CollectionUtils.isEmpty(userEntity)) {
 			log.error("user Type: " + userType + " not available in User table.");
 			throw new ApiValidationException("User Type not exists in user Table.");
@@ -565,7 +570,7 @@ public class UserServiceImpl implements UserService {
 		userEntity.forEach(user -> {
 			if(user.isStatus()) {
 				AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetails(user);
-				
+
 				aclUserService.addRole(addUserDeptLevelRoleRequestDto);
 			}
 
@@ -576,20 +581,20 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public boolean createRoleBaseUser(List<String> mobiles) {
-		
+
 		for (String mobile : mobiles) {
 			UserEntity userEntity = userDbService.findByMobile(mobile);
 			if(Objects.nonNull(userEntity) && userEntity.isStatus()) {
 				AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetails(userEntity);
-				
+
 				aclUserService.addRole(addUserDeptLevelRoleRequestDto);
 			}
 		}
 		return Boolean.TRUE;
 	}
 
-	
-	
+
+
 	private AddUserDeptLevelRoleRequestDto getRoleDetails(UserEntity user) {
 		AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = AddUserDeptLevelRoleRequestDto.builder()
 				.build();
@@ -612,15 +617,15 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public Map<String, UserProfileDto> getUserProfileDto(Set<String> mobileNos) {
-		
+
 		Map<String, UserProfileDto> userMap = new HashMap<>();
-		
+
 		List<UserProfileDto> userProfileDto=UserAdapter.getUserProfileDtos(userDbService.findByMobileIn(mobileNos));
 
 		userProfileDto.forEach(user -> {
 			userMap.put(user.getMobile(), user);
 		});
-		
+
 		return userMap;
 	}
 
@@ -641,7 +646,7 @@ public class UserServiceImpl implements UserService {
 
 		@Override
 		public Map<String, UserProfileDto> getUserProfileForUserIn(List<String> userUuids) {
-			
+
 			Map<String, UserProfileDto> userMap = new HashMap<>();
 
 			List<UserProfileDto> userProfileDto = UserAdapter.getUserProfileDtos(userDbService.findByUuidIn(userUuids));
@@ -768,5 +773,26 @@ public class UserServiceImpl implements UserService {
 			}
 		}
 		return userAccessModuleDtoList;
+	}
+
+	public List<CityMetadataDto> getCitiesByUserAcessAndDepartment(String userUuid, Department department) {
+		UserDepartmentLevelEntity userDepartmentLevelEntitiesByCountry = userDepartmentLevelRepository
+			.findByUserUuidAndDepartmentAndAccessLevelAndStatus(userUuid, department, AccessLevel.COUNTRY, true);
+		if (Objects.nonNull(userDepartmentLevelEntitiesByCountry)) {
+		    return transformationCache.getAllCities();
+        } else {
+            UserDepartmentLevelEntity userDepartmentLevelEntitiesByCity = userDepartmentLevelRepository
+                .findByUserUuidAndDepartmentAndAccessLevelAndStatus(userUuid, department, AccessLevel.CITY, true);
+            if (Objects.nonNull(userDepartmentLevelEntitiesByCity)) {
+                List<String> cityUuids = Arrays.asList(userDepartmentLevelEntitiesByCity.getCsvAccessLevelEntityUuid().split(","));
+                List<CityMetadataDto> cityMetadataDtos = new ArrayList<>();
+                for (String cityUuid : cityUuids) {
+                    cityMetadataDtos.add(transformationCache.getCityByUuid(cityUuid));
+                }
+                return cityMetadataDtos;
+            } else {
+                return null;
+            }
+		}
 	}
 }

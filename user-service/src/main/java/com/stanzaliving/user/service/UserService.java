@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
+import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.user.dto.AccessLevelRoleRequestDto;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserFilterDto;
@@ -20,6 +21,7 @@ import com.stanzaliving.core.user.request.dto.ActiveUserRequestDto;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
+import com.stanzaliving.transformations.pojo.CityMetadataDto;
 import com.stanzaliving.user.entity.UserEntity;
 
 /**
@@ -80,4 +82,6 @@ public interface UserService {
 	UserProfileDto getUserProfileDtoByEmail(String email);
 
 	List<UserAccessModuleDto> getUserAccessModulesByUserUuid(String userUuid);
+
+	List<CityMetadataDto> getCitiesByUserAcessAndDepartment(String userUuid, Department department);
 }
