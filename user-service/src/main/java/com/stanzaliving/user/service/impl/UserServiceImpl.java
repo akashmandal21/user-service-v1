@@ -74,6 +74,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -843,7 +844,9 @@ public class UserServiceImpl implements UserService {
        } else if (requestDto.getAccessLevel() == AccessLevel.MICROMARKET) {
 	        List<String> micromarketUuids = new ArrayList<>();
 	        for (String cityUuid : requestDto.getCityUuids()) {
-	            micromarketUuids.addAll(transformationCache.getMicromarketUuidsByCityUuid(cityUuid));
+	        	log.info("micromarket uuids : {}", micromarketUuids);
+				Optional.ofNullable(transformationCache.getMicromarketUuidsByCityUuid(cityUuid))
+					.ifPresent(micromarketUuids::addAll);
             }
             for (String micromarketUuid : micromarketUuids) {
                 List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelRepository
@@ -867,7 +870,8 @@ public class UserServiceImpl implements UserService {
             List<String> micromarketUuids = new ArrayList<>();
             Map<String, List<String>> micromarketResidenceMap = new HashMap<>();
             for (String cityUuid : requestDto.getCityUuids()) {
-                micromarketUuids.addAll(transformationCache.getMicromarketUuidsByCityUuid(cityUuid));
+				Optional.ofNullable(transformationCache.getMicromarketUuidsByCityUuid(cityUuid))
+					.ifPresent(micromarketUuids::addAll);
             }
             for (String micromarketUuid : micromarketUuids) {
                 micromarketResidenceMap.put(micromarketUuid, transformationCache.getResidenceUuidsByMicromarketUuid(micromarketUuid));
