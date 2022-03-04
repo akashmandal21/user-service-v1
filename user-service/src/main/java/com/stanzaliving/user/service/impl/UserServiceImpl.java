@@ -666,8 +666,8 @@ public class UserServiceImpl implements UserService {
 						List<String> uuids = departmentLevelRoleEntities.stream().map(UserDepartmentLevelRoleEntity::getUserDepartmentLevelUuid).collect(Collectors.toList());
 
 						List<UserDepartmentLevelEntity> departmentLevelEntities = userDepartmentLevelDbService.findByUuidInAndAccessLevel(uuids, roleDto.getAccessLevel());
-
-//						log.info("Department Level Entity {}",departmentLevelEntities);
+						
+						Set<String> activeUserUuids = getActiveUserUuidsForUserDepttLevels(departmentLevelEntities);
 
 						if (CollectionUtils.isNotEmpty(departmentLevelEntities)) {
 							String key = roleDto.getRoleName()+""+department;
@@ -676,7 +676,11 @@ public class UserServiceImpl implements UserService {
 								Arrays.asList((entity.getCsvAccessLevelEntityUuid().split(","))).stream().forEach(accessUuid -> {
 									cacheDtos.get(key).getAccessUserMap().putIfAbsent(accessUuid, new ArrayList<>());
 									cacheDtos.get(key).getAccessUserMap().get(accessUuid).add(new UIKeyValue(entity.getUserUuid(), entity.getUserUuid()));
-									users.add(entity.getUserUuid());
+									
+									// while iterating check if user uuid is present in active users list 
+									if(activeUserUuids.contains(activeUserUuids)){
+										users.add(entity.getUserUuid());
+									}
 								});
 							});
 						}
@@ -700,6 +704,26 @@ public class UserServiceImpl implements UserService {
 
 		}
 		return ListUtils.EMPTY_LIST;
+	}
+
+	/**
+	 * @param departmentLevelEntities
+	 * @return
+	 */
+	private Set<String> getActiveUserUuidsForUserDepttLevels(List<UserDepartmentLevelEntity> departmentLevelEntities) {
+		// extract all user ids from list
+		List<String> userIds = departmentLevelEntities.stream().map(UserDepartmentLevelEntity::getUserUuid).collect(Collectors.toList());
+
+		// build ActiveUserRequestDto
+		ActiveUserRequestDto activeUserRequestDto = ActiveUserRequestDto.builder().userIds(userIds).build();
+
+		// fetch active user response dtos
+		List<UserProfileDto> userProfileDtos = getAllActiveUsersByUuidIn(activeUserRequestDto);
+
+		// create set of active user ids
+		Set<String> activeUserUuids = userProfileDtos.stream().map(UserProfileDto::getUuid).collect(Collectors.toSet());
+
+		return activeUserUuids;
 	}
 
 	private String getUserName(UserProfileDto userProfile){
