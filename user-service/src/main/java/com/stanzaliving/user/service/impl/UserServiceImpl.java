@@ -667,17 +667,25 @@ public class UserServiceImpl implements UserService {
 
 						List<UserDepartmentLevelEntity> departmentLevelEntities = userDepartmentLevelDbService.findByUuidInAndAccessLevel(uuids, roleDto.getAccessLevel());
 
-//						log.info("Department Level Entity {}",departmentLevelEntities);
+						Set<String> userIds = departmentLevelEntities.stream().map(UserDepartmentLevelEntity::getUserUuid).collect(Collectors.toSet());
+						log.info("userIds {}",userIds);
+						
+						Set<String> activeUserIds = getActiveUserUuids(userIds);
 
 						if (CollectionUtils.isNotEmpty(departmentLevelEntities)) {
-							String key = roleDto.getRoleName()+""+department;
-							cacheDtos.putIfAbsent(key,UserRoleCacheDto.builder().roleName(roleDto.getRoleName()).department(department).accessUserMap(new HashMap<>()).build());
+
+							String key = roleDto.getRoleName() + "" + department;
+							cacheDtos.putIfAbsent(key, UserRoleCacheDto.builder().roleName(roleDto.getRoleName()).department(department).accessUserMap(new HashMap<>()).build());
 							departmentLevelEntities.forEach(entity -> {
-								Arrays.asList((entity.getCsvAccessLevelEntityUuid().split(","))).stream().forEach(accessUuid -> {
-									cacheDtos.get(key).getAccessUserMap().putIfAbsent(accessUuid, new ArrayList<>());
-									cacheDtos.get(key).getAccessUserMap().get(accessUuid).add(new UIKeyValue(entity.getUserUuid(), entity.getUserUuid()));
-									users.add(entity.getUserUuid());
-								});
+
+								if (activeUserIds.contains(entity.getUserUuid())) {
+									Arrays.asList((entity.getCsvAccessLevelEntityUuid().split(","))).stream().forEach(accessUuid -> {
+										cacheDtos.get(key).getAccessUserMap().putIfAbsent(accessUuid, new ArrayList<>());
+										cacheDtos.get(key).getAccessUserMap().get(accessUuid).add(new UIKeyValue(entity.getUserUuid(), entity.getUserUuid()));
+										users.add(entity.getUserUuid());
+									});
+								}
+
 							});
 						}
 					}
@@ -689,7 +697,7 @@ public class UserServiceImpl implements UserService {
 		if(CollectionUtils.isNotEmpty(users)){
 			
 			PaginationRequest paginationRequest = PaginationRequest.builder().pageNo(1).limit(users.size()).build();
-			Map<String,String> userNames = this.searchUser(UserFilterDto.builder().pageRequest(paginationRequest).userIds(getActiveUserUuids(users).stream().collect(Collectors.toList())).build()).getData()
+			Map<String,String> userNames = this.searchUser(UserFilterDto.builder().pageRequest(paginationRequest).userIds(users.stream().collect(Collectors.toList())).build()).getData()
 					.stream().collect(Collectors.toMap(f->f.getUuid(), f->getUserName(f)));
 			return cacheDtos.values().stream().map(userRoleCacheDto -> {
 				for (Map.Entry<String, List<UIKeyValue>> entry : userRoleCacheDto.getAccessUserMap().entrySet()) {
