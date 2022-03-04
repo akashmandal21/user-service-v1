@@ -646,30 +646,28 @@ public class UserServiceImpl implements UserService {
 		Map<String,UserRoleCacheDto> cacheDtos = new HashMap<>(Department.values().length*roleNames.size());
 		Set<String> users = new HashSet<>();
 		for(Department department: Department.values()) {
-			log.info("Department {}", department);
+
+//			log.info("Department {}",department);
 
 			List<RoleDto> roleDtos = roleService.findByRoleNameInAndDepartment(roleNames, department);
-			log.info("Roles {}", roleDtos);
+
+//			log.info("Roles {}",roleDtos);
+
 
 			for (RoleDto roleDto : roleDtos) {
-				
-				log.info("Running iteration for role: {} ", roleDto);
-				
 				if (Objects.nonNull(roleDtos) && roleDto.getDepartment().equals(department)) {
 
 					List<UserDepartmentLevelRoleEntity> departmentLevelRoleEntities = userDepartmentLevelRoleDbService.findByRoleUuid(roleDto.getUuid());
-					log.info("Department Role Entity {}",departmentLevelRoleEntities);
+
+//					log.info("Department Role Entity {}",departmentLevelRoleEntities);
 
 					if (CollectionUtils.isNotEmpty(departmentLevelRoleEntities)) {
 
 						List<String> uuids = departmentLevelRoleEntities.stream().map(UserDepartmentLevelRoleEntity::getUserDepartmentLevelUuid).collect(Collectors.toList());
-						log.info("uuids {}",uuids);
-						
+
 						List<UserDepartmentLevelEntity> departmentLevelEntities = userDepartmentLevelDbService.findByUuidInAndAccessLevel(uuids, roleDto.getAccessLevel());
-						log.info("departmentLevelEntities {}",departmentLevelEntities);
-						
-						Set<String> activeUserUuids = getActiveUserUuidsForUserDepttLevels(departmentLevelEntities);
-						log.info("activeUserUuids {}",activeUserUuids);
+
+//						log.info("Department Level Entity {}",departmentLevelEntities);
 
 						if (CollectionUtils.isNotEmpty(departmentLevelEntities)) {
 							String key = roleDto.getRoleName()+""+department;
@@ -678,12 +676,7 @@ public class UserServiceImpl implements UserService {
 								Arrays.asList((entity.getCsvAccessLevelEntityUuid().split(","))).stream().forEach(accessUuid -> {
 									cacheDtos.get(key).getAccessUserMap().putIfAbsent(accessUuid, new ArrayList<>());
 									cacheDtos.get(key).getAccessUserMap().get(accessUuid).add(new UIKeyValue(entity.getUserUuid(), entity.getUserUuid()));
-									
-									// while iterating check if user uuid is present in active users list 
-									if(activeUserUuids.contains(entity.getUserUuid())){
-										log.info("adding user uuid to users list {}",entity.getUserUuid());
-										users.add(entity.getUserUuid());
-									}
+									users.add(entity.getUserUuid());
 								});
 							});
 						}
@@ -692,10 +685,11 @@ public class UserServiceImpl implements UserService {
 			}
 
 		}
-
+		
 		if(CollectionUtils.isNotEmpty(users)){
+			
 			PaginationRequest paginationRequest = PaginationRequest.builder().pageNo(1).limit(users.size()).build();
-			Map<String,String> userNames = this.searchUser(UserFilterDto.builder().pageRequest(paginationRequest).userIds(users.stream().collect(Collectors.toList())).build()).getData()
+			Map<String,String> userNames = this.searchUser(UserFilterDto.builder().pageRequest(paginationRequest).userIds(getActiveUserUuids(users).stream().collect(Collectors.toList())).build()).getData()
 					.stream().collect(Collectors.toMap(f->f.getUuid(), f->getUserName(f)));
 			return cacheDtos.values().stream().map(userRoleCacheDto -> {
 				for (Map.Entry<String, List<UIKeyValue>> entry : userRoleCacheDto.getAccessUserMap().entrySet()) {
@@ -710,13 +704,10 @@ public class UserServiceImpl implements UserService {
 	}
 
 	/**
-	 * @param departmentLevelEntities
+	 * @param userIds
 	 * @return
 	 */
-	private Set<String> getActiveUserUuidsForUserDepttLevels(List<UserDepartmentLevelEntity> departmentLevelEntities) {
-		// extract all user ids from list
-		List<String> userIds = departmentLevelEntities.stream().map(UserDepartmentLevelEntity::getUserUuid).collect(Collectors.toList());
-
+	private Set<String> getActiveUserUuids(Set<String> userIds) {
 		// build ActiveUserRequestDto
 		ActiveUserRequestDto activeUserRequestDto = ActiveUserRequestDto.builder().userIds(userIds).build();
 
