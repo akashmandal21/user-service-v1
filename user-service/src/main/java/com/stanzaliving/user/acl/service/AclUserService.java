@@ -4,12 +4,16 @@ import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
 import com.stanzaliving.core.user.acl.dto.UserAccessLevelIdsByRoleNameWithFiltersDto;
+import com.stanzaliving.core.user.acl.dto.UserAccessModuleDto;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleListDto;
+import com.stanzaliving.core.user.acl.dto.UsersByAccessModulesAndCitiesRequestDto;
+import com.stanzaliving.core.user.acl.dto.UsersByAccessModulesAndCitiesResponseDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRequestDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleByEmailRequestDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleRequestDto;
 import com.stanzaliving.core.user.dto.response.UserContactDetailsResponseDto;
+import com.stanzaliving.transformations.pojo.CityMetadataDto;
 
 import java.util.List;
 import java.util.Map;
@@ -40,4 +44,10 @@ public interface AclUserService {
 	void bulkAddRole(AddUserDeptLevelRoleByEmailRequestDto addUserDeptLevelRoleByEmailRequestDto);
 
 	Map<String, List<String>> getUsersForRolesWithFilters(UserAccessLevelIdsByRoleNameWithFiltersDto userAccessLevelIdsByRoleNameWithFiltersDto);
+
+	List<UserAccessModuleDto> getUserAccessModulesByUserUuid(String userUuid);
+
+	List<CityMetadataDto> getCitiesByUserAcessAndDepartment(String userUuid, Department department);
+
+	List<UsersByAccessModulesAndCitiesResponseDto> getUsersByAccessModulesAndCitites(UsersByAccessModulesAndCitiesRequestDto usersByAccessModulesAndCitiesRequestDto);
 }

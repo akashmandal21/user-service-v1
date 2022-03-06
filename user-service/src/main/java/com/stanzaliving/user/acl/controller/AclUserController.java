@@ -14,7 +14,6 @@ import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleByEmailReq
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleRequestDto;
 import com.stanzaliving.transformations.pojo.CityMetadataDto;
 import com.stanzaliving.user.acl.service.AclUserService;
-import com.stanzaliving.user.service.UserService;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,9 +39,6 @@ public class AclUserController {
 
     @Autowired
     AclUserService aclUserService;
-
-    @Autowired
-    private UserService userService;
 
     @PostMapping("add/role")
     public ResponseDto<Void> addRole(@RequestBody @Valid AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleDto) {
@@ -102,7 +98,7 @@ public class AclUserController {
     public ResponseDto<List<UserAccessModuleDto>> getUserAccessModulesByUserUuid(@RequestAttribute(name = SecurityConstants.USER_ID) @NotBlank(message = "User Id is mandatory to get user profile") String userUuid) {
 
         log.info("Get Access Modules for user : {]", userUuid);
-        List<UserAccessModuleDto> userAccessModuleDtoList = userService.getUserAccessModulesByUserUuid(userUuid);
+        List<UserAccessModuleDto> userAccessModuleDtoList = aclUserService.getUserAccessModulesByUserUuid(userUuid);
         if (CollectionUtils.isNotEmpty(userAccessModuleDtoList)) {
             return ResponseDto.success("List of Modules that the user has access to", userAccessModuleDtoList);
         } else {
@@ -114,7 +110,7 @@ public class AclUserController {
     public ResponseDto<List<CityMetadataDto>> getCitiesByUserAcessAndDepartment(@RequestAttribute(name = SecurityConstants.USER_ID) @NotBlank(message = "User Id is mandatory to get user profile") String userUuid,
                                                                                 @PathVariable @NotBlank(message = "Department must not be blank") Department department) {
         log.info("Get Cities for User : {}, and Department : {}", userUuid, department);
-        List<CityMetadataDto> cityMetadataDtoList = userService.getCitiesByUserAcessAndDepartment(userUuid, department);
+        List<CityMetadataDto> cityMetadataDtoList = aclUserService.getCitiesByUserAcessAndDepartment(userUuid, department);
         if (CollectionUtils.isNotEmpty(cityMetadataDtoList)) {
             return ResponseDto.success("List of cities", cityMetadataDtoList);
         } else {
@@ -126,7 +122,7 @@ public class AclUserController {
     public ResponseDto<List<UsersByAccessModulesAndCitiesResponseDto>> getUsersByAccessModulesAndCitites(
         @RequestBody UsersByAccessModulesAndCitiesRequestDto requestDto) {
         log.info("Get Users by access modules and cities : {}", requestDto);
-        List<UsersByAccessModulesAndCitiesResponseDto> responseDtos = userService.getUsersByAccessModulesAndCitites(requestDto);
+        List<UsersByAccessModulesAndCitiesResponseDto> responseDtos = aclUserService.getUsersByAccessModulesAndCitites(requestDto);
         if (CollectionUtils.isNotEmpty(responseDtos)) {
             return ResponseDto.success("Users by Access Modules, Cities and Access Level", responseDtos);
         } else {
