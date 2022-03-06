@@ -876,7 +876,7 @@ public class AclUserServiceImpl implements AclUserService {
 						}
 					}
 					responseDto.setUserProfileDtoList(userProfileDtoList);
-					if (Objects.nonNull(responseDto.getUserProfileDtoList())) {
+					if (CollectionUtils.isNotEmpty(responseDto.getUserProfileDtoList())) {
 						responseDtoList.add(responseDto);
 					}
 				}
@@ -907,7 +907,7 @@ public class AclUserServiceImpl implements AclUserService {
 							}
 						}
 						responseDto.setUserProfileDtoList(userProfileDtoList);
-						if (Objects.nonNull(responseDto.getUserProfileDtoList())) {
+						if (CollectionUtils.isNotEmpty(responseDto.getUserProfileDtoList())) {
 							responseDtoList.add(responseDto);
 						}
 					}
@@ -943,7 +943,7 @@ public class AclUserServiceImpl implements AclUserService {
 							}
 						}
 						responseDto.setUserProfileDtoList(userProfileDtoList);
-						if (Objects.nonNull(responseDto.getUserProfileDtoList())) {
+						if (CollectionUtils.isNotEmpty(responseDto.getUserProfileDtoList())) {
 							responseDtoList.add(responseDto);
 						}
 					}
