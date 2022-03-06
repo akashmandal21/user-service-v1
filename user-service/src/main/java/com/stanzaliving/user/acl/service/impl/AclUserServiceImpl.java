@@ -614,7 +614,11 @@ public class AclUserServiceImpl implements AclUserService {
         }
         if (CollectionUtils.isEmpty(micromarketUuids) && CollectionUtils.isNotEmpty(filtersRequestDto.getCityFilterUuids())) {
             for (String cityUuid : filtersRequestDto.getCityFilterUuids()) {
-                micromarketUuids.addAll(transformationCache.getMicromarketUuidsByCityUuid(cityUuid));
+				if(Objects.nonNull(cityUuid)) {
+					List<String> micromarketUuidsByCityUuid = transformationCache.getMicromarketUuidsByCityUuid(cityUuid);
+					if(CollectionUtils.isNotEmpty(micromarketUuidsByCityUuid))
+						micromarketUuids.addAll(micromarketUuidsByCityUuid);
+				}
             }
             filtersRequestDto.setMicromarketFilterUuids(micromarketUuids);
         }
