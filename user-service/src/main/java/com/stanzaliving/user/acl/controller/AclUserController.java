@@ -5,6 +5,7 @@ import com.stanzaliving.core.base.constants.SecurityConstants;
 import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.user.acl.dto.UserAccessModuleDto;
+import com.stanzaliving.core.user.acl.dto.UserDepartmentLevelAccessModulesDto;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleListDto;
 import com.stanzaliving.core.user.acl.dto.UsersByAccessModulesAndCitiesRequestDto;
@@ -127,6 +128,19 @@ public class AclUserController {
             return ResponseDto.success("Users by Access Modules, Cities and Access Level", responseDtos);
         } else {
             return ResponseDto.failure("Can't find Users by Access Modules, Cities and Access Level");
+        }
+    }
+
+    @GetMapping("/accessModule/{userUuid}/{department}")
+    public ResponseDto<List<UserDepartmentLevelAccessModulesDto>> getUserDepartmentLevelAccessModules(@PathVariable @NotBlank(message = "User uuid must not be blank")String userUuid,
+                                                                                         @PathVariable @NotBlank(message = "Department must not be blank") Department department) {
+        log.info("Get User Department Level Access Modules for user : {} and department : {}", userUuid, department);
+        List<UserDepartmentLevelAccessModulesDto> userDepartmentLevelAccessModulesDtos = aclUserService
+            .getUserDepartmentLevelAccessModules(userUuid, department);
+        if (CollectionUtils.isNotEmpty(userDepartmentLevelAccessModulesDtos)) {
+            return ResponseDto.success("Access modules and access levels of the user", userDepartmentLevelAccessModulesDtos);
+        } else {
+            return ResponseDto.failure("Can't find access modules for the user");
         }
     }
 }
