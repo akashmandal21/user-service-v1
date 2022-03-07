@@ -5,6 +5,7 @@ import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
 import com.stanzaliving.core.user.acl.dto.UserAccessLevelIdsByRoleNameWithFiltersDto;
 import com.stanzaliving.core.user.acl.dto.UserAccessModuleDto;
+import com.stanzaliving.core.user.acl.dto.UserDepartmentLevelAccessModulesDto;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleListDto;
 import com.stanzaliving.core.user.acl.dto.UsersByAccessModulesAndCitiesRequestDto;
@@ -50,4 +51,6 @@ public interface AclUserService {
 	List<CityMetadataDto> getCitiesByUserAcessAndDepartment(String userUuid, Department department);
 
 	List<UsersByAccessModulesAndCitiesResponseDto> getUsersByAccessModulesAndCitites(UsersByAccessModulesAndCitiesRequestDto usersByAccessModulesAndCitiesRequestDto);
+
+	List<UserDepartmentLevelAccessModulesDto> getUserDepartmentLevelAccessModules(String userUuid, Department department);
 }

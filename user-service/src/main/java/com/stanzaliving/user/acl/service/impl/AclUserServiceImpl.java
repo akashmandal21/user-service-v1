@@ -17,6 +17,7 @@ import com.stanzaliving.core.transformation.client.cache.TransformationCache;
 import com.stanzaliving.core.user.acl.dto.UserAccessLevelIdsByRoleNameWithFiltersDto;
 import com.stanzaliving.core.user.acl.dto.UserAccessLevelListDto;
 import com.stanzaliving.core.user.acl.dto.UserAccessModuleDto;
+import com.stanzaliving.core.user.acl.dto.UserDepartmentLevelAccessModulesDto;
 import com.stanzaliving.core.user.acl.dto.UsersByAccessModulesAndCitiesRequestDto;
 import com.stanzaliving.core.user.acl.dto.UsersByAccessModulesAndCitiesResponseDto;
 import com.stanzaliving.core.user.acl.dto.UsersByFiltersRequestDto;
@@ -26,6 +27,7 @@ import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleByEmailReq
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.transformations.pojo.CityMetadataDto;
 import com.stanzaliving.transformations.pojo.MicroMarketMetadataDto;
+import com.stanzaliving.user.acl.entity.RoleAccessModuleMappingEntity;
 import com.stanzaliving.user.acl.repository.RoleAccessModuleRepository;
 import com.stanzaliving.user.acl.repository.RoleRepository;
 import com.stanzaliving.user.acl.repository.UserDepartmentLevelRepository;
@@ -951,5 +953,46 @@ public class AclUserServiceImpl implements AclUserService {
 			}
 		}
 		return responseDtoList;
+	}
+
+	@Override
+	public List<UserDepartmentLevelAccessModulesDto> getUserDepartmentLevelAccessModules(String userUuid, Department department) {
+		log.info("Get User Department Level Access Modules for user : {} and department : {}", userUuid, department);
+		List<UserDepartmentLevelAccessModulesDto> userDepartmentLevelAccessModulesDtoList = new ArrayList<>();
+		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelRepository
+			.findByUserUuidAndDepartmentAndStatus(userUuid, department, true);
+		if (CollectionUtils.isNotEmpty(userDepartmentLevelEntityList)) {
+			List<String> userDepartmentLevelUuids = userDepartmentLevelEntityList.stream().map(UserDepartmentLevelEntity::getUuid).collect(Collectors.toList());
+			List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = userDepartmentLevelRoleRepository
+				.findByUserDepartmentLevelUuidInAndStatus(userDepartmentLevelUuids, true);
+			if (CollectionUtils.isNotEmpty(userDepartmentLevelRoleEntityList)) {
+				for (UserDepartmentLevelRoleEntity userDepartmentLevelRoleEntity : userDepartmentLevelRoleEntityList) {
+					RoleAccessModuleMappingEntity roleAccessModuleMappingEntity = roleAccessModuleRepository
+						.findByRoleUuid(userDepartmentLevelRoleEntity.getRoleUuid());
+					if (Objects.nonNull(roleAccessModuleMappingEntity)) {
+						UserDepartmentLevelAccessModulesDto accessModulesDto = new UserDepartmentLevelAccessModulesDto();
+						accessModulesDto.setAccessModule(roleAccessModuleMappingEntity.getAccessModule());
+						accessModulesDto.setRoleUuid(userDepartmentLevelRoleEntity.getRoleUuid());
+						accessModulesDto.setUserDepartmentLevelUuid(userDepartmentLevelRoleEntity.getUserDepartmentLevelUuid());
+						UserDepartmentLevelEntity userDepartmentLevelEntity = userDepartmentLevelRepository
+							.findFirstByUuidAndStatus(userDepartmentLevelRoleEntity.getUserDepartmentLevelUuid(), true);
+						if (Objects.nonNull(userDepartmentLevelEntity)) {
+							accessModulesDto.setAccessLevel(userDepartmentLevelEntity.getAccessLevel());
+							List<String> accessLevelEntityUuids = Arrays.asList(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid().split(","));
+							Map<String, String> accessLevelEntityUuidNameMap = new HashMap<>();
+							for (String entityUuid : accessLevelEntityUuids) {
+								if (Objects.nonNull(transformationCache.getAccessLevelNameByUuid(entityUuid, userDepartmentLevelEntity.getAccessLevel().toString()))) {
+									accessLevelEntityUuidNameMap.put(transformationCache.getAccessLevelNameByUuid(entityUuid,
+										userDepartmentLevelEntity.getAccessLevel().toString()), entityUuid);
+								}
+							}
+							accessModulesDto.setAccessLevelEntityUuidNameMap(accessLevelEntityUuidNameMap);
+							userDepartmentLevelAccessModulesDtoList.add(accessModulesDto);
+						}
+					}
+				}
+			}
+		}
+		return userDepartmentLevelAccessModulesDtoList;
 	}
 }

@@ -23,4 +23,6 @@ public interface UserDepartmentLevelRoleRepository extends AbstractJpaRepository
         "WHERE u.roleUuid IN :roleUuids " +
         "AND u.status = :status")
     List<String> findUserDepartmentLevelUuidByRoleUuidInAndStatus(List<String> roleUuids, boolean status);
+
+    List<UserDepartmentLevelRoleEntity> findByUserDepartmentLevelUuidInAndStatus(List<String> userDepartmentLevelUuids, boolean status);
 }
