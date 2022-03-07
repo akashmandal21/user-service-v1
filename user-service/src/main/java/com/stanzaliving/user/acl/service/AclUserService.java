@@ -3,6 +3,7 @@ package com.stanzaliving.user.acl.service;
 import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
+import com.stanzaliving.core.user.acl.dto.UpdateAccessModuleAccessLevelRequestDto;
 import com.stanzaliving.core.user.acl.dto.UserAccessLevelIdsByRoleNameWithFiltersDto;
 import com.stanzaliving.core.user.acl.dto.UserAccessModuleDto;
 import com.stanzaliving.core.user.acl.dto.UserDepartmentLevelAccessModulesDto;
@@ -53,4 +54,6 @@ public interface AclUserService {
 	List<UsersByAccessModulesAndCitiesResponseDto> getUsersByAccessModulesAndCitites(UsersByAccessModulesAndCitiesRequestDto usersByAccessModulesAndCitiesRequestDto);
 
 	List<UserDepartmentLevelAccessModulesDto> getUserDepartmentLevelAccessModules(String userUuid, Department department);
+
+	void updateUserAccessModuleAccessLevel(UpdateAccessModuleAccessLevelRequestDto updateAccessModuleAccessLevelRequestDto);
 }

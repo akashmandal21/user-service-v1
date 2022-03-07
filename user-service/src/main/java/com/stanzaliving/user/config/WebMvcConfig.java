@@ -60,8 +60,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 						"/swagger-resources/**",
 						"/configuration/security",
 						"/swagger-ui.html",
-						"/webjars/**",
-					    "/acl/user/accessModule/accessLevel/**");
+						"/webjars/**");
 
 	}
 

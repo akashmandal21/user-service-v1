@@ -4,6 +4,7 @@ import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.base.constants.SecurityConstants;
 import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
+import com.stanzaliving.core.user.acl.dto.UpdateAccessModuleAccessLevelRequestDto;
 import com.stanzaliving.core.user.acl.dto.UserAccessModuleDto;
 import com.stanzaliving.core.user.acl.dto.UserDepartmentLevelAccessModulesDto;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
@@ -142,5 +143,12 @@ public class AclUserController {
         } else {
             return ResponseDto.failure("Can't find access modules for the user");
         }
+    }
+
+    @PostMapping("/update/accessModule/accessLevel")
+    public ResponseDto<Void> updateUserAccessModuleAccessLevel(@RequestBody UpdateAccessModuleAccessLevelRequestDto requestDto) {
+        log.info("Update user access module access level {}", requestDto);
+        aclUserService.updateUserAccessModuleAccessLevel(requestDto);
+        return ResponseDto.success("Access Module Access Level Updated Successfuly");
     }
 }

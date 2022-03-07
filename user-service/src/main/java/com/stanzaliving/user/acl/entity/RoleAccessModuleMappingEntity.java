@@ -1,5 +1,6 @@
 package com.stanzaliving.user.acl.entity;
 
+import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.AccessModule;
 import com.stanzaliving.core.sqljpa.entity.AbstractJpaEntity;
 import lombok.AllArgsConstructor;
@@ -34,4 +35,8 @@ public class RoleAccessModuleMappingEntity extends AbstractJpaEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "access_module", columnDefinition = "varchar(40) NOT NULL", nullable = false)
     private AccessModule accessModule;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "access_level", columnDefinition = "varchar(30) NOT NULL", nullable = false)
+    private AccessLevel accessLevel;
 }

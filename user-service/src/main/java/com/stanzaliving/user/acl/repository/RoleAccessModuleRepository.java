@@ -1,5 +1,6 @@
 package com.stanzaliving.user.acl.repository;
 
+import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.AccessModule;
 import com.stanzaliving.core.sqljpa.repository.AbstractJpaRepository;
 import com.stanzaliving.user.acl.entity.RoleAccessModuleMappingEntity;
@@ -23,4 +24,6 @@ public interface RoleAccessModuleRepository extends AbstractJpaRepository<RoleAc
     List<String> findRoleUuidByAccessModuleIn(List<AccessModule> accessModules);
 
     RoleAccessModuleMappingEntity findByRoleUuid(String roleUuid);
+
+    RoleAccessModuleMappingEntity findByAccessModuleAndAccessLevel(AccessModule accessModule, AccessLevel accessLevel);
 }

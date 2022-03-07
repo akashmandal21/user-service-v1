@@ -3,6 +3,7 @@ package com.stanzaliving.user.acl.service.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 
 import com.stanzaliving.core.base.enums.AccessModule;
 import com.stanzaliving.core.transformation.client.cache.TransformationCache;
+import com.stanzaliving.core.user.acl.dto.UpdateAccessModuleAccessLevelRequestDto;
 import com.stanzaliving.core.user.acl.dto.UserAccessLevelIdsByRoleNameWithFiltersDto;
 import com.stanzaliving.core.user.acl.dto.UserAccessLevelListDto;
 import com.stanzaliving.core.user.acl.dto.UserAccessModuleDto;
@@ -69,6 +71,7 @@ import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.service.UserService;
 
 import lombok.extern.log4j.Log4j2;
+import org.springframework.transaction.annotation.Transactional;
 
 @Log4j2
 @Service
@@ -994,5 +997,47 @@ public class AclUserServiceImpl implements AclUserService {
 			}
 		}
 		return userDepartmentLevelAccessModulesDtoList;
+	}
+
+	@Override
+	@Transactional
+	public void updateUserAccessModuleAccessLevel(UpdateAccessModuleAccessLevelRequestDto requestDto) {
+		log.info("Update user access module access level {}", requestDto);
+		UserDepartmentLevelEntity userDepartmentLevelEntity = userDepartmentLevelRepository
+			.findFirstByUuidAndStatus(requestDto.getUserDepartmentLevelUuid(), true);
+		if (Objects.nonNull(userDepartmentLevelEntity)) {
+			try {
+				if (userDepartmentLevelEntity.getAccessLevel() == requestDto.getAccessLevel()) {
+					if (CollectionUtils.isNotEmpty(requestDto.getAccessLevelEntityUuids())) {
+						userDepartmentLevelEntity.setCsvAccessLevelEntityUuid(String.join(",", requestDto.getAccessLevelEntityUuids()));
+						userDepartmentLevelEntity.setUpdatedAt(new Date());
+						userDepartmentLevelRepository.save(userDepartmentLevelEntity);
+					} else {
+						throw  new ApiValidationException("Access Level Entity Uuids can't be null or empty");
+					}
+				} else {
+					userDepartmentLevelEntity.setAccessLevel(requestDto.getAccessLevel());
+					userDepartmentLevelEntity.setCsvAccessLevelEntityUuid(String.join(",", requestDto.getAccessLevelEntityUuids()));
+					userDepartmentLevelEntity.setUpdatedAt(new Date());
+
+					UserDepartmentLevelRoleEntity userDepartmentLevelRoleEntity = userDepartmentLevelRoleRepository
+						.findByUserDepartmentLevelUuidAndRoleUuidAndStatus(requestDto.getUserDepartmentLevelUuid(), requestDto.getRoleUuid() ,true);
+					if (Objects.nonNull(userDepartmentLevelRoleEntity)) {
+						RoleAccessModuleMappingEntity roleAccessModuleMappingEntity = roleAccessModuleRepository
+							.findByAccessModuleAndAccessLevel(requestDto.getAccessModule(), requestDto.getAccessLevel());
+						userDepartmentLevelRoleEntity.setRoleUuid(roleAccessModuleMappingEntity.getRoleUuid());
+						userDepartmentLevelRoleEntity.setUpdatedAt(new Date());
+						userDepartmentLevelRepository.save(userDepartmentLevelEntity);
+						userDepartmentLevelRoleRepository.save(userDepartmentLevelRoleEntity);
+					} else {
+						throw  new ApiValidationException("No entry found in User Department Level Role entity for the request");
+					}
+				}
+			} catch (Exception e) {
+				log.error(e.getMessage());
+			}
+		} else {
+			throw  new ApiValidationException("No entry found in User Department Level entity for the request");
+		}
 	}
 }

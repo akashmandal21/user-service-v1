@@ -25,4 +25,6 @@ public interface UserDepartmentLevelRoleRepository extends AbstractJpaRepository
     List<String> findUserDepartmentLevelUuidByRoleUuidInAndStatus(List<String> roleUuids, boolean status);
 
     List<UserDepartmentLevelRoleEntity> findByUserDepartmentLevelUuidInAndStatus(List<String> userDepartmentLevelUuids, boolean status);
+
+    UserDepartmentLevelRoleEntity findByUserDepartmentLevelUuidAndRoleUuidAndStatus(String userDepartmentLevelUuid, String roleUuid, boolean status);
 }
