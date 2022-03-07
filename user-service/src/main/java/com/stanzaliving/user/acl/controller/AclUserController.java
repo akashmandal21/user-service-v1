@@ -131,7 +131,7 @@ public class AclUserController {
         }
     }
 
-    @GetMapping("/accessModule/{userUuid}/{department}")
+    @GetMapping("/accessModule/accessLevel/{userUuid}/{department}")
     public ResponseDto<List<UserDepartmentLevelAccessModulesDto>> getUserDepartmentLevelAccessModules(@PathVariable @NotBlank(message = "User uuid must not be blank")String userUuid,
                                                                                          @PathVariable @NotBlank(message = "Department must not be blank") Department department) {
         log.info("Get User Department Level Access Modules for user : {} and department : {}", userUuid, department);
