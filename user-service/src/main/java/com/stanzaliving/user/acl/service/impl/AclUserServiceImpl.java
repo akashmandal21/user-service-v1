@@ -1006,6 +1006,7 @@ public class AclUserServiceImpl implements AclUserService {
 					if (Objects.nonNull(roleAccessModuleMappingEntity)) {
 						UserDepartmentLevelAccessModulesDto accessModulesDto = new UserDepartmentLevelAccessModulesDto();
 						accessModulesDto.setAccessModule(roleAccessModuleMappingEntity.getAccessModule());
+						accessModulesDto.setAccessModuleName(roleAccessModuleMappingEntity.getAccessModule().getName());
 						accessModulesDto.setRoleUuid(userDepartmentLevelRoleEntity.getRoleUuid());
 						accessModulesDto.setUserDepartmentLevelUuid(userDepartmentLevelRoleEntity.getUserDepartmentLevelUuid());
 						UserDepartmentLevelEntity userDepartmentLevelEntity = userDepartmentLevelRepository
