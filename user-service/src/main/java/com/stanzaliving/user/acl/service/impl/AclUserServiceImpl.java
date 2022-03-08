@@ -922,7 +922,15 @@ public class AclUserServiceImpl implements AclUserService {
 							for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
 								if (Arrays.asList(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid().split(",")).contains(micromarketUuid)) {
 									UserProfileDto userProfileDto = userService.getActiveUserByUserId(userDepartmentLevelEntity.getUserUuid());
-									userProfileDtoList.add(userProfileDto);
+									if (StringUtils.isEmpty(requestDto.getSearchText())) {
+										userProfileDtoList.add(userProfileDto);
+									} else {
+										if (userProfileDto.getFirstName().equalsIgnoreCase(requestDto.getSearchText())
+											|| userProfileDto.getMobile().equalsIgnoreCase(requestDto.getSearchText())
+											|| userProfileDto.getUuid().equalsIgnoreCase(requestDto.getSearchText())) {
+											userProfileDtoList.add(userProfileDto);
+										}
+									}
 								}
 							}
 						}
@@ -958,7 +966,15 @@ public class AclUserServiceImpl implements AclUserService {
 							for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
 								if (!Collections.disjoint(Arrays.asList(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid().split(",")), entry.getValue())) {
 									UserProfileDto userProfileDto = userService.getActiveUserByUserId(userDepartmentLevelEntity.getUserUuid());
-									userProfileDtoList.add(userProfileDto);
+									if (StringUtils.isEmpty(requestDto.getSearchText())) {
+										userProfileDtoList.add(userProfileDto);
+									} else {
+										if (userProfileDto.getFirstName().equalsIgnoreCase(requestDto.getSearchText())
+											|| userProfileDto.getMobile().equalsIgnoreCase(requestDto.getSearchText())
+											|| userProfileDto.getUuid().equalsIgnoreCase(requestDto.getSearchText())) {
+											userProfileDtoList.add(userProfileDto);
+										}
+									}
 								}
 							}
 						}
