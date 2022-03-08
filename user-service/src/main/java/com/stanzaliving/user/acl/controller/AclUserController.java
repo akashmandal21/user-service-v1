@@ -4,6 +4,7 @@ import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.base.constants.SecurityConstants;
 import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
+import com.stanzaliving.core.user.acl.dto.AddUserAndRoleDto;
 import com.stanzaliving.core.user.acl.dto.UpdateAccessModuleAccessLevelRequestDto;
 import com.stanzaliving.core.user.acl.dto.UserAccessModuleDto;
 import com.stanzaliving.core.user.acl.dto.UserDepartmentLevelAccessModulesDto;
@@ -150,5 +151,13 @@ public class AclUserController {
         log.info("Update user access module access level {}", requestDto);
         aclUserService.updateUserAccessModuleAccessLevel(requestDto);
         return ResponseDto.success("Access Module Access Level Updated Successfuly");
+    }
+
+    @PostMapping("/addUserAndRole")
+    public ResponseDto<AddUserAndRoleDto> addUserAndRole (@RequestBody AddUserAndRoleDto addUserAndRoleDto) {
+
+        log.info("Add User and assign Role : {}", addUserAndRoleDto);
+        AddUserAndRoleDto userAndRoleDto = aclUserService.addUserAndRole(addUserAndRoleDto);
+        return ResponseDto.success("Added User and assigned roles", userAndRoleDto);
     }
 }

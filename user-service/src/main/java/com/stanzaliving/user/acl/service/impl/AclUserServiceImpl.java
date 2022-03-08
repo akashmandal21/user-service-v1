@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import com.stanzaliving.core.base.enums.AccessModule;
 import com.stanzaliving.core.transformation.client.cache.TransformationCache;
+import com.stanzaliving.core.user.acl.dto.AddUserAndRoleDto;
 import com.stanzaliving.core.user.acl.dto.UpdateAccessModuleAccessLevelRequestDto;
 import com.stanzaliving.core.user.acl.dto.UserAccessLevelIdsByRoleNameWithFiltersDto;
 import com.stanzaliving.core.user.acl.dto.UserAccessLevelListDto;
@@ -26,7 +27,10 @@ import com.stanzaliving.core.user.acl.dto.UsersByFiltersRequestDto;
 import com.stanzaliving.core.user.acl.dto.UsersByFiltersResponseDto;
 import com.stanzaliving.core.user.acl.enums.Role;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleByEmailRequestDto;
+import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
+import com.stanzaliving.core.user.enums.UserType;
+import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.transformations.pojo.CityMetadataDto;
 import com.stanzaliving.transformations.pojo.MicroMarketMetadataDto;
 import com.stanzaliving.user.acl.entity.RoleAccessModuleMappingEntity;
@@ -36,6 +40,7 @@ import com.stanzaliving.user.acl.repository.UserDepartmentLevelRepository;
 import com.stanzaliving.user.acl.repository.UserDepartmentLevelRoleRepository;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -1038,6 +1043,35 @@ public class AclUserServiceImpl implements AclUserService {
 			}
 		} else {
 			throw  new ApiValidationException("No entry found in User Department Level entity for the request");
+		}
+	}
+
+	@Override
+	@Transactional
+	public AddUserAndRoleDto addUserAndRole (AddUserAndRoleDto addUserAndRoleDto) {
+
+		log.info("Add User and assign Role : {}", addUserAndRoleDto);
+		if (StringUtils.isNotEmpty(addUserAndRoleDto.getFirstName()) && StringUtils.isNotEmpty(addUserAndRoleDto.getLastName())
+			&& StringUtils.isNotEmpty(addUserAndRoleDto.getEmail()) && StringUtils.isNotEmpty(addUserAndRoleDto.getMobile())
+			&& StringUtils.isNotEmpty(addUserAndRoleDto.getIsoCode())) {
+			AddUserRequestDto addUserRequestDto = AddUserRequestDto.builder().userType(UserType.CITY_TEAM).department(Department.SALES)
+				.isoCode(addUserAndRoleDto.getIsoCode()).email(addUserAndRoleDto.getEmail()).mobile(addUserAndRoleDto.getMobile())
+				.firstName(addUserAndRoleDto.getFirstName()).lastName(addUserAndRoleDto.getLastName()).build();
+			UserDto userDto = userService.addUser(addUserRequestDto);
+			log.info("User Created with uuid : {}", userDto.getUuid());
+
+			if (Objects.nonNull(addUserAndRoleDto.getAccessLevel()) & CollectionUtils.isNotEmpty(addUserAndRoleDto.getAccessLevelEntityUuids())
+				&& CollectionUtils.isNotEmpty(addUserAndRoleDto.getRoleUuids())) {
+
+				AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = AddUserDeptLevelRoleRequestDto.builder().accessLevel(addUserAndRoleDto.getAccessLevel())
+					.accessLevelEntityListUuid(addUserAndRoleDto.getAccessLevelEntityUuids()).userUuid(userDto.getUuid()).department(Department.SALES)
+					.rolesUuid(addUserAndRoleDto.getRoleUuids()).build();
+				addRole(addUserDeptLevelRoleRequestDto);
+			}
+			addUserAndRoleDto.setUserUuid(userDto.getUuid());
+			return addUserAndRoleDto;
+		} else {
+			throw new ApiValidationException("Bad Request - Required fields missing");
 		}
 	}
 }
