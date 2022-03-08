@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 import com.stanzaliving.core.base.enums.AccessModule;
 import com.stanzaliving.core.transformation.client.cache.TransformationCache;
 import com.stanzaliving.core.user.acl.dto.AddUserAndRoleDto;
+import com.stanzaliving.core.user.acl.dto.MicromarketAndResidencesDropdownRequestDto;
+import com.stanzaliving.core.user.acl.dto.MicromarketAndResidencesDropdownResponseDto;
 import com.stanzaliving.core.user.acl.dto.UpdateAccessModuleAccessLevelRequestDto;
 import com.stanzaliving.core.user.acl.dto.UserAccessLevelIdsByRoleNameWithFiltersDto;
 import com.stanzaliving.core.user.acl.dto.UserAccessLevelListDto;
@@ -1070,6 +1072,45 @@ public class AclUserServiceImpl implements AclUserService {
 			}
 			addUserAndRoleDto.setUserUuid(userDto.getUuid());
 			return addUserAndRoleDto;
+		} else {
+			throw new ApiValidationException("Bad Request - Required fields missing");
+		}
+	}
+
+	public List<MicromarketAndResidencesDropdownResponseDto> getMicromarketAndResidenceDropdown(MicromarketAndResidencesDropdownRequestDto requestDto) {
+		log.info("Get micromarket and residence dropdown {}", requestDto);
+		if (CollectionUtils.isNotEmpty(requestDto.getCityUuids())) {
+			List<MicromarketAndResidencesDropdownResponseDto> responseDtos = new ArrayList<>();
+			List<String> micromarketUuids = new ArrayList<>();
+			for (String cityUuid : requestDto.getCityUuids()) {
+				log.info("micromarket uuids : {}", micromarketUuids);
+				Optional.ofNullable(transformationCache.getMicromarketUuidsByCityUuid(cityUuid))
+					.ifPresent(micromarketUuids::addAll);
+			}
+			if (CollectionUtils.isNotEmpty(micromarketUuids)) {
+				for (String micromarketUuid : micromarketUuids) {
+					List<Map<String, String>> residenceNameUuidMapList = new ArrayList<>();
+					MicromarketAndResidencesDropdownResponseDto responseDto = new MicromarketAndResidencesDropdownResponseDto();
+					if (Objects.nonNull(transformationCache.getMicromarketByUuid(micromarketUuid))) {
+						responseDto.setMicromarketName(transformationCache.getMicromarketByUuid(micromarketUuid).getMicroMarketName());
+						responseDto.setMicromarketUuid(micromarketUuid);
+						List<String> residenceUuids = transformationCache.getResidenceUuidsByMicromarketUuid(micromarketUuid);
+						if (CollectionUtils.isNotEmpty(residenceUuids)) {
+							for (String residenceUuid : residenceUuids) {
+								if (Objects.nonNull(transformationCache.getResidenceByUuid(residenceUuid))) {
+									Map<String, String> residenceNameUuidMap = new HashMap<>();
+									residenceNameUuidMap.put(transformationCache.getResidenceByUuid(residenceUuid).getResidenceName(),
+										residenceUuid);
+									residenceNameUuidMapList.add(residenceNameUuidMap);
+								}
+							}
+							responseDto.setResidenceNameUuidMapList(residenceNameUuidMapList);
+						}
+					}
+					responseDtos.add(responseDto);
+				}
+			}
+			return responseDtos;
 		} else {
 			throw new ApiValidationException("Bad Request - Required fields missing");
 		}

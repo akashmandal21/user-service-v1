@@ -3,6 +3,8 @@ package com.stanzaliving.user.acl.service;
 import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.user.acl.dto.AddUserAndRoleDto;
+import com.stanzaliving.core.user.acl.dto.MicromarketAndResidencesDropdownRequestDto;
+import com.stanzaliving.core.user.acl.dto.MicromarketAndResidencesDropdownResponseDto;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
 import com.stanzaliving.core.user.acl.dto.UpdateAccessModuleAccessLevelRequestDto;
 import com.stanzaliving.core.user.acl.dto.UserAccessLevelIdsByRoleNameWithFiltersDto;
@@ -59,4 +61,6 @@ public interface AclUserService {
 	void updateUserAccessModuleAccessLevel(UpdateAccessModuleAccessLevelRequestDto updateAccessModuleAccessLevelRequestDto);
 
 	AddUserAndRoleDto addUserAndRole (AddUserAndRoleDto addUserAndRoleDto);
+
+	List<MicromarketAndResidencesDropdownResponseDto> getMicromarketAndResidenceDropdown(MicromarketAndResidencesDropdownRequestDto requestDto);
 }
