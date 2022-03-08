@@ -112,4 +112,10 @@ public class RoleController {
 		return ResponseDto.success("Found Access Levels", RoleAccessAdapter.getAccessLevelEnumAsEnumListing());
 	}
 
+	@GetMapping("accesslevel/list/v3")
+	public ResponseDto<List<EnumListing<AccessLevel>>> getAccessLevelListV3() {
+		log.info("Received request for retrieving access level list api.");
+		return ResponseDto.success("Found Access Levels", RoleAccessAdapter.getAccessLevelEnumAsEnumListingV3());
+	}
+
 }
