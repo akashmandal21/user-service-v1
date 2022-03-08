@@ -77,4 +77,6 @@ public interface UserService {
 	List<UserRoleCacheDto> getCacheableForRoles(List<String> roleNames);
 
 	UserProfileDto getUserProfileDtoByEmail(String email);
+
+	UserDto addUserV3(AddUserRequestDto addUserRequestDto);
 }

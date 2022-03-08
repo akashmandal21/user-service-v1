@@ -1057,7 +1057,7 @@ public class AclUserServiceImpl implements AclUserService {
 			AddUserRequestDto addUserRequestDto = AddUserRequestDto.builder().userType(UserType.CITY_TEAM).department(Department.SALES)
 				.isoCode(addUserAndRoleDto.getIsoCode()).email(addUserAndRoleDto.getEmail()).mobile(addUserAndRoleDto.getMobile())
 				.firstName(addUserAndRoleDto.getFirstName()).lastName(addUserAndRoleDto.getLastName()).build();
-			UserDto userDto = userService.addUser(addUserRequestDto);
+			UserDto userDto = userService.addUserV3(addUserRequestDto);
 			log.info("User Created with uuid : {}", userDto.getUuid());
 
 			if (Objects.nonNull(addUserAndRoleDto.getAccessLevel()) & CollectionUtils.isNotEmpty(addUserAndRoleDto.getAccessLevelEntityUuids())

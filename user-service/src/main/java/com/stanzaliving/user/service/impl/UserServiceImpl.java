@@ -723,4 +723,52 @@ public class UserServiceImpl implements UserService {
 
 		return UserAdapter.getUserProfileDto(userEntity);
 	}
+
+	@Override
+	public UserDto addUserV3(AddUserRequestDto addUserRequestDto) {
+
+		if (!PhoneNumberUtils.isValidMobileForCountry(addUserRequestDto.getMobile(), addUserRequestDto.getIsoCode())) {
+			log.error("Number: " + addUserRequestDto.getMobile() + " and ISO: " + addUserRequestDto.getIsoCode()
+				+ " doesn't appear to be a valid mobile combination");
+			throw new ApiValidationException("Mobile Number and ISO Code combination not valid");
+		}
+
+		UserEntity userEntity = userDbService.getUserForMobile(addUserRequestDto.getMobile(),
+			addUserRequestDto.getIsoCode());
+
+		if (Objects.nonNull(userEntity)) {
+
+			throw new ApiValidationException("User: " + userEntity.getUuid() + " already exists for Mobile: " + addUserRequestDto.getMobile()
+				+ ", ISO Code: " + addUserRequestDto.getIsoCode() + " of type: " + addUserRequestDto.getUserType());
+		}
+
+		log.info("Adding new User [Mobile: " + addUserRequestDto.getMobile() + ", ISOCode: "
+			+ addUserRequestDto.getIsoCode() + ", UserType: " + addUserRequestDto.getUserType() + "]");
+
+		UserProfileEntity profileEntity = UserAdapter.getUserProfileEntity(addUserRequestDto);
+
+		userEntity = UserEntity.builder().userType(addUserRequestDto.getUserType())
+			.isoCode(addUserRequestDto.getIsoCode()).mobile(addUserRequestDto.getMobile()).mobileVerified(false)
+			.email(addUserRequestDto.getEmail()).emailVerified(false).userProfile(profileEntity).status(true)
+			.department(addUserRequestDto.getDepartment()).build();
+
+		profileEntity.setUser(userEntity);
+
+		userEntity = userDbService.saveAndFlush(userEntity);
+
+
+		addUserOrConsumerRole(userEntity);
+
+
+		log.info("Added New User with Id: " + userEntity.getUuid());
+
+		UserDto userDto = UserAdapter.getUserDto(userEntity);
+
+		KafkaDTO kafkaDTO = new KafkaDTO();
+		kafkaDTO.setData(userDto);
+
+		notificationProducer.publish(kafkaResidentDetailTopic, KafkaDTO.class.getName(), kafkaDTO);
+
+		return userDto;
+	}
 }
