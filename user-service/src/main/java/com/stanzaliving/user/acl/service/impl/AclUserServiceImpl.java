@@ -883,7 +883,16 @@ public class AclUserServiceImpl implements AclUserService {
 						for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
 							if (Arrays.asList(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid().split(",")).contains(cityUuid)) {
 								UserProfileDto userProfileDto = userService.getActiveUserByUserId(userDepartmentLevelEntity.getUserUuid());
-								userProfileDtoList.add(userProfileDto);
+								if (StringUtils.isNotEmpty(requestDto.getSearchText())) {
+									userProfileDtoList.add(userProfileDto);
+								} else {
+									if (userProfileDto.getFirstName().equalsIgnoreCase(requestDto.getSearchText())
+										|| userProfileDto.getLastName().equalsIgnoreCase(requestDto.getSearchText())
+										|| userProfileDto.getMobile().equalsIgnoreCase(requestDto.getSearchText())
+										|| userProfileDto.getUuid().equalsIgnoreCase(requestDto.getSearchText())) {
+										userProfileDtoList.add(userProfileDto);
+									}
+								}
 							}
 						}
 					}
