@@ -887,8 +887,7 @@ public class AclUserServiceImpl implements AclUserService {
 									userProfileDtoList.add(userProfileDto);
 								} else {
 									if (requestDto.getSearchText().length() >= 3 && (userProfileDto.getFirstName().contains(requestDto.getSearchText())
-										|| userProfileDto.getMobile().contains(requestDto.getSearchText())
-										|| userProfileDto.getUuid().contains(requestDto.getSearchText()))) {
+										|| userProfileDto.getMobile().contains(requestDto.getSearchText()))) {
 										userProfileDtoList.add(userProfileDto);
 									}
 								}
@@ -926,8 +925,7 @@ public class AclUserServiceImpl implements AclUserService {
 										userProfileDtoList.add(userProfileDto);
 									} else {
 										if (requestDto.getSearchText().length() >= 3 && (userProfileDto.getFirstName().contains(requestDto.getSearchText())
-											|| userProfileDto.getMobile().contains(requestDto.getSearchText())
-											|| userProfileDto.getUuid().contains(requestDto.getSearchText()))) {
+											|| userProfileDto.getMobile().contains(requestDto.getSearchText()))) {
 											userProfileDtoList.add(userProfileDto);
 										}
 									}
@@ -970,8 +968,7 @@ public class AclUserServiceImpl implements AclUserService {
 										userProfileDtoList.add(userProfileDto);
 									} else {
 										if (requestDto.getSearchText().length() >= 3 && (userProfileDto.getFirstName().contains(requestDto.getSearchText())
-											|| userProfileDto.getMobile().contains(requestDto.getSearchText())
-											|| userProfileDto.getUuid().contains(requestDto.getSearchText()))) {
+											|| userProfileDto.getMobile().contains(requestDto.getSearchText()))) {
 											userProfileDtoList.add(userProfileDto);
 										}
 									}
