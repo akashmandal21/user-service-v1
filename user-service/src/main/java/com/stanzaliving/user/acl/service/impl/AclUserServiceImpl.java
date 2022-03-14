@@ -1006,6 +1006,10 @@ public class AclUserServiceImpl implements AclUserService {
 						accessModulesDto.setAccessModuleName(roleAccessModuleMappingEntity.getAccessModule().getName());
 						accessModulesDto.setRoleUuid(userDepartmentLevelRoleEntity.getRoleUuid());
 						accessModulesDto.setUserDepartmentLevelUuid(userDepartmentLevelRoleEntity.getUserDepartmentLevelUuid());
+						if (Arrays.asList(AccessModule.PG_LEAD_EDIT, AccessModule.APARTMENTS_LEAD_EDIT)
+							.contains(roleAccessModuleMappingEntity.getAccessModule())) {
+							accessModulesDto.setLeadTransferApplicable(true);
+						}
 						UserDepartmentLevelEntity userDepartmentLevelEntity = userDepartmentLevelRepository
 							.findFirstByUuidAndStatus(userDepartmentLevelRoleEntity.getUserDepartmentLevelUuid(), true);
 						if (Objects.nonNull(userDepartmentLevelEntity)) {
