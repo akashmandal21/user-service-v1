@@ -3,6 +3,31 @@
  */
 package com.stanzaliving.user.service.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.validation.Valid;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.ListUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+
 import com.stanzaliving.core.base.common.dto.PageResponse;
 import com.stanzaliving.core.base.common.dto.PaginationRequest;
 import com.stanzaliving.core.base.enums.AccessLevel;
@@ -796,5 +821,14 @@ public class UserServiceImpl implements UserService {
 		notificationProducer.publish(kafkaResidentDetailTopic, KafkaDTO.class.getName(), kafkaDTO);
 
 		return userDto;
+	}
+
+	@Override
+	public List<String> getUserProfileDtoWhoseBirthdayIsToday() {
+	log.info("Fetching users who have there birthday today.");
+	List <String> newList = new ArrayList<>();
+	List<String> userList = userDbService.getUserWhoseBirthdayIsToday().orElse(newList);
+
+	return userList;
 	}
 }

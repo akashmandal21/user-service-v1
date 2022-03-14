@@ -1,10 +1,11 @@
 /**
- * 
+ *
  */
 package com.stanzaliving.user.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
@@ -47,7 +48,7 @@ public interface UserService {
 	UserManagerAndRoleDto getUserWithManagerAndRole(String userUuid);
 
 	List<UserProfileDto> getAllUsers();
-	
+
 	List<UserProfileDto> getAllActiveUsersByUuidIn(ActiveUserRequestDto activeUserRequestDto);
 
 	List<UserEntity> getUserByEmail(String email);
@@ -71,12 +72,14 @@ public interface UserService {
 	boolean createRoleBaseUser(List<String> mobiles);
 
 	UserProfileDto getUserDetails(String mobileNo);
-    
+
 	Map<String, UserProfileDto> getUserProfileForUserIn(List<String> userUuids);
-    
+
 	List<UserRoleCacheDto> getCacheableForRoles(List<String> roleNames);
 
 	UserProfileDto getUserProfileDtoByEmail(String email);
 
 	UserDto addUserV3(AddUserRequestDto addUserRequestDto);
+	
+	List<String> getUserProfileDtoWhoseBirthdayIsToday();
 }

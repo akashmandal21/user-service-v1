@@ -13,6 +13,7 @@ import com.stanzaliving.user.entity.UserEntity;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -43,4 +44,6 @@ public interface UserDbService extends AbstractJpaService<UserEntity, Long> {
 	UserEntity findTop1ByEmailOrderByCreatedAtDesc(String email);
 
 	Map<String, String> getUuidByEmail(List<String> emails);
+	
+	Optional<List<String>> getUserWhoseBirthdayIsToday();
 }
