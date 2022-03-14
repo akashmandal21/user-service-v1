@@ -35,6 +35,7 @@ import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.transformations.pojo.CityMetadataDto;
 import com.stanzaliving.transformations.pojo.MicroMarketMetadataDto;
+import com.stanzaliving.transformations.pojo.ResidenceMetadataDto;
 import com.stanzaliving.user.acl.entity.RoleAccessModuleMappingEntity;
 import com.stanzaliving.user.acl.repository.RoleAccessModuleRepository;
 import com.stanzaliving.user.acl.repository.RoleRepository;
@@ -886,8 +887,8 @@ public class AclUserServiceImpl implements AclUserService {
 								if (StringUtils.isEmpty(requestDto.getSearchText())) {
 									userProfileDtoList.add(userProfileDto);
 								} else {
-									if (requestDto.getSearchText().length() >= 3 && (userProfileDto.getFirstName().contains(requestDto.getSearchText())
-										|| userProfileDto.getMobile().contains(requestDto.getSearchText()))) {
+									if (requestDto.getSearchText().length() >= 3 && (userProfileDto.getFirstName().toLowerCase().contains(requestDto.getSearchText().toLowerCase())
+										|| userProfileDto.getMobile().toLowerCase().contains(requestDto.getSearchText().toLowerCase()))) {
 										userProfileDtoList.add(userProfileDto);
 									}
 								}
@@ -924,8 +925,8 @@ public class AclUserServiceImpl implements AclUserService {
 									if (StringUtils.isEmpty(requestDto.getSearchText())) {
 										userProfileDtoList.add(userProfileDto);
 									} else {
-										if (requestDto.getSearchText().length() >= 3 && (userProfileDto.getFirstName().contains(requestDto.getSearchText())
-											|| userProfileDto.getMobile().contains(requestDto.getSearchText()))) {
+										if (requestDto.getSearchText().length() >= 3 && (userProfileDto.getFirstName().toLowerCase().contains(requestDto.getSearchText().toLowerCase())
+											|| userProfileDto.getMobile().toLowerCase().contains(requestDto.getSearchText().toLowerCase()))) {
 											userProfileDtoList.add(userProfileDto);
 										}
 									}
@@ -967,8 +968,8 @@ public class AclUserServiceImpl implements AclUserService {
 									if (StringUtils.isEmpty(requestDto.getSearchText())) {
 										userProfileDtoList.add(userProfileDto);
 									} else {
-										if (requestDto.getSearchText().length() >= 3 && (userProfileDto.getFirstName().contains(requestDto.getSearchText())
-											|| userProfileDto.getMobile().contains(requestDto.getSearchText()))) {
+										if (requestDto.getSearchText().length() >= 3 && (userProfileDto.getFirstName().toLowerCase().contains(requestDto.getSearchText().toLowerCase())
+											|| userProfileDto.getMobile().toLowerCase().contains(requestDto.getSearchText().toLowerCase()))) {
 											userProfileDtoList.add(userProfileDto);
 										}
 									}
@@ -1109,31 +1110,36 @@ public class AclUserServiceImpl implements AclUserService {
 			List<MicromarketAndResidencesDropdownResponseDto> responseDtos = new ArrayList<>();
 			List<String> micromarketUuids = new ArrayList<>();
 			for (String cityUuid : requestDto.getCityUuids()) {
-				log.info("micromarket uuids : {}", micromarketUuids);
 				Optional.ofNullable(transformationCache.getMicromarketUuidsByCityUuid(cityUuid))
 					.ifPresent(micromarketUuids::addAll);
+				log.info("micromarket uuids : {}", micromarketUuids);
 			}
 			if (CollectionUtils.isNotEmpty(micromarketUuids)) {
 				for (String micromarketUuid : micromarketUuids) {
-					List<Map<String, String>> residenceNameUuidMapList = new ArrayList<>();
-					MicromarketAndResidencesDropdownResponseDto responseDto = new MicromarketAndResidencesDropdownResponseDto();
 					if (Objects.nonNull(transformationCache.getMicromarketByUuid(micromarketUuid))) {
-						responseDto.setMicromarketName(transformationCache.getMicromarketByUuid(micromarketUuid).getMicroMarketName());
-						responseDto.setMicromarketUuid(micromarketUuid);
-						List<String> residenceUuids = transformationCache.getResidenceUuidsByMicromarketUuid(micromarketUuid);
-						if (CollectionUtils.isNotEmpty(residenceUuids)) {
-							for (String residenceUuid : residenceUuids) {
-								if (Objects.nonNull(transformationCache.getResidenceByUuid(residenceUuid))) {
-									Map<String, String> residenceNameUuidMap = new HashMap<>();
-									residenceNameUuidMap.put(transformationCache.getResidenceByUuid(residenceUuid).getResidenceName(),
-										residenceUuid);
-									residenceNameUuidMapList.add(residenceNameUuidMap);
-								}
+						List<Map<String, String>> residenceNameUuidMapList = new ArrayList<>();
+						MicromarketAndResidencesDropdownResponseDto responseDto = new MicromarketAndResidencesDropdownResponseDto();
+						List<ResidenceMetadataDto> residences = new ArrayList<>();
+						if (StringUtils.isEmpty(requestDto.getSearchText())) {
+							residences = transformationCache.getResidencesByMicromarketUuid(micromarketUuid);
+						}
+						else if (requestDto.getSearchText().length() >= 3) {
+							residences = transformationCache.getResidencesByMicromarketUuid(micromarketUuid).stream()
+								.filter(residenceMetadataDto -> residenceMetadataDto.getResidenceName().toLowerCase()
+									.contains(requestDto.getSearchText().toLowerCase())).collect(Collectors.toList());
+						}
+						if (CollectionUtils.isNotEmpty(residences)) {
+							responseDto.setMicromarketName(transformationCache.getMicromarketByUuid(micromarketUuid).getMicroMarketName());
+							responseDto.setMicromarketUuid(micromarketUuid);
+							for (ResidenceMetadataDto residenceMetadataDto : residences) {
+								Map<String, String> residenceNameUuidMap = new HashMap<>();
+								residenceNameUuidMap.put(residenceMetadataDto.getResidenceName(), residenceMetadataDto.getUuid());
+								residenceNameUuidMapList.add(residenceNameUuidMap);
 							}
 							responseDto.setResidenceNameUuidMapList(residenceNameUuidMapList);
+							responseDtos.add(responseDto);
 						}
 					}
-					responseDtos.add(responseDto);
 				}
 			}
 			return responseDtos;
