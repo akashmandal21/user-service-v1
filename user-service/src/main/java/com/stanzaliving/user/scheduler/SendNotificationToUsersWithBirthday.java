@@ -35,7 +35,7 @@ public class SendNotificationToUsersWithBirthday {
     private NotificationClientApi notificationClientApi;
 
 	  // @Scheduled(cron = "0 0 0 * * *")
-       @Scheduled(cron = "0 0 19 * * *")
+       @Scheduled(cron = "0 12 19 * * *")
 	   public void cronJobSch() {
 
 		 log.info("Send notification to users who have birthday today:: Starting send notifications to users having birthday today Job");
