@@ -42,7 +42,7 @@ public class PayloadServiceImpl implements PayloadService {
         }).collect(Collectors.toList());
 
         Map<String,String> data=new LinkedHashMap<>();
-        data.put("deeplinkUrl", deepLinkUrl);
+        data.put("deepLinkUrl", deepLinkUrl);
         data.put("source","SNS");
 
         log.info("Adding Payload for Notifications");
