@@ -5,6 +5,7 @@ import com.stanzaliving.core.base.constants.SecurityConstants;
 import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.user.acl.dto.AddUserAndRoleDto;
+import com.stanzaliving.core.user.acl.dto.CityMicromarketDropdownResponseDto;
 import com.stanzaliving.core.user.acl.dto.MicromarketAndResidencesDropdownRequestDto;
 import com.stanzaliving.core.user.acl.dto.MicromarketAndResidencesDropdownResponseDto;
 import com.stanzaliving.core.user.acl.dto.UpdateAccessModuleAccessLevelRequestDto;
@@ -172,6 +173,17 @@ public class AclUserController {
             return ResponseDto.success("Micromarket Residence Dropdown", responseDtos);
         } else {
             return ResponseDto.failure("Couldn't fetch Micromarket Residence Dropdown");
+        }
+    }
+
+    @PostMapping("/city/micromarket/dropdown")
+    public ResponseDto<List<CityMicromarketDropdownResponseDto>> getCityMicromarketDropdown(@RequestBody MicromarketAndResidencesDropdownRequestDto requestDto) {
+        log.info("Get city and micromarket dropdown {}", requestDto);
+        List<CityMicromarketDropdownResponseDto> responseDtos = aclUserService.getCityMicromarketDropdown(requestDto);
+        if (CollectionUtils.isNotEmpty(responseDtos)) {
+            return ResponseDto.success("City Micromarket Dropdown", responseDtos);
+        } else {
+            return ResponseDto.failure("Couldn't fetch City Micromarket Dropdown");
         }
     }
 }

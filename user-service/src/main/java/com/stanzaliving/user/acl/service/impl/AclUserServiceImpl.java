@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import com.stanzaliving.core.base.enums.AccessModule;
 import com.stanzaliving.core.transformation.client.cache.TransformationCache;
 import com.stanzaliving.core.user.acl.dto.AddUserAndRoleDto;
+import com.stanzaliving.core.user.acl.dto.CityMicromarketDropdownResponseDto;
 import com.stanzaliving.core.user.acl.dto.MicromarketAndResidencesDropdownRequestDto;
 import com.stanzaliving.core.user.acl.dto.MicromarketAndResidencesDropdownResponseDto;
 import com.stanzaliving.core.user.acl.dto.UpdateAccessModuleAccessLevelRequestDto;
@@ -1104,6 +1105,7 @@ public class AclUserServiceImpl implements AclUserService {
 		}
 	}
 
+	@Override
 	public List<MicromarketAndResidencesDropdownResponseDto> getMicromarketAndResidenceDropdown(MicromarketAndResidencesDropdownRequestDto requestDto) {
 		log.info("Get micromarket and residence dropdown {}", requestDto);
 		if (CollectionUtils.isNotEmpty(requestDto.getCityUuids())) {
@@ -1140,6 +1142,40 @@ public class AclUserServiceImpl implements AclUserService {
 							responseDtos.add(responseDto);
 						}
 					}
+				}
+			}
+			return responseDtos;
+		} else {
+			throw new ApiValidationException("Bad Request - Required fields missing");
+		}
+	}
+
+	@Override
+	public List<CityMicromarketDropdownResponseDto> getCityMicromarketDropdown(MicromarketAndResidencesDropdownRequestDto requestDto) {
+		log.info("Get city and micromarket dropdown {}", requestDto);
+		if (CollectionUtils.isNotEmpty(requestDto.getCityUuids())) {
+			List<CityMicromarketDropdownResponseDto> responseDtos = new ArrayList<>();
+			for (String cityUuid : requestDto.getCityUuids()) {
+				List<MicroMarketMetadataDto> micromarkets = new ArrayList<>();
+				if (StringUtils.isEmpty(requestDto.getSearchText())) {
+					micromarkets = transformationCache.getMicromarketsByCityUuid(cityUuid);
+				} else if (requestDto.getSearchText().length() >= 3) {
+					micromarkets = transformationCache.getMicromarketsByCityUuid(cityUuid).stream().filter(microMarketMetadataDto ->
+						microMarketMetadataDto.getMicroMarketName().toLowerCase().contains(requestDto.getSearchText().toLowerCase()))
+						.collect(Collectors.toList());
+				}
+				if (CollectionUtils.isNotEmpty(micromarkets)) {
+					List<Map<String, String>> micromarketNameUuidMapList = new ArrayList<>();
+					CityMicromarketDropdownResponseDto responseDto = new CityMicromarketDropdownResponseDto();
+					responseDto.setCityName(transformationCache.getCityByUuid(cityUuid).getCityName());
+					responseDto.setCityUuid(cityUuid);
+					for (MicroMarketMetadataDto microMarketMetadataDto : micromarkets) {
+						Map<String, String> micromarketNameUuidMap = new HashMap<>();
+						micromarketNameUuidMap.put(microMarketMetadataDto.getMicroMarketName(), microMarketMetadataDto.getUuid());
+						micromarketNameUuidMapList.add(micromarketNameUuidMap);
+					}
+					responseDto.setMicromarketNameUuidMapList(micromarketNameUuidMapList);
+					responseDtos.add(responseDto);
 				}
 			}
 			return responseDtos;
