@@ -1125,7 +1125,7 @@ public class AclUserServiceImpl implements AclUserService {
 						if (StringUtils.isEmpty(requestDto.getSearchText())) {
 							residences = transformationCache.getResidencesByMicromarketUuid(micromarketUuid);
 						}
-						else if (requestDto.getSearchText().length() >= 3) {
+						else if (requestDto.getSearchText().length() >= 3 && CollectionUtils.isNotEmpty(transformationCache.getResidencesByMicromarketUuid(micromarketUuid))) {
 							residences = transformationCache.getResidencesByMicromarketUuid(micromarketUuid).stream()
 								.filter(residenceMetadataDto -> residenceMetadataDto.getResidenceName().toLowerCase()
 									.contains(requestDto.getSearchText().toLowerCase())).collect(Collectors.toList());
@@ -1159,7 +1159,7 @@ public class AclUserServiceImpl implements AclUserService {
 				List<MicroMarketMetadataDto> micromarkets = new ArrayList<>();
 				if (StringUtils.isEmpty(requestDto.getSearchText())) {
 					micromarkets = transformationCache.getMicromarketsByCityUuid(cityUuid);
-				} else if (requestDto.getSearchText().length() >= 3) {
+				} else if (requestDto.getSearchText().length() >= 3 && CollectionUtils.isNotEmpty(transformationCache.getMicromarketsByCityUuid(cityUuid))) {
 					micromarkets = transformationCache.getMicromarketsByCityUuid(cityUuid).stream().filter(microMarketMetadataDto ->
 						microMarketMetadataDto.getMicroMarketName().toLowerCase().contains(requestDto.getSearchText().toLowerCase()))
 						.collect(Collectors.toList());
