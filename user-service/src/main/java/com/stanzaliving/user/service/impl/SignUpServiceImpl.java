@@ -131,10 +131,10 @@ public class SignUpServiceImpl implements SignUpService {
 				return false;
 			}
 			int count = Integer.parseInt(String.valueOf(object));
+			count++;
 			if(count > otpMaxValidatedCount) {
 				return false;
 			} else {
-				count++;
 				saveInMap(key, String.valueOf(count));
 				return true;
 			}

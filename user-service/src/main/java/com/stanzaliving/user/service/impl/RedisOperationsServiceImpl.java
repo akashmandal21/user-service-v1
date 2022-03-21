@@ -31,7 +31,7 @@ public class RedisOperationsServiceImpl implements RedisOperationsService {
 
     @Override
     public boolean putToMap(String mapName, String key, Object value, long ttl, TimeUnit timeUnit) {
-        logger.info("Put to Map {} key {} value{}", mapName, key, value);
+        logger.info("Put to Map {} key {} value {}", mapName, key, value);
         Object object = redissonClient.getMapCache(mapName).put(key, value, ttl, timeUnit);
         return Objects.nonNull(object);
     }

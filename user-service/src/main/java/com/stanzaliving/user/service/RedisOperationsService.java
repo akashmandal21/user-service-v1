@@ -4,7 +4,6 @@ import java.util.concurrent.TimeUnit;
 
 public interface RedisOperationsService {
 
-
     Object getFromMap(String mapName, String key);
 
     boolean deleteFromMap(String mapName, String key);

@@ -25,7 +25,7 @@ public class RedisConfig {
 	@Value("${redis.connection.timeout:5000}")
 	private int redisConnectionTimeout;
 
-	@Bean(destroyMethod = "shutdown")
+	@Bean
 	public RedissonClient redissonClient() {
 		Config config = new Config();
 		config.useSingleServer()
