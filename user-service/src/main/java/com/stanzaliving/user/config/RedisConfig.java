@@ -1,5 +1,6 @@
 package com.stanzaliving.user.config;
 
+import lombok.extern.log4j.Log4j2;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+@Log4j2
 @Configuration
 public class RedisConfig {
 
@@ -27,6 +29,7 @@ public class RedisConfig {
 
 	@Bean
 	public RedissonClient redissonClient() {
+		log.info("redisUrl :: {}", redisUrl);
 		Config config = new Config();
 		config.useSingleServer()
 				.setAddress(redisUrl)
