@@ -69,8 +69,6 @@ public class OtpServiceImpl implements OtpService {
 	
 	@Value("${otp.max.validate.count:5}")
 	private int otpMaxValidateCount;
-	
-	
 
 	@Autowired
 	private OtpDbService otpDbService;

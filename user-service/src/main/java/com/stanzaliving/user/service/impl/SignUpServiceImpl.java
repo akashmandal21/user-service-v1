@@ -3,8 +3,10 @@ package com.stanzaliving.user.service.impl;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import com.stanzaliving.user.service.RedisOperationsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -46,8 +48,9 @@ public class SignUpServiceImpl implements SignUpService {
 
 	@Value("${test.mobile}")
 	private String testMobile;
-	
-	
+
+	@Value("${otp.max.validated.count:2}")
+	private int otpMaxValidatedCount;
 
 	@Autowired
 	private KafkaUserService kafkaUserService;
@@ -59,6 +62,9 @@ public class SignUpServiceImpl implements SignUpService {
 
 	@Autowired
 	private UserDbService userDbService;
+
+	@Autowired
+	private RedisOperationsService redisOperationsService;
 
 	@Override
 	public String signUpUser(AddUserRequestDto addUserRequestDto) {
@@ -95,14 +101,55 @@ public class SignUpServiceImpl implements SignUpService {
 		if (signup == null)
 			throw new AuthException("No OTP exists for mobile", Otp.OTP_NOT_FOUND);
 
+		String userType = "";
+		if(Objects.nonNull(signup.getSignupObject()) && Objects.nonNull(signup.getSignupObject().getUserType()))
+			userType = signup.getSignupObject().getUserType().getTypeName();
+		String key = "";
+		if(StringUtils.isNotBlank(userType))
+			key = "User_" + signup.getMobile() + "_" + userType + "_" + signup.getOtp();
+		else
+			key = "User_" + signup.getMobile() + "_" + signup.getOtp();
+
 		if (!signup.isValidated() && signup.getOtp().toString().equals(otp)) {
 			signup.setValidated(true);
-			signUpDbService.save(signup);
+			signUpDbService.saveAndFlush(signup);
+			saveInMap(key, "1");
 		} else {
-			throw new AuthException("Invalid OTP For User With Mobile " + signup.getMobile(), Otp.INVALID_OTP);
+			if(isValidationAllowed(key))
+				return Boolean.TRUE;
+			else
+				throw new AuthException("Invalid OTP For User With Mobile " + signup.getMobile(), Otp.INVALID_OTP);
 		}
 
 		return Boolean.TRUE;
+	}
+
+	private boolean isValidationAllowed(String key) {
+		try {
+			Object object = redisOperationsService.getFromMap("USER_VALIDATION_COUNT_MAPPING", key);
+			if (Objects.isNull(object)) {
+				return false;
+			}
+			int count = Integer.parseInt(String.valueOf(object));
+			if(count > otpMaxValidatedCount) {
+				return false;
+			} else {
+				count++;
+				saveInMap(key, String.valueOf(count));
+				return true;
+			}
+		} catch (Exception e) {
+			log.error("Exception in isValidationAllowed for key {}, Exception is {}", key, e);
+			return false;
+		}
+	}
+
+	private void saveInMap(String key, String value) {
+		try {
+			redisOperationsService.putToMap("USER_VALIDATION_COUNT_MAPPING", key, value, 10, TimeUnit.SECONDS);
+		} catch (Exception e) {
+			log.error("Exception in saveInMap for key {}, Exception is {}", key, e);
+		}
 	}
 
 	private void sendOtp(AddUserRequestDto addUserRequestDto, SignupEntity signUpOtp) {
