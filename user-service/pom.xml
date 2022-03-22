@@ -38,6 +38,12 @@
 
 		<dependency>
 			<groupId>com.stanzaliving.core</groupId>
+			<artifactId>redis</artifactId>
+			<version>${global.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.stanzaliving.core</groupId>
 			<artifactId>base</artifactId>
 			<version>${global.version}</version>
 		</dependency>

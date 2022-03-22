@@ -27,6 +27,7 @@
 		<module>../core-utils/security</module>
 		<module>../core-utils/user-client</module>
 		<module>../core-utils/transformation-client</module>
+		<module>../core-utils/redis</module>
 		<module>../core-utils/notification-v2-client</module>
 	</modules>
 
