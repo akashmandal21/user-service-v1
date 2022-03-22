@@ -1114,12 +1114,12 @@ public class AclUserServiceImpl implements AclUserService {
 			UserDto userDto = userService.addUserV3(addUserRequestDto);
 			log.info("User Created with uuid : {}", userDto.getUuid());
 
-			if (Objects.nonNull(addUserAndRoleDto.getAccessLevel()) & CollectionUtils.isNotEmpty(addUserAndRoleDto.getAccessLevelEntityUuids())
-				&& CollectionUtils.isNotEmpty(addUserAndRoleDto.getRoleUuids())) {
+			if (Objects.nonNull(addUserAndRoleDto.getAccessLevel()) & CollectionUtils.isNotEmpty(addUserAndRoleDto.getAccessLevelEntityListUuid())
+				&& CollectionUtils.isNotEmpty(addUserAndRoleDto.getRolesUuid())) {
 
 				AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = AddUserDeptLevelRoleRequestDto.builder().accessLevel(addUserAndRoleDto.getAccessLevel())
-					.accessLevelEntityListUuid(addUserAndRoleDto.getAccessLevelEntityUuids()).userUuid(userDto.getUuid()).department(Department.SALES)
-					.rolesUuid(addUserAndRoleDto.getRoleUuids()).build();
+					.accessLevelEntityListUuid(addUserAndRoleDto.getAccessLevelEntityListUuid()).userUuid(userDto.getUuid()).department(Department.SALES)
+					.rolesUuid(addUserAndRoleDto.getRolesUuid()).build();
 				addRole(addUserDeptLevelRoleRequestDto);
 			}
 			addUserAndRoleDto.setUserUuid(userDto.getUuid());
