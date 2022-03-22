@@ -71,6 +71,12 @@
 			<artifactId>transformation-client</artifactId>
 			<version>${global.version}</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>com.stanzaliving.core</groupId>
+			<artifactId>notification-v2-client</artifactId>
+			<version>${global.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>com.stanzaliving.core</groupId>
