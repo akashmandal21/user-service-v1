@@ -1070,21 +1070,26 @@ public class AclUserServiceImpl implements AclUserService {
 						throw  new ApiValidationException("Access Level Entity Uuids can't be null or empty");
 					}
 				} else {
-					userDepartmentLevelEntity.setAccessLevel(requestDto.getAccessLevel());
-					userDepartmentLevelEntity.setCsvAccessLevelEntityUuid(String.join(",", requestDto.getAccessLevelEntityUuids()));
-					userDepartmentLevelEntity.setUpdatedAt(new Date());
 
-					UserDepartmentLevelRoleEntity userDepartmentLevelRoleEntity = userDepartmentLevelRoleRepository
-						.findByUserDepartmentLevelUuidAndRoleUuidAndStatus(requestDto.getUserDepartmentLevelUuid(), requestDto.getRoleUuid() ,true);
-					if (Objects.nonNull(userDepartmentLevelRoleEntity)) {
-						RoleAccessModuleMappingEntity roleAccessModuleMappingEntity = roleAccessModuleRepository
+					RoleAccessModuleMappingEntity roleAccessModuleMappingEntity = roleAccessModuleRepository
 							.findByAccessModuleAndAccessLevel(requestDto.getAccessModule(), requestDto.getAccessLevel());
-						userDepartmentLevelRoleEntity.setRoleUuid(roleAccessModuleMappingEntity.getRoleUuid());
-						userDepartmentLevelRoleEntity.setUpdatedAt(new Date());
-						userDepartmentLevelRepository.save(userDepartmentLevelEntity);
-						userDepartmentLevelRoleRepository.save(userDepartmentLevelRoleEntity);
+					if (Objects.nonNull(roleAccessModuleMappingEntity)) {
+						UserDeptLevelRoleListDto userDeptLevelRoleListDto = new UserDeptLevelRoleListDto();
+						userDeptLevelRoleListDto.setUserUuid(requestDto.getUserUuid());
+						userDeptLevelRoleListDto.setDepartment(Department.SALES);
+						userDeptLevelRoleListDto.setAccessLevel(userDepartmentLevelEntity.getAccessLevel());
+						userDeptLevelRoleListDto.setRolesUuid(Arrays.asList(requestDto.getRoleUuid()));
+						revokeRolesForDepartmentOfLevel(userDeptLevelRoleListDto);
+
+						AddUserDeptLevelRoleRequestDto addRoleaddUserDeptLevelRoleDto = new AddUserDeptLevelRoleRequestDto();
+						addRoleaddUserDeptLevelRoleDto.setUserUuid(requestDto.getUserUuid());
+						addRoleaddUserDeptLevelRoleDto.setDepartment(Department.SALES);
+						addRoleaddUserDeptLevelRoleDto.setAccessLevel(requestDto.getAccessLevel());
+						addRoleaddUserDeptLevelRoleDto.setAccessLevelEntityListUuid(requestDto.getAccessLevelEntityUuids());
+						addRoleaddUserDeptLevelRoleDto.setRolesUuid(Arrays.asList(roleAccessModuleMappingEntity.getRoleUuid()));
+						addRole(addRoleaddUserDeptLevelRoleDto);
 					} else {
-						throw  new ApiValidationException("No entry found in User Department Level Role entity for the request");
+						throw new ApiValidationException("No Role Access Module found");
 					}
 				}
 			} catch (Exception e) {
