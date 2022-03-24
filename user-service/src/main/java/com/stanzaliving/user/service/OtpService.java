@@ -41,4 +41,6 @@ public interface OtpService {
 	void resendEmailVerificationOtp(EmailVerificationRequestDto emailVerificationRequestDto, UserEntity userEntity);
 
 	int getOtp(String mobile, String isoCode, OtpType otpType);
+
+	void resendMobileOtpV2(MobileOtpRequestDto mobileOtpRequestDto, String mobile, String isoCode, OtpType otpType);
 }

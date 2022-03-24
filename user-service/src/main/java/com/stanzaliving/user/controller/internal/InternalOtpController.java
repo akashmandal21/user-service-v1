@@ -94,4 +94,21 @@ public class InternalOtpController {
 		return ResponseDto.success("OTP is", otpService.getOtp(mobile, isoCode, otpType));
 	}
 
+	@PostMapping("mobile/resent/v2")
+	public ResponseDto<Void> resendMobileOtpV2(@RequestBody @Valid MobileOtpRequestDto mobileOtpRequestDto) {
+
+		log.info("Received request to resend OTP: {}", mobileOtpRequestDto);
+
+		try {
+
+			otpService.resendMobileOtpV2(mobileOtpRequestDto, mobileOtpRequestDto.getMobile(), mobileOtpRequestDto.getIsoCode(), mobileOtpRequestDto.getOtpType());
+
+			return ResponseDto.success("OTP resent to mobile");
+
+		} catch (AuthException e) {
+			log.error(e.getMessage());
+			return ResponseDto.failure(e.getMessage());
+		}
+	}
+
 }
