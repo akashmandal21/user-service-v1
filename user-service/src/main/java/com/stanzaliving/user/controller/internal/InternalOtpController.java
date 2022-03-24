@@ -20,6 +20,8 @@ import com.stanzaliving.user.service.OtpService;
 
 import lombok.extern.log4j.Log4j2;
 
+import java.util.Objects;
+
 @Log4j2
 @RestController
 @RequestMapping("/internal/otp")
@@ -97,8 +99,9 @@ public class InternalOtpController {
 	@PostMapping("mobile/resent/v2")
 	public ResponseDto<Void> resendMobileOtpV2(@RequestBody @Valid MobileOtpRequestDto mobileOtpRequestDto) {
 
+		if (Objects.isNull(mobileOtpRequestDto))
+			return ResponseDto.failure("Unable to resend OTP");
 		log.info("Received request to resend OTP: {}", mobileOtpRequestDto);
-
 		try {
 
 			otpService.resendMobileOtpV2(mobileOtpRequestDto, mobileOtpRequestDto.getMobile(), mobileOtpRequestDto.getIsoCode(), mobileOtpRequestDto.getOtpType());
@@ -106,7 +109,7 @@ public class InternalOtpController {
 			return ResponseDto.success("OTP resent to mobile");
 
 		} catch (AuthException e) {
-			log.error(e.getMessage());
+			log.error("Exception occured {} ",e);
 			return ResponseDto.failure(e.getMessage());
 		}
 	}
