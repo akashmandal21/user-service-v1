@@ -3,6 +3,31 @@
  */
 package com.stanzaliving.user.service.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.validation.Valid;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.ListUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+
 import com.stanzaliving.core.base.common.dto.PageResponse;
 import com.stanzaliving.core.base.common.dto.PaginationRequest;
 import com.stanzaliving.core.base.enums.AccessLevel;
@@ -664,26 +689,34 @@ public class UserServiceImpl implements UserService {
 
 						List<UserDepartmentLevelEntity> departmentLevelEntities = userDepartmentLevelDbService.findByUuidInAndAccessLevel(uuids, roleDto.getAccessLevel());
 
-//						log.info("Department Level Entity {}",departmentLevelEntities);
+						Set<String> userIds = departmentLevelEntities.stream().map(UserDepartmentLevelEntity::getUserUuid).collect(Collectors.toSet());
+						log.info("userIds {}",userIds);
+						
+						Set<String> activeUserIds = getActiveUserUuids(userIds);
 
 						if (CollectionUtils.isNotEmpty(departmentLevelEntities)) {
-							String key = roleDto.getRoleName()+""+department;
-							cacheDtos.putIfAbsent(key,UserRoleCacheDto.builder().roleName(roleDto.getRoleName()).department(department).accessUserMap(new HashMap<>()).build());
+
+							String key = roleDto.getRoleName() + "" + department;
+							cacheDtos.putIfAbsent(key, UserRoleCacheDto.builder().roleName(roleDto.getRoleName()).department(department).accessUserMap(new HashMap<>()).build());
 							departmentLevelEntities.forEach(entity -> {
-								Arrays.asList((entity.getCsvAccessLevelEntityUuid().split(","))).stream().forEach(accessUuid -> {
-									cacheDtos.get(key).getAccessUserMap().putIfAbsent(accessUuid, new ArrayList<>());
-									cacheDtos.get(key).getAccessUserMap().get(accessUuid).add(new UIKeyValue(entity.getUserUuid(), entity.getUserUuid()));
-									users.add(entity.getUserUuid());
-								});
+
+								if (activeUserIds.contains(entity.getUserUuid())) {
+									Arrays.asList((entity.getCsvAccessLevelEntityUuid().split(","))).stream().forEach(accessUuid -> {
+										cacheDtos.get(key).getAccessUserMap().putIfAbsent(accessUuid, new ArrayList<>());
+										cacheDtos.get(key).getAccessUserMap().get(accessUuid).add(new UIKeyValue(entity.getUserUuid(), entity.getUserUuid()));
+										users.add(entity.getUserUuid());
+									});
+								}
+
 							});
 						}
 					}
 				}
 			}
 
-        }
-
+		}
 		if(CollectionUtils.isNotEmpty(users)){
+			
 			PaginationRequest paginationRequest = PaginationRequest.builder().pageNo(1).limit(users.size()).build();
 			Map<String,String> userNames = this.searchUser(UserFilterDto.builder().pageRequest(paginationRequest).userIds(users.stream().collect(Collectors.toList())).build()).getData()
 					.stream().collect(Collectors.toMap(f->f.getUuid(), f->getUserName(f)));
@@ -697,6 +730,23 @@ public class UserServiceImpl implements UserService {
 
 		}
 		return ListUtils.EMPTY_LIST;
+	}
+
+	/**
+	 * @param userIds
+	 * @return
+	 */
+	private Set<String> getActiveUserUuids(Set<String> userIds) {
+		// build ActiveUserRequestDto
+		ActiveUserRequestDto activeUserRequestDto = ActiveUserRequestDto.builder().userIds(userIds).build();
+
+		// fetch active user response dtos
+		List<UserProfileDto> userProfileDtos = getAllActiveUsersByUuidIn(activeUserRequestDto);
+
+		// create set of active user ids
+		Set<String> activeUserUuids = userProfileDtos.stream().map(UserProfileDto::getUuid).collect(Collectors.toSet());
+
+		return activeUserUuids;
 	}
 
 	private String getUserName(UserProfileDto userProfile){
@@ -724,7 +774,6 @@ public class UserServiceImpl implements UserService {
 		return UserAdapter.getUserProfileDto(userEntity);
 	}
 
-	@Override
 	public UserDto addUserV3(AddUserRequestDto addUserRequestDto) {
 
 		if (!PhoneNumberUtils.isValidMobileForCountry(addUserRequestDto.getMobile(), addUserRequestDto.getIsoCode())) {
@@ -770,5 +819,13 @@ public class UserServiceImpl implements UserService {
 		notificationProducer.publish(kafkaResidentDetailTopic, KafkaDTO.class.getName(), kafkaDTO);
 
 		return userDto;
+	}
+
+	public List<String> getUserProfileDtoWhoseBirthdayIsToday() {
+		log.info("Fetching users who have there birthday today.");
+		List <String> newList = new ArrayList<>();
+		List<String> userList = userDbService.getUserWhoseBirthdayIsToday().orElse(newList);
+		
+		return userList;
 	}
 }

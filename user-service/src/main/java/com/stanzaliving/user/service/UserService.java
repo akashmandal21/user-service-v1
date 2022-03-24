@@ -5,6 +5,7 @@ package com.stanzaliving.user.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
@@ -79,4 +80,6 @@ public interface UserService {
 	UserProfileDto getUserProfileDtoByEmail(String email);
 
 	UserDto addUserV3(AddUserRequestDto addUserRequestDto);
+	
+	List<String> getUserProfileDtoWhoseBirthdayIsToday();
 }

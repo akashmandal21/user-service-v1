@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.stanzaliving.core.base.http.StanzaRestClient;
+import com.stanzaliving.core.notificationv2.api.NotificationClientApi;
 import com.stanzaliving.core.transformation.client.api.InternalDataControllerApi;
 import com.stanzaliving.core.transformation.client.cache.TransformationCache;
 
@@ -13,6 +14,9 @@ public class ClientConfig {
 
     @Value("${service.transformationmaster.url}")
     private String transformationUrl;
+    
+    @Value("${service.notificationClient.url}")
+	private String notificationClientUrl;
 
     @Bean
     public InternalDataControllerApi internalDataControllerApi() {
@@ -23,4 +27,10 @@ public class ClientConfig {
     public TransformationCache transformationCache(InternalDataControllerApi internalDataControllerApi) {
         return new TransformationCache(internalDataControllerApi);
     }
+    
+    @Bean
+    public NotificationClientApi notificationClientApi() {
+        return new NotificationClientApi(new StanzaRestClient(notificationClientUrl));
+    }
+    
 }
