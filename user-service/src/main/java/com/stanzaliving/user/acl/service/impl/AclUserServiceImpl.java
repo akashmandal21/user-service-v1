@@ -889,8 +889,14 @@ public class AclUserServiceImpl implements AclUserService {
 									if (StringUtils.isEmpty(requestDto.getSearchText())) {
 										userProfileDtoList.add(userProfileDto);
 									} else {
-										if (requestDto.getSearchText().length() >= 3 && (userProfileDto.getFirstName().toLowerCase().contains(requestDto.getSearchText().toLowerCase())
-											|| userProfileDto.getMobile().toLowerCase().contains(requestDto.getSearchText().toLowerCase()))) {
+										String name = "";
+										String firstName = StringUtils.isNotEmpty(userProfileDto.getFirstName()) ? userProfileDto.getFirstName() : "";
+										String lastName = StringUtils.isNotEmpty(userProfileDto.getLastName()) ? userProfileDto.getLastName() : "";
+										if (StringUtils.isNotEmpty(firstName) && StringUtils.isEmpty(lastName)) name = firstName;
+										else if (StringUtils.isEmpty(firstName) && StringUtils.isNotEmpty(lastName)) name = lastName;
+										else if (StringUtils.isNotEmpty(firstName) && StringUtils.isNotEmpty(lastName)) name = firstName + " " +  lastName;
+										if (requestDto.getSearchText().length() >= 3 && (StringUtils.containsIgnoreCase(name, requestDto.getSearchText())
+											|| StringUtils.containsIgnoreCase(userProfileDto.getMobile(), requestDto.getSearchText()))) {
 											userProfileDtoList.add(userProfileDto);
 										}
 									}
@@ -929,8 +935,14 @@ public class AclUserServiceImpl implements AclUserService {
 										if (StringUtils.isEmpty(requestDto.getSearchText())) {
 											userProfileDtoList.add(userProfileDto);
 										} else {
-											if (requestDto.getSearchText().length() >= 3 && (userProfileDto.getFirstName().toLowerCase().contains(requestDto.getSearchText().toLowerCase())
-												|| userProfileDto.getMobile().toLowerCase().contains(requestDto.getSearchText().toLowerCase()))) {
+											String name = "";
+											String firstName = StringUtils.isNotEmpty(userProfileDto.getFirstName()) ? userProfileDto.getFirstName() : "";
+											String lastName = StringUtils.isNotEmpty(userProfileDto.getLastName()) ? userProfileDto.getLastName() : "";
+											if (StringUtils.isNotEmpty(firstName) && StringUtils.isEmpty(lastName)) name = firstName;
+											else if (StringUtils.isEmpty(firstName) && StringUtils.isNotEmpty(lastName)) name = lastName;
+											else if (StringUtils.isNotEmpty(firstName) && StringUtils.isNotEmpty(lastName)) name = firstName + " " +  lastName;
+											if (requestDto.getSearchText().length() >= 3 && (StringUtils.containsIgnoreCase(name, requestDto.getSearchText())
+												|| StringUtils.containsIgnoreCase(userProfileDto.getMobile(), requestDto.getSearchText()))) {
 												userProfileDtoList.add(userProfileDto);
 											}
 										}
@@ -974,8 +986,14 @@ public class AclUserServiceImpl implements AclUserService {
 										if (StringUtils.isEmpty(requestDto.getSearchText())) {
 											userProfileDtoList.add(userProfileDto);
 										} else {
-											if (requestDto.getSearchText().length() >= 3 && (userProfileDto.getFirstName().toLowerCase().contains(requestDto.getSearchText().toLowerCase())
-												|| userProfileDto.getMobile().toLowerCase().contains(requestDto.getSearchText().toLowerCase()))) {
+											String name = "";
+											String firstName = StringUtils.isNotEmpty(userProfileDto.getFirstName()) ? userProfileDto.getFirstName() : "";
+											String lastName = StringUtils.isNotEmpty(userProfileDto.getLastName()) ? userProfileDto.getLastName() : "";
+											if (StringUtils.isNotEmpty(firstName) && StringUtils.isEmpty(lastName)) name = firstName;
+											else if (StringUtils.isEmpty(firstName) && StringUtils.isNotEmpty(lastName)) name = lastName;
+											else if (StringUtils.isNotEmpty(firstName) && StringUtils.isNotEmpty(lastName)) name = firstName + " " +  lastName;
+											if (requestDto.getSearchText().length() >= 3 && (StringUtils.containsIgnoreCase(name, requestDto.getSearchText())
+												|| StringUtils.containsIgnoreCase(userProfileDto.getMobile(), requestDto.getSearchText()))) {
 												userProfileDtoList.add(userProfileDto);
 											}
 										}
