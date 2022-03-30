@@ -139,6 +139,9 @@ public class UserServiceImpl implements UserService {
 	@Value("${country.uuid}")
 	private String countryUuid;
 
+	@Value("${sigmaManageSales.role}")
+	private String sigmaManageSalesUuid;
+
 	@Override
 	public UserProfileDto getActiveUserByUserId(String userId) {
 
@@ -822,6 +825,7 @@ public class UserServiceImpl implements UserService {
 			log.info("Added New User with Id: " + userEntity.getUuid());
 		}
 		addUserOrConsumerRole(userEntity);
+		addSigmaManageSalesRole(userEntity);
 		UserDto userDto = UserAdapter.getUserDto(userEntity);
 
 		KafkaDTO kafkaDTO = new KafkaDTO();
@@ -830,6 +834,13 @@ public class UserServiceImpl implements UserService {
 		notificationProducer.publish(kafkaResidentDetailTopic, KafkaDTO.class.getName(), kafkaDTO);
 
 		return userDto;
+	}
+
+	private void addSigmaManageSalesRole(UserEntity userEntity) {
+		AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = AddUserDeptLevelRoleRequestDto.builder().department(Department.SALES)
+			.rolesUuid(Arrays.asList(sigmaManageSalesUuid)).accessLevel(AccessLevel.COUNTRY)
+			.accessLevelEntityListUuid(Arrays.asList(countryUuid)).userUuid(userEntity.getUuid()).build();
+		aclUserService.addRole(addUserDeptLevelRoleRequestDto);
 	}
 
 	public List<String> getUserProfileDtoWhoseBirthdayIsToday() {
