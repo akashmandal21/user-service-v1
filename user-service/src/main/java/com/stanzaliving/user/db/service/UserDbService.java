@@ -46,4 +46,6 @@ public interface UserDbService extends AbstractJpaService<UserEntity, Long> {
 	Map<String, String> getUuidByEmail(List<String> emails);
 	
 	Optional<List<String>> getUserWhoseBirthdayIsToday();
+
+	List<UserEntity> findAllByUuidInAndStatus(List<String> userId, boolean b);
 }

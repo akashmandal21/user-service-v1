@@ -66,4 +66,6 @@ public interface AclUserService {
 	List<MicromarketAndResidencesDropdownResponseDto> getMicromarketAndResidenceDropdown(MicromarketAndResidencesDropdownRequestDto requestDto);
 
 	List<CityMicromarketDropdownResponseDto> getCityMicromarketDropdown(MicromarketAndResidencesDropdownRequestDto requestDto);
+
+	void addRoleV2(AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleDto);
 }

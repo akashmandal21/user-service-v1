@@ -186,4 +186,11 @@ public class AclUserController {
             return ResponseDto.failure("Couldn't fetch City Micromarket Dropdown");
         }
     }
+
+    @PostMapping("add/role/v2")
+    public ResponseDto<Void> addRoleV2(@RequestBody @Valid AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleDto) {
+        log.info("Received request to add role " + addUserDeptLevelRoleDto);
+        aclUserService.addRoleV2(addUserDeptLevelRoleDto);
+        return ResponseDto.success("Role Assignment successful");
+    }
 }

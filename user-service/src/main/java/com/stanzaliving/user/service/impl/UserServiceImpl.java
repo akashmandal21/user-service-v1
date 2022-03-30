@@ -785,32 +785,43 @@ public class UserServiceImpl implements UserService {
 		UserEntity userEntity = userDbService.getUserForMobile(addUserRequestDto.getMobile(),
 			addUserRequestDto.getIsoCode());
 
-		if (Objects.nonNull(userEntity)) {
+		if (Objects.nonNull(userEntity) && userEntity.isStatus() == true) {
 
-			throw new ApiValidationException("User: " + userEntity.getUuid() + " already exists for Mobile: " + addUserRequestDto.getMobile()
-				+ ", ISO Code: " + addUserRequestDto.getIsoCode() + " of type: " + addUserRequestDto.getUserType());
+			throw new ApiValidationException("Active User already exists for Mobile: " + addUserRequestDto.getMobile()
+				+ ", ISO Code: " + addUserRequestDto.getIsoCode());
 		}
 
-		log.info("Adding new User [Mobile: " + addUserRequestDto.getMobile() + ", ISOCode: "
-			+ addUserRequestDto.getIsoCode() + ", UserType: " + addUserRequestDto.getUserType() + "]");
+		if (Objects.nonNull(userEntity) && userEntity.isStatus() == false) {
+			log.info("Activating deactivated user [Mobile: " + addUserRequestDto.getMobile() + ", ISOCode: "
+				+ addUserRequestDto.getIsoCode() + ", UserType: " + addUserRequestDto.getUserType() + "]");
 
-		UserProfileEntity profileEntity = UserAdapter.getUserProfileEntity(addUserRequestDto);
+			userEntity.setUserType(addUserRequestDto.getUserType());
+			userEntity.setEmail(addUserRequestDto.getEmail());
+			userEntity.setDepartment(addUserRequestDto.getDepartment());
+			userEntity.setStatus(true);
+			UserProfileEntity userProfileEntity = userEntity.getUserProfile();
+			userProfileEntity.setFirstName(addUserRequestDto.getFirstName());
+			userProfileEntity.setLastName(addUserRequestDto.getLastName());
+			userProfileEntity.setStatus(true);
+			userEntity = userDbService.saveAndFlush(userEntity);
+		} else {
+			log.info("Adding new User [Mobile: " + addUserRequestDto.getMobile() + ", ISOCode: "
+				+ addUserRequestDto.getIsoCode() + ", UserType: " + addUserRequestDto.getUserType() + "]");
 
-		userEntity = UserEntity.builder().userType(addUserRequestDto.getUserType())
-			.isoCode(addUserRequestDto.getIsoCode()).mobile(addUserRequestDto.getMobile()).mobileVerified(false)
-			.email(addUserRequestDto.getEmail()).emailVerified(false).userProfile(profileEntity).status(true)
-			.department(addUserRequestDto.getDepartment()).build();
+			UserProfileEntity profileEntity = UserAdapter.getUserProfileEntity(addUserRequestDto);
 
-		profileEntity.setUser(userEntity);
+			userEntity = UserEntity.builder().userType(addUserRequestDto.getUserType())
+				.isoCode(addUserRequestDto.getIsoCode()).mobile(addUserRequestDto.getMobile()).mobileVerified(false)
+				.email(addUserRequestDto.getEmail()).emailVerified(false).userProfile(profileEntity).status(true)
+				.department(addUserRequestDto.getDepartment()).build();
 
-		userEntity = userDbService.saveAndFlush(userEntity);
+			profileEntity.setUser(userEntity);
 
+			userEntity = userDbService.saveAndFlush(userEntity);
 
+			log.info("Added New User with Id: " + userEntity.getUuid());
+		}
 		addUserOrConsumerRole(userEntity);
-
-
-		log.info("Added New User with Id: " + userEntity.getUuid());
-
 		UserDto userDto = UserAdapter.getUserDto(userEntity);
 
 		KafkaDTO kafkaDTO = new KafkaDTO();
