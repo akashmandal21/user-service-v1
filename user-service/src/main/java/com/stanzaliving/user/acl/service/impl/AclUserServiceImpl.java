@@ -811,7 +811,8 @@ public class AclUserServiceImpl implements AclUserService {
 			}
 		}
 		if (CollectionUtils.isNotEmpty(roleUuids)) {
-			List<AccessModule> accessModuleList = roleAccessModuleRepository.findAccessModuleByRoleUuidInAndStatus(roleUuids, true);
+			List<AccessModule> accessModuleList = roleAccessModuleRepository
+				.findAccessModuleByRoleUuidInAndAccessLevelInAndStatus(roleUuids, Arrays.asList(AccessLevel.COUNTRY, AccessLevel.CITY), true);
 			if (CollectionUtils.isNotEmpty(accessModuleList)) {
 				for (AccessModule accessModule : accessModuleList) {
 					UserAccessModuleDto userAccessModuleDto = new UserAccessModuleDto();
@@ -853,7 +854,7 @@ public class AclUserServiceImpl implements AclUserService {
 	public List<UsersByAccessModulesAndCitiesResponseDto> getUsersByAccessModulesAndCitites(UsersByAccessModulesAndCitiesRequestDto requestDto) {
 
 		log.info("Get Users by access modules and cities : {}", requestDto);
-		List<String> roleUuids = roleAccessModuleRepository.findRoleUuidByAccessModuleIn(requestDto.getAccessModuleList());
+		List<String> roleUuids = roleAccessModuleRepository.findRoleUuidByAccessModuleInAndStatus(requestDto.getAccessModuleList(), true);
 		if (CollectionUtils.isNotEmpty(roleUuids)) {
 			log.info("Role uuids : {}", roleUuids);
 			List<String> userDepartmentLevelUuids = userDepartmentLevelRoleRepository.findUserDepartmentLevelUuidByRoleUuidInAndStatus(roleUuids, true);
@@ -1095,7 +1096,7 @@ public class AclUserServiceImpl implements AclUserService {
 			if (CollectionUtils.isNotEmpty(userDepartmentLevelRoleEntityList)) {
 				for (UserDepartmentLevelRoleEntity userDepartmentLevelRoleEntity : userDepartmentLevelRoleEntityList) {
 					RoleAccessModuleMappingEntity roleAccessModuleMappingEntity = roleAccessModuleRepository
-						.findByRoleUuid(userDepartmentLevelRoleEntity.getRoleUuid());
+						.findByRoleUuidAndStatus(userDepartmentLevelRoleEntity.getRoleUuid(), true);
 					if (Objects.nonNull(roleAccessModuleMappingEntity)) {
 						UserDepartmentLevelAccessModulesDto accessModulesDto = new UserDepartmentLevelAccessModulesDto();
 						accessModulesDto.setAccessModule(roleAccessModuleMappingEntity.getAccessModule());
@@ -1147,7 +1148,7 @@ public class AclUserServiceImpl implements AclUserService {
 				} else {
 
 					RoleAccessModuleMappingEntity roleAccessModuleMappingEntity = roleAccessModuleRepository
-							.findByAccessModuleAndAccessLevel(requestDto.getAccessModule(), requestDto.getAccessLevel());
+							.findByAccessModuleAndAccessLevelAndStatus(requestDto.getAccessModule(), requestDto.getAccessLevel(),true);
 					if (Objects.nonNull(roleAccessModuleMappingEntity)) {
 						UserDeptLevelRoleListDto userDeptLevelRoleListDto = new UserDeptLevelRoleListDto();
 						userDeptLevelRoleListDto.setUserUuid(requestDto.getUserUuid());
