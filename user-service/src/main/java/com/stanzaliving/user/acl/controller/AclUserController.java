@@ -103,7 +103,7 @@ public class AclUserController {
     @GetMapping("/accessModule")
     public ResponseDto<List<UserAccessModuleDto>> getUserAccessModulesByUserUuid(@RequestAttribute(name = SecurityConstants.USER_ID) @NotBlank(message = "User Id is mandatory to get user profile") String userUuid) {
 
-        log.info("Get Access Modules for user : {]", userUuid);
+        log.info("Get Access Modules for user : {}", userUuid);
         List<UserAccessModuleDto> userAccessModuleDtoList = aclUserService.getUserAccessModulesByUserUuid(userUuid);
         if (CollectionUtils.isNotEmpty(userAccessModuleDtoList)) {
             return ResponseDto.success("List of Modules that the user has access to", userAccessModuleDtoList);
