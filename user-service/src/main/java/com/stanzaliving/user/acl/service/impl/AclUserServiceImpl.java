@@ -3,6 +3,7 @@ package com.stanzaliving.user.acl.service.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -878,7 +879,8 @@ public class AclUserServiceImpl implements AclUserService {
 			getClusterManagers(requestDto, userDepartmentLevelUuids, responseDtoList);
 		else if (requestDto.getAccessLevel() == AccessLevel.RESIDENCE)
 			getSalesAssociates(requestDto, userDepartmentLevelUuids, responseDtoList);
-		return responseDtoList;
+		return responseDtoList.stream().sorted(Comparator.comparing(UsersByAccessModulesAndCitiesResponseDto::getAccessLevelEntityName))
+			.collect(Collectors.toList());
 	}
 
 	private void getSalesAssociates(UsersByAccessModulesAndCitiesRequestDto requestDto, List<String> userDepartmentLevelUuids, List<UsersByAccessModulesAndCitiesResponseDto> responseDtoList) {
@@ -1244,7 +1246,9 @@ public class AclUserServiceImpl implements AclUserService {
 					}
 				}
 			}
-			return responseDtos;
+			return responseDtos.stream()
+				.sorted(Comparator.comparing(MicromarketAndResidencesDropdownResponseDto::getMicromarketName))
+				.collect(Collectors.toList());
 		} else {
 			throw new ApiValidationException("Bad Request - Required fields missing");
 		}
@@ -1278,7 +1282,9 @@ public class AclUserServiceImpl implements AclUserService {
 					responseDtos.add(responseDto);
 				}
 			}
-			return responseDtos;
+			return responseDtos.stream()
+				.sorted(Comparator.comparing(CityMicromarketDropdownResponseDto::getCityName))
+				.collect(Collectors.toList());
 		} else {
 			throw new ApiValidationException("Bad Request - Required fields missing");
 		}
