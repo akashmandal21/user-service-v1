@@ -942,20 +942,7 @@ public class AclUserServiceImpl implements AclUserService {
 					if (!Collections.disjoint(Arrays.asList(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid().split(",")), entry.getValue())) {
 						UserProfileDto userProfileDto = userMap.get(userDepartmentLevelEntity.getUserUuid());
 						if (Objects.nonNull(userProfileDto)) {
-							if (StringUtils.isEmpty(requestDto.getSearchText())) {
-								userProfileDtoList.add(userProfileDto);
-							} else {
-								String name = "";
-								String firstName = StringUtils.isNotEmpty(userProfileDto.getFirstName()) ? userProfileDto.getFirstName() : "";
-								String lastName = StringUtils.isNotEmpty(userProfileDto.getLastName()) ? userProfileDto.getLastName() : "";
-								if (StringUtils.isNotEmpty(firstName) && StringUtils.isEmpty(lastName)) name = firstName;
-								else if (StringUtils.isEmpty(firstName) && StringUtils.isNotEmpty(lastName)) name = lastName;
-								else if (StringUtils.isNotEmpty(firstName) && StringUtils.isNotEmpty(lastName)) name = firstName + " " +  lastName;
-								if (requestDto.getSearchText().length() >= 3 && (StringUtils.containsIgnoreCase(name, requestDto.getSearchText())
-									|| StringUtils.containsIgnoreCase(userProfileDto.getMobile(), requestDto.getSearchText()))) {
-									userProfileDtoList.add(userProfileDto);
-								}
-							}
+							filterUsers(requestDto, userProfileDtoList, userProfileDto);
 						}
 					}
 				}
@@ -1008,26 +995,31 @@ public class AclUserServiceImpl implements AclUserService {
 				if (Arrays.asList(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid().split(",")).contains(micromarketUuid)) {
 					UserProfileDto userProfileDto = userMap.get(userDepartmentLevelEntity.getUserUuid());
 					if (Objects.nonNull(userProfileDto)) {
-						if (StringUtils.isEmpty(requestDto.getSearchText())) {
-							userProfileDtoList.add(userProfileDto);
-						} else {
-							String name = "";
-							String firstName = StringUtils.isNotEmpty(userProfileDto.getFirstName()) ? userProfileDto.getFirstName() : "";
-							String lastName = StringUtils.isNotEmpty(userProfileDto.getLastName()) ? userProfileDto.getLastName() : "";
-							if (StringUtils.isNotEmpty(firstName) && StringUtils.isEmpty(lastName)) name = firstName;
-							else if (StringUtils.isEmpty(firstName) && StringUtils.isNotEmpty(lastName)) name = lastName;
-							else if (StringUtils.isNotEmpty(firstName) && StringUtils.isNotEmpty(lastName)) name = firstName + " " +  lastName;
-							if (requestDto.getSearchText().length() >= 3 && (StringUtils.containsIgnoreCase(name, requestDto.getSearchText())
-								|| StringUtils.containsIgnoreCase(userProfileDto.getMobile(), requestDto.getSearchText()))) {
-								userProfileDtoList.add(userProfileDto);
-							}
-						}
+						filterUsers(requestDto, userProfileDtoList, userProfileDto);
 					}
 				}
 			}
 			responseDto.setUserProfileDtoList(userProfileDtoList);
 			if (CollectionUtils.isNotEmpty(responseDto.getUserProfileDtoList())) {
 				responseDtoList.add(responseDto);
+			}
+		}
+	}
+
+	private void filterUsers(UsersByAccessModulesAndCitiesRequestDto requestDto, List<UserProfileDto> userProfileDtoList, UserProfileDto userProfileDto) {
+		if (StringUtils.isEmpty(requestDto.getSearchText())) {
+			userProfileDtoList.add(userProfileDto);
+		} else {
+			String name = "";
+			String firstName = StringUtils.isNotEmpty(userProfileDto.getFirstName()) ? userProfileDto.getFirstName() : "";
+			String lastName = StringUtils.isNotEmpty(userProfileDto.getLastName()) ? userProfileDto.getLastName() : "";
+			if (StringUtils.isNotEmpty(firstName) && StringUtils.isEmpty(lastName)) name = firstName;
+			else if (StringUtils.isEmpty(firstName) && StringUtils.isNotEmpty(lastName)) name = lastName;
+			else if (StringUtils.isNotEmpty(firstName) && StringUtils.isNotEmpty(lastName))
+				name = firstName + " " + lastName;
+			if (requestDto.getSearchText().length() >= 3 && (StringUtils.containsIgnoreCase(name, requestDto.getSearchText())
+				|| StringUtils.containsIgnoreCase(userProfileDto.getMobile(), requestDto.getSearchText()))) {
+				userProfileDtoList.add(userProfileDto);
 			}
 		}
 	}
@@ -1064,20 +1056,7 @@ public class AclUserServiceImpl implements AclUserService {
 				if (Arrays.asList(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid().split(",")).contains(cityUuid)) {
 					UserProfileDto userProfileDto = userMap.get(userDepartmentLevelEntity.getUserUuid());
 					if (Objects.nonNull(userProfileDto)) {
-						if (StringUtils.isEmpty(requestDto.getSearchText())) {
-							userProfileDtoList.add(userProfileDto);
-						} else {
-							String name = "";
-							String firstName = StringUtils.isNotEmpty(userProfileDto.getFirstName()) ? userProfileDto.getFirstName() : "";
-							String lastName = StringUtils.isNotEmpty(userProfileDto.getLastName()) ? userProfileDto.getLastName() : "";
-							if (StringUtils.isNotEmpty(firstName) && StringUtils.isEmpty(lastName)) name = firstName;
-							else if (StringUtils.isEmpty(firstName) && StringUtils.isNotEmpty(lastName)) name = lastName;
-							else if (StringUtils.isNotEmpty(firstName) && StringUtils.isNotEmpty(lastName)) name = firstName + " " +  lastName;
-							if (requestDto.getSearchText().length() >= 3 && (StringUtils.containsIgnoreCase(name, requestDto.getSearchText())
-								|| StringUtils.containsIgnoreCase(userProfileDto.getMobile(), requestDto.getSearchText()))) {
-								userProfileDtoList.add(userProfileDto);
-							}
-						}
+						filterUsers(requestDto, userProfileDtoList, userProfileDto);
 					}
 				}
 			}
