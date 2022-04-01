@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.stanzaliving.user.acl.controller;
 
@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.stanzaliving.core.user.acl.dto.UserAccessLevelIdsByRoleNameDto;
+import com.stanzaliving.core.user.acl.dto.UserAccessLevelIdsByRoleNameWithFiltersDto;
+import com.stanzaliving.core.user.acl.dto.UsersByFiltersRequestDto;
 import com.stanzaliving.core.user.dto.response.UserContactDetailsResponseDto;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,5 +92,13 @@ public class AclInternalController {
 		if(CollectionUtils.isNotEmpty(aclUserService.getAccessLevelIds(department,roleName)))
 			return ResponseDto.success("Found User", aclUserService.getAccessLevelIds(department,roleName));
 		return ResponseDto.success("User Not Found");
+	}
+
+	@PostMapping("/useridAccessLevelIdByRoleName/filters")
+	public ResponseDto<Map<String, List<String>>> getUseridAccessLevelIdByRoleNameWithFilters(@RequestBody UserAccessLevelIdsByRoleNameWithFiltersDto userAccessLevelIdsByRoleNameWithFiltersDto) {
+
+		log.info("Fetching user by {} ", userAccessLevelIdsByRoleNameWithFiltersDto);
+
+		return ResponseDto.success("Found User", aclUserService.getUsersForRolesWithFilters(userAccessLevelIdsByRoleNameWithFiltersDto));
 	}
 }
