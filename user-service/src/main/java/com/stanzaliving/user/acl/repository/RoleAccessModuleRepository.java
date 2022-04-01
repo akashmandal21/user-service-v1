@@ -28,4 +28,6 @@ public interface RoleAccessModuleRepository extends AbstractJpaRepository<RoleAc
     RoleAccessModuleMappingEntity findByRoleUuidAndStatus(String roleUuid, boolean status);
 
     RoleAccessModuleMappingEntity findByAccessModuleAndAccessLevelAndStatus(AccessModule accessModule, AccessLevel accessLevel, boolean status);
+
+    List<RoleAccessModuleMappingEntity> findByRoleUuidInAndStatus(List<String> roleUuids, boolean status);
 }
