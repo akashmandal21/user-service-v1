@@ -5,6 +5,13 @@ package com.stanzaliving.user.service.impl;
 
 import java.util.Objects;
 
+import com.stanzaliving.core.base.enums.Department;
+import com.stanzaliving.core.base.exception.StanzaException;
+import com.stanzaliving.core.leadservice.client.api.LeadserviceClientApi;
+import com.stanzaliving.core.user.enums.UserType;
+import com.stanzaliving.core.user.request.dto.*;
+import com.stanzaliving.user.service.UserService;
+import com.stanzaliving.website.response.dto.LeadDetailEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,10 +22,6 @@ import com.stanzaliving.core.kafka.dto.KafkaDTO;
 import com.stanzaliving.core.kafka.producer.NotificationProducer;
 import com.stanzaliving.core.user.constants.UserErrorCodes;
 import com.stanzaliving.core.user.dto.UserProfileDto;
-import com.stanzaliving.core.user.request.dto.EmailOtpValidateRequestDto;
-import com.stanzaliving.core.user.request.dto.EmailVerificationRequestDto;
-import com.stanzaliving.core.user.request.dto.LoginRequestDto;
-import com.stanzaliving.core.user.request.dto.OtpValidateRequestDto;
 import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.db.service.UserDbService;
 import com.stanzaliving.user.entity.UserEntity;
@@ -48,6 +51,12 @@ public class AuthServiceImpl implements AuthService {
 	@Autowired
 	private NotificationProducer notificationProducer;
 
+	@Autowired
+	private LeadserviceClientApi leadserviceClientApi;
+
+	@Autowired
+	private UserService userService;
+
 	@Override
 	public void login(LoginRequestDto loginRequestDto) {
 
@@ -66,7 +75,21 @@ public class AuthServiceImpl implements AuthService {
 		// userEntity = createUserIfUserIsConsumer(loginRequestDto, userEntity);
 
 		if (Objects.isNull(userEntity)) {
-			throw new AuthException("No user exists with this number", UserErrorCodes.USER_NOT_EXISTS);
+			LeadDetailEntity leadDetail = leadserviceClientApi.search(loginRequestDto.getMobile(), null).getData();
+			if (Objects.isNull(leadDetail) || !(leadDetail.getPhone().equals(loginRequestDto.getMobile()))) {
+				throw new AuthException("No booking found for this number");
+			} else {
+				AddUserRequestDto addUserRequestDto = new AddUserRequestDto();
+				addUserRequestDto.setMobile(leadDetail.getPhone());
+				addUserRequestDto.setFirstName(leadDetail.getFirstName());
+				addUserRequestDto.setLastName(leadDetail.getLastName());
+				addUserRequestDto.setEmail(leadDetail.getLeadEmail());
+				addUserRequestDto.setIsoCode(loginRequestDto.getIsoCode());
+				addUserRequestDto.setDepartment(Department.WEB);
+				addUserRequestDto.setUserType(UserType.GUEST);
+				userService.addUser(addUserRequestDto);
+				userEntity = userDbService.getUserForMobile(loginRequestDto.getMobile(), loginRequestDto.getIsoCode());
+			}
 		}
 
 		if (!userEntity.isStatus()) {

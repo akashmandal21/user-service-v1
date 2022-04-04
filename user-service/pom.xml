@@ -56,6 +56,12 @@
 
 		<dependency>
 			<groupId>com.stanzaliving.core</groupId>
+			<artifactId>leadservice-client</artifactId>
+			<version>${global.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.stanzaliving.core</groupId>
 			<artifactId>properties</artifactId>
 			<version>${global.version}</version>
 		</dependency>
