@@ -126,9 +126,10 @@ public class AclUserController {
 
     @PostMapping("accessModules/cities")
     public ResponseDto<List<UsersByAccessModulesAndCitiesResponseDto>> getUsersByAccessModulesAndCitites(
-        @RequestBody UsersByAccessModulesAndCitiesRequestDto requestDto) {
+        @RequestBody UsersByAccessModulesAndCitiesRequestDto requestDto,
+        @RequestAttribute(name = SecurityConstants.USER_ID) @NotBlank(message = "User Id is mandatory to get user profile") String userUuid) {
         log.info("Get Users by access modules and cities : {}", requestDto);
-        List<UsersByAccessModulesAndCitiesResponseDto> responseDtos = aclUserService.getUsersByAccessModulesAndCitites(requestDto);
+        List<UsersByAccessModulesAndCitiesResponseDto> responseDtos = aclUserService.getUsersByAccessModulesAndCitites(requestDto, userUuid);
         if (CollectionUtils.isNotEmpty(responseDtos)) {
             return ResponseDto.success("Users by Access Modules, Cities and Access Level", responseDtos);
         } else {
