@@ -868,7 +868,8 @@ public class AclUserServiceImpl implements AclUserService {
 	}
 
 	@Override
-	public List<UsersByAccessModulesAndCitiesResponseDto> getUsersByAccessModulesAndCitites(UsersByAccessModulesAndCitiesRequestDto requestDto) {
+	public List<UsersByAccessModulesAndCitiesResponseDto> getUsersByAccessModulesAndCitites(UsersByAccessModulesAndCitiesRequestDto requestDto,
+																							String userUuid) {
 
 		log.info("Get Users by access modules and cities : {}", requestDto);
 		List<String> roleUuids = roleAccessModuleRepository.findRoleUuidByAccessModuleInAndStatus(requestDto.getAccessModuleList(), true);
@@ -876,7 +877,7 @@ public class AclUserServiceImpl implements AclUserService {
 			log.info("Role uuids : {}", roleUuids);
 			List<String> userDepartmentLevelUuids = userDepartmentLevelRoleRepository.findUserDepartmentLevelUuidByRoleUuidInAndStatus(roleUuids, true);
 			if (CollectionUtils.isNotEmpty(userDepartmentLevelUuids)) {
-				return getUsersByCities(requestDto, userDepartmentLevelUuids);
+				return getUsersByCities(requestDto, userDepartmentLevelUuids, userUuid);
 			} else {
 				return null;
 			}
@@ -886,20 +887,21 @@ public class AclUserServiceImpl implements AclUserService {
 	}
 
 	private List<UsersByAccessModulesAndCitiesResponseDto> getUsersByCities(UsersByAccessModulesAndCitiesRequestDto requestDto,
-																			List<String> userDepartmentLevelUuids) {
+																			List<String> userDepartmentLevelUuids, String userUuid) {
 		log.info("User Department Level Uuids found with access modules {}", userDepartmentLevelUuids);
 		List<UsersByAccessModulesAndCitiesResponseDto> responseDtoList = new ArrayList<>();
 		if (requestDto.getAccessLevel() == AccessLevel.CITY)
-			getCityHeads(requestDto, userDepartmentLevelUuids, responseDtoList);
+			getCityHeads(requestDto, userDepartmentLevelUuids, responseDtoList, userUuid);
 		else if (requestDto.getAccessLevel() == AccessLevel.MICROMARKET)
-			getClusterManagers(requestDto, userDepartmentLevelUuids, responseDtoList);
+			getClusterManagers(requestDto, userDepartmentLevelUuids, responseDtoList, userUuid);
 		else if (requestDto.getAccessLevel() == AccessLevel.RESIDENCE)
-			getSalesAssociates(requestDto, userDepartmentLevelUuids, responseDtoList);
+			getSalesAssociates(requestDto, userDepartmentLevelUuids, responseDtoList, userUuid);
 		return responseDtoList.stream().sorted(Comparator.comparing(UsersByAccessModulesAndCitiesResponseDto::getAccessLevelEntityName))
 			.collect(Collectors.toList());
 	}
 
-	private void getSalesAssociates(UsersByAccessModulesAndCitiesRequestDto requestDto, List<String> userDepartmentLevelUuids, List<UsersByAccessModulesAndCitiesResponseDto> responseDtoList) {
+	private void getSalesAssociates(UsersByAccessModulesAndCitiesRequestDto requestDto, List<String> userDepartmentLevelUuids,
+									List<UsersByAccessModulesAndCitiesResponseDto> responseDtoList, String userUuid) {
 		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelRepository
 			.findByUuidInAndAccessLevel(userDepartmentLevelUuids, AccessLevel.RESIDENCE);
 		if (CollectionUtils.isEmpty(userDepartmentLevelEntityList)) {
@@ -942,7 +944,7 @@ public class AclUserServiceImpl implements AclUserService {
 					if (!Collections.disjoint(Arrays.asList(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid().split(",")), entry.getValue())) {
 						UserProfileDto userProfileDto = userMap.get(userDepartmentLevelEntity.getUserUuid());
 						if (Objects.nonNull(userProfileDto)) {
-							filterUsers(requestDto, userProfileDtoList, userProfileDto);
+							filterUsers(requestDto, userProfileDtoList, userProfileDto, userUuid);
 						}
 					}
 				}
@@ -954,7 +956,8 @@ public class AclUserServiceImpl implements AclUserService {
 		}
 	}
 
-	private void getClusterManagers(UsersByAccessModulesAndCitiesRequestDto requestDto, List<String> userDepartmentLevelUuids, List<UsersByAccessModulesAndCitiesResponseDto> responseDtoList) {
+	private void getClusterManagers(UsersByAccessModulesAndCitiesRequestDto requestDto, List<String> userDepartmentLevelUuids,
+									List<UsersByAccessModulesAndCitiesResponseDto> responseDtoList, String userUuid) {
 		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelRepository
 			.findByUuidInAndAccessLevel(userDepartmentLevelUuids, AccessLevel.MICROMARKET);
 		if (CollectionUtils.isEmpty(userDepartmentLevelEntityList)) {
@@ -995,7 +998,7 @@ public class AclUserServiceImpl implements AclUserService {
 				if (Arrays.asList(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid().split(",")).contains(micromarketUuid)) {
 					UserProfileDto userProfileDto = userMap.get(userDepartmentLevelEntity.getUserUuid());
 					if (Objects.nonNull(userProfileDto)) {
-						filterUsers(requestDto, userProfileDtoList, userProfileDto);
+						filterUsers(requestDto, userProfileDtoList, userProfileDto, userUuid);
 					}
 				}
 			}
@@ -1006,25 +1009,29 @@ public class AclUserServiceImpl implements AclUserService {
 		}
 	}
 
-	private void filterUsers(UsersByAccessModulesAndCitiesRequestDto requestDto, List<UserProfileDto> userProfileDtoList, UserProfileDto userProfileDto) {
-		if (StringUtils.isEmpty(requestDto.getSearchText())) {
-			userProfileDtoList.add(userProfileDto);
-		} else {
-			String name = "";
-			String firstName = StringUtils.isNotEmpty(userProfileDto.getFirstName()) ? userProfileDto.getFirstName() : "";
-			String lastName = StringUtils.isNotEmpty(userProfileDto.getLastName()) ? userProfileDto.getLastName() : "";
-			if (StringUtils.isNotEmpty(firstName) && StringUtils.isEmpty(lastName)) name = firstName;
-			else if (StringUtils.isEmpty(firstName) && StringUtils.isNotEmpty(lastName)) name = lastName;
-			else if (StringUtils.isNotEmpty(firstName) && StringUtils.isNotEmpty(lastName))
-				name = firstName + " " + lastName;
-			if (requestDto.getSearchText().length() >= 3 && (StringUtils.containsIgnoreCase(name, requestDto.getSearchText())
-				|| StringUtils.containsIgnoreCase(userProfileDto.getMobile(), requestDto.getSearchText()))) {
+	private void filterUsers(UsersByAccessModulesAndCitiesRequestDto requestDto, List<UserProfileDto> userProfileDtoList,
+							 UserProfileDto userProfileDto, String userUuid) {
+		if (! userProfileDto.getUuid().equalsIgnoreCase(userUuid)) {
+			if (StringUtils.isEmpty(requestDto.getSearchText())) {
 				userProfileDtoList.add(userProfileDto);
+			} else {
+				String name = "";
+				String firstName = StringUtils.isNotEmpty(userProfileDto.getFirstName()) ? userProfileDto.getFirstName() : "";
+				String lastName = StringUtils.isNotEmpty(userProfileDto.getLastName()) ? userProfileDto.getLastName() : "";
+				if (StringUtils.isNotEmpty(firstName) && StringUtils.isEmpty(lastName)) name = firstName;
+				else if (StringUtils.isEmpty(firstName) && StringUtils.isNotEmpty(lastName)) name = lastName;
+				else if (StringUtils.isNotEmpty(firstName) && StringUtils.isNotEmpty(lastName))
+					name = firstName + " " + lastName;
+				if (requestDto.getSearchText().length() >= 3 && (StringUtils.containsIgnoreCase(name, requestDto.getSearchText())
+					|| StringUtils.containsIgnoreCase(userProfileDto.getMobile(), requestDto.getSearchText()))) {
+					userProfileDtoList.add(userProfileDto);
+				}
 			}
 		}
 	}
 
-	private void getCityHeads(UsersByAccessModulesAndCitiesRequestDto requestDto, List<String> userDepartmentLevelUuids, List<UsersByAccessModulesAndCitiesResponseDto> responseDtoList) {
+	private void getCityHeads(UsersByAccessModulesAndCitiesRequestDto requestDto, List<String> userDepartmentLevelUuids,
+							  List<UsersByAccessModulesAndCitiesResponseDto> responseDtoList, String userUuid) {
 		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelRepository
 			.findByUuidInAndAccessLevel(userDepartmentLevelUuids, AccessLevel.CITY);
 		if (CollectionUtils.isEmpty(userDepartmentLevelEntityList)) {
@@ -1056,7 +1063,7 @@ public class AclUserServiceImpl implements AclUserService {
 				if (Arrays.asList(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid().split(",")).contains(cityUuid)) {
 					UserProfileDto userProfileDto = userMap.get(userDepartmentLevelEntity.getUserUuid());
 					if (Objects.nonNull(userProfileDto)) {
-						filterUsers(requestDto, userProfileDtoList, userProfileDto);
+						filterUsers(requestDto, userProfileDtoList, userProfileDto, userUuid);
 					}
 				}
 			}
