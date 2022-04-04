@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.stanzaliving.user.service.impl;
 
@@ -67,8 +67,29 @@ import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.entity.UserProfileEntity;
 import com.stanzaliving.user.service.UserManagerMappingService;
 import com.stanzaliving.user.service.UserService;
-
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.ListUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+
+import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author naveen
@@ -114,10 +135,13 @@ public class UserServiceImpl implements UserService {
 
 	@Value("${broker.role}")
 	private String brokerUuid;
-	
+
 	@Value("${country.uuid}")
 	private String countryUuid;
-	
+
+	@Value("${sigmaManageSales.role}")
+	private String sigmaManageSalesUuid;
+
 	@Override
 	public UserProfileDto getActiveUserByUserId(String userId) {
 
@@ -178,7 +202,7 @@ public class UserServiceImpl implements UserService {
 
 			log.warn("User: " + userEntity.getUuid() + " already exists for Mobile: " + addUserRequestDto.getMobile()
 					+ ", ISO Code: " + addUserRequestDto.getIsoCode() + " of type: " + addUserRequestDto.getUserType());
-			
+
 			if(addUserRequestDto.getUserType().equals(UserType.CONSUMER)|| addUserRequestDto.getUserType().equals(UserType.EXTERNAL)) {
 				userEntity.setUserType(addUserRequestDto.getUserType());
 				try {
@@ -187,8 +211,8 @@ public class UserServiceImpl implements UserService {
 					log.error("Got error while adding role",e);
 				}
 			}
-			
-			
+
+
 			return UserAdapter.getUserDto(userEntity);
 
 		}
@@ -207,9 +231,9 @@ public class UserServiceImpl implements UserService {
 
 		userEntity = userDbService.saveAndFlush(userEntity);
 
-		
+
 		addUserOrConsumerRole(userEntity);
-			
+
 
 		log.info("Added New User with Id: " + userEntity.getUuid());
 
@@ -340,13 +364,13 @@ public class UserServiceImpl implements UserService {
 	public List<UserProfileDto> getAllUsers() {
 
 		List<UserEntity> userEntities = userDbService.findAll();
-		
+
 		return UserAdapter.getUserProfileDtos(userEntities);
 	}
-	
+
 	@Override
 	public List<UserProfileDto> getAllActiveUsersByUuidIn(ActiveUserRequestDto activeUserRequestDto) {
-		
+
 		List<UserEntity> userEntities = userDbService.findByUuidInAndStatus(activeUserRequestDto.getUserIds(), true);
 
 		return UserAdapter.getUserProfileDtos(userEntities);
@@ -375,7 +399,7 @@ public class UserServiceImpl implements UserService {
 		userEntity = userDbService.update(userEntity);
 
 		addUserOrConsumerRole(userEntity);
-		
+
 		return Objects.nonNull(userEntity);
 	}
 
@@ -449,7 +473,7 @@ public class UserServiceImpl implements UserService {
 		UserProfileDto userProfileDto = UserAdapter.getUserProfileDto(userEntity);
 
 		addUserOrConsumerRole(userEntity);
-		
+
 		KafkaDTO kafkaDTO = new KafkaDTO();
 		kafkaDTO.setData(userProfileDto);
 
@@ -461,7 +485,7 @@ public class UserServiceImpl implements UserService {
 	private void addUserOrConsumerRole(UserEntity userEntity) {
 		if(userEntity.getUserType().equals(UserType.CONSUMER) || userEntity.getUserType().equals(UserType.EXTERNAL)) {
 			AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetails(userEntity);
-			
+
 			aclUserService.addRole(addUserDeptLevelRoleRequestDto);
 		}
 	}
@@ -506,7 +530,7 @@ public class UserServiceImpl implements UserService {
 		}
 
 		UserDto userDto = UserAdapter.getUserProfileDto(userDbService.update(userEntity));
-		
+
 		addUserOrConsumerRole(userEntity);
 
 		return userDto;
@@ -544,7 +568,7 @@ public class UserServiceImpl implements UserService {
 	public boolean createRoleBaseUser(UserType userType) {
 
 		List<UserEntity> userEntity = userDbService.findByUserType(userType);
-		
+
 		if (CollectionUtils.isEmpty(userEntity)) {
 			log.error("user Type: " + userType + " not available in User table.");
 			throw new ApiValidationException("User Type not exists in user Table.");
@@ -552,7 +576,7 @@ public class UserServiceImpl implements UserService {
 		userEntity.forEach(user -> {
 			if(user.isStatus()) {
 				AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetails(user);
-				
+
 				aclUserService.addRole(addUserDeptLevelRoleRequestDto);
 			}
 
@@ -563,20 +587,20 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public boolean createRoleBaseUser(List<String> mobiles) {
-		
+
 		for (String mobile : mobiles) {
 			UserEntity userEntity = userDbService.findByMobile(mobile);
 			if(Objects.nonNull(userEntity) && userEntity.isStatus()) {
 				AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetails(userEntity);
-				
+
 				aclUserService.addRole(addUserDeptLevelRoleRequestDto);
 			}
 		}
 		return Boolean.TRUE;
 	}
 
-	
-	
+
+
 	private AddUserDeptLevelRoleRequestDto getRoleDetails(UserEntity user) {
 		AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = AddUserDeptLevelRoleRequestDto.builder()
 				.build();
@@ -599,15 +623,15 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public Map<String, UserProfileDto> getUserProfileDto(Set<String> mobileNos) {
-		
+
 		Map<String, UserProfileDto> userMap = new HashMap<>();
-		
+
 		List<UserProfileDto> userProfileDto=UserAdapter.getUserProfileDtos(userDbService.findByMobileIn(mobileNos));
 
 		userProfileDto.forEach(user -> {
 			userMap.put(user.getMobile(), user);
 		});
-		
+
 		return userMap;
 	}
 
@@ -628,7 +652,7 @@ public class UserServiceImpl implements UserService {
 
 		@Override
 		public Map<String, UserProfileDto> getUserProfileForUserIn(List<String> userUuids) {
-			
+
 			Map<String, UserProfileDto> userMap = new HashMap<>();
 
 			List<UserProfileDto> userProfileDto = UserAdapter.getUserProfileDtos(userDbService.findByUuidIn(userUuids));
@@ -694,7 +718,6 @@ public class UserServiceImpl implements UserService {
 			}
 
 		}
-		
 		if(CollectionUtils.isNotEmpty(users)){
 			
 			PaginationRequest paginationRequest = PaginationRequest.builder().pageNo(1).limit(users.size()).build();
@@ -754,7 +777,72 @@ public class UserServiceImpl implements UserService {
 		return UserAdapter.getUserProfileDto(userEntity);
 	}
 
-	@Override
+	public UserDto addUserV3(AddUserRequestDto addUserRequestDto) {
+
+		if (!PhoneNumberUtils.isValidMobileForCountry(addUserRequestDto.getMobile(), addUserRequestDto.getIsoCode())) {
+			log.error("Number: " + addUserRequestDto.getMobile() + " and ISO: " + addUserRequestDto.getIsoCode()
+				+ " doesn't appear to be a valid mobile combination");
+			throw new ApiValidationException("Mobile Number and ISO Code combination not valid");
+		}
+
+		UserEntity userEntity = userDbService.getUserForMobile(addUserRequestDto.getMobile(),
+			addUserRequestDto.getIsoCode());
+
+		if (Objects.nonNull(userEntity) && userEntity.isStatus() == true) {
+
+			throw new ApiValidationException("Active User already exists for Mobile: " + addUserRequestDto.getMobile()
+				+ ", ISO Code: " + addUserRequestDto.getIsoCode());
+		}
+
+		if (Objects.nonNull(userEntity) && userEntity.isStatus() == false) {
+			log.info("Activating deactivated user [Mobile: " + addUserRequestDto.getMobile() + ", ISOCode: "
+				+ addUserRequestDto.getIsoCode() + ", UserType: " + addUserRequestDto.getUserType() + "]");
+
+			userEntity.setUserType(addUserRequestDto.getUserType());
+			userEntity.setEmail(addUserRequestDto.getEmail());
+			userEntity.setDepartment(addUserRequestDto.getDepartment());
+			userEntity.setStatus(true);
+			UserProfileEntity userProfileEntity = userEntity.getUserProfile();
+			userProfileEntity.setFirstName(addUserRequestDto.getFirstName());
+			userProfileEntity.setLastName(addUserRequestDto.getLastName());
+			userProfileEntity.setStatus(true);
+			userEntity = userDbService.saveAndFlush(userEntity);
+		} else {
+			log.info("Adding new User [Mobile: " + addUserRequestDto.getMobile() + ", ISOCode: "
+				+ addUserRequestDto.getIsoCode() + ", UserType: " + addUserRequestDto.getUserType() + "]");
+
+			UserProfileEntity profileEntity = UserAdapter.getUserProfileEntity(addUserRequestDto);
+
+			userEntity = UserEntity.builder().userType(addUserRequestDto.getUserType())
+				.isoCode(addUserRequestDto.getIsoCode()).mobile(addUserRequestDto.getMobile()).mobileVerified(false)
+				.email(addUserRequestDto.getEmail()).emailVerified(false).userProfile(profileEntity).status(true)
+				.department(addUserRequestDto.getDepartment()).build();
+
+			profileEntity.setUser(userEntity);
+
+			userEntity = userDbService.saveAndFlush(userEntity);
+
+			log.info("Added New User with Id: " + userEntity.getUuid());
+		}
+		addUserOrConsumerRole(userEntity);
+		addSigmaManageSalesRole(userEntity);
+		UserDto userDto = UserAdapter.getUserDto(userEntity);
+
+		KafkaDTO kafkaDTO = new KafkaDTO();
+		kafkaDTO.setData(userDto);
+
+		notificationProducer.publish(kafkaResidentDetailTopic, KafkaDTO.class.getName(), kafkaDTO);
+
+		return userDto;
+	}
+
+	private void addSigmaManageSalesRole(UserEntity userEntity) {
+		AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = AddUserDeptLevelRoleRequestDto.builder().department(Department.SALES)
+			.rolesUuid(Arrays.asList(sigmaManageSalesUuid)).accessLevel(AccessLevel.COUNTRY)
+			.accessLevelEntityListUuid(Arrays.asList(countryUuid)).userUuid(userEntity.getUuid()).build();
+		aclUserService.addRole(addUserDeptLevelRoleRequestDto);
+	}
+
 	public List<String> getUserProfileDtoWhoseBirthdayIsToday() {
 		log.info("Fetching users who have there birthday today.");
 		List <String> newList = new ArrayList<>();
