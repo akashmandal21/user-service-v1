@@ -166,4 +166,9 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 		return getJpaRepository().findUsersWhoseBirthdayIsToday();
 	}
 
+	@Override
+	public List<UserEntity> findAllByUuidInAndStatus(List<String> userId, boolean b) {
+		return getJpaRepository().findByUuidInAndStatus(userId, b);
+	}
+
 }
