@@ -86,7 +86,7 @@ public class AuthServiceImpl implements AuthService {
 				addUserRequestDto.setEmail(leadDetail.getLeadEmail());
 				addUserRequestDto.setIsoCode(loginRequestDto.getIsoCode());
 				addUserRequestDto.setDepartment(Department.WEB);
-				addUserRequestDto.setUserType(UserType.GUEST);
+				addUserRequestDto.setUserType(UserType.INVITED_GUEST);
 				userService.addUser(addUserRequestDto);
 				userEntity = userDbService.getUserForMobile(loginRequestDto.getMobile(), loginRequestDto.getIsoCode());
 			}
