@@ -150,7 +150,7 @@ public class RoleServiceImpl implements RoleService {
 
 	@Override
 	public List<KeyValueDto> getAllViewOnlyRoles() {
-		List<RoleEntity> roleEntities = roleDbService.findByRoleNameEndsWithIgnoreCase("_VIEW");
+		List<RoleEntity> roleEntities = roleDbService.findByRoleNameEndsWithIgnoreCase("_REVIEW_TEMPLATE_VIEW");
 
 		List<KeyValueDto> roles = new ArrayList<>();
 		if (!ObjectUtils.isEmpty(roleEntities)) {
@@ -159,7 +159,7 @@ public class RoleServiceImpl implements RoleService {
 			);
 		}
 		else
-			throw new ApiValidationException("Unable to find view only roles");
+			throw new ApiValidationException("Unable to find review template view only roles");
 
 	return roles;
 	}
