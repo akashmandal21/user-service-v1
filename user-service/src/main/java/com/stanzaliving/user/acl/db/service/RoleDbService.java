@@ -8,6 +8,7 @@ import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.sqljpa.service.AbstractJpaService;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
 import com.stanzaliving.user.acl.entity.RoleEntity;
+import org.apache.kafka.common.protocol.types.Field;
 
 import java.util.List;
 
@@ -31,4 +32,6 @@ public interface RoleDbService extends AbstractJpaService<RoleEntity, Long> {
 	List<RoleEntity> filter(RoleDto roleDto);
 
 	List<RoleEntity> findByRoleNameAndDepartment(List<String> roleName, Department department);
+
+	List<RoleEntity> findByRoleNameEndsWithIgnoreCase(String roleName);
 }
