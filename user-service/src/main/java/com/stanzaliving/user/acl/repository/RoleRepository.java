@@ -7,6 +7,7 @@ import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.sqljpa.repository.AbstractJpaRepository;
 import com.stanzaliving.user.acl.entity.RoleEntity;
+import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -30,4 +31,6 @@ public interface RoleRepository extends AbstractJpaRepository<RoleEntity, Long> 
 	List<RoleEntity> findByRoleNameInAndDepartment(List<String> roleNames, Department department);
 
 	List<RoleEntity> findByDepartmentAndAccessLevel(Department department, AccessLevel accessLevel);
+
+	List<RoleEntity> findByRoleNameEndsWithIgnoreCase(String roleName);
 }

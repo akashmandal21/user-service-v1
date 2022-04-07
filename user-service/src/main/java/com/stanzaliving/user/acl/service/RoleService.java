@@ -4,6 +4,7 @@ import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
 import com.stanzaliving.core.user.acl.request.dto.AddRoleRequestDto;
+import com.stanzaliving.estate_v2.dto.KeyValueDto;
 
 import java.util.List;
 
@@ -23,4 +24,6 @@ public interface RoleService {
     List<RoleDto> filter(RoleDto roleDto);
 
     List<RoleDto> findByRoleNameInAndDepartment(List<String> roleNames, Department department);
+
+    List<KeyValueDto> getAllViewOnlyRoles();
 }
