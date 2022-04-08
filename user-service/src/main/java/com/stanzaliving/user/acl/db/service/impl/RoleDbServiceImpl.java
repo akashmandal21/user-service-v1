@@ -90,8 +90,8 @@ public class RoleDbServiceImpl extends AbstractJpaServiceImpl<RoleEntity, Long, 
 	}
 
 	@Override
-	public List<RoleEntity> findByRoleNameEndsWithIgnoreCase(String RoleName){
-		return getJpaRepository().findByRoleNameEndsWithIgnoreCase(RoleName);
+	public List<RoleEntity> findByDepartment(Department department){
+		return getJpaRepository().findByDepartment(department);
 	}
 
 }

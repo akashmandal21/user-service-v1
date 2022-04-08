@@ -115,7 +115,7 @@ public class RoleController {
 
 	@GetMapping("getAllViewOnlyRoles")
 	public ResponseDto<List<KeyValueDto>> getAllViewOnlyRoles() {
-		log.info("Received request to get all View only roles.");
+		log.info("Received request to get all View only roles for real estate department.");
 		return ResponseDto.success("fetched view only roles successfully ", roleService.getAllViewOnlyRoles());
 	}
 

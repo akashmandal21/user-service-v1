@@ -150,13 +150,14 @@ public class RoleServiceImpl implements RoleService {
 
 	@Override
 	public List<KeyValueDto> getAllViewOnlyRoles() {
-		List<RoleEntity> roleEntities = roleDbService.findByRoleNameEndsWithIgnoreCase("_REVIEW_TEMPLATE_VIEW");
+		List<RoleEntity> roleEntities = roleDbService.findByDepartment(Department.BUSINESS_DEVELOPMENT);
 
 		List<KeyValueDto> roles = new ArrayList<>();
 		if (!ObjectUtils.isEmpty(roleEntities)) {
-			roleEntities.stream().forEach(roleEntity ->
-					roles.add(KeyValueDto.builder().label(roleEntity.getRoleName()).value(roleEntity.getUuid()).build())
-			);
+			roleEntities.stream().forEach(roleEntity -> {
+				if (roleEntity.getRoleName().toLowerCase().endsWith("_view"))
+					roles.add(KeyValueDto.builder().label(roleEntity.getRoleName()).value(roleEntity.getUuid()).build());
+			});
 		}
 		else
 			throw new ApiValidationException("Unable to find review template view only roles");
