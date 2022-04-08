@@ -33,5 +33,5 @@ public interface RoleDbService extends AbstractJpaService<RoleEntity, Long> {
 
 	List<RoleEntity> findByRoleNameAndDepartment(List<String> roleName, Department department);
 
-	List<RoleEntity> findByDepartment(Department department);
+	List<RoleEntity> findByDepartmentAndRoleNameEndsWithIgnoreCase(Department department, String suffix);
 }
