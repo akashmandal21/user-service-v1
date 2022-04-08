@@ -32,5 +32,5 @@ public interface RoleRepository extends AbstractJpaRepository<RoleEntity, Long> 
 
 	List<RoleEntity> findByDepartmentAndAccessLevel(Department department, AccessLevel accessLevel);
 
-	List<RoleEntity> findByRoleNameEndsWithIgnoreCase(String roleName);
+	List<RoleEntity> findByDepartment(Department department);
 }
