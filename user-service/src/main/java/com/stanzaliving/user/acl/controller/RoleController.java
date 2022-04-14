@@ -13,6 +13,7 @@ import com.stanzaliving.core.user.acl.request.dto.AddRoleRequestDto;
 import com.stanzaliving.core.user.acl.request.dto.CheckRoleNamesDto;
 import com.stanzaliving.core.user.acl.request.dto.UpdateRoleAccessDto;
 import com.stanzaliving.core.user.enums.EnumListing;
+import com.stanzaliving.estate_v2.dto.KeyValueDto;
 import com.stanzaliving.user.acl.adapters.RoleAccessAdapter;
 import com.stanzaliving.user.acl.service.RoleAccessService;
 import com.stanzaliving.user.acl.service.RoleService;
@@ -116,6 +117,12 @@ public class RoleController {
 	public ResponseDto<List<EnumListing<AccessLevel>>> getAccessLevelListV3() {
 		log.info("Received request for retrieving access level list api.");
 		return ResponseDto.success("Found Access Levels", RoleAccessAdapter.getAccessLevelEnumAsEnumListingV3());
+	}
+
+	@GetMapping("getAllViewOnlyRoles")
+	public ResponseDto<List<KeyValueDto>> getAllViewOnlyRoles() {
+		log.info("Received request to get all View only roles for real estate department.");
+		return ResponseDto.success("fetched view only roles successfully ", roleService.getAllViewOnlyRoles());
 	}
 
 }
