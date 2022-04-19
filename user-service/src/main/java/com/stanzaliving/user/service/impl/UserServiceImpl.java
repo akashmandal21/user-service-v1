@@ -446,6 +446,7 @@ public class UserServiceImpl implements UserService {
 			userEntity.getUserProfile().setSecondaryIsoCode(updateUserRequestDto.getForiegnCountryCode());
 		}
 		if (Objects.nonNull(updateUserRequestDto.getForiegnMobileNumber())) {
+			userEntity.getUserProfile().setSecondaryMobile(updateUserRequestDto.getForiegnMobileNumber());
 			userEntity.getUserProfile().setProfilePicture(updateUserRequestDto.getForiegnMobileNumber());
 		}
 		if (Objects.nonNull(updateUserRequestDto.getNextDestination())) {
