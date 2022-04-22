@@ -1,8 +1,11 @@
 package com.stanzaliving.user.acl.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.stanzaliving.estate_v2.dto.KeyValueDto;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -145,4 +148,20 @@ public class RoleServiceImpl implements RoleService {
 		return roleEntity.stream().map(f->RoleAdapter.getDto(f)).collect(Collectors.toList());
 	}
 
+	@Override
+	public List<KeyValueDto> getAllViewOnlyRoles() {
+		List<RoleEntity> roleEntities = new ArrayList<>();
+		roleEntities.addAll(roleDbService.findByDepartmentAndRoleNameEndsWithIgnoreCase(Department.BUSINESS_DEVELOPMENT, "_VIEW"));
+		roleEntities.addAll(roleDbService.findByDepartmentAndRoleNameEndsWithIgnoreCase(Department.LEADERSHIP,"_VIEW"));
+
+		List<KeyValueDto> roles = new ArrayList<>();
+		if (!ObjectUtils.isEmpty(roleEntities)) {
+			roleEntities.stream().forEach(roleEntity ->
+					roles.add(KeyValueDto.builder().label(roleEntity.getRoleName()).value(roleEntity.getUuid()).build()));
+		}
+		else
+			throw new ApiValidationException("Unable to find review template view only roles");
+
+	return roles;
+	}
 }
