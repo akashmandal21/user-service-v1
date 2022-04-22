@@ -227,11 +227,9 @@ public class UserServiceImpl implements UserService {
 			}
 		});
 
-		// Saving and flushing in DB
-		List<UserEntity> newUserEntityCreatedList = userDbService.saveAndFlush(newUserEntityList);
+		if(CollectionUtils.isEmpty(newUserEntityList)) return existingUserDtoList;
 
-		// adding role to users
-		assignRoleToAllUser(uniqueAddUserAndRoleRequestDtoMap, newUserEntityCreatedList);
+		List<UserEntity> newUserEntityCreatedList = userDbService.saveAndFlush(newUserEntityList);
 
 		List<UserDto> userDtoList = new ArrayList<>();
 
@@ -240,8 +238,13 @@ public class UserServiceImpl implements UserService {
 			log.info("Added New User with Id: " + newUserEntityCreated.getUuid());
 		});
 
-		// publishing in to kafka
+		log.info("Assigning roles to each created user is started");
+		assignRoleToAllUser(uniqueAddUserAndRoleRequestDtoMap, newUserEntityCreatedList);
+		log.info("Assigning roles to each created user is completed");
+
+		log.info("Publishing users to Kafka is started");
 		publishToKafka(userDtoList);
+		log.info("Publishing users to Kafka is completed");
 
 		userDtoList.addAll(existingUserDtoList);
 		return userDtoList;
