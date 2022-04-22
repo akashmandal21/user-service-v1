@@ -27,4 +27,12 @@ public class InternalRoleController {
 
         return ResponseDto.success("Found Role with Id: " + roleUuid, roleService.getRoleByUuid(roleUuid));
     }
+    @GetMapping("/acl/roles/{roleName}")
+    public ResponseDto<RoleDto> getRoleByName(@PathVariable @NotBlank(message = "Role Name must not be blank") String roleName) {
+
+        log.info("Fetching role with name: " + roleName);
+
+        return ResponseDto.success("Found Role with Name: " + roleName, roleService.findByRoleName(roleName));
+    }
+
 }
