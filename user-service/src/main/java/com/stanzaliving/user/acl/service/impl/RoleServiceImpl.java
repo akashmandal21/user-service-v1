@@ -111,7 +111,7 @@ public class RoleServiceImpl implements RoleService {
 		RoleEntity roleEntity = roleDbService.findByRoleName(roleName);
 
 		if (null == roleEntity) {
-			throw new ApiValidationException("Unable to find rule by roleName " + roleName);
+			throw new ApiValidationException("Unable to find role by roleName " + roleName);
 		}
 
 		return RoleAdapter.getDto(roleEntity);
