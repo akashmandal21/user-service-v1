@@ -230,7 +230,7 @@ public class UserServiceImpl implements UserService {
 		// Saving and flushing in DB
 		List<UserEntity> newUserEntityCreatedList = userDbService.saveAndFlush(newUserEntityList);
 
-		// TODO: adding role to users
+		// adding role to users
 		assignRoleToAllUser(uniqueAddUserAndRoleRequestDtoMap, newUserEntityCreatedList);
 
 		List<UserDto> userDtoList = new ArrayList<>();
