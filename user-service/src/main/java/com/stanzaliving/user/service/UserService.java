@@ -5,7 +5,6 @@ package com.stanzaliving.user.service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
@@ -16,10 +15,7 @@ import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.dto.UserRoleCacheDto;
 import com.stanzaliving.core.user.enums.UserType;
-import com.stanzaliving.core.user.request.dto.ActiveUserRequestDto;
-import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
-import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
-import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
+import com.stanzaliving.core.user.request.dto.*;
 import com.stanzaliving.user.entity.UserEntity;
 
 /**
@@ -36,6 +32,8 @@ public interface UserService {
 	void assertActiveUserByUserUuid(String userId);
 
 	UserDto addUser(AddUserRequestDto addUserRequestDto);
+
+	List<UserDto> addBulkUserAndRole(List<AddUserAndRoleRequestDto> addUserRequestDtoList);
 
 	UserProfileDto getUserProfile(String userId);
 
