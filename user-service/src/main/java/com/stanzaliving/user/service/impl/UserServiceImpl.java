@@ -242,9 +242,7 @@ public class UserServiceImpl implements UserService {
 		assignRoleToAllUser(uniqueAddUserAndRoleRequestDtoMap, newUserEntityCreatedList);
 		log.info("Assigning roles to each created user is completed");
 
-		log.info("Publishing users to Kafka is started");
 		publishToKafka(userDtoList);
-		log.info("Publishing users to Kafka is completed");
 
 		userDtoList.addAll(existingUserDtoList);
 		return userDtoList;
