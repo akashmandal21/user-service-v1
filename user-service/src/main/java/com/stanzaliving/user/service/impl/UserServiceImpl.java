@@ -227,7 +227,7 @@ public class UserServiceImpl implements UserService {
 			}
 		});
 
-		if(CollectionUtils.isEmpty(newUserEntityList)) return existingUserDtoList;
+		if(newUserEntityList.isEmpty()) return existingUserDtoList;
 
 		List<UserEntity> newUserEntityCreatedList = userDbService.saveAndFlush(newUserEntityList);
 
