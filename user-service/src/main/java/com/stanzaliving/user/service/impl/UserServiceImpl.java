@@ -16,9 +16,18 @@ import com.stanzaliving.core.kafka.producer.NotificationProducer;
 import com.stanzaliving.core.sqljpa.adapter.AddressAdapter;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleRequestDto;
-import com.stanzaliving.core.user.dto.*;
+import com.stanzaliving.core.user.dto.AccessLevelRoleRequestDto;
+import com.stanzaliving.core.user.dto.UserDto;
+import com.stanzaliving.core.user.dto.UserFilterDto;
+import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
+import com.stanzaliving.core.user.dto.UserProfileDto;
+import com.stanzaliving.core.user.dto.UserRoleCacheDto;
 import com.stanzaliving.core.user.enums.UserType;
-import com.stanzaliving.core.user.request.dto.*;
+import com.stanzaliving.core.user.request.dto.ActiveUserRequestDto;
+import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
+import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
+import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
+import com.stanzaliving.core.user.request.dto.AddUserAndRoleRequestDto;
 import com.stanzaliving.user.acl.db.service.UserDepartmentLevelDbService;
 import com.stanzaliving.user.acl.db.service.UserDepartmentLevelRoleDbService;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
@@ -48,7 +57,14 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
