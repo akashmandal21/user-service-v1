@@ -5,7 +5,6 @@ package com.stanzaliving.user.service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
@@ -20,6 +19,7 @@ import com.stanzaliving.core.user.request.dto.ActiveUserRequestDto;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
+import com.stanzaliving.core.user.request.dto.AddUserAndRoleRequestDto;
 import com.stanzaliving.user.entity.UserEntity;
 
 /**
@@ -36,6 +36,8 @@ public interface UserService {
 	void assertActiveUserByUserUuid(String userId);
 
 	UserDto addUser(AddUserRequestDto addUserRequestDto);
+
+	List<UserDto> addBulkUserAndRole(List<AddUserAndRoleRequestDto> addUserRequestDtoList);
 
 	UserProfileDto getUserProfile(String userId);
 
