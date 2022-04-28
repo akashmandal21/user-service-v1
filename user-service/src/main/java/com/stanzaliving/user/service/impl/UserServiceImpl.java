@@ -133,6 +133,19 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public UserProfileDto getUserByUserId(String userId) {
+        log.info("Searching User by UserId: " + userId);
+
+        UserEntity userEntity = userDbService.findByUuid(userId);
+
+        if (Objects.isNull(userEntity)) {
+            throw new ApiValidationException("User not found for UserId: " + userId);
+        }
+
+        return UserAdapter.getUserProfileDto(userEntity);
+	}
+
+	@Override
 	public UserDto getActiveUserByUuid(String userUuid) {
 
 		UserEntity userEntity = userDbService.findByUuid(userUuid);
@@ -798,7 +811,7 @@ public class UserServiceImpl implements UserService {
 
 						Set<String> userIds = departmentLevelEntities.stream().map(UserDepartmentLevelEntity::getUserUuid).collect(Collectors.toSet());
 						log.info("userIds {}",userIds);
-						
+
 						Set<String> activeUserIds = getActiveUserUuids(userIds);
 
 						if (CollectionUtils.isNotEmpty(departmentLevelEntities)) {
@@ -823,7 +836,7 @@ public class UserServiceImpl implements UserService {
 
 		}
 		if(CollectionUtils.isNotEmpty(users)){
-			
+
 			PaginationRequest paginationRequest = PaginationRequest.builder().pageNo(1).limit(users.size()).build();
 			Map<String,String> userNames = this.searchUser(UserFilterDto.builder().pageRequest(paginationRequest).userIds(users.stream().collect(Collectors.toList())).build()).getData()
 					.stream().collect(Collectors.toMap(f->f.getUuid(), f->getUserName(f)));
@@ -951,7 +964,7 @@ public class UserServiceImpl implements UserService {
 		log.info("Fetching users who have there birthday today.");
 		List <String> newList = new ArrayList<>();
 		List<String> userList = userDbService.getUserWhoseBirthdayIsToday().orElse(newList);
-		
+
 		return userList;
 	}
 }

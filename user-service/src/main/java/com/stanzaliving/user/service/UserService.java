@@ -31,6 +31,8 @@ public interface UserService {
 
 	UserProfileDto getActiveUserByUserId(String userId);
 
+	UserProfileDto getUserByUserId(String userId);
+
 	UserDto getActiveUserByUuid(String userUuid);
 
 	void assertActiveUserByUserUuid(String userId);

@@ -30,11 +30,11 @@ public class InternalUserDetailsController {
 	private UserService userService;
 
 	@GetMapping("{userUuid}")
-	public ResponseDto<UserProfileDto> getUser(@PathVariable String userUuid) {
+	public ResponseDto<UserProfileDto> getUser(@PathVariable String userUuid, @RequestParam(required = false, defaultValue = "false") boolean includeDeactivated) {
 
 		log.info("Fetching User with userUuid: {}", userUuid);
 
-		return ResponseDto.success("Found User for userUuid", userService.getActiveUserByUserId(userUuid));
+		return ResponseDto.success("Found User for userUuid", includeDeactivated ? userService.getUserByUserId(userUuid) : userService.getActiveUserByUserId(userUuid));
 	}
 	
 	@GetMapping("email")
