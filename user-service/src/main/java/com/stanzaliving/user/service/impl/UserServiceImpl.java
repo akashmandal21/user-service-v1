@@ -214,7 +214,7 @@ public class UserServiceImpl implements UserService {
 		userEntity = UserEntity.builder().userType(addUserRequestDto.getUserType())
 				.isoCode(addUserRequestDto.getIsoCode()).mobile(addUserRequestDto.getMobile()).mobileVerified(false)
 				.email(addUserRequestDto.getEmail()).emailVerified(false).userProfile(profileEntity).status(true)
-				.department(addUserRequestDto.getUserDepartment()).build();
+				.department(addUserRequestDto.getDepartment()).build();
 
 		profileEntity.setUser(userEntity);
 
@@ -432,7 +432,7 @@ public class UserServiceImpl implements UserService {
 		UserEntity userEntity = UserEntity.builder().userType(addUserAndRoleRequestDto.getUserType())
 				.isoCode(addUserAndRoleRequestDto.getIsoCode()).mobile(addUserAndRoleRequestDto.getMobile()).mobileVerified(false)
 				.email(addUserAndRoleRequestDto.getEmail()).emailVerified(false).userProfile(profileEntity).status(true)
-				.department(addUserAndRoleRequestDto.getUserDepartment()).build();
+				.department(addUserAndRoleRequestDto.getDepartment()).build();
 
 		profileEntity.setUser(userEntity);
 		return userEntity;
@@ -931,7 +931,7 @@ public class UserServiceImpl implements UserService {
 
 			userEntity.setUserType(addUserRequestDto.getUserType());
 			userEntity.setEmail(addUserRequestDto.getEmail());
-			userEntity.setDepartment(addUserRequestDto.getUserDepartment());
+			userEntity.setDepartment(addUserRequestDto.getDepartment());
 			userEntity.setStatus(true);
 			UserProfileEntity userProfileEntity = userEntity.getUserProfile();
 			userProfileEntity.setFirstName(addUserRequestDto.getFirstName());
@@ -947,7 +947,7 @@ public class UserServiceImpl implements UserService {
 			userEntity = UserEntity.builder().userType(addUserRequestDto.getUserType())
 				.isoCode(addUserRequestDto.getIsoCode()).mobile(addUserRequestDto.getMobile()).mobileVerified(false)
 				.email(addUserRequestDto.getEmail()).emailVerified(false).userProfile(profileEntity).status(true)
-				.department(addUserRequestDto.getUserDepartment()).build();
+				.department(addUserRequestDto.getDepartment()).build();
 
 			profileEntity.setUser(userEntity);
 

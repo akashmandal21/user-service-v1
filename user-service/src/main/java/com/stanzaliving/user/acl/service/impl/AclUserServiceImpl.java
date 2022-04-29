@@ -1204,7 +1204,7 @@ public class AclUserServiceImpl implements AclUserService {
 		if (StringUtils.isNotEmpty(addUserAndRoleDto.getFirstName()) && StringUtils.isNotEmpty(addUserAndRoleDto.getLastName())
 			&& StringUtils.isNotEmpty(addUserAndRoleDto.getEmail()) && StringUtils.isNotEmpty(addUserAndRoleDto.getMobile())
 			&& StringUtils.isNotEmpty(addUserAndRoleDto.getIsoCode())) {
-			AddUserRequestDto addUserRequestDto = AddUserRequestDto.builder().userType(UserType.CITY_TEAM).userDepartment(Department.SALES)
+			AddUserRequestDto addUserRequestDto = AddUserRequestDto.builder().userType(UserType.CITY_TEAM).department(Department.SALES)
 				.isoCode(addUserAndRoleDto.getIsoCode()).email(addUserAndRoleDto.getEmail()).mobile(addUserAndRoleDto.getMobile())
 				.firstName(addUserAndRoleDto.getFirstName()).lastName(addUserAndRoleDto.getLastName()).build();
 			UserDto userDto = userService.addUserV3(addUserRequestDto);
