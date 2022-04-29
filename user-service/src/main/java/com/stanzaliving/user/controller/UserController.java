@@ -102,6 +102,7 @@ public class UserController {
 	@PostMapping("add")
 	public ResponseDto<UserDto> addUser(@RequestBody @Valid AddUserRequestDto addUserRequestDto) {
 
+		log.info("Request received to add new user addUserRequestDto is {}", addUserRequestDto);
 		UserDto userDto = userService.addUser(addUserRequestDto);
 
 		log.info("Added new user with id: " + userDto.getUuid());
