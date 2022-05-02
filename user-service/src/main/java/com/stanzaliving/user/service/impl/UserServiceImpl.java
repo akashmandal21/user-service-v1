@@ -136,11 +136,8 @@ public class UserServiceImpl implements UserService {
 	public UserProfileDto getUserByUserId(String userId) {
         log.info("Searching User by UserId: " + userId);
 
-        UserEntity userEntity = userDbService.findByUuid(userId);
+        UserEntity userEntity = userDbService.findByUuidAndStatus(userId,true);
 
-        if (Objects.isNull(userEntity)) {
-            throw new ApiValidationException("User not found for UserId: " + userId);
-        }
 
         return UserAdapter.getUserProfileDto(userEntity);
 	}
