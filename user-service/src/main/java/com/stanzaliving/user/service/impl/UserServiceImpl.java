@@ -136,7 +136,7 @@ public class UserServiceImpl implements UserService {
 	public UserProfileDto getUserByUserId(String userId) {
         log.info("Searching User by UserId: " + userId);
 
-        UserEntity userEntity = userDbService.findByUuidAndStatus(userId,true);
+        UserEntity userEntity = userDbService.findByUuid(userId);
 
 
         return UserAdapter.getUserProfileDto(userEntity);
