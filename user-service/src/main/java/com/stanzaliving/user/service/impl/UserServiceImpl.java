@@ -238,18 +238,18 @@ public class UserServiceImpl implements UserService {
 
 	public List<UserDto> addBulkUserAndRole(List<AddUserAndRoleRequestDto> addUserAndRoleRequestDtoList) {
 
-		Map<String, AddUserAndRoleRequestDto> uniqueAddUserAndRoleRequestDtoMap = removeDuplicateEntity(addUserAndRoleRequestDtoList);
+		Map<String, ArrayList<AddUserAndRoleRequestDto>> userAndRoleRequestDtoListMapByMobile = createUserAndRoleRequestDtoListByMobile(addUserAndRoleRequestDtoList);
 
 		List<UserEntity> newUserEntityList = new ArrayList<>();
 
 		List<UserDto> existingUserDtoList = new ArrayList<>();
 
-		uniqueAddUserAndRoleRequestDtoMap.forEach((key, addUserAndRoleRequestDto) -> {
+		userAndRoleRequestDtoListMapByMobile.forEach((key, userAndRoleRequestDtoListByMobile) -> {
 
-			UserEntity userEntity = checkExistingUser(uniqueAddUserAndRoleRequestDtoMap, addUserAndRoleRequestDto);
+			UserEntity userEntity = checkExistingUser(userAndRoleRequestDtoListByMobile);
 
 			if(Objects.isNull(userEntity)) {
-				userEntity = createNewUser(addUserAndRoleRequestDto);
+				userEntity = createNewUser(userAndRoleRequestDtoListByMobile.get(0));
 				newUserEntityList.add(userEntity);
 			} else {
 				existingUserDtoList.add(UserAdapter.getUserDto(userEntity));
@@ -268,7 +268,7 @@ public class UserServiceImpl implements UserService {
 		});
 
 		log.info("Assigning roles to each created user is started");
-		assignRoleToAllUser(uniqueAddUserAndRoleRequestDtoMap, newUserEntityCreatedList);
+		assignRoleToAllUser(userAndRoleRequestDtoListMapByMobile, newUserEntityCreatedList);
 		log.info("Assigning roles to each created user is completed");
 
 		publishToKafka(userDtoList);
@@ -339,24 +339,30 @@ public class UserServiceImpl implements UserService {
 
 	}
 
-	private void assignRoleToAllUser(Map<String, AddUserAndRoleRequestDto> uniqueAddUserAndRoleRequestDtoMap, List<UserEntity> newUserEntityList) {
+	private void assignRoleToAllUser(Map<String, ArrayList<AddUserAndRoleRequestDto>> userAndRoleRequestDtoMapByMobile, List<UserEntity> newUserEntityList) {
 
-		newUserEntityList.forEach(userEntity -> assignRoleToUser(uniqueAddUserAndRoleRequestDtoMap, userEntity));
+		newUserEntityList.forEach(userEntity -> {
+			String key = String.format("%s%s", userEntity.getIsoCode(), userEntity.getMobile());
+			List<AddUserAndRoleRequestDto> userAndRoleRequestDtoListByMobile = userAndRoleRequestDtoMapByMobile.get(key);
+
+			userAndRoleRequestDtoListByMobile.forEach(userAndRoleRequestDtoByMobile -> {
+				assignRoleToUser(userAndRoleRequestDtoByMobile, userEntity);
+			});
+
+		});
 	}
 
-	private void assignRoleToUser(Map<String, AddUserAndRoleRequestDto> uniqueAddUserAndRoleRequestDtoMap, UserEntity userEntity) {
+	private void assignRoleToUser(AddUserAndRoleRequestDto addUserAndRoleRequestDto, UserEntity userEntity) {
 
-			String key = String.format("%s%s", userEntity.getIsoCode(), userEntity.getMobile());
-			AddUserAndRoleRequestDto addUserAndRoleRequestDto = uniqueAddUserAndRoleRequestDtoMap.get(key);
 			if (CollectionUtils.isEmpty(addUserAndRoleRequestDto.getRolesUuid()) || Objects.isNull(addUserAndRoleRequestDto.getAccessLevel()) ||
-					CollectionUtils.isEmpty(addUserAndRoleRequestDto.getAccessLevelEntityListUuid())) {
+					CollectionUtils.isEmpty(addUserAndRoleRequestDto.getAccessLevelEntityListUuid()) || Objects.isNull(addUserAndRoleRequestDto.getRoleDepartment())) {
 				// Assigning default role
 				addUserOrConsumerRole(userEntity);
 			} else {
 				aclUserService.addRole(
 						AddUserDeptLevelRoleRequestDto.builder()
 								.userUuid(userEntity.getUuid())
-								.department(userEntity.getDepartment())
+								.department(addUserAndRoleRequestDto.getRoleDepartment())
 								.rolesUuid(addUserAndRoleRequestDto.getRolesUuid())
 								.accessLevel(addUserAndRoleRequestDto.getAccessLevel())
 								.accessLevelEntityListUuid(addUserAndRoleRequestDto.getAccessLevelEntityListUuid())
@@ -371,19 +377,24 @@ public class UserServiceImpl implements UserService {
 		notificationProducer.publish(kafkaResidentDetailTopic, KafkaDTO.class.getName(), kafkaDTO);
 	}
 
-	private Map<String, AddUserAndRoleRequestDto> removeDuplicateEntity(List<AddUserAndRoleRequestDto> addUserAndRoleRequestDtoList) {
+	private Map<String, ArrayList<AddUserAndRoleRequestDto>> createUserAndRoleRequestDtoListByMobile(List<AddUserAndRoleRequestDto> addUserAndRoleRequestDtoList) {
 
-		Map<String, AddUserAndRoleRequestDto> map = new HashMap<>();
+		Map<String, ArrayList<AddUserAndRoleRequestDto>> map = new HashMap<>();
 		addUserAndRoleRequestDtoList.forEach(addUserAndRoleRequestDto -> {
 			String key = String.format("%s%s",addUserAndRoleRequestDto.getIsoCode(), addUserAndRoleRequestDto.getMobile());
-			if(!map.containsKey(key)) {
-				map.put(key, addUserAndRoleRequestDto);
+
+			if(map.containsKey(key)) {
+				map.get(key).add(addUserAndRoleRequestDto);
+			} else {
+				map.put(key, new ArrayList<AddUserAndRoleRequestDto>(){{ add(addUserAndRoleRequestDto); }});
 			}
 		});
 		return map;
 	}
 
-	private UserEntity checkExistingUser(Map<String, AddUserAndRoleRequestDto> uniqueAddUserAndRoleRequestDtoMap, AddUserAndRoleRequestDto addUserAndRoleRequestDto) {
+	private UserEntity checkExistingUser(ArrayList<AddUserAndRoleRequestDto> userAndRoleRequestDtoListByMobile) {
+
+		AddUserAndRoleRequestDto addUserAndRoleRequestDto = userAndRoleRequestDtoListByMobile.get(0);
 
 		if (!PhoneNumberUtils.isValidMobileForCountry(addUserAndRoleRequestDto.getMobile(), addUserAndRoleRequestDto.getIsoCode())) {
 			log.error("Number: " + addUserAndRoleRequestDto.getMobile() + " and ISO: " + addUserAndRoleRequestDto.getIsoCode()
@@ -403,7 +414,10 @@ public class UserServiceImpl implements UserService {
 		log.warn("User: " + userEntity.getUuid() + " already exists for Mobile: " + addUserAndRoleRequestDto.getMobile()
 				+ ", ISO Code: " + addUserAndRoleRequestDto.getIsoCode() + " of type: " + addUserAndRoleRequestDto.getUserType());
 
-		assignRoleToUser(uniqueAddUserAndRoleRequestDtoMap, userEntity);
+		// assigning all the roles to user
+		userAndRoleRequestDtoListByMobile.forEach(userAndRoleRequestDtoByMobile -> {
+			assignRoleToUser(userAndRoleRequestDtoByMobile, userEntity);
+		});
 
 		return userEntity;
 
