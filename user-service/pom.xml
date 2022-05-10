@@ -29,6 +29,13 @@
 			<artifactId>kafka</artifactId>
 			<version>${global.version}</version>
 		</dependency>
+		
+		<dependency>
+            <groupId>com.stanzaliving.core</groupId>
+            <artifactId>booking-service-client</artifactId>
+            <version>1.0.0</version>
+            <scope>compile</scope>
+        </dependency>
 
 		<dependency>
 			<groupId>com.stanzaliving.core</groupId>

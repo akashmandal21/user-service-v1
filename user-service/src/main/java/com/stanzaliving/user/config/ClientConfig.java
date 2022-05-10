@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.stanzaliving.core.base.http.StanzaRestClient;
+import com.stanzaliving.core.client.api.BookingDataControllerApi;
 import com.stanzaliving.core.notificationv2.api.NotificationClientApi;
 import com.stanzaliving.core.transformation.client.api.InternalDataControllerApi;
 import com.stanzaliving.core.transformation.client.cache.TransformationCache;
@@ -17,6 +18,8 @@ public class ClientConfig {
     
     @Value("${service.notificationClient.url}")
 	private String notificationClientUrl;
+    @Value("${service.booking.url}")
+	private String bookingServiceUrl;
 
     @Bean
     public InternalDataControllerApi internalDataControllerApi() {
@@ -32,5 +35,10 @@ public class ClientConfig {
     public NotificationClientApi notificationClientApi() {
         return new NotificationClientApi(new StanzaRestClient(notificationClientUrl));
     }
+     
     
+    @Bean
+	public BookingDataControllerApi bookingDataControllerApi() {
+		return new BookingDataControllerApi(new StanzaRestClient(bookingServiceUrl));
+	}
 }
