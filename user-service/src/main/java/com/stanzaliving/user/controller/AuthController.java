@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.stanzaliving.booking.dto.BookingResponseDto;
 import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.base.constants.SecurityConstants;
 import com.stanzaliving.core.base.utils.ObjectMapperUtil;
@@ -81,7 +82,7 @@ public class AuthController {
 
 		UserProfileDto userProfileDto = authService.validateOtp(otpValidateRequestDto);
 
-		log.info("OTP Successfully Validated for User: " + userProfileDto.getUuid() + ". Creating User Session now" + userProfileDto.getUserType());
+		log.info("OTP Successfully Validated for User: " + userProfileDto.getUuid() + ". Creating User Session now " + userProfileDto.getUserType());
 
 		String token = StanzaUtils.generateUniqueId();
 
@@ -89,8 +90,11 @@ public class AuthController {
 
 		if (Objects.nonNull(userSessionEntity)) {
 			addTokenToResponse(request, response, token);
-			if(userProfileDto.getUserType().equals(UserType.INVITED_GUEST)) {
-				onboardGuestService.createGuestBooking(userProfileDto.getMobile());
+			if(UserType.INVITED_GUEST.equals(userProfileDto.getUserType())) {
+				BookingResponseDto bookingResponseDto = onboardGuestService.createGuestBooking(userProfileDto.getMobile());
+				if (Objects.isNull(bookingResponseDto) ) {
+					return ResponseDto.failure("Failed to create guest booking for " + userProfileDto.getMobile());
+				}
 				
 			}
 			
