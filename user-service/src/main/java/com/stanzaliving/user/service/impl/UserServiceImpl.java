@@ -56,7 +56,10 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
+import javax.validation.Validator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -102,6 +105,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private NotificationProducer notificationProducer;
+
+	@Autowired
+	private Validator validator;
 
 	@Value("${kafka.resident.detail.topic}")
 	private String kafkaResidentDetailTopic;
@@ -235,6 +241,9 @@ public class UserServiceImpl implements UserService {
 
 	public List<UserDto> addBulkUserAndRole(List<AddUserAndRoleRequestDto> addUserAndRoleRequestDtoList) {
 
+		// Adding validation at service layer
+		validateConstraint(addUserAndRoleRequestDtoList);
+
 		Map<String, ArrayList<AddUserAndRoleRequestDto>> userAndRoleRequestDtoListMapByMobile = createUserAndRoleRequestDtoListByMobile(addUserAndRoleRequestDtoList);
 
 		List<UserEntity> newUserEntityList = new ArrayList<>();
@@ -334,6 +343,30 @@ public class UserServiceImpl implements UserService {
 		return new PageResponse<>(pageNo, userPage.getNumberOfElements(), userPage.getTotalPages(),
 				userPage.getTotalElements(), userDtos);
 
+	}
+
+	private void validateConstraint(List<AddUserAndRoleRequestDto> addUserAndRoleRequestDtoList) {
+		Set<ConstraintViolation<AddUserAndRoleRequestDto>> violations = new HashSet<>();
+
+		addUserAndRoleRequestDtoList.forEach(addUserAndRoleRequestDto -> {
+
+			if(addUserAndRoleRequestDto.getIsoCode() == null || addUserAndRoleRequestDto.getIsoCode().isEmpty()) {
+				addUserAndRoleRequestDto.setIsoCode("IN");
+			}
+
+			if(userDbService.getUserForMobile(addUserAndRoleRequestDto.getMobile(), addUserAndRoleRequestDto.getIsoCode()) == null) {
+				// if user does not exist then validating
+				violations.addAll(validator.validate(addUserAndRoleRequestDto));
+			}
+		});
+
+		if (!violations.isEmpty()) {
+			StringBuilder sb = new StringBuilder();
+			for (ConstraintViolation<AddUserAndRoleRequestDto> constraintViolation : violations) {
+				sb.append(constraintViolation.getMessage()).append(", ");
+			}
+			throw new ConstraintViolationException("Error occurred: " + sb, violations);
+		}
 	}
 
 	private void assignRoleToAllUser(Map<String, ArrayList<AddUserAndRoleRequestDto>> userAndRoleRequestDtoMapByMobile, List<UserEntity> newUserEntityList) {

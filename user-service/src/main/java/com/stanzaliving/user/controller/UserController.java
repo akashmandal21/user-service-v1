@@ -10,7 +10,6 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,7 +49,6 @@ import lombok.extern.log4j.Log4j2;
  *
  * @date 10-Oct-2019
  */
-@Validated
 @Log4j2
 @RestController
 @RequestMapping("")
@@ -110,7 +108,7 @@ public class UserController {
 	}
 
 	@PostMapping("bulk/add")
-	public ResponseDto<List<UserDto>> addBulkUserAndRole(@RequestBody List<@Valid AddUserAndRoleRequestDto> addUserAndRoleRequestDtoList) {
+	public ResponseDto<List<UserDto>> addBulkUserAndRole(@RequestBody List<AddUserAndRoleRequestDto> addUserAndRoleRequestDtoList) {
 
 		List<UserDto> userDtoList = userService.addBulkUserAndRole(addUserAndRoleRequestDtoList);
 
