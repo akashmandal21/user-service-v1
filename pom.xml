@@ -28,6 +28,10 @@
 		<module>../core-utils/user-client</module>
 		<module>../core-utils/transformation-client</module>
 		<module>../core-utils/leadservice-client</module>
+
+		<module>../core-utils/redis</module>
+		<module>../core-utils/notification-v2-client</module>
+		<module>../core-utils/booking-service-client</module>
 	</modules>
 
 	<build>

@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.stanzaliving.booking.dto.BookingResponseDto;
 import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.base.constants.SecurityConstants;
 import com.stanzaliving.core.base.utils.ObjectMapperUtil;
@@ -27,6 +28,7 @@ import com.stanzaliving.core.base.utils.SecureCookieUtil;
 import com.stanzaliving.core.base.utils.StanzaUtils;
 import com.stanzaliving.core.user.acl.dto.AclUserDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
+import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.EmailOtpValidateRequestDto;
 import com.stanzaliving.core.user.request.dto.EmailVerificationRequestDto;
 import com.stanzaliving.core.user.request.dto.LoginRequestDto;
@@ -36,6 +38,7 @@ import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.entity.UserSessionEntity;
 import com.stanzaliving.user.service.AuthService;
+import com.stanzaliving.user.service.OnboardGuestService;
 import com.stanzaliving.user.service.SessionService;
 
 import lombok.extern.log4j.Log4j2;
@@ -61,6 +64,9 @@ public class AuthController {
 
 	@Autowired
 	private AclService aclService;
+	
+	@Autowired
+	private OnboardGuestService onboardGuestService;
 
 	@PostMapping("login")
 	public ResponseDto<Void> login(@RequestBody @Valid LoginRequestDto loginRequestDto) {
@@ -76,7 +82,7 @@ public class AuthController {
 
 		UserProfileDto userProfileDto = authService.validateOtp(otpValidateRequestDto);
 
-		log.info("OTP Successfully Validated for User: " + userProfileDto.getUuid() + ". Creating User Session now");
+		log.info("OTP Successfully Validated for User: " + userProfileDto.getUuid() + ". Creating User Session now " + userProfileDto.getUserType());
 
 		String token = StanzaUtils.generateUniqueId();
 
@@ -84,6 +90,16 @@ public class AuthController {
 
 		if (Objects.nonNull(userSessionEntity)) {
 			addTokenToResponse(request, response, token);
+			if(UserType.INVITED_GUEST.equals(userProfileDto.getUserType())) {
+				
+				log.info("UserType for user is INVITED_GUEST {} " + userProfileDto.getUuid());
+				BookingResponseDto bookingResponseDto = onboardGuestService.createGuestBooking(userProfileDto.getMobile());
+				if (Objects.isNull(bookingResponseDto) ) {
+					return ResponseDto.failure("Failed to create guest booking for " + userProfileDto.getMobile());
+				}
+				
+			}
+			
 			return ResponseDto.success("User Login Successfull", UserAdapter.getAclUserDto(userProfileDto, aclService.getUserDeptLevelRoleNameUrlExpandedDtoFe(userProfileDto.getUuid())));
 		}
 

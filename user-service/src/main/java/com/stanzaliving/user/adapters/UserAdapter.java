@@ -84,6 +84,10 @@ public class UserAdapter {
 
 	public UserProfileDto getUserProfileDto(UserEntity userEntity) {
 
+		if(Objects.isNull(userEntity)){
+			return null;
+		}
+
 		UserProfileEntity profileEntity = userEntity.getUserProfile();
 		if (Objects.isNull(profileEntity)) {
 			return null;
