@@ -20,7 +20,7 @@ public class OnboardGuestServiceImpl implements OnboardGuestService {
 	private BookingDataControllerApi bookingDataControllerApi;
 	    
 	public BookingResponseDto createGuestBooking(String phoneNumber) {
-		log.info("Inside createGuestBooking with phoneNumber : " + phoneNumber);
+		log.info("Inside createGuestBooking with phoneNumber {} " + phoneNumber);
 		BookingResponseDto bookingResponseDto=null;
 		try {
 			bookingResponseDto = bookingDataControllerApi.createGuestBooking(phoneNumber);
