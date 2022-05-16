@@ -650,7 +650,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	private void addUserOrConsumerRole(UserEntity userEntity) {
-		if (userEntity.getUserType().equals(UserType.CONSUMER) || userEntity.getUserType().equals(UserType.EXTERNAL) || userEntity.getUserType().equals(UserType.VENDOR)) {
+		if (userEntity.getUserType().equals(UserType.CONSUMER) || userEntity.getUserType().equals(UserType.EXTERNAL)) {
 			AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetails(userEntity);
 
 			aclUserService.addRole(addUserDeptLevelRoleRequestDto);
