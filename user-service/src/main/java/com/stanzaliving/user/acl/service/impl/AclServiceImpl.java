@@ -107,7 +107,11 @@ public class AclServiceImpl implements AclService {
 		}
 		List<UserDeptLevelRoleNameUrlExpandedDto> userDeptLevelRoleNameUrlExpandedDtoList = new ArrayList<>();
 		for (UserEntity userEntity : userEntityList) {
-			userDeptLevelRoleNameUrlExpandedDtoList.addAll(getUserDeptLevelRoleNameUrlExpandedDtoFe(userEntity.getUuid()));
+			try {
+				userDeptLevelRoleNameUrlExpandedDtoList.addAll(getUserDeptLevelRoleNameUrlExpandedDtoFe(userEntity.getUuid()));
+			} catch (Exception e) {
+				log.error("Exception while getting user dept level role name", e);
+			}
 		}
 		return userDeptLevelRoleNameUrlExpandedDtoList;
 	}

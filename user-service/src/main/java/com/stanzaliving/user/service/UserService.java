@@ -19,6 +19,7 @@ import com.stanzaliving.core.user.request.dto.ActiveUserRequestDto;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
+import com.stanzaliving.core.user.request.dto.AddUserAndRoleRequestDto;
 import com.stanzaliving.user.entity.UserEntity;
 
 /**
@@ -30,11 +31,15 @@ public interface UserService {
 
 	UserProfileDto getActiveUserByUserId(String userId);
 
+	UserProfileDto getUserByUserId(String userId);
+
 	UserDto getActiveUserByUuid(String userUuid);
 
 	void assertActiveUserByUserUuid(String userId);
 
 	UserDto addUser(AddUserRequestDto addUserRequestDto);
+
+	List<UserDto> addBulkUserAndRole(List<AddUserAndRoleRequestDto> addUserRequestDtoList);
 
 	UserProfileDto getUserProfile(String userId);
 
@@ -77,4 +82,8 @@ public interface UserService {
 	List<UserRoleCacheDto> getCacheableForRoles(List<String> roleNames);
 
 	UserProfileDto getUserProfileDtoByEmail(String email);
+
+	UserDto addUserV3(AddUserRequestDto addUserRequestDto);
+	
+	List<String> getUserProfileDtoWhoseBirthdayIsToday();
 }

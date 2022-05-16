@@ -5,6 +5,7 @@ package com.stanzaliving.user.repository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.stanzaliving.core.base.enums.Department;
@@ -56,5 +57,10 @@ public interface UserRepository extends AbstractJpaRepository<UserEntity, Long> 
 
 
 	List<UserView> findByEmailInAndStatus(List<String> emails, Boolean status);
+	
+	@Query("Select u.uuid from user u where u.id in (select up.user.id from user_profile up where MONTH(up.birthday) = MONTH(NOW()) AND DAY(up.birthday) = DAY(NOW()))")
+	Optional<List<String>> findUsersWhoseBirthdayIsToday();
+
+	List<UserEntity> findByUuidInAndStatus(List<String> uuid, boolean status);
 
 }

@@ -37,6 +37,7 @@ import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
 import com.stanzaliving.core.user.request.dto.UserRequestDto;
 import com.stanzaliving.core.user.request.dto.UserStatusRequestDto;
+import com.stanzaliving.core.user.request.dto.AddUserAndRoleRequestDto;
 import com.stanzaliving.user.acl.service.AclService;
 import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.service.UserService;
@@ -104,6 +105,14 @@ public class UserController {
 		log.info("Added new user with id: " + userDto.getUuid());
 
 		return ResponseDto.success("New User Created", userDto);
+	}
+
+	@PostMapping("bulk/add")
+	public ResponseDto<List<UserDto>> addBulkUserAndRole(@RequestBody List<AddUserAndRoleRequestDto> addUserAndRoleRequestDtoList) {
+
+		List<UserDto> userDtoList = userService.addBulkUserAndRole(addUserAndRoleRequestDtoList);
+
+		return ResponseDto.success("Bulk New Users creation with role assignment are successful", userDtoList);
 	}
 
 	@GetMapping("search/{pageNo}/{limit}")

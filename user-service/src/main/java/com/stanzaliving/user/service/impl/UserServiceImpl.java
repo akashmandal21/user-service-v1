@@ -1,31 +1,7 @@
 /**
- * 
+ *
  */
 package com.stanzaliving.user.service.impl;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.validation.Valid;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.ListUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
 import com.stanzaliving.core.base.common.dto.PaginationRequest;
@@ -51,6 +27,7 @@ import com.stanzaliving.core.user.request.dto.ActiveUserRequestDto;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
+import com.stanzaliving.core.user.request.dto.AddUserAndRoleRequestDto;
 import com.stanzaliving.user.acl.db.service.UserDepartmentLevelDbService;
 import com.stanzaliving.user.acl.db.service.UserDepartmentLevelRoleDbService;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
@@ -66,8 +43,32 @@ import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.entity.UserProfileEntity;
 import com.stanzaliving.user.service.UserManagerMappingService;
 import com.stanzaliving.user.service.UserService;
-
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.ListUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Valid;
+import javax.validation.Validator;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author naveen
@@ -105,6 +106,9 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private NotificationProducer notificationProducer;
 
+	@Autowired
+	private Validator validator;
+
 	@Value("${kafka.resident.detail.topic}")
 	private String kafkaResidentDetailTopic;
 
@@ -113,10 +117,13 @@ public class UserServiceImpl implements UserService {
 
 	@Value("${broker.role}")
 	private String brokerUuid;
-	
+
 	@Value("${country.uuid}")
 	private String countryUuid;
-	
+
+	@Value("${sigmaManageSales.role}")
+	private String sigmaManageSalesUuid;
+
 	@Override
 	public UserProfileDto getActiveUserByUserId(String userId) {
 
@@ -129,6 +136,16 @@ public class UserServiceImpl implements UserService {
 		}
 
 		return UserAdapter.getUserProfileDto(userEntity);
+	}
+
+	@Override
+	public UserProfileDto getUserByUserId(String userId) {
+        log.info("Searching User by UserId: " + userId);
+
+        UserEntity userEntity = userDbService.findByUuid(userId);
+
+
+        return UserAdapter.getUserProfileDto(userEntity);
 	}
 
 	@Override
@@ -177,7 +194,7 @@ public class UserServiceImpl implements UserService {
 
 			log.warn("User: " + userEntity.getUuid() + " already exists for Mobile: " + addUserRequestDto.getMobile()
 					+ ", ISO Code: " + addUserRequestDto.getIsoCode() + " of type: " + addUserRequestDto.getUserType());
-			
+
 			if(addUserRequestDto.getUserType().equals(UserType.CONSUMER)|| addUserRequestDto.getUserType().equals(UserType.EXTERNAL)) {
 				userEntity.setUserType(addUserRequestDto.getUserType());
 				try {
@@ -186,8 +203,8 @@ public class UserServiceImpl implements UserService {
 					log.error("Got error while adding role",e);
 				}
 			}
-			
-			
+
+
 			return UserAdapter.getUserDto(userEntity);
 
 		}
@@ -206,9 +223,9 @@ public class UserServiceImpl implements UserService {
 
 		userEntity = userDbService.saveAndFlush(userEntity);
 
-		
+
 		addUserOrConsumerRole(userEntity);
-			
+
 
 		log.info("Added New User with Id: " + userEntity.getUuid());
 
@@ -221,6 +238,51 @@ public class UserServiceImpl implements UserService {
 
 		return userDto;
 	}
+
+	public List<UserDto> addBulkUserAndRole(List<AddUserAndRoleRequestDto> addUserAndRoleRequestDtoList) {
+
+		// Adding validation at service layer
+		validateConstraint(addUserAndRoleRequestDtoList);
+
+		Map<String, ArrayList<AddUserAndRoleRequestDto>> userAndRoleRequestDtoListMapByMobile = createUserAndRoleRequestDtoListByMobile(addUserAndRoleRequestDtoList);
+
+		List<UserEntity> newUserEntityList = new ArrayList<>();
+
+		List<UserDto> existingUserDtoList = new ArrayList<>();
+
+		userAndRoleRequestDtoListMapByMobile.forEach((key, userAndRoleRequestDtoListByMobile) -> {
+
+			UserEntity userEntity = checkExistingUser(userAndRoleRequestDtoListByMobile);
+
+			if(Objects.isNull(userEntity)) {
+				userEntity = createNewUser(userAndRoleRequestDtoListByMobile.get(0));
+				newUserEntityList.add(userEntity);
+			} else {
+				existingUserDtoList.add(UserAdapter.getUserDto(userEntity));
+			}
+		});
+
+		if(newUserEntityList.isEmpty()) return existingUserDtoList;
+
+		List<UserEntity> newUserEntityCreatedList = userDbService.saveAndFlush(newUserEntityList);
+
+		List<UserDto> userDtoList = new ArrayList<>();
+
+		newUserEntityCreatedList.forEach(newUserEntityCreated -> {
+			userDtoList.add(UserAdapter.getUserDto(newUserEntityCreated));
+			log.info("Added New User with Id: " + newUserEntityCreated.getUuid());
+		});
+
+		log.info("Assigning roles to each created user is started");
+		assignRoleToAllUser(userAndRoleRequestDtoListMapByMobile, newUserEntityCreatedList);
+		log.info("Assigning roles to each created user is completed");
+
+		publishToKafka(userDtoList);
+
+		userDtoList.addAll(existingUserDtoList);
+		return userDtoList;
+	}
+
 
 	@Override
 	public UserProfileDto getUserProfile(String userId) {
@@ -283,6 +345,129 @@ public class UserServiceImpl implements UserService {
 
 	}
 
+	private void validateConstraint(List<AddUserAndRoleRequestDto> addUserAndRoleRequestDtoList) {
+		Set<ConstraintViolation<AddUserAndRoleRequestDto>> violations = new HashSet<>();
+
+		addUserAndRoleRequestDtoList.forEach(addUserAndRoleRequestDto -> {
+
+			if(addUserAndRoleRequestDto.getIsoCode() == null || addUserAndRoleRequestDto.getIsoCode().isEmpty()) {
+				addUserAndRoleRequestDto.setIsoCode("IN");
+			}
+
+			if(userDbService.getUserForMobile(addUserAndRoleRequestDto.getMobile(), addUserAndRoleRequestDto.getIsoCode()) == null) {
+				// if user does not exist then validating
+				violations.addAll(validator.validate(addUserAndRoleRequestDto));
+			}
+		});
+
+		if (!violations.isEmpty()) {
+			StringBuilder sb = new StringBuilder();
+			for (ConstraintViolation<AddUserAndRoleRequestDto> constraintViolation : violations) {
+				sb.append(constraintViolation.getMessage()).append(", ");
+			}
+			throw new ConstraintViolationException("Error occurred: " + sb, violations);
+		}
+	}
+
+	private void assignRoleToAllUser(Map<String, ArrayList<AddUserAndRoleRequestDto>> userAndRoleRequestDtoMapByMobile, List<UserEntity> newUserEntityList) {
+
+		newUserEntityList.forEach(userEntity -> {
+			String key = String.format("%s%s", userEntity.getIsoCode(), userEntity.getMobile());
+			List<AddUserAndRoleRequestDto> userAndRoleRequestDtoListByMobile = userAndRoleRequestDtoMapByMobile.get(key);
+
+			userAndRoleRequestDtoListByMobile.forEach(userAndRoleRequestDtoByMobile -> {
+				assignRoleToUser(userAndRoleRequestDtoByMobile, userEntity);
+			});
+
+		});
+	}
+
+	private void assignRoleToUser(AddUserAndRoleRequestDto addUserAndRoleRequestDto, UserEntity userEntity) {
+
+			if (CollectionUtils.isEmpty(addUserAndRoleRequestDto.getRolesUuid()) || Objects.isNull(addUserAndRoleRequestDto.getAccessLevel()) ||
+					CollectionUtils.isEmpty(addUserAndRoleRequestDto.getAccessLevelEntityListUuid()) || Objects.isNull(addUserAndRoleRequestDto.getRoleDepartment())) {
+				// Assigning default role
+				addUserOrConsumerRole(userEntity);
+			} else {
+				aclUserService.addRole(
+						AddUserDeptLevelRoleRequestDto.builder()
+								.userUuid(userEntity.getUuid())
+								.department(addUserAndRoleRequestDto.getRoleDepartment())
+								.rolesUuid(addUserAndRoleRequestDto.getRolesUuid())
+								.accessLevel(addUserAndRoleRequestDto.getAccessLevel())
+								.accessLevelEntityListUuid(addUserAndRoleRequestDto.getAccessLevelEntityListUuid())
+								.build()
+				);
+			}
+	}
+
+	private void publishToKafka(Object object) {
+		KafkaDTO kafkaDTO = new KafkaDTO();
+		kafkaDTO.setData(object);
+		notificationProducer.publish(kafkaResidentDetailTopic, KafkaDTO.class.getName(), kafkaDTO);
+	}
+
+	private Map<String, ArrayList<AddUserAndRoleRequestDto>> createUserAndRoleRequestDtoListByMobile(List<AddUserAndRoleRequestDto> addUserAndRoleRequestDtoList) {
+
+		Map<String, ArrayList<AddUserAndRoleRequestDto>> map = new HashMap<>();
+		addUserAndRoleRequestDtoList.forEach(addUserAndRoleRequestDto -> {
+			String key = String.format("%s%s",addUserAndRoleRequestDto.getIsoCode(), addUserAndRoleRequestDto.getMobile());
+
+			if(map.containsKey(key)) {
+				map.get(key).add(addUserAndRoleRequestDto);
+			} else {
+				map.put(key, new ArrayList<AddUserAndRoleRequestDto>(){{ add(addUserAndRoleRequestDto); }});
+			}
+		});
+		return map;
+	}
+
+	private UserEntity checkExistingUser(ArrayList<AddUserAndRoleRequestDto> userAndRoleRequestDtoListByMobile) {
+
+		AddUserAndRoleRequestDto addUserAndRoleRequestDto = userAndRoleRequestDtoListByMobile.get(0);
+
+		if (!PhoneNumberUtils.isValidMobileForCountry(addUserAndRoleRequestDto.getMobile(), addUserAndRoleRequestDto.getIsoCode())) {
+			log.error("Number: " + addUserAndRoleRequestDto.getMobile() + " and ISO: " + addUserAndRoleRequestDto.getIsoCode()
+					+ " doesn't appear to be a valid mobile combination");
+			throw new ApiValidationException("Mobile Number and ISO Code combination not valid");
+		}
+
+		UserEntity userEntity = userDbService.getUserForMobile(addUserAndRoleRequestDto.getMobile(),
+				addUserAndRoleRequestDto.getIsoCode());
+		if(Objects.isNull(userEntity)) return null;
+
+		if(!userEntity.isStatus()) {
+			userEntity.setStatus(true);
+			userDbService.update(userEntity);
+		}
+
+		log.warn("User: " + userEntity.getUuid() + " already exists for Mobile: " + addUserAndRoleRequestDto.getMobile()
+				+ ", ISO Code: " + addUserAndRoleRequestDto.getIsoCode() + " of type: " + addUserAndRoleRequestDto.getUserType());
+
+		// assigning all the roles to user
+		userAndRoleRequestDtoListByMobile.forEach(userAndRoleRequestDtoByMobile -> {
+			assignRoleToUser(userAndRoleRequestDtoByMobile, userEntity);
+		});
+
+		return userEntity;
+
+	}
+
+	private UserEntity createNewUser(AddUserAndRoleRequestDto addUserAndRoleRequestDto) {
+		log.info("Adding new User [Mobile: " + addUserAndRoleRequestDto.getMobile() + ", ISOCode: "
+				+ addUserAndRoleRequestDto.getIsoCode() + ", UserType: " + addUserAndRoleRequestDto.getUserType() + "]");
+
+		UserProfileEntity profileEntity = UserAdapter.getUserProfileEntity(addUserAndRoleRequestDto);
+
+		UserEntity userEntity = UserEntity.builder().userType(addUserAndRoleRequestDto.getUserType())
+				.isoCode(addUserAndRoleRequestDto.getIsoCode()).mobile(addUserAndRoleRequestDto.getMobile()).mobileVerified(false)
+				.email(addUserAndRoleRequestDto.getEmail()).emailVerified(false).userProfile(profileEntity).status(true)
+				.department(addUserAndRoleRequestDto.getDepartment()).build();
+
+		profileEntity.setUser(userEntity);
+		return userEntity;
+	}
+
 	private Page<UserEntity> getUserPage(UserFilterDto userFilterDto) {
 
 		Specification<UserEntity> specification = userDbService.getSearchQuery(userFilterDto);
@@ -339,13 +524,13 @@ public class UserServiceImpl implements UserService {
 	public List<UserProfileDto> getAllUsers() {
 
 		List<UserEntity> userEntities = userDbService.findAll();
-		
+
 		return UserAdapter.getUserProfileDtos(userEntities);
 	}
-	
+
 	@Override
 	public List<UserProfileDto> getAllActiveUsersByUuidIn(ActiveUserRequestDto activeUserRequestDto) {
-		
+
 		List<UserEntity> userEntities = userDbService.findByUuidInAndStatus(activeUserRequestDto.getUserIds(), true);
 
 		return UserAdapter.getUserProfileDtos(userEntities);
@@ -374,7 +559,7 @@ public class UserServiceImpl implements UserService {
 		userEntity = userDbService.update(userEntity);
 
 		addUserOrConsumerRole(userEntity);
-		
+
 		return Objects.nonNull(userEntity);
 	}
 
@@ -421,6 +606,7 @@ public class UserServiceImpl implements UserService {
 			userEntity.getUserProfile().setSecondaryIsoCode(updateUserRequestDto.getForiegnCountryCode());
 		}
 		if (Objects.nonNull(updateUserRequestDto.getForiegnMobileNumber())) {
+			userEntity.getUserProfile().setSecondaryMobile(updateUserRequestDto.getForiegnMobileNumber());
 			userEntity.getUserProfile().setProfilePicture(updateUserRequestDto.getForiegnMobileNumber());
 		}
 		if (Objects.nonNull(updateUserRequestDto.getNextDestination())) {
@@ -448,7 +634,7 @@ public class UserServiceImpl implements UserService {
 		UserProfileDto userProfileDto = UserAdapter.getUserProfileDto(userEntity);
 
 		addUserOrConsumerRole(userEntity);
-		
+
 		KafkaDTO kafkaDTO = new KafkaDTO();
 		kafkaDTO.setData(userProfileDto);
 
@@ -460,7 +646,7 @@ public class UserServiceImpl implements UserService {
 	private void addUserOrConsumerRole(UserEntity userEntity) {
 		if(userEntity.getUserType().equals(UserType.CONSUMER) || userEntity.getUserType().equals(UserType.EXTERNAL)) {
 			AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetails(userEntity);
-			
+
 			aclUserService.addRole(addUserDeptLevelRoleRequestDto);
 		}
 	}
@@ -505,7 +691,7 @@ public class UserServiceImpl implements UserService {
 		}
 
 		UserDto userDto = UserAdapter.getUserProfileDto(userDbService.update(userEntity));
-		
+
 		addUserOrConsumerRole(userEntity);
 
 		return userDto;
@@ -543,7 +729,7 @@ public class UserServiceImpl implements UserService {
 	public boolean createRoleBaseUser(UserType userType) {
 
 		List<UserEntity> userEntity = userDbService.findByUserType(userType);
-		
+
 		if (CollectionUtils.isEmpty(userEntity)) {
 			log.error("user Type: " + userType + " not available in User table.");
 			throw new ApiValidationException("User Type not exists in user Table.");
@@ -551,7 +737,7 @@ public class UserServiceImpl implements UserService {
 		userEntity.forEach(user -> {
 			if(user.isStatus()) {
 				AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetails(user);
-				
+
 				aclUserService.addRole(addUserDeptLevelRoleRequestDto);
 			}
 
@@ -562,20 +748,20 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public boolean createRoleBaseUser(List<String> mobiles) {
-		
+
 		for (String mobile : mobiles) {
 			UserEntity userEntity = userDbService.findByMobile(mobile);
 			if(Objects.nonNull(userEntity) && userEntity.isStatus()) {
 				AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetails(userEntity);
-				
+
 				aclUserService.addRole(addUserDeptLevelRoleRequestDto);
 			}
 		}
 		return Boolean.TRUE;
 	}
 
-	
-	
+
+
 	private AddUserDeptLevelRoleRequestDto getRoleDetails(UserEntity user) {
 		AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = AddUserDeptLevelRoleRequestDto.builder()
 				.build();
@@ -598,15 +784,15 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public Map<String, UserProfileDto> getUserProfileDto(Set<String> mobileNos) {
-		
+
 		Map<String, UserProfileDto> userMap = new HashMap<>();
-		
+
 		List<UserProfileDto> userProfileDto=UserAdapter.getUserProfileDtos(userDbService.findByMobileIn(mobileNos));
 
 		userProfileDto.forEach(user -> {
 			userMap.put(user.getMobile(), user);
 		});
-		
+
 		return userMap;
 	}
 
@@ -627,7 +813,7 @@ public class UserServiceImpl implements UserService {
 
 		@Override
 		public Map<String, UserProfileDto> getUserProfileForUserIn(List<String> userUuids) {
-			
+
 			Map<String, UserProfileDto> userMap = new HashMap<>();
 
 			List<UserProfileDto> userProfileDto = UserAdapter.getUserProfileDtos(userDbService.findByUuidIn(userUuids));
@@ -667,17 +853,25 @@ public class UserServiceImpl implements UserService {
 
 						List<UserDepartmentLevelEntity> departmentLevelEntities = userDepartmentLevelDbService.findByUuidInAndAccessLevel(uuids, roleDto.getAccessLevel());
 
-//						log.info("Department Level Entity {}",departmentLevelEntities);
+						Set<String> userIds = departmentLevelEntities.stream().map(UserDepartmentLevelEntity::getUserUuid).collect(Collectors.toSet());
+						log.info("userIds {}",userIds);
+
+						Set<String> activeUserIds = getActiveUserUuids(userIds);
 
 						if (CollectionUtils.isNotEmpty(departmentLevelEntities)) {
-							String key = roleDto.getRoleName()+""+department;
-							cacheDtos.putIfAbsent(key,UserRoleCacheDto.builder().roleName(roleDto.getRoleName()).department(department).accessUserMap(new HashMap<>()).build());
+
+							String key = roleDto.getRoleName() + "" + department;
+							cacheDtos.putIfAbsent(key, UserRoleCacheDto.builder().roleName(roleDto.getRoleName()).department(department).accessUserMap(new HashMap<>()).build());
 							departmentLevelEntities.forEach(entity -> {
-								Arrays.asList((entity.getCsvAccessLevelEntityUuid().split(","))).stream().forEach(accessUuid -> {
-									cacheDtos.get(key).getAccessUserMap().putIfAbsent(accessUuid, new ArrayList<>());
-									cacheDtos.get(key).getAccessUserMap().get(accessUuid).add(new UIKeyValue(entity.getUserUuid(), entity.getUserUuid()));
-									users.add(entity.getUserUuid());
-								});
+
+								if (activeUserIds.contains(entity.getUserUuid())) {
+									Arrays.asList((entity.getCsvAccessLevelEntityUuid().split(","))).stream().forEach(accessUuid -> {
+										cacheDtos.get(key).getAccessUserMap().putIfAbsent(accessUuid, new ArrayList<>());
+										cacheDtos.get(key).getAccessUserMap().get(accessUuid).add(new UIKeyValue(entity.getUserUuid(), entity.getUserUuid()));
+										users.add(entity.getUserUuid());
+									});
+								}
+
 							});
 						}
 					}
@@ -685,8 +879,8 @@ public class UserServiceImpl implements UserService {
 			}
 
 		}
-
 		if(CollectionUtils.isNotEmpty(users)){
+
 			PaginationRequest paginationRequest = PaginationRequest.builder().pageNo(1).limit(users.size()).build();
 			Map<String,String> userNames = this.searchUser(UserFilterDto.builder().pageRequest(paginationRequest).userIds(users.stream().collect(Collectors.toList())).build()).getData()
 					.stream().collect(Collectors.toMap(f->f.getUuid(), f->getUserName(f)));
@@ -700,6 +894,23 @@ public class UserServiceImpl implements UserService {
 
 		}
 		return ListUtils.EMPTY_LIST;
+	}
+
+	/**
+	 * @param userIds
+	 * @return
+	 */
+	private Set<String> getActiveUserUuids(Set<String> userIds) {
+		// build ActiveUserRequestDto
+		ActiveUserRequestDto activeUserRequestDto = ActiveUserRequestDto.builder().userIds(userIds).build();
+
+		// fetch active user response dtos
+		List<UserProfileDto> userProfileDtos = getAllActiveUsersByUuidIn(activeUserRequestDto);
+
+		// create set of active user ids
+		Set<String> activeUserUuids = userProfileDtos.stream().map(UserProfileDto::getUuid).collect(Collectors.toSet());
+
+		return activeUserUuids;
 	}
 
 	private String getUserName(UserProfileDto userProfile){
@@ -725,5 +936,79 @@ public class UserServiceImpl implements UserService {
 		}
 
 		return UserAdapter.getUserProfileDto(userEntity);
+	}
+
+	public UserDto addUserV3(AddUserRequestDto addUserRequestDto) {
+
+		if (!PhoneNumberUtils.isValidMobileForCountry(addUserRequestDto.getMobile(), addUserRequestDto.getIsoCode())) {
+			log.error("Number: " + addUserRequestDto.getMobile() + " and ISO: " + addUserRequestDto.getIsoCode()
+				+ " doesn't appear to be a valid mobile combination");
+			throw new ApiValidationException("Mobile Number and ISO Code combination not valid");
+		}
+
+		UserEntity userEntity = userDbService.getUserForMobile(addUserRequestDto.getMobile(),
+			addUserRequestDto.getIsoCode());
+
+		if (Objects.nonNull(userEntity) && userEntity.isStatus() == true) {
+
+			throw new ApiValidationException("Active User already exists for Mobile: " + addUserRequestDto.getMobile()
+				+ ", ISO Code: " + addUserRequestDto.getIsoCode());
+		}
+
+		if (Objects.nonNull(userEntity) && userEntity.isStatus() == false) {
+			log.info("Activating deactivated user [Mobile: " + addUserRequestDto.getMobile() + ", ISOCode: "
+				+ addUserRequestDto.getIsoCode() + ", UserType: " + addUserRequestDto.getUserType() + "]");
+
+			userEntity.setUserType(addUserRequestDto.getUserType());
+			userEntity.setEmail(addUserRequestDto.getEmail());
+			userEntity.setDepartment(addUserRequestDto.getDepartment());
+			userEntity.setStatus(true);
+			UserProfileEntity userProfileEntity = userEntity.getUserProfile();
+			userProfileEntity.setFirstName(addUserRequestDto.getFirstName());
+			userProfileEntity.setLastName(addUserRequestDto.getLastName());
+			userProfileEntity.setStatus(true);
+			userEntity = userDbService.saveAndFlush(userEntity);
+		} else {
+			log.info("Adding new User [Mobile: " + addUserRequestDto.getMobile() + ", ISOCode: "
+				+ addUserRequestDto.getIsoCode() + ", UserType: " + addUserRequestDto.getUserType() + "]");
+
+			UserProfileEntity profileEntity = UserAdapter.getUserProfileEntity(addUserRequestDto);
+
+			userEntity = UserEntity.builder().userType(addUserRequestDto.getUserType())
+				.isoCode(addUserRequestDto.getIsoCode()).mobile(addUserRequestDto.getMobile()).mobileVerified(false)
+				.email(addUserRequestDto.getEmail()).emailVerified(false).userProfile(profileEntity).status(true)
+				.department(addUserRequestDto.getDepartment()).build();
+
+			profileEntity.setUser(userEntity);
+
+			userEntity = userDbService.saveAndFlush(userEntity);
+
+			log.info("Added New User with Id: " + userEntity.getUuid());
+		}
+		addUserOrConsumerRole(userEntity);
+		addSigmaManageSalesRole(userEntity);
+		UserDto userDto = UserAdapter.getUserDto(userEntity);
+
+		KafkaDTO kafkaDTO = new KafkaDTO();
+		kafkaDTO.setData(userDto);
+
+		notificationProducer.publish(kafkaResidentDetailTopic, KafkaDTO.class.getName(), kafkaDTO);
+
+		return userDto;
+	}
+
+	private void addSigmaManageSalesRole(UserEntity userEntity) {
+		AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = AddUserDeptLevelRoleRequestDto.builder().department(Department.SALES)
+			.rolesUuid(Arrays.asList(sigmaManageSalesUuid)).accessLevel(AccessLevel.COUNTRY)
+			.accessLevelEntityListUuid(Arrays.asList(countryUuid)).userUuid(userEntity.getUuid()).build();
+		aclUserService.addRole(addUserDeptLevelRoleRequestDto);
+	}
+
+	public List<String> getUserProfileDtoWhoseBirthdayIsToday() {
+		log.info("Fetching users who have there birthday today.");
+		List <String> newList = new ArrayList<>();
+		List<String> userList = userDbService.getUserWhoseBirthdayIsToday().orElse(newList);
+
+		return userList;
 	}
 }
