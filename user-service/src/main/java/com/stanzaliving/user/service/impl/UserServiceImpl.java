@@ -30,8 +30,10 @@ import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
 import com.stanzaliving.core.user.request.dto.AddUserAndRoleRequestDto;
 import com.stanzaliving.user.acl.db.service.UserDepartmentLevelDbService;
 import com.stanzaliving.user.acl.db.service.UserDepartmentLevelRoleDbService;
+import com.stanzaliving.user.acl.entity.RoleEntity;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity;
+import com.stanzaliving.user.acl.repository.RoleRepository;
 import com.stanzaliving.user.acl.service.AclUserService;
 import com.stanzaliving.user.acl.service.RoleService;
 import com.stanzaliving.user.acl.service.UserDepartmentLevelRoleService;
@@ -105,6 +107,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private NotificationProducer notificationProducer;
+	
+	@Autowired
+	private RoleRepository roleRepository;
 
 	@Autowired
 	private Validator validator;
@@ -187,7 +192,7 @@ public class UserServiceImpl implements UserService {
 
 		if (Objects.nonNull(userEntity)) {
 
-			if(!userEntity.isStatus()){
+			if (!userEntity.isStatus()) {
 				userEntity.setStatus(true);
 				userDbService.update(userEntity);
 			}
@@ -195,18 +200,20 @@ public class UserServiceImpl implements UserService {
 			log.warn("User: " + userEntity.getUuid() + " already exists for Mobile: " + addUserRequestDto.getMobile()
 					+ ", ISO Code: " + addUserRequestDto.getIsoCode() + " of type: " + addUserRequestDto.getUserType());
 
-			if(addUserRequestDto.getUserType().equals(UserType.CONSUMER)|| addUserRequestDto.getUserType().equals(UserType.EXTERNAL)) {
+			if (addUserRequestDto.getUserType().equals(UserType.CONSUMER) || addUserRequestDto.getUserType().equals(UserType.EXTERNAL) || addUserRequestDto.getUserType().equals(UserType.VENDOR)) {
+
 				userEntity.setUserType(addUserRequestDto.getUserType());
 				try {
-					addUserOrConsumerRole(userEntity);
-				}catch (Exception e) {
-					log.error("Got error while adding role",e);
+					if (addUserRequestDto.getUserType().equals(UserType.CONSUMER) || addUserRequestDto.getUserType().equals(UserType.EXTERNAL))
+						addUserOrConsumerRole(userEntity);
+					else if (addUserRequestDto.getUserType().equals(UserType.VENDOR))
+						addUserOrConsumerRoleByRoleNames(userEntity, addUserRequestDto.getRoleNames());
+				} catch (Exception e) {
+					log.error("Got error while adding role", e);
 				}
 			}
 
-
 			return UserAdapter.getUserDto(userEntity);
-
 		}
 
 		log.info("Adding new User [Mobile: " + addUserRequestDto.getMobile() + ", ISOCode: "
@@ -223,9 +230,8 @@ public class UserServiceImpl implements UserService {
 
 		userEntity = userDbService.saveAndFlush(userEntity);
 
-
 		addUserOrConsumerRole(userEntity);
-
+		addUserOrConsumerRoleByRoleNames(userEntity, addUserRequestDto.getRoleNames());
 
 		log.info("Added New User with Id: " + userEntity.getUuid());
 
@@ -644,8 +650,16 @@ public class UserServiceImpl implements UserService {
 	}
 
 	private void addUserOrConsumerRole(UserEntity userEntity) {
-		if(userEntity.getUserType().equals(UserType.CONSUMER) || userEntity.getUserType().equals(UserType.EXTERNAL)) {
+		if (userEntity.getUserType().equals(UserType.CONSUMER) || userEntity.getUserType().equals(UserType.EXTERNAL) || userEntity.getUserType().equals(UserType.VENDOR)) {
 			AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetails(userEntity);
+
+			aclUserService.addRole(addUserDeptLevelRoleRequestDto);
+		}
+	}
+	
+	private void addUserOrConsumerRoleByRoleNames(UserEntity userEntity, List<String> roleNames) {
+		if (userEntity.getUserType().equals(UserType.VENDOR)) {
+			AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetailsForListOfRoleNames(userEntity, roleNames);
 
 			aclUserService.addRole(addUserDeptLevelRoleRequestDto);
 		}
@@ -760,8 +774,6 @@ public class UserServiceImpl implements UserService {
 		return Boolean.TRUE;
 	}
 
-
-
 	private AddUserDeptLevelRoleRequestDto getRoleDetails(UserEntity user) {
 		AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = AddUserDeptLevelRoleRequestDto.builder()
 				.build();
@@ -779,6 +791,29 @@ public class UserServiceImpl implements UserService {
 			addUserDeptLevelRoleRequestDto.setDepartment(user.getDepartment());
 		}
 
+		return addUserDeptLevelRoleRequestDto;
+	}
+	
+	private AddUserDeptLevelRoleRequestDto getRoleDetailsForListOfRoleNames(UserEntity user, List<String> roleNames){
+		AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = AddUserDeptLevelRoleRequestDto.builder()
+				.build();
+
+		addUserDeptLevelRoleRequestDto.setUserUuid(user.getUuid());
+		addUserDeptLevelRoleRequestDto.setAccessLevelEntityListUuid(Arrays.asList(countryUuid));
+
+		if (user.getUserType().getTypeName().equalsIgnoreCase("Vendor")) {
+
+			if (CollectionUtils.isNotEmpty(roleNames)) {
+				List<RoleEntity> roleEntities = roleRepository.findByRoleNameInAndDepartment(roleNames, user.getDepartment());
+				List<String> roleUuids = roleEntities.stream().map(RoleEntity::getUuid).collect(Collectors.toList());
+
+				addUserDeptLevelRoleRequestDto.setRolesUuid(roleUuids);
+			}
+
+			addUserDeptLevelRoleRequestDto.setAccessLevel(AccessLevel.valueOf("COUNTRY"));
+			addUserDeptLevelRoleRequestDto.setDepartment(user.getDepartment());
+		}
+		
 		return addUserDeptLevelRoleRequestDto;
 	}
 
