@@ -1,6 +1,7 @@
 package com.stanzaliving.user.controller.internal;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
+import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
 import com.stanzaliving.user.acl.service.RoleService;
 import lombok.extern.log4j.Log4j2;
@@ -27,4 +28,21 @@ public class InternalRoleController {
 
         return ResponseDto.success("Found Role with Id: " + roleUuid, roleService.getRoleByUuid(roleUuid));
     }
+    @GetMapping("/acl/roles/{roleName}")
+    public ResponseDto<RoleDto> getRoleByName(@PathVariable @NotBlank(message = "Role Name must not be blank") String roleName) {
+
+        log.info("Fetching role with name: " + roleName);
+
+        return ResponseDto.success("Found Role with Name: " + roleName, roleService.findByRoleName(roleName));
+    }
+
+    @GetMapping("/acl/roles/{roleName}/{department}")
+    public ResponseDto<RoleDto> getRoleByNameAndDepartment(@PathVariable @NotBlank(message = "Role Name must not be blank") String roleName
+            ,@PathVariable @NotBlank(message = "Department Name must not be blank") Department department) {
+
+        log.info("Fetching role with name and department name: " + roleName + department);
+
+        return ResponseDto.success("Found Role with Name: " + roleName, roleService.findByRoleNameAndDepartment(roleName,department));
+    }
+
 }
