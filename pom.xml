@@ -32,7 +32,9 @@
 		<module>../core-utils/redis</module>
 		<module>../core-utils/notification-v2-client</module>
 		<module>../core-utils/booking-service-client</module>
-		<module>../core-utils/redis</module>
+		<module>../core-utils/pojo-wanda</module>
+		<module>../core-utils/pojo-ops</module>
+		<module>../core-utils/wanda-client</module>
 	</modules>
 
 	<build>
