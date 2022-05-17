@@ -32,6 +32,7 @@
 		<module>../core-utils/redis</module>
 		<module>../core-utils/notification-v2-client</module>
 		<module>../core-utils/booking-service-client</module>
+		<module>../core-utils/redis</module>
 	</modules>
 
 	<build>

@@ -16,7 +16,7 @@ public class ClientConfig {
 
     @Value("${service.transformationmaster.url}")
     private String transformationUrl;
-    
+
     @Value("${service.notificationClient.url}")
 	private String notificationClientUrl;
     @Value("${service.booking.url}")
@@ -50,5 +50,7 @@ public class ClientConfig {
 	public BookingDataControllerApi bookingDataControllerApi() {
 		return new BookingDataControllerApi(new StanzaRestClient(bookingServiceUrl));
 	}
+
+
 
 }
