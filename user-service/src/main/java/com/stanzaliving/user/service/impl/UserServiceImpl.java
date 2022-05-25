@@ -742,7 +742,9 @@ public class UserServiceImpl implements UserService {
 					.findByUuid(userDepartmentLevelRoleEntity.getUserDepartmentLevelUuid());
 
 			UserEntity userEntity = userDbService.findByUuid(userDepartmentLevelEntity.getUserUuid());
-			userDtos.add(UserAdapter.getUserDto(userEntity));
+			if(userEntity.getDepartment().equals(cityRolesRequestDto.getDepartment())) {
+				userDtos.add(UserAdapter.getUserDto(userEntity));
+			}
 
 		}
 		return userDtos;
