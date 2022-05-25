@@ -126,11 +126,11 @@ public class InternalUserController {
 
 	@PostMapping("user/role")
 	@ApiOperation(value = "Get user for a particular role")
-	public List<UserDto> getUsersForRole(@RequestBody @Valid AccessLevelRoleRequestDto cityRolesRequestDto) {
+	public ResponseDto<List<UserDto>> getUsersForRole(@RequestBody @Valid AccessLevelRoleRequestDto cityRolesRequestDto) {
 
 		log.info("Request received for getting users for Role: {}  and AccessLevel: {}  with AccessUuid:{}", cityRolesRequestDto.getRoleName(), cityRolesRequestDto.getAccessLevel(), cityRolesRequestDto.getAccessLevelUuid());
 
-		return userService.getUsersForRole(cityRolesRequestDto);
+		return ResponseDto.success(userService.getUsersForRole(cityRolesRequestDto));
 	}
 	
 
