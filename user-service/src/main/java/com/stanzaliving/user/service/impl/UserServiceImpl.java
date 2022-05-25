@@ -726,6 +726,29 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public List<UserDto> getUsersForRole(AccessLevelRoleRequestDto cityRolesRequestDto){
+		RoleDto roleDto = roleService.findByRoleNameAndDepartment(cityRolesRequestDto.getRoleName(),
+				cityRolesRequestDto.getDepartment());
+		List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = userDepartmentLevelRoleService
+				.findByRoleUuid(roleDto.getUuid());
+
+		if (CollectionUtils.isEmpty(userDepartmentLevelRoleEntityList)) {
+			return null;
+		}
+		List<UserDto> userDtos=new ArrayList<>();
+
+		for (UserDepartmentLevelRoleEntity userDepartmentLevelRoleEntity : userDepartmentLevelRoleEntityList) {
+			UserDepartmentLevelEntity userDepartmentLevelEntity = userDepartmentLevelService
+					.findByUuid(userDepartmentLevelRoleEntity.getUserDepartmentLevelUuid());
+
+			UserEntity userEntity = userDbService.findByUuid(userDepartmentLevelEntity.getUserUuid());
+			userDtos.add(UserAdapter.getUserDto(userEntity));
+
+		}
+		return userDtos;
+	}
+
+	@Override
 	public boolean createRoleBaseUser(UserType userType) {
 
 		List<UserEntity> userEntity = userDbService.findByUserType(userType);
