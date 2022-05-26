@@ -350,6 +350,15 @@ public class UserServiceImpl implements UserService {
 				userPage.getTotalElements(), userDtos);
 
 	}
+	
+	@Override
+	public Set<UserProfileDto> searchUserList(UserFilterDto userFilterDto) {
+
+		Set<UserProfileDto> userDtos = getUserList(userFilterDto).stream().map(UserAdapter::getUserProfileDto)
+				.collect(Collectors.toSet());
+
+		return userDtos;
+	}
 
 	private void validateConstraint(List<AddUserAndRoleRequestDto> addUserAndRoleRequestDtoList) {
 		Set<ConstraintViolation<AddUserAndRoleRequestDto>> violations = new HashSet<>();
@@ -482,6 +491,13 @@ public class UserServiceImpl implements UserService {
 				userFilterDto.getPageRequest().getLimit());
 
 		return userDbService.findAll(specification, pagination);
+	}
+	
+	private List<UserEntity> getUserList(UserFilterDto userFilterDto) {
+
+		Specification<UserEntity> specification = userDbService.getSearchQuery(userFilterDto);
+
+		return userDbService.findAll(specification);
 	}
 
 	private Pageable getPaginationForSearchRequest(int pageNo, int limit) {
