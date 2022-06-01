@@ -161,4 +161,15 @@ public class InternalUserController {
 		
 		return ResponseDto.success("Found list",userService.getUserProfileDtoWhoseBirthdayIsToday());
 	}
+	
+	
+	@PostMapping("/getFilteredContacts")
+	public ResponseDto<List<String>> getContacts(@RequestBody List<String> mobileNos){
+		log.info("Fetching Filtered contact ");
+		
+		return ResponseDto.success("Found list",userService.getUserProfileDto(mobileNos));
+	}
+	
+	
+	
 }

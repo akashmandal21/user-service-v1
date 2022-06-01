@@ -820,6 +820,24 @@ public class UserServiceImpl implements UserService {
 
 		return userMap;
 	}
+	
+	
+	@Override
+	public List<String> getUserProfileDto(List<String> mobileNos) {
+
+		List<String> usermobileNos =mobileNos;
+
+		List<UserProfileDto> userProfileDto=UserAdapter.getUserProfileDtos(userDbService.findByMobileIn(mobileNos));
+
+		userProfileDto.forEach(user -> {
+			if(usermobileNos.contains(user.getMobile())) {
+				usermobileNos.remove(user.getMobile());
+				
+			}
+		});
+
+		return usermobileNos;
+	}
 
 	@Override
 	public UserProfileDto getUserDetails(String mobileNo) {
