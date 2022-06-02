@@ -826,8 +826,9 @@ public class UserServiceImpl implements UserService {
 	public List<String> getUserProfileDto(List<String> mobileNos) {
 
 		List<String> usermobileNos =mobileNos;
+		Set<String> mobileNo = mobileNos.stream().collect(Collectors.toSet());
 
-		List<UserProfileDto> userProfileDto=UserAdapter.getUserProfileDtos(userDbService.findByMobileIn(mobileNos));
+		List<UserProfileDto> userProfileDto=UserAdapter.getUserProfileDtos(userDbService.findByMobileIn(mobileNo));
 
 		userProfileDto.forEach(user -> {
 			if(usermobileNos.contains(user.getMobile())) {
