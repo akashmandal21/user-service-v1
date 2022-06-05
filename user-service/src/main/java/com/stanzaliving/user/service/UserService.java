@@ -69,6 +69,8 @@ public interface UserService {
 
 	UserDto getUserForAccessLevelAndRole(AccessLevelRoleRequestDto cityRolesRequestDto);
 
+	List<UserDto> getUsersForRole(AccessLevelRoleRequestDto cityRolesRequestDto);
+
 	boolean createRoleBaseUser(UserType userType);
 
 	Map<String, UserProfileDto> getUserProfileDto(Set<String> mobileNos);
