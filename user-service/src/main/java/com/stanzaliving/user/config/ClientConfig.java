@@ -4,7 +4,7 @@ import com.stanzaliving.core.leadservice.client.api.LeadserviceClientApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
+import com.stanzaliving.core.client.api.BookingDataControllerApi;
 import com.stanzaliving.core.base.http.StanzaRestClient;
 import com.stanzaliving.core.notificationv2.api.NotificationClientApi;
 import com.stanzaliving.core.transformation.client.api.InternalDataControllerApi;
@@ -21,6 +21,9 @@ public class ClientConfig {
 
     @Value("${service.lead.url}")
     private String leadUrl;
+
+    @Value("${service.booking.url}")
+    private String bookingServiceUrl;
 
     @Bean
     public InternalDataControllerApi internalDataControllerApi() {
@@ -41,5 +44,10 @@ public class ClientConfig {
     @Bean
     public LeadserviceClientApi LeadserviceClientApi() {
         return new LeadserviceClientApi(new StanzaRestClient(leadUrl));
+    }
+
+    @Bean
+    public BookingDataControllerApi bookingDataControllerApi() {
+        return new BookingDataControllerApi(new StanzaRestClient(bookingServiceUrl));
     }
 }
