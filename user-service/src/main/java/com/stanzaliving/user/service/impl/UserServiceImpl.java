@@ -726,6 +726,31 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public List<UserDto> getUsersForRole(AccessLevelRoleRequestDto cityRolesRequestDto){
+		RoleDto roleDto = roleService.findByRoleNameAndDepartment(cityRolesRequestDto.getRoleName(),
+				cityRolesRequestDto.getDepartment());
+		List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = userDepartmentLevelRoleService
+				.findByRoleUuid(roleDto.getUuid());
+
+		if (CollectionUtils.isEmpty(userDepartmentLevelRoleEntityList)) {
+			return null;
+		}
+		List<UserDto> userDtos=new ArrayList<>();
+
+		for (UserDepartmentLevelRoleEntity userDepartmentLevelRoleEntity : userDepartmentLevelRoleEntityList) {
+			UserDepartmentLevelEntity userDepartmentLevelEntity = userDepartmentLevelService
+					.findByUuid(userDepartmentLevelRoleEntity.getUserDepartmentLevelUuid());
+
+			UserEntity userEntity = userDbService.findByUuid(userDepartmentLevelEntity.getUserUuid());
+			if(userEntity.getDepartment().equals(cityRolesRequestDto.getDepartment())) {
+				userDtos.add(UserAdapter.getUserDto(userEntity));
+			}
+
+		}
+		return userDtos;
+	}
+
+	@Override
 	public boolean createRoleBaseUser(UserType userType) {
 
 		List<UserEntity> userEntity = userDbService.findByUserType(userType);
@@ -794,6 +819,25 @@ public class UserServiceImpl implements UserService {
 		});
 
 		return userMap;
+	}
+	
+	
+	@Override
+	public List<String> getUserProfileDto(List<String> mobileNos) {
+
+		List<String> usermobileNos =mobileNos;
+		Set<String> mobileNo = mobileNos.stream().collect(Collectors.toSet());
+
+		List<UserProfileDto> userProfileDto=UserAdapter.getUserProfileDtos(userDbService.findByMobileIn(mobileNo));
+
+		userProfileDto.forEach(user -> {
+			if(usermobileNos.contains(user.getMobile())) {
+				usermobileNos.remove(user.getMobile());
+				
+			}
+		});
+
+		return usermobileNos;
 	}
 
 	@Override

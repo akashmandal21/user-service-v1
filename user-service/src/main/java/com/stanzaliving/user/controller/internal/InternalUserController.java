@@ -123,6 +123,15 @@ public class InternalUserController {
 
 		return userService.getUserForAccessLevelAndRole(cityRolesRequestDto);
 	}
+
+	@PostMapping("user/role")
+	@ApiOperation(value = "Get user for a particular role")
+	public ResponseDto<List<UserDto>> getUsersForRole(@RequestBody @Valid AccessLevelRoleRequestDto cityRolesRequestDto) {
+
+		log.info("Request received for getting users for Role: {}  and AccessLevel: {}  with AccessUuid:{}", cityRolesRequestDto.getRoleName(), cityRolesRequestDto.getAccessLevel(), cityRolesRequestDto.getAccessLevelUuid());
+
+		return ResponseDto.success(userService.getUsersForRole(cityRolesRequestDto));
+	}
 	
 
 	@PostMapping("/search/get/userUuid")
@@ -152,4 +161,15 @@ public class InternalUserController {
 		
 		return ResponseDto.success("Found list",userService.getUserProfileDtoWhoseBirthdayIsToday());
 	}
+	
+	
+	@PostMapping("/getFilteredContacts")
+	public ResponseDto<List<String>> getContacts(@RequestBody List<String> mobileNos){
+		log.info("Fetching Filtered contact ");
+		
+		return ResponseDto.success("Found list",userService.getUserProfileDto(mobileNos));
+	}
+	
+	
+	
 }
