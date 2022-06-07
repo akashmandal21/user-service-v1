@@ -1,6 +1,7 @@
 package com.stanzaliving.user.acl.adapters;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.stanzaliving.core.base.enums.AccessLevel;
@@ -36,6 +37,18 @@ public class RoleAccessAdapter {
 			data.add(EnumListing.of(accessLevel, String.valueOf(accessLevel.getLevelNum())));
 		}
 		
+		return data;
+	}
+
+	public List<EnumListing<AccessLevel>> getAccessLevelEnumAsEnumListingV3() {
+		List<EnumListing<AccessLevel>> data = new ArrayList<>();
+
+		for (AccessLevel accessLevel : AccessLevel.values()) {
+			if (Arrays.asList(AccessLevel.CITY, AccessLevel.MICROMARKET, AccessLevel.RESIDENCE).contains(accessLevel)) {
+				data.add(EnumListing.of(accessLevel, String.valueOf(accessLevel.getLevelNum())));
+			}
+		}
+
 		return data;
 	}
 

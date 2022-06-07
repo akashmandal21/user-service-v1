@@ -69,8 +69,6 @@ public class OtpServiceImpl implements OtpService {
 	
 	@Value("${otp.max.validate.count:5}")
 	private int otpMaxValidateCount;
-	
-	
 
 	@Autowired
 	private OtpDbService otpDbService;
@@ -442,4 +440,24 @@ public class OtpServiceImpl implements OtpService {
 
 		return otpEntity.getOtp();
 	}
+	@Override
+	public void resendMobileOtpV2(MobileOtpRequestDto mobileOtpRequestDto, String mobile, String isoCode, OtpType otpType) {
+		OtpEntity userOtp = getLastActiveOtp(mobile, isoCode, otpType);
+
+		if (Objects.isNull(userOtp)) {
+			sendMobileOtp(mobileOtpRequestDto);
+			return;
+		} else {
+			checkForOtpResendConditions(userOtp);
+		}
+		userOtp.setResendCount(userOtp.getResendCount() + 1);
+		userOtp.setValidateCount(UserConstants.ZERO);
+
+		log.info("Updating OTP for Mobile: {}", userOtp.getMobile());
+		userOtp = otpDbService.updateAndFlush(userOtp);
+
+		log.info("Re-Sending OTP: " + userOtp.getOtp() + " for Mobile: " + userOtp.getMobile() + " of Type " + otpType);
+		kafkaUserService.sendOtpToKafka(userOtp, null);
+	}
+
 }

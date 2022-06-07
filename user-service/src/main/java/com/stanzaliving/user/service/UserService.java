@@ -20,6 +20,7 @@ import com.stanzaliving.core.user.request.dto.ActiveUserRequestDto;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
+import com.stanzaliving.core.user.request.dto.AddUserAndRoleRequestDto;
 import com.stanzaliving.user.entity.UserEntity;
 
 /**
@@ -31,9 +32,15 @@ public interface UserService {
 
 	UserProfileDto getActiveUserByUserId(String userId);
 
+	UserProfileDto getUserByUserId(String userId);
+
+	UserDto getActiveUserByUuid(String userUuid);
+
 	void assertActiveUserByUserUuid(String userId);
 
 	UserDto addUser(AddUserRequestDto addUserRequestDto);
+
+	List<UserDto> addBulkUserAndRole(List<AddUserAndRoleRequestDto> addUserRequestDtoList);
 
 	UserProfileDto getUserProfile(String userId);
 
@@ -63,6 +70,8 @@ public interface UserService {
 
 	UserDto getUserForAccessLevelAndRole(AccessLevelRoleRequestDto cityRolesRequestDto);
 
+	List<UserDto> getUsersForRole(AccessLevelRoleRequestDto cityRolesRequestDto);
+
 	boolean createRoleBaseUser(UserType userType);
 
 	Map<String, UserProfileDto> getUserProfileDto(Set<String> mobileNos);
@@ -80,4 +89,8 @@ public interface UserService {
 	void saveUserDeptLevelForNewDept(Department newDept, Department refDept);
 
 	void rollBack(Department newDepartment);
+
+	UserDto addUserV3(AddUserRequestDto addUserRequestDto);
+	
+	List<String> getUserProfileDtoWhoseBirthdayIsToday();
 }

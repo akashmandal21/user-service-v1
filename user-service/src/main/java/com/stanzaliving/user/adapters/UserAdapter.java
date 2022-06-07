@@ -84,6 +84,10 @@ public class UserAdapter {
 
 	public UserProfileDto getUserProfileDto(UserEntity userEntity) {
 
+		if(Objects.isNull(userEntity)){
+			return null;
+		}
+
 		UserProfileEntity profileEntity = userEntity.getUserProfile();
 		if (Objects.isNull(profileEntity)) {
 			return null;
@@ -197,6 +201,7 @@ public class UserAdapter {
 				.arrivalDate(userProfileDto.getArrivalDate())
 				.nextDestination(userProfileDto.getNextDestination())
 				.acl(acl)
+				.fcmEnabled(true)
 				.build();
 
 	}

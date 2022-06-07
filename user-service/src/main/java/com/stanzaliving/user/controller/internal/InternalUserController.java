@@ -5,6 +5,7 @@ package com.stanzaliving.user.controller.internal;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -13,6 +14,7 @@ import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.generic.dto.UIKeyValue;
 import com.stanzaliving.core.user.dto.UserRoleCacheDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,6 +28,7 @@ import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
+import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.service.UserService;
 
 import io.swagger.annotations.ApiOperation;
@@ -121,6 +124,15 @@ public class InternalUserController {
 
 		return userService.getUserForAccessLevelAndRole(cityRolesRequestDto);
 	}
+
+	@PostMapping("user/role")
+	@ApiOperation(value = "Get user for a particular role")
+	public ResponseDto<List<UserDto>> getUsersForRole(@RequestBody @Valid AccessLevelRoleRequestDto cityRolesRequestDto) {
+
+		log.info("Request received for getting users for Role: {}  and AccessLevel: {}  with AccessUuid:{}", cityRolesRequestDto.getRoleName(), cityRolesRequestDto.getAccessLevel(), cityRolesRequestDto.getAccessLevelUuid());
+
+		return ResponseDto.success(userService.getUsersForRole(cityRolesRequestDto));
+	}
 	
 
 	@PostMapping("/search/get/userUuid")
@@ -159,6 +171,11 @@ public class InternalUserController {
 		userService.rollBack(newDepartment);
 		return ResponseDto.success("saved data");
 	}
-
-
+	
+	@GetMapping("/getUserWhoseBirthdayIsToday")
+	public ResponseDto<List<String>> getUser(){
+		log.info("Fetching user by birthday");
+		
+		return ResponseDto.success("Found list",userService.getUserProfileDtoWhoseBirthdayIsToday());
+	}
 }

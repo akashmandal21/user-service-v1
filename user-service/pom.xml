@@ -38,6 +38,12 @@
 
 		<dependency>
 			<groupId>com.stanzaliving.core</groupId>
+			<artifactId>redis</artifactId>
+			<version>${global.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.stanzaliving.core</groupId>
 			<artifactId>base</artifactId>
 			<version>${global.version}</version>
 		</dependency>
@@ -63,6 +69,12 @@
 		<dependency>
 			<groupId>com.stanzaliving.core</groupId>
 			<artifactId>transformation-client</artifactId>
+			<version>${global.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.stanzaliving.core</groupId>
+			<artifactId>notification-v2-client</artifactId>
 			<version>${global.version}</version>
 		</dependency>
 
