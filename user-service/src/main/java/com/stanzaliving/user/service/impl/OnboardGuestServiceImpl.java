@@ -9,6 +9,7 @@ import com.stanzaliving.user.service.OnboardGuestService;
 
 import lombok.extern.log4j.Log4j2;
 
+import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.client.api.BookingDataControllerApi;
 
 
@@ -16,20 +17,27 @@ import com.stanzaliving.core.client.api.BookingDataControllerApi;
 @Log4j2
 public class OnboardGuestServiceImpl implements OnboardGuestService {
 
-    @Autowired
-    private BookingDataControllerApi bookingDataControllerApi;
+	
+	@Autowired
+	private BookingDataControllerApi bookingDataControllerApi;
+	    
+	public ResponseDto<BookingResponseDto> createGuestBooking(String phoneNumber) {
+		log.info("Inside createGuestBooking with phoneNumber {} " + phoneNumber);
+		ResponseDto<BookingResponseDto> bookingResponseDto=null;
+		try {
+			bookingResponseDto = bookingDataControllerApi.createGuestBooking(phoneNumber);
 
-    public BookingResponseDto createGuestBooking(String phoneNumber) {
-        log.info("Inside createGuestBooking with phoneNumber {} " + phoneNumber);
-        BookingResponseDto bookingResponseDto=null;
-        try {
-            bookingResponseDto = bookingDataControllerApi.createGuestBooking(phoneNumber);
+			if (!bookingResponseDto.isStatus())
+				return null;
 
-        } catch (Exception e) {
-            log.error("Error in createGuestBooking for phoneNumber : {} is: {}", phoneNumber, e.getMessage());
-        }
+		} catch (Exception e) {
 
-        return bookingResponseDto;
-    }
+			log.error("Error in createGuestBooking for phoneNumber : {} is: {}", phoneNumber, e.getMessage());
+
+		}
+
+		return bookingResponseDto;
+	}
 
 }
+
