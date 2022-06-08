@@ -26,6 +26,8 @@ public class OnboardGuestServiceImpl implements OnboardGuestService {
 		ResponseDto<BookingResponseDto> bookingResponseDto=null;
 		try {
 			bookingResponseDto = bookingDataControllerApi.createGuestBooking(phoneNumber);
+			
+			log.info("\n\n\n\n\n Inside createGuestBooking Successfully bookingResponseDto " + bookingResponseDto);
 
 			if (!bookingResponseDto.isStatus())
 				return null;
