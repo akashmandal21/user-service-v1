@@ -93,8 +93,8 @@ public class AuthController {
 			if(UserType.INVITED_GUEST.equals(userProfileDto.getUserType())) {
 				
 				log.info("UserType for user is INVITED_GUEST {} " + userProfileDto.getUuid());
-				BookingResponseDto bookingResponseDto = onboardGuestService.createGuestBooking(userProfileDto.getMobile());
-				if (Objects.isNull(bookingResponseDto) ) {
+				ResponseDto<BookingResponseDto> bookingResponseDto = onboardGuestService.createGuestBooking(userProfileDto.getMobile());
+				if (Objects.isNull(bookingResponseDto)) {    
 					return ResponseDto.failure("Failed to create guest booking for " + userProfileDto.getMobile());
 				}
 				
