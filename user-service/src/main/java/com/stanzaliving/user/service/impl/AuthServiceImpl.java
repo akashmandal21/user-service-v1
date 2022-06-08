@@ -7,6 +7,7 @@ import java.util.Objects;
 
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.base.exception.StanzaException;
+import com.stanzaliving.core.client.api.BookingDataControllerApi;
 import com.stanzaliving.core.leadservice.client.api.LeadserviceClientApi;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.*;
@@ -56,6 +57,9 @@ public class AuthServiceImpl implements AuthService {
 
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private BookingDataControllerApi bookingDataControllerApi;
 
 	@Override
 	public void login(LoginRequestDto loginRequestDto) {
