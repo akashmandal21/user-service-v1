@@ -192,7 +192,10 @@ public class AuthServiceImpl implements AuthService {
 
 		if (Objects.nonNull(emailOtpValidateRequestDto.getLastName()))
 			userEntity.getUserProfile().setLastName(emailOtpValidateRequestDto.getLastName());
-		
+
+		if(UserType.INVITED_GUEST.equals(userEntity.getUserType())){
+			bookingDataControllerApi.emailVerifiedUpdate(userEntity.getMobile());
+		}
 		userEntity = userDbService.update(userEntity);
 		
 		UserProfileDto userProfileDto = UserAdapter.getUserProfileDto(userEntity);
