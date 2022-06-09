@@ -110,7 +110,7 @@ public class AuthServiceImpl implements AuthService {
 
 				profileEntity.setUser(userEntity);
 
-				userEntity = userDbService.saveAndFlush(userEntity);
+				userEntity = userDbService.save(userEntity);
 			}
 		}
 
