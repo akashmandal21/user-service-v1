@@ -979,7 +979,6 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	@Transactional
 	public void saveUserDeptLevelForNewDept(Department newDept, Department refDept) {
 
 		List<UserDepartmentLevelEntity> entityList = userDepartmentLevelRepository.findByDepartment(refDept);
@@ -1006,7 +1005,6 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	@Transactional
 	public void rollBack(Department newDepartment) {
 
 		List<UserDepartmentLevelEntity> entityListNewDept = userDepartmentLevelRepository.findByDepartment(newDepartment);
