@@ -94,6 +94,8 @@ public class AuthController {
 
 				log.info("UserType for user is INVITED_GUEST {} " + userProfileDto.getUuid());
 				ResponseDto<BookingResponseDto> bookingResponseDto = onboardGuestService.createGuestBooking(userProfileDto.getMobile());
+				
+				log.info("\n\n\n\n\n OTP Successfully bookingResponseDto " + bookingResponseDto);
 				if (Objects.isNull(bookingResponseDto) ) {    
 					return ResponseDto.failure("Failed to create guest booking for " + userProfileDto.getMobile());
 				}
