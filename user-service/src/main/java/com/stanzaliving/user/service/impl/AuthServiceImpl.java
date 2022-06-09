@@ -5,6 +5,19 @@ package com.stanzaliving.user.service.impl;
 
 import java.util.Objects;
 
+import com.stanzaliving.core.bookingservice.dto.request.*;
+import com.stanzaliving.core.base.enums.Department;
+import com.stanzaliving.core.base.exception.StanzaException;
+import com.stanzaliving.core.client.api.BookingDataControllerApi;
+import com.stanzaliving.core.leadservice.client.api.LeadserviceClientApi;
+import com.stanzaliving.core.user.enums.Gender;
+import com.stanzaliving.core.user.enums.Nationality;
+import com.stanzaliving.core.user.enums.UserType;
+import com.stanzaliving.core.user.request.dto.*;
+import com.stanzaliving.user.entity.UserProfileEntity;
+import com.stanzaliving.user.service.UserService;
+import com.stanzaliving.website.response.dto.LeadDetailEntity;
+import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,10 +28,6 @@ import com.stanzaliving.core.kafka.dto.KafkaDTO;
 import com.stanzaliving.core.kafka.producer.NotificationProducer;
 import com.stanzaliving.core.user.constants.UserErrorCodes;
 import com.stanzaliving.core.user.dto.UserProfileDto;
-import com.stanzaliving.core.user.request.dto.EmailOtpValidateRequestDto;
-import com.stanzaliving.core.user.request.dto.EmailVerificationRequestDto;
-import com.stanzaliving.core.user.request.dto.LoginRequestDto;
-import com.stanzaliving.core.user.request.dto.OtpValidateRequestDto;
 import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.db.service.UserDbService;
 import com.stanzaliving.user.entity.UserEntity;
@@ -48,6 +57,15 @@ public class AuthServiceImpl implements AuthService {
 	@Autowired
 	private NotificationProducer notificationProducer;
 
+	@Autowired
+	private LeadserviceClientApi leadserviceClientApi;
+
+	@Autowired
+	private UserService userService;
+
+	@Autowired
+	private BookingDataControllerApi bookingDataControllerApi;
+
 	@Override
 	public void login(LoginRequestDto loginRequestDto) {
 
@@ -65,11 +83,42 @@ public class AuthServiceImpl implements AuthService {
 
 		// userEntity = createUserIfUserIsConsumer(loginRequestDto, userEntity);
 
-		if (Objects.isNull(userEntity)) {
-			throw new AuthException("No user exists with this number", UserErrorCodes.USER_NOT_EXISTS);
+		try {
+			if (Objects.isNull(userEntity)) {
+				LeadDetailEntity leadDetail = leadserviceClientApi.search(loginRequestDto.getMobile(), null).getData();
+				if (Objects.isNull(leadDetail) || !(leadDetail.getPhone().equals(loginRequestDto.getMobile()))) {
+					throw new AuthException("No booking found for this number");
+				} else {
+					GuestRequestPayloadDto guestRequestPayloadDto = bookingDataControllerApi.getGuestDetailsByPhone(leadDetail.getPhone()).getData();
+					AddUserRequestDto addUserRequestDto = new AddUserRequestDto();
+					addUserRequestDto.setMobile(leadDetail.getPhone());
+					addUserRequestDto.setFirstName(leadDetail.getFirstName());
+					addUserRequestDto.setLastName(leadDetail.getLastName());
+					addUserRequestDto.setEmail(leadDetail.getLeadEmail());
+					addUserRequestDto.setIsoCode(loginRequestDto.getIsoCode());
+					addUserRequestDto.setDepartment(Department.WEB);
+					addUserRequestDto.setUserType(UserType.INVITED_GUEST);
+					addUserRequestDto.setGender(Gender.valueOf(guestRequestPayloadDto.getGender()));
+					addUserRequestDto.setNationality(Nationality.valueOf(guestRequestPayloadDto.getNationality()));
+					userService.addUser(addUserRequestDto);
+
+					UserProfileEntity profileEntity = UserAdapter.getUserProfileEntity(addUserRequestDto);
+
+					userEntity = UserEntity.builder().userType(addUserRequestDto.getUserType())
+							.isoCode(addUserRequestDto.getIsoCode()).mobile(addUserRequestDto.getMobile()).mobileVerified(false)
+							.email(addUserRequestDto.getEmail()).emailVerified(false).userProfile(profileEntity).status(true)
+							.department(addUserRequestDto.getDepartment()).build();
+
+					profileEntity.setUser(userEntity);
+
+					userEntity = userDbService.saveAndFlush(userEntity);
+				}
+			}
+		} catch(Exception e){
+			log.error("Error in getActiveUser, error is ", e);
 		}
 
-		if (!userEntity.isStatus()) {
+		if (Objects.isNull(userEntity) || !userEntity.isStatus()) {
 			throw new AuthException("The booking is disabled for this number", UserErrorCodes.USER_ACCOUNT_INACTIVE);
 		}
 
@@ -147,7 +196,10 @@ public class AuthServiceImpl implements AuthService {
 
 		if (Objects.nonNull(emailOtpValidateRequestDto.getLastName()))
 			userEntity.getUserProfile().setLastName(emailOtpValidateRequestDto.getLastName());
-		
+
+		if(UserType.INVITED_GUEST.equals(userEntity.getUserType())){
+			bookingDataControllerApi.emailVerifiedUpdate(userEntity.getMobile());
+		}
 		userEntity = userDbService.update(userEntity);
 		
 		UserProfileDto userProfileDto = UserAdapter.getUserProfileDto(userEntity);

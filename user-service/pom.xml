@@ -62,6 +62,12 @@
 
 		<dependency>
 			<groupId>com.stanzaliving.core</groupId>
+			<artifactId>leadservice-client</artifactId>
+			<version>${global.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.stanzaliving.core</groupId>
 			<artifactId>properties</artifactId>
 			<version>${global.version}</version>
 		</dependency>
@@ -93,6 +99,13 @@
 					<artifactId>spring-boot-starter-logging</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>com.stanzaliving.core</groupId>
+			<artifactId>booking-service-client</artifactId>
+			<version>${global.version}</version>
+			<scope>compile</scope>
 		</dependency>
 
 		<dependency>
