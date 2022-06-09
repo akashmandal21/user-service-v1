@@ -83,38 +83,46 @@ public class AuthServiceImpl implements AuthService {
 
 		// userEntity = createUserIfUserIsConsumer(loginRequestDto, userEntity);
 
-		if (Objects.isNull(userEntity)) {
-			LeadDetailEntity leadDetail = leadserviceClientApi.search(loginRequestDto.getMobile(), null).getData();
-			if (Objects.isNull(leadDetail) || !(leadDetail.getPhone().equals(loginRequestDto.getMobile()))) {
-				throw new AuthException("No booking found for this number");
-			} else {
-				GuestRequestPayloadDto guestRequestPayloadDto = bookingDataControllerApi.getGuestDetailsByPhone(leadDetail.getPhone()).getData();
-				AddUserRequestDto addUserRequestDto = new AddUserRequestDto();
-				addUserRequestDto.setMobile(leadDetail.getPhone());
-				addUserRequestDto.setFirstName(leadDetail.getFirstName());
-				addUserRequestDto.setLastName(leadDetail.getLastName());
-				addUserRequestDto.setEmail(leadDetail.getLeadEmail());
-				addUserRequestDto.setIsoCode(loginRequestDto.getIsoCode());
-				addUserRequestDto.setDepartment(Department.WEB);
-				addUserRequestDto.setUserType(UserType.INVITED_GUEST);
-				addUserRequestDto.setGender(Gender.valueOf(guestRequestPayloadDto.getGender()));
-				addUserRequestDto.setNationality(Nationality.valueOf(guestRequestPayloadDto.getNationality()));
-				userService.addUser(addUserRequestDto);
+		try {
+			if (Objects.isNull(userEntity)) {
+				LeadDetailEntity leadDetail = leadserviceClientApi.search(loginRequestDto.getMobile(), null).getData();
+				if (Objects.isNull(leadDetail) || !(leadDetail.getPhone().equals(loginRequestDto.getMobile()))) {
+					throw new AuthException("No booking found for this number");
+				} else {
+					GuestRequestPayloadDto guestRequestPayloadDto = bookingDataControllerApi.getGuestDetailsByPhone(leadDetail.getPhone()).getData();
+					AddUserRequestDto addUserRequestDto = new AddUserRequestDto();
+					addUserRequestDto.setMobile(leadDetail.getPhone());
+					addUserRequestDto.setFirstName(leadDetail.getFirstName());
+					addUserRequestDto.setLastName(leadDetail.getLastName());
+					addUserRequestDto.setEmail(leadDetail.getLeadEmail());
+					addUserRequestDto.setIsoCode(loginRequestDto.getIsoCode());
+					addUserRequestDto.setDepartment(Department.WEB);
+					addUserRequestDto.setUserType(UserType.INVITED_GUEST);
+					addUserRequestDto.setGender(Gender.valueOf(guestRequestPayloadDto.getGender()));
+					addUserRequestDto.setNationality(Nationality.valueOf(guestRequestPayloadDto.getNationality()));
+					userService.addUser(addUserRequestDto);
 
-				UserProfileEntity profileEntity = UserAdapter.getUserProfileEntity(addUserRequestDto);
+					UserProfileEntity profileEntity = UserAdapter.getUserProfileEntity(addUserRequestDto);
 
-				userEntity = UserEntity.builder().userType(addUserRequestDto.getUserType())
-						.isoCode(addUserRequestDto.getIsoCode()).mobile(addUserRequestDto.getMobile()).mobileVerified(false)
-						.email(addUserRequestDto.getEmail()).emailVerified(false).userProfile(profileEntity).status(true)
-						.department(addUserRequestDto.getDepartment()).build();
+					userEntity = UserEntity.builder().userType(addUserRequestDto.getUserType())
+							.isoCode(addUserRequestDto.getIsoCode()).mobile(addUserRequestDto.getMobile()).mobileVerified(false)
+							.email(addUserRequestDto.getEmail()).emailVerified(false).userProfile(profileEntity).status(true)
+							.department(addUserRequestDto.getDepartment()).build();
 
-				profileEntity.setUser(userEntity);
+					profileEntity.setUser(userEntity);
 
-				userEntity = userDbService.saveAndFlush(userEntity);
+					userEntity = userDbService.saveAndFlush(userEntity);
+				}
 			}
+		} catch(Exception e){
+			log.error("Error in getActiveUser, error is ", e);
 		}
 
-		if (!userEntity.isStatus()) {
+		if (Objects.isNull(userEntity)) {
+			throw new AuthException("The booking is disabled for this number", UserErrorCodes.USER_ACCOUNT_INACTIVE);
+		}
+
+		if (Objects.nonNull(userEntity) && !userEntity.isStatus()) {
 			throw new AuthException("The booking is disabled for this number", UserErrorCodes.USER_ACCOUNT_INACTIVE);
 		}
 

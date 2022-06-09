@@ -12,6 +12,8 @@ import lombok.extern.log4j.Log4j2;
 import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.client.api.BookingDataControllerApi;
 
+import java.util.Objects;
+
 
 @Service
 @Log4j2
@@ -27,15 +29,13 @@ public class OnboardGuestServiceImpl implements OnboardGuestService {
 		try {
 			bookingResponseDto = bookingDataControllerApi.createGuestBooking(phoneNumber);
 			
-			log.info("\n\n\n\n\n Inside createGuestBooking Successfully bookingResponseDto " + bookingResponseDto);
+			log.info("Inside createGuestBooking Successfully bookingResponseDto " + bookingResponseDto);
 
-			if (!bookingResponseDto.isStatus())
+			if (Objects.nonNull(bookingResponseDto) && !bookingResponseDto.isStatus())
 				return null;
 
 		} catch (Exception e) {
-
-			log.error("Error in createGuestBooking for phoneNumber : {} is: {}", phoneNumber, e.getMessage());
-
+			log.error("Error in createGuestBooking for phoneNumber : {} is ", phoneNumber, e);
 		}
 
 		return bookingResponseDto;
