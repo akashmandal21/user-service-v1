@@ -118,7 +118,7 @@ public class AuthServiceImpl implements AuthService {
 			log.error("Error in getActiveUser, error is ", e);
 		}
 
-		if (Objects.nonNull(userEntity) || !userEntity.isStatus()) {
+		if (Objects.isNull(userEntity) || !userEntity.isStatus()) {
 			throw new AuthException("The booking is disabled for this number", UserErrorCodes.USER_ACCOUNT_INACTIVE);
 		}
 

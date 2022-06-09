@@ -31,7 +31,7 @@ public class OnboardGuestServiceImpl implements OnboardGuestService {
 			
 			log.info("Inside createGuestBooking Successfully bookingResponseDto " + bookingResponseDto);
 
-			if (Objects.nonNull(bookingResponseDto) && !bookingResponseDto.isStatus())
+			if (Objects.isNull(bookingResponseDto) || !bookingResponseDto.isStatus())
 				return null;
 
 		} catch (Exception e) {
