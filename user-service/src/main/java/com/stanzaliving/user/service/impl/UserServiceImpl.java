@@ -298,6 +298,25 @@ public class UserServiceImpl implements UserService {
 		return userDtoList;
 	}
 
+	@Override
+	public List<UserProfileDto> getUserProfileList(List<String> userUuidList) {
+
+		log.info("Searching users in list: {}",userUuidList);
+
+		List<UserEntity> userEntityList = userDbService.findAllByUuidInAndStatus(userUuidList, true);
+
+		if (CollectionUtils.isNotEmpty(userEntityList)) {
+			throw new ApiValidationException("Users not found for UserId List: " + userUuidList);
+		}
+		List<UserProfileDto> userProfileDtoList = new ArrayList<>();
+		if(CollectionUtils.isNotEmpty(userEntityList)) {
+			for (UserEntity userEntity : userEntityList) {
+				userProfileDtoList.add(UserAdapter.getUserProfileDto(userEntity));
+			}
+		}
+		return userProfileDtoList;
+	}
+
 
 	@Override
 	public UserProfileDto getUserProfile(String userId) {
