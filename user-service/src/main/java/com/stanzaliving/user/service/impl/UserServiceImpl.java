@@ -305,15 +305,13 @@ public class UserServiceImpl implements UserService {
 
 		List<UserEntity> userEntityList = userDbService.findAllByUuidInAndStatus(userUuidList, true);
 
-		if (CollectionUtils.isNotEmpty(userEntityList)) {
+		if (CollectionUtils.isEmpty(userEntityList)) {
 			throw new ApiValidationException("Users not found for UserId List: " + userUuidList);
 		}
 		List<UserProfileDto> userProfileDtoList = new ArrayList<>();
-		if(CollectionUtils.isNotEmpty(userEntityList)) {
 			for (UserEntity userEntity : userEntityList) {
 				userProfileDtoList.add(UserAdapter.getUserProfileDto(userEntity));
 			}
-		}
 		return userProfileDtoList;
 	}
 

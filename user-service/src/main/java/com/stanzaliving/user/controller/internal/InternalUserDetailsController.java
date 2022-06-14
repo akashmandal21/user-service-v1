@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import com.stanzaliving.core.base.exception.ApiValidationException;
 import com.stanzaliving.core.user.dto.UserProfileRequestDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,7 +42,10 @@ public class InternalUserDetailsController {
 	@GetMapping("getUserProfileList")
 	public ResponseDto<List<UserProfileDto>> getUserProfileList(@RequestBody UserProfileRequestDto userProfileRequestDto) {
 
-		log.info("Fetching User with userUuid list: {}",userProfileRequestDto.getUserUuids());
+		log.info("Got UserProfileRequestDto: {}",userProfileRequestDto);
+
+		if(Objects.isNull(userProfileRequestDto.getUserUuids()))
+			throw new ApiValidationException("User id's not found");
 
 		return ResponseDto.success("Found User for userUuid", userService.getUserProfileList(userProfileRequestDto.getUserUuids()));
 	}
