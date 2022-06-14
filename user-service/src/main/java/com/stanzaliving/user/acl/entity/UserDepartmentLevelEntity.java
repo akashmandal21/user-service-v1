@@ -3,6 +3,7 @@ package com.stanzaliving.user.acl.entity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
+import javax.persistence.Lob;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -41,7 +42,7 @@ public class UserDepartmentLevelEntity extends AbstractJpaEntity {
 	@Column(name = "access_level", columnDefinition = "varchar(30) NOT NULL", nullable = false)
 	private AccessLevel accessLevel;
 
-	@Column(name = "access_level_entity_uuids", columnDefinition = "varchar(2048) NOT NULL", nullable = false)
+	@Column(name = "access_level_entity_uuids", columnDefinition = "varchar(4048) NOT NULL", nullable = false)
 	private String csvAccessLevelEntityUuid;
 
 }
