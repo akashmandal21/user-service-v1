@@ -3,16 +3,13 @@ package com.stanzaliving.user.service.impl;
 import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.venta_aggregation_client.api.VentaAggregationServiceApi;
+import com.stanzaliving.core.ventaaggregationservice.dto.BookingResidenceAggregationEntityDto;
+import com.stanzaliving.core.ventaaggregationservice.dto.ResidenceFilterRequestDto;
 import com.stanzaliving.user.acl.db.service.UserDepartmentLevelDbService;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
 import com.stanzaliving.user.acl.service.AclUserService;
-import com.stanzaliving.user.constants.BankAccountNumber;
-import com.stanzaliving.user.constants.BankAddress;
-import com.stanzaliving.user.constants.BankIfsc;
-import com.stanzaliving.user.constants.BankNames;
 import com.stanzaliving.user.db.service.UserDbService;
 import com.stanzaliving.user.dto.request.CashReconReceiverRequest;
-import com.stanzaliving.user.dto.response.BankDetails;
 import com.stanzaliving.user.dto.response.CashReconReceiverInfo;
 import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.enums.TransferTo;
@@ -52,26 +49,68 @@ public class CashReconServiceImpl implements CashReconService {
         if (CollectionUtils.isEmpty(userDepartmentLevelEntityList))
             return cashReceiverInfoList;
         Optional<UserDepartmentLevelEntity> userDepartmentLevelEntity;
-        List<String> microMarketIds;
-        List<String> cityIds;
+        List<String> residenceIds;
+        List<String> microMarketIds = new ArrayList<>();
+        ;
+        List<String> cityIds = new ArrayList<>();
+        String cityId;
+        String microMarketId;
         if (TransferTo.CLUSTER_MANAGER.equals(transferTo)) {
             userDepartmentLevelEntity =
-                    userDepartmentLevelEntityList.stream().filter(x -> x.getAccessLevel().equals(AccessLevel.MICROMARKET) || x.getAccessLevel().equals(AccessLevel.RESIDENCE))
+                    userDepartmentLevelEntityList.stream().filter(x -> x.getAccessLevel().equals(AccessLevel.RESIDENCE))
                             .findFirst();
-
             if (userDepartmentLevelEntity.isPresent()) {
-                microMarketIds = Arrays.asList(userDepartmentLevelEntity.get().getCsvAccessLevelEntityUuid().split(","));
+                residenceIds = Arrays.asList(userDepartmentLevelEntity.get().getCsvAccessLevelEntityUuid().split(","));
+                for (String residenceId : residenceIds) {
+                    microMarketId = ventaAggregationServiceApi.getAggregatedResidenceInformation(residenceId).getData().getMicroMarketId();
+                    if (!microMarketIds.contains(microMarketId))
+                        microMarketIds.add(microMarketId);
+                }
                 return getClusterManagerOrNodalList(microMarketIds, transferTo);
+            } else {
+                userDepartmentLevelEntity =
+                        userDepartmentLevelEntityList.stream().filter(x -> x.getAccessLevel().equals(AccessLevel.MICROMARKET))
+                                .findFirst();
+                if (userDepartmentLevelEntity.isPresent()) {
+                    microMarketIds = Arrays.asList(userDepartmentLevelEntity.get().getCsvAccessLevelEntityUuid().split(","));
+                    return getClusterManagerOrNodalList(microMarketIds, transferTo);
+                }
             }
 
         } else if (TransferTo.NODAL.equals(transferTo)) {
             userDepartmentLevelEntity =
-                    userDepartmentLevelEntityList.stream().filter(x -> x.getAccessLevel().equals(AccessLevel.CITY))
+                    userDepartmentLevelEntityList.stream().filter(x -> x.getAccessLevel().equals(AccessLevel.RESIDENCE))
                             .findFirst();
-
             if (userDepartmentLevelEntity.isPresent()) {
-                cityIds = Arrays.asList(userDepartmentLevelEntity.get().getCsvAccessLevelEntityUuid().split(","));
+                residenceIds = Arrays.asList(userDepartmentLevelEntity.get().getCsvAccessLevelEntityUuid().split(","));
+                for (String residenceId : residenceIds) {
+                    cityId = ventaAggregationServiceApi.getAggregatedResidenceInformation(residenceId).getData().getCityId() + "";
+                    cityIds.add(cityId);
+                }
                 return getClusterManagerOrNodalList(cityIds, transferTo);
+            } else {
+                userDepartmentLevelEntity =
+                        userDepartmentLevelEntityList.stream().filter(x -> x.getAccessLevel().equals(AccessLevel.MICROMARKET))
+                                .findFirst();
+                if (userDepartmentLevelEntity.isPresent()) {
+                    microMarketIds = Arrays.asList(userDepartmentLevelEntity.get().getCsvAccessLevelEntityUuid().split(","));
+                    for (String microMarketid : microMarketIds) {
+                        List<BookingResidenceAggregationEntityDto> bookingResidenceAggregationEntityDtoList = ventaAggregationServiceApi.getResidenceListing(ResidenceFilterRequestDto.builder().
+                                microMarketIdList(Collections.singleton(microMarketid)).build()).getData().getContent();
+                        for(BookingResidenceAggregationEntityDto bookingResidenceAggregationEntityDto : bookingResidenceAggregationEntityDtoList){
+                            cityIds.add(bookingResidenceAggregationEntityDto.getCityId()+"");
+                        }
+                    }
+                    return getClusterManagerOrNodalList(cityIds, transferTo);
+                } else {
+                    userDepartmentLevelEntity =
+                            userDepartmentLevelEntityList.stream().filter(x -> x.getAccessLevel().equals(AccessLevel.CITY))
+                                    .findFirst();
+                    if (userDepartmentLevelEntity.isPresent()) {
+                        cityIds = Arrays.asList(userDepartmentLevelEntity.get().getCsvAccessLevelEntityUuid().split(","));
+                        return getClusterManagerOrNodalList(cityIds, transferTo);
+                    }
+                }
             }
         }
 
@@ -105,30 +144,5 @@ public class CashReconServiceImpl implements CashReconService {
                         .build());
             }
         }
-    }
-
-    public List<BankDetails> getBankDetails() {
-        log.info("Fetching bank details");
-        List<BankDetails> bankDetailsList = new ArrayList<>();
-        bankDetailsList.add(BankDetails.builder()
-                .bankName(BankNames.HDFC)
-                .accountNumber(BankAccountNumber.HDFC)
-                .ifscCode(BankIfsc.HDFC)
-                .address(BankAddress.HDFC).build());
-
-        bankDetailsList.add(BankDetails.builder()
-                .bankName(BankNames.INDUSLND)
-                .accountNumber(BankAccountNumber.INDUSLND)
-                .ifscCode(BankIfsc.INDUSLND)
-                .address(BankAddress.INDUSLND).build());
-
-        bankDetailsList.add(BankDetails.builder()
-                .bankName(BankNames.RBL)
-                .accountNumber(BankAccountNumber.RBL)
-                .ifscCode(BankIfsc.RBL)
-                .address(BankAddress.RBL).build());
-
-        log.info("Fetched bank details : {}", bankDetailsList);
-        return bankDetailsList;
     }
 }
