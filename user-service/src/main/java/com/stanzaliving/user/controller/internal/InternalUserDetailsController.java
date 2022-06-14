@@ -44,7 +44,7 @@ public class InternalUserDetailsController {
 
 		log.info("Got UserProfileRequestDto: {}",userProfileRequestDto);
 
-		if(Objects.isNull(userProfileRequestDto.getUserUuids()))
+		if(Objects.isNull(userProfileRequestDto))
 			throw new ApiValidationException("User id's not found");
 
 		return ResponseDto.success("Found User for userUuid", userService.getUserProfileList(userProfileRequestDto.getUserUuids()));
