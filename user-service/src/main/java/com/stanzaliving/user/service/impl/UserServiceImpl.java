@@ -3,6 +3,35 @@
  */
 package com.stanzaliving.user.service.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import javax.validation.Valid;
+
+import com.stanzaliving.core.base.exception.StanzaException;
+import com.stanzaliving.user.acl.repository.UserDepartmentLevelRepository;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.ListUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+
 import com.stanzaliving.core.base.common.dto.PageResponse;
 import com.stanzaliving.core.base.common.dto.PaginationRequest;
 import com.stanzaliving.core.base.enums.AccessLevel;
@@ -44,31 +73,11 @@ import com.stanzaliving.user.entity.UserProfileEntity;
 import com.stanzaliving.user.service.UserManagerMappingService;
 import com.stanzaliving.user.service.UserService;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.ListUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
-import javax.validation.Valid;
 import javax.validation.Validator;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author naveen
@@ -105,6 +114,12 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private NotificationProducer notificationProducer;
+
+	@Autowired
+	private UserDepartmentLevelRepository userDepartmentLevelRepository;
+
+	@PersistenceContext
+	private EntityManager entityManager;
 
 	@Autowired
 	private Validator validator;
@@ -961,6 +976,43 @@ public class UserServiceImpl implements UserService {
 		}
 
 		return UserAdapter.getUserProfileDto(userEntity);
+	}
+
+	@Override
+	public void saveUserDeptLevelForNewDept(Department newDept, Department refDept) {
+
+		List<UserDepartmentLevelEntity> entityList = userDepartmentLevelRepository.findByDepartment(refDept);
+		List<UserDepartmentLevelEntity> entityListNewDept = userDepartmentLevelRepository.findByDepartment(newDept);
+
+		//handled for duplicate entries
+		if(CollectionUtils.isNotEmpty(entityListNewDept)){
+
+			log.info("already configured for new department: {}", newDept);
+			return;
+		}
+
+		if (CollectionUtils.isNotEmpty(entityList)) {
+			List<UserDepartmentLevelEntity> list = entityList.stream().map(entity ->
+					UserDepartmentLevelEntity.builder()
+							.department(newDept)
+							.accessLevel(entity.getAccessLevel())
+							.userUuid(entity.getUserUuid())
+							.csvAccessLevelEntityUuid(entity.getCsvAccessLevelEntityUuid())
+							.status(entity.isStatus()).build()).collect(Collectors.toList());
+
+			userDepartmentLevelRepository.saveAll(list);
+		}
+	}
+
+	@Override
+	public void rollBack(Department newDepartment) {
+
+		List<UserDepartmentLevelEntity> entityListNewDept = userDepartmentLevelRepository.findByDepartment(newDepartment);
+
+		if(CollectionUtils.isNotEmpty(entityListNewDept)){
+
+			userDepartmentLevelRepository.deleteAll(entityListNewDept);
+		}
 	}
 
 	public UserDto addUserV3(AddUserRequestDto addUserRequestDto) {
