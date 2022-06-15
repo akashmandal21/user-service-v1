@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import com.stanzaliving.booking.dto.BookingResponseDto;
 import com.stanzaliving.user.controller.AuthController;
 import com.stanzaliving.user.service.OnboardGuestService;
-
+import java.util.Objects;
 import lombok.extern.log4j.Log4j2;
 import com.stanzaliving.core.base.common.dto.ResponseDto;
 
@@ -26,7 +26,9 @@ public class OnboardGuestServiceImpl implements OnboardGuestService {
 		try {
 			bookingResponseDto = bookingDataControllerApi.createGuestBooking(phoneNumber);
 
-			if (!bookingResponseDto.isStatus())
+			log.info("Inside createGuestBooking Successfully bookingResponseDto " + bookingResponseDto);
+
+			if (Objects.isNull(bookingResponseDto) || !bookingResponseDto.isStatus())
 				return null;
 
 		} catch (Exception e) {

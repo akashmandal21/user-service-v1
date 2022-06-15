@@ -23,6 +23,8 @@ public interface UserDepartmentLevelRepository extends AbstractJpaRepository<Use
 
     List<UserDepartmentLevelEntity> findByUuidInAndAccessLevel(List<String> uuids, AccessLevel accessLevel);
 
+    List<UserDepartmentLevelEntity> findByDepartment(Department refDept);
+
     List<UserDepartmentLevelEntity> findByUuidInAndDepartmentAndAccessLevel(List<String> userUuid, Department department, AccessLevel accessLevel);
 
     List<UserDepartmentLevelEntity> findByDepartmentAndAccessLevel(Department department, AccessLevel accessLevel);

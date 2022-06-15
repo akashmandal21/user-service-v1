@@ -1,10 +1,11 @@
 package com.stanzaliving.user.config;
 
 import com.stanzaliving.core.leadservice.client.api.LeadserviceClientApi;
+import com.stanzaliving.core.venta_aggregation_client.api.VentaAggregationServiceApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
+import com.stanzaliving.core.client.api.BookingDataControllerApi;
 import com.stanzaliving.core.base.http.StanzaRestClient;
 import com.stanzaliving.core.client.api.BookingDataControllerApi;
 import com.stanzaliving.core.notificationv2.api.NotificationClientApi;
@@ -19,11 +20,15 @@ public class ClientConfig {
 
     @Value("${service.notificationClient.url}")
 	private String notificationClientUrl;
-    @Value("${service.booking.url}")
-	private String bookingServiceUrl;
 
     @Value("${service.lead.url}")
     private String leadUrl;
+
+    @Value("${service.booking.url}")
+    private String bookingServiceUrl;
+
+    @Value("${service.aggregation.url}")
+    private String aggregationClientUrl;
 
     @Bean
     public InternalDataControllerApi internalDataControllerApi() {
@@ -36,21 +41,17 @@ public class ClientConfig {
     }
 
     @Bean
-    public LeadserviceClientApi LeadserviceClientApi() {
-        return new LeadserviceClientApi(new StanzaRestClient(leadUrl));
-    }
-    
-    @Bean
     public NotificationClientApi notificationClientApi() {
         return new NotificationClientApi(new StanzaRestClient(notificationClientUrl));
     }
-     
-    
+
     @Bean
-	public BookingDataControllerApi bookingDataControllerApi() {
-		return new BookingDataControllerApi(new StanzaRestClient(bookingServiceUrl));
-	}
+    public VentaAggregationServiceApi ventaAggregationServiceApi() {
+        return new VentaAggregationServiceApi(new StanzaRestClient(aggregationClientUrl));
+    }
 
-
-
+    @Bean
+    public BookingDataControllerApi bookingDataControllerApi() {
+        return new BookingDataControllerApi(new StanzaRestClient(bookingServiceUrl));
+    }
 }

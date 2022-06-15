@@ -10,6 +10,7 @@ import java.util.Set;
 
 import javax.validation.Valid;
 
+import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.generic.dto.UIKeyValue;
 import com.stanzaliving.core.user.dto.UserRoleCacheDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -153,6 +154,22 @@ public class InternalUserController {
 		log.info("Fetching user by {} {}", roles);
 
 		return ResponseDto.success("Found User", userService.getCacheableForRoles(roles));
+	}
+
+	@PostMapping("/save/userDeptLevel/{newDepartment}/{refDepartment}")
+	public ResponseDto<String> saveUserDeptLevelForNewDept(@PathVariable Department newDepartment, @PathVariable Department refDepartment) {
+
+		log.info("saving UserDeptLevelForNewDept ");
+		userService.saveUserDeptLevelForNewDept(newDepartment, refDepartment);
+		return ResponseDto.success("saved data");
+	}
+
+	@PostMapping("/roll-back/userDeptLevel/{newDepartment}")
+	public ResponseDto<String> rollBack(@PathVariable Department newDepartment) {
+
+		log.info("rolling back UserDeptLevelForNewDept ");
+		userService.rollBack(newDepartment);
+		return ResponseDto.success("saved data");
 	}
 	
 	@GetMapping("/getUserWhoseBirthdayIsToday")
