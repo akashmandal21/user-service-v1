@@ -54,4 +54,10 @@ public class ClientConfig {
     public BookingDataControllerApi bookingDataControllerApi() {
         return new BookingDataControllerApi(new StanzaRestClient(bookingServiceUrl));
     }
+
+    @Bean
+    public LeadserviceClientApi leadserviceClientApi() {
+        return new LeadserviceClientApi(new StanzaRestClient(leadUrl));
+    }
+
 }
