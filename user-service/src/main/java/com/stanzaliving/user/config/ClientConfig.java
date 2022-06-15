@@ -1,6 +1,7 @@
 package com.stanzaliving.user.config;
 
 import com.stanzaliving.core.leadservice.client.api.LeadserviceClientApi;
+import com.stanzaliving.core.venta_aggregation_client.api.VentaAggregationServiceApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +25,9 @@ public class ClientConfig {
 
     @Value("${service.booking.url}")
     private String bookingServiceUrl;
+
+    @Value("${service.aggregation.url}")
+    private String aggregationClientUrl;
 
     @Bean
     public InternalDataControllerApi internalDataControllerApi() {
@@ -49,5 +53,10 @@ public class ClientConfig {
     @Bean
     public BookingDataControllerApi bookingDataControllerApi() {
         return new BookingDataControllerApi(new StanzaRestClient(bookingServiceUrl));
+    }
+
+    @Bean
+    public VentaAggregationServiceApi ventaAggregationServiceApi() {
+        return new VentaAggregationServiceApi(new StanzaRestClient(aggregationClientUrl));
     }
 }
