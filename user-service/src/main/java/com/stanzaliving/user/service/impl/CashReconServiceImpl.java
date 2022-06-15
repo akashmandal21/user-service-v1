@@ -1,5 +1,6 @@
 package com.stanzaliving.user.service.impl;
 
+import com.stanzaliving.core.base.common.dto.AbstractDto;
 import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
@@ -135,15 +136,15 @@ public class CashReconServiceImpl implements CashReconService {
                 roleService.findByRoleNameInAndDepartment(Arrays.asList("NODAL_CASH_LEDGER_VIEWER", "NODAL_CASH_LEDGER_EDITOR"), Department.OPS);
         List<NodalOfficerInfo> nodalOfficerInfoList = new ArrayList<>();
         log.info("RoleDtoList is : {}", roleDtoList);
-        List<String> roleUuids = roleDtoList.stream().map(x -> x.getUuid()).collect(Collectors.toList());
+        List<String> roleUuids = roleDtoList.stream().map(AbstractDto::getUuid).collect(Collectors.toList());
         log.info("RoleUuids are : {}", roleUuids);
         List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = userDepartmentLevelRoleDbService.findByRoleUuidInAndStatus(roleUuids, true);
         log.info("userDepartmentLevelRoleEntityList is : {}", userDepartmentLevelRoleEntityList);
-        List<String> userDepartmentLevelIds = userDepartmentLevelRoleEntityList.stream().map(x -> x.getUserDepartmentLevelUuid()).collect(Collectors.toList());
+        List<String> userDepartmentLevelIds = userDepartmentLevelRoleEntityList.stream().map(UserDepartmentLevelRoleEntity::getUserDepartmentLevelUuid).collect(Collectors.toList());
         log.info("userDepartmentLevelIds are : {}", userDepartmentLevelIds);
         List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelDbService.findByUuidInAndStatus(userDepartmentLevelIds, true);
         log.info("userDepartmentLevelEntityList is {}", userDepartmentLevelEntityList);
-        List<String> userUuids = userDepartmentLevelEntityList.stream().map(x -> x.getUserUuid()).collect(Collectors.toList());
+        List<String> userUuids = userDepartmentLevelEntityList.stream().map(UserDepartmentLevelEntity::getUserUuid).collect(Collectors.toList());
         log.info("userUuids are : {}", userUuids);
         for(String userId : userUuids){
             UserEntity userEntity = userDbService.findByUuidAndStatus(userId, true);
