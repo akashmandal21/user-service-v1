@@ -11,6 +11,7 @@ import com.stanzaliving.user.acl.service.AclUserService;
 import com.stanzaliving.user.db.service.UserDbService;
 import com.stanzaliving.user.dto.request.CashReconReceiverRequest;
 import com.stanzaliving.user.dto.response.CashReconReceiverInfo;
+import com.stanzaliving.user.dto.response.NodalOfficerInfo;
 import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.enums.TransferTo;
 import com.stanzaliving.user.service.CashReconService;
@@ -115,6 +116,11 @@ public class CashReconServiceImpl implements CashReconService {
         }
 
         return cashReceiverInfoList;
+    }
+
+    @Override
+    public List<NodalOfficerInfo> getNodalOfficersList() {
+        return null;
     }
 
     private List<CashReconReceiverInfo> getClusterManagerOrNodalList(List<String> ids, TransferTo transferTo) {
