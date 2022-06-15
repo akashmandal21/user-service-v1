@@ -34,6 +34,7 @@
 		<module>../core-utils/pojo-wanda</module>
 		<module>../core-utils/pojo-ops</module>
 		<module>../core-utils/wanda-client</module>
+		<module>../core-utils/venta-aggregation-service-client</module>
 	</modules>
 
 	<build>
