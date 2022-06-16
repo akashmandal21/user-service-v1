@@ -15,7 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,7 +39,6 @@ import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.entity.UserSessionEntity;
 import com.stanzaliving.user.service.AuthService;
 import com.stanzaliving.user.service.OnboardGuestService;
-import com.stanzaliving.user.service.PauseOtpService;
 import com.stanzaliving.user.service.SessionService;
 
 import lombok.extern.log4j.Log4j2;
@@ -57,8 +55,6 @@ public class AuthController {
 
 	@Autowired
 	private AuthService authService;
-	@Autowired
-	private PauseOtpService blacklistUserService;
 
 	@Autowired
 	private SessionService sessionService;
@@ -196,17 +192,5 @@ public class AuthController {
 			response.addCookie(SecureCookieUtil.create(SecurityConstants.TOKEN_HEADER_NAME, token, Optional.of(isLocalFrontEnd), Optional.of(isApp)));
 		}
 	}
-	
-	
-	@PostMapping("pauseOtp/add/{mobile}")
-	public ResponseDto<Boolean> addUser(@PathVariable("mobile") String mobile,
-			@CookieValue(name = SecurityConstants.TOKEN_HEADER_NAME) String token) {
 
-		log.info("Received request to pause OTP for mobile: {}", mobile);
-
-		return ResponseDto.success("OTP Paused for " + mobile, blacklistUserService.pauseOtpV2(mobile, token));
-	}
-	
-	
-	
 }
