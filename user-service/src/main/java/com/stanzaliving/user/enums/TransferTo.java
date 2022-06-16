@@ -8,7 +8,7 @@ import lombok.Getter;
 public enum TransferTo {
 
     CLUSTER_MANAGER("Cluster Manager"),
-    NODAL("Nodal"),
+    NODAL_OFFICER("Nodal Officer"),
     RESIDENT_CAPTAIN("Resident Captain"),
     STANZA_ACCOUNT("Stanza Account");
 
