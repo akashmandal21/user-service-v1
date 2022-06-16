@@ -41,6 +41,7 @@ public interface UserService {
 	UserDto addUser(AddUserRequestDto addUserRequestDto);
 
 	List<UserDto> addBulkUserAndRole(List<AddUserAndRoleRequestDto> addUserRequestDtoList);
+	List<UserProfileDto> getUserProfileList(List<String> userUuidList);
 
 	UserProfileDto getUserProfile(String userId);
 
