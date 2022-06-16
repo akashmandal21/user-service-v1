@@ -835,6 +835,24 @@ public class UserServiceImpl implements UserService {
 
 		return userMap;
 	}
+	
+	
+	@Override
+	public List<String> getUserProfileDto(List<String> mobileNos) {
+
+		Set<String> mobileNo = mobileNos.stream().collect(Collectors.toSet());
+
+		List<UserProfileDto> userProfileDto=UserAdapter.getUserProfileDtos(userDbService.findByMobileIn(mobileNo));
+
+		userProfileDto.forEach(user -> {
+			if(mobileNos.contains(user.getMobile())) {
+				mobileNos.remove(user.getMobile());
+				
+			}
+		});
+
+		return mobileNos;
+	}
 
 	@Override
 	public UserProfileDto getUserDetails(String mobileNo) {
