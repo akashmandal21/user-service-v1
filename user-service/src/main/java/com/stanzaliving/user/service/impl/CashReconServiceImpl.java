@@ -90,7 +90,7 @@ public class CashReconServiceImpl implements CashReconService {
                 }
             }
 
-        } else if (TransferTo.NODAL.equals(transferTo)) {
+        } else if (TransferTo.NODAL_OFFICER.equals(transferTo)) {
             userDepartmentLevelEntity =
                     userDepartmentLevelEntityList.stream().filter(x -> x.getAccessLevel().equals(AccessLevel.RESIDENCE))
                             .findFirst();
@@ -162,7 +162,7 @@ public class CashReconServiceImpl implements CashReconService {
         Map<String, List<String>> userIdMapping = new HashMap<>();
         if (TransferTo.CLUSTER_MANAGER.equals(transferTo)) {
             userIdMapping = aclUserService.getActiveUsersForRoles(Department.OPS, "CM_CASH_LEDGER_EDITOR", ids);
-        } else if (TransferTo.NODAL.equals(transferTo)) {
+        } else if (TransferTo.NODAL_OFFICER.equals(transferTo)) {
             userIdMapping = aclUserService.getActiveUsersForRoles(Department.OPS, "NODAL_CASH_LEDGER_EDITOR", ids);
         }
         if(Objects.nonNull(userIdMapping) && userIdMapping.size() > 0){
