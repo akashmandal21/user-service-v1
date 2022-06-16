@@ -63,6 +63,7 @@ public class CashReconServiceImpl implements CashReconService {
 
         if (CollectionUtils.isEmpty(userDepartmentLevelEntityList))
             return cashReceiverInfoList;
+        log.info("userDepartmentLevelEntityList is {}", userDepartmentLevelEntityList);
         Optional<UserDepartmentLevelEntity> userDepartmentLevelEntity;
         List<String> residenceIds;
         List<String> microMarketIds = new ArrayList<>();
@@ -172,6 +173,7 @@ public class CashReconServiceImpl implements CashReconService {
         if(Objects.nonNull(userIdMapping) && userIdMapping.size() > 0){
             buildCashReceiverInfo(cashReconReceiverInfoList, userIdMapping);
         }
+        log.info("cashReconReceiverInfoList is {}", cashReconReceiverInfoList);
         return cashReconReceiverInfoList;
     }
 
