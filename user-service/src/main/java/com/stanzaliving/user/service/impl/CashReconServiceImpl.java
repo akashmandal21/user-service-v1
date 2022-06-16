@@ -6,6 +6,7 @@ import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
 import com.stanzaliving.core.venta_aggregation_client.api.VentaAggregationServiceApi;
 import com.stanzaliving.core.ventaaggregationservice.dto.BookingResidenceAggregationEntityDto;
+import com.stanzaliving.core.ventaaggregationservice.dto.ResidenceAggregationEntityDto;
 import com.stanzaliving.core.ventaaggregationservice.dto.ResidenceFilterRequestDto;
 import com.stanzaliving.user.acl.db.service.UserDepartmentLevelDbService;
 import com.stanzaliving.user.acl.db.service.UserDepartmentLevelRoleDbService;
@@ -24,6 +25,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -64,7 +66,6 @@ public class CashReconServiceImpl implements CashReconService {
         Optional<UserDepartmentLevelEntity> userDepartmentLevelEntity;
         List<String> residenceIds;
         List<String> microMarketIds = new ArrayList<>();
-        ;
         List<String> cityIds = new ArrayList<>();
         String cityId;
         String microMarketId;
@@ -97,8 +98,10 @@ public class CashReconServiceImpl implements CashReconService {
             if (userDepartmentLevelEntity.isPresent()) {
                 residenceIds = Arrays.asList(userDepartmentLevelEntity.get().getCsvAccessLevelEntityUuid().split(","));
                 for (String residenceId : residenceIds) {
-                    cityId = ventaAggregationServiceApi.getAggregatedResidenceInformation(residenceId).getData().getCityId() + "";
-                    cityIds.add(cityId);
+                    ResidenceAggregationEntityDto aggregationEntityDto = ventaAggregationServiceApi.getAggregatedResidenceInformation(residenceId).getData();
+                    cityId = Objects.nonNull(aggregationEntityDto) ? aggregationEntityDto.getCityId() + "" : null;
+                    if(!StringUtils.isEmpty(cityId))
+                        cityIds.add(cityId);
                 }
                 return getClusterManagerOrNodalList(cityIds, transferTo);
             } else {
@@ -111,7 +114,8 @@ public class CashReconServiceImpl implements CashReconService {
                         List<BookingResidenceAggregationEntityDto> bookingResidenceAggregationEntityDtoList = ventaAggregationServiceApi.getResidenceListing(ResidenceFilterRequestDto.builder().
                                 microMarketIdList(Collections.singleton(microMarketid)).build()).getData().getContent();
                         for(BookingResidenceAggregationEntityDto bookingResidenceAggregationEntityDto : bookingResidenceAggregationEntityDtoList){
-                            cityIds.add(bookingResidenceAggregationEntityDto.getCityId()+"");
+                            if(Objects.nonNull(bookingResidenceAggregationEntityDto))
+                                cityIds.add(bookingResidenceAggregationEntityDto.getCityId()+"");
                         }
                     }
                     return getClusterManagerOrNodalList(cityIds, transferTo);
