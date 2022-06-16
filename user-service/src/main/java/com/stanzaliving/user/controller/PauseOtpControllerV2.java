@@ -19,7 +19,7 @@ public class PauseOtpControllerV2 {
 	private PauseOtpService blacklistUserService;
 
 	
-	@PostMapping("pauseOtp/add/{mobile}")
+	@PostMapping("pauseotp/add/{mobile}")
 	public ResponseDto<Boolean> addUser(@PathVariable("mobile") String mobile,
 			@CookieValue(name = SecurityConstants.TOKEN_HEADER_NAME) String token) {
 
