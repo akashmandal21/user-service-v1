@@ -41,7 +41,7 @@ public class UserDepartmentLevelEntity extends AbstractJpaEntity {
 	@Column(name = "access_level", columnDefinition = "varchar(30) NOT NULL", nullable = false)
 	private AccessLevel accessLevel;
 
-	@Column(name = "access_level_entity_uuids", columnDefinition = "varchar(2048) NOT NULL", nullable = false)
+	@Column(name = "access_level_entity_uuids", columnDefinition = "TEXT", nullable = false)
 	private String csvAccessLevelEntityUuid;
 
 }
