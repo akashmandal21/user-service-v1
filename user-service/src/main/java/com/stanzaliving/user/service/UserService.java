@@ -41,6 +41,7 @@ public interface UserService {
 	UserDto addUser(AddUserRequestDto addUserRequestDto);
 
 	List<UserDto> addBulkUserAndRole(List<AddUserAndRoleRequestDto> addUserRequestDtoList);
+	List<UserProfileDto> getUserProfileList(List<String> userUuidList);
 
 	UserProfileDto getUserProfile(String userId);
 
@@ -75,6 +76,8 @@ public interface UserService {
 	boolean createRoleBaseUser(UserType userType);
 
 	Map<String, UserProfileDto> getUserProfileDto(Set<String> mobileNos);
+	
+	List<String> getUserProfileDto(List<String> mobileNos);
 
 	boolean createRoleBaseUser(List<String> mobiles);
 

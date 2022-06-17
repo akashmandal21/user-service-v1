@@ -298,6 +298,23 @@ public class UserServiceImpl implements UserService {
 		return userDtoList;
 	}
 
+	@Override
+	public List<UserProfileDto> getUserProfileList(List<String> userUuidList) {
+
+		log.info("Searching users in list: {}",userUuidList);
+
+		List<UserEntity> userEntityList = userDbService.findAllByUuidInAndStatus(userUuidList, true);
+
+		if (CollectionUtils.isEmpty(userEntityList)) {
+			throw new ApiValidationException("Users not found for UserId List: " + userUuidList);
+		}
+		List<UserProfileDto> userProfileDtoList = new ArrayList<>();
+			for (UserEntity userEntity : userEntityList) {
+				userProfileDtoList.add(UserAdapter.getUserProfileDto(userEntity));
+			}
+		return userProfileDtoList;
+	}
+
 
 	@Override
 	public UserProfileDto getUserProfile(String userId) {
@@ -834,6 +851,24 @@ public class UserServiceImpl implements UserService {
 		});
 
 		return userMap;
+	}
+	
+	
+	@Override
+	public List<String> getUserProfileDto(List<String> mobileNos) {
+
+		Set<String> mobileNo = mobileNos.stream().collect(Collectors.toSet());
+
+		List<UserProfileDto> userProfileDto=UserAdapter.getUserProfileDtos(userDbService.findByMobileIn(mobileNo));
+
+		userProfileDto.forEach(user -> {
+			if(mobileNos.contains(user.getMobile())) {
+				mobileNos.remove(user.getMobile());
+				
+			}
+		});
+
+		return mobileNos;
 	}
 
 	@Override

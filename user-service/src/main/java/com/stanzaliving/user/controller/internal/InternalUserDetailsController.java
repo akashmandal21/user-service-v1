@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import com.stanzaliving.core.base.exception.ApiValidationException;
+import com.stanzaliving.core.user.dto.UserProfileRequestDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,7 +38,19 @@ public class InternalUserDetailsController {
 
 		return ResponseDto.success("Found User for userUuid", includeDeactivated ? userService.getUserByUserId(userUuid) : userService.getActiveUserByUserId(userUuid));
 	}
-	
+
+	@GetMapping("getUserProfileList")
+	public ResponseDto<List<UserProfileDto>> getUserProfileList(@RequestBody UserProfileRequestDto userProfileRequestDto) {
+
+		log.info("Got UserProfileRequestDto: {}",userProfileRequestDto);
+
+		if(Objects.isNull(userProfileRequestDto))
+			throw new ApiValidationException("User id's not found");
+
+		return ResponseDto.success("Found User for userUuid", userService.getUserProfileList(userProfileRequestDto.getUserUuids()));
+	}
+
+
 	@GetMapping("email")
 	public ResponseDto<UserProfileDto> getUserProfileDtoByEmail(@RequestParam(name = "email", required = true) String email) {
 
