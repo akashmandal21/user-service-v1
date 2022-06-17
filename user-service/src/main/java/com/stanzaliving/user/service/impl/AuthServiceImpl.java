@@ -85,6 +85,11 @@ public class AuthServiceImpl implements AuthService {
 
 		try {
 			if (Objects.isNull(userEntity)) {
+				
+				if (UserType.VENDOR == loginRequestDto.getUserType()) {
+					throw new AuthException("No user exists with this number", UserErrorCodes.USER_NOT_EXISTS);
+				}
+				
 				LeadDetailEntity leadDetail = leadserviceClientApi.search(loginRequestDto.getMobile(), null).getData();
 				if (Objects.isNull(leadDetail) || !(leadDetail.getPhone().equals(loginRequestDto.getMobile()))) {
 					throw new AuthException("No booking found for this number");
