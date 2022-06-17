@@ -1,5 +1,5 @@
 /**
- *
+ * 
  */
 package com.stanzaliving.user.controller;
 
@@ -64,7 +64,7 @@ public class AuthController {
 
 	@Autowired
 	private AclService aclService;
-
+	
 	@Autowired
 	private OnboardGuestService onboardGuestService;
 
@@ -75,7 +75,7 @@ public class AuthController {
 
 		return ResponseDto.success("OTP Sent for Login");
 	}
-
+	
 	@PostMapping("validateOtp")
 	public ResponseDto<AclUserDto> validateOtp(
 			@RequestBody @Valid OtpValidateRequestDto otpValidateRequestDto, HttpServletRequest request, HttpServletResponse response) {
@@ -91,17 +91,15 @@ public class AuthController {
 		if (Objects.nonNull(userSessionEntity)) {
 			addTokenToResponse(request, response, token);
 			if(UserType.INVITED_GUEST.equals(userProfileDto.getUserType())) {
-
+				
 				log.info("UserType for user is INVITED_GUEST {} " + userProfileDto.getUuid());
 				ResponseDto<BookingResponseDto> bookingResponseDto = onboardGuestService.createGuestBooking(userProfileDto.getMobile());
-				
-				log.info("\n\n\n\n\n OTP Successfully bookingResponseDto " + bookingResponseDto);
-				if (Objects.isNull(bookingResponseDto) ) {    
+				if (Objects.isNull(bookingResponseDto)) {    
 					return ResponseDto.failure("Failed to create guest booking for " + userProfileDto.getMobile());
 				}
-
+				
 			}
-
+			
 			return ResponseDto.success("User Login Successfull", UserAdapter.getAclUserDto(userProfileDto, aclService.getUserDeptLevelRoleNameUrlExpandedDtoFe(userProfileDto.getUuid())));
 		}
 
@@ -121,34 +119,34 @@ public class AuthController {
 
 		return ResponseDto.failure("Failed to refresh user session");
 	}
-
+	
 	@PostMapping("sendEmailVerificationOtp")
 	public ResponseDto<Void> sendEmailVerificationOtp(@RequestBody @Valid EmailVerificationRequestDto emailVerificationRequestDto) {
 
 		log.info("Request received to send otp for email verification: {}", emailVerificationRequestDto);
-
+		
 		authService.sendEmailOtp(emailVerificationRequestDto);
 
 		return ResponseDto.success("Email OTP Sent");
 	}
-
+	
 	@PostMapping("resendEmailVerificationOtp")
 	public ResponseDto<Void> resendEmailVerificationOtp(@RequestBody @Valid EmailVerificationRequestDto emailVerificationRequestDto) {
 
 		log.info("Request received to re-send otp for email verification: {}", emailVerificationRequestDto);
-
+		
 		authService.resendEmailOtp(emailVerificationRequestDto);
 
 		return ResponseDto.success("OTP Successfully Resent");
 	}
-
+	
 	@PostMapping("validateEmailVerificationOtp")
 	public ResponseDto<String> validateEmailVerificationOtp(@RequestBody EmailOtpValidateRequestDto emailOtpValidateRequestDto) {
 
 		log.info("Request received to validate otp for email verification and update Deatils: {}", ObjectMapperUtil.getString(emailOtpValidateRequestDto));
-
+		
 		UserEntity userEntity = authService.validateEmailVerificationOtpAndUpdateUserDetails(emailOtpValidateRequestDto);
-
+		
 		log.info("Email OTP Successfully verified for User: " + userEntity.getUuid());
 
 		return ResponseDto.success("Email OTP Successfully verified for User: " + userEntity.getUuid() + " with Email: " + userEntity.getEmail() + " and User Details Updated Successfully.");

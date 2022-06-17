@@ -1,11 +1,13 @@
 package com.stanzaliving.user.config;
 
 import com.stanzaliving.core.leadservice.client.api.LeadserviceClientApi;
+import com.stanzaliving.core.venta_aggregation_client.api.VentaAggregationServiceApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import com.stanzaliving.core.client.api.BookingDataControllerApi;
 import com.stanzaliving.core.base.http.StanzaRestClient;
+import com.stanzaliving.core.client.api.BookingDataControllerApi;
 import com.stanzaliving.core.notificationv2.api.NotificationClientApi;
 import com.stanzaliving.core.transformation.client.api.InternalDataControllerApi;
 import com.stanzaliving.core.transformation.client.cache.TransformationCache;
@@ -25,6 +27,9 @@ public class ClientConfig {
     @Value("${service.booking.url}")
     private String bookingServiceUrl;
 
+    @Value("${service.aggregation.url}")
+    private String aggregationClientUrl;
+
     @Bean
     public InternalDataControllerApi internalDataControllerApi() {
         return new InternalDataControllerApi(new StanzaRestClient(transformationUrl));
@@ -40,14 +45,19 @@ public class ClientConfig {
         return new NotificationClientApi(new StanzaRestClient(notificationClientUrl));
     }
 
-
     @Bean
-    public LeadserviceClientApi LeadserviceClientApi() {
-        return new LeadserviceClientApi(new StanzaRestClient(leadUrl));
+    public VentaAggregationServiceApi ventaAggregationServiceApi() {
+        return new VentaAggregationServiceApi(new StanzaRestClient(aggregationClientUrl));
     }
 
     @Bean
     public BookingDataControllerApi bookingDataControllerApi() {
         return new BookingDataControllerApi(new StanzaRestClient(bookingServiceUrl));
     }
+
+    @Bean
+    public LeadserviceClientApi leadserviceClientApi() {
+        return new LeadserviceClientApi(new StanzaRestClient(leadUrl));
+    }
+
 }

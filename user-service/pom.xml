@@ -29,6 +29,13 @@
 			<artifactId>kafka</artifactId>
 			<version>${global.version}</version>
 		</dependency>
+		
+		<dependency>
+            <groupId>com.stanzaliving.core</groupId>
+            <artifactId>booking-service-client</artifactId>
+            <version>${global.version}</version>
+            <scope>compile</scope>
+        </dependency>
 
 		<dependency>
 			<groupId>com.stanzaliving.core</groupId>
@@ -145,6 +152,12 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.stanzaliving.core</groupId>
+			<artifactId>venta-aggregation-service-client</artifactId>
+			<version>${global.version}</version>
 		</dependency>
 
 	</dependencies>

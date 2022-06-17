@@ -236,7 +236,7 @@ public class UserServiceImpl implements UserService {
 
 		profileEntity.setUser(userEntity);
 
-		userEntity = userDbService.saveAndFlush(userEntity);
+		userEntity = userDbService.save(userEntity);
 
 
 		addUserOrConsumerRole(userEntity);
