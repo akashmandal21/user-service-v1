@@ -3,7 +3,9 @@
  */
 package com.stanzaliving.user.controller;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -32,12 +34,12 @@ import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.EnumListing;
 import com.stanzaliving.core.user.enums.UserType;
+import com.stanzaliving.core.user.request.dto.AddUserAndRoleRequestDto;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
 import com.stanzaliving.core.user.request.dto.UserRequestDto;
 import com.stanzaliving.core.user.request.dto.UserStatusRequestDto;
-import com.stanzaliving.core.user.request.dto.AddUserAndRoleRequestDto;
 import com.stanzaliving.user.acl.service.AclService;
 import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.service.UserService;
@@ -202,5 +204,28 @@ public class UserController {
 		PageResponse<UserProfileDto> userDtos = userService.searchUser(userFilterDto);
 
 		return ResponseDto.success("Found " + userDtos.getRecords() + " Users for Search Criteria", userDtos);
+	}
+	
+	@PostMapping("search/user/list")
+	public ResponseDto<Set<UserProfileDto>> searchUsersDetailAll(@RequestBody UserRequestDto userRequestDto) {
+
+		log.info("Post Request received to search user details for user list UserRequestDto {} ", userRequestDto);
+
+		Set<UserProfileDto> userProfileDtos = new HashSet<UserProfileDto>();
+
+		UserFilterDto userFilterDto = UserFilterDto.builder()
+				.userIds(userRequestDto.getUserIds())
+				.mobile(userRequestDto.getMobile())
+				.isoCode(userRequestDto.getIsoCode())
+				.email(userRequestDto.getEmail())
+				.userType(userRequestDto.getUserType())
+				.status(userRequestDto.getStatus())
+				.department(userRequestDto.getDepartment())
+				.name(userRequestDto.getName())
+				.build();
+
+		userProfileDtos = userService.searchUserList(userFilterDto);
+
+		return ResponseDto.success("Found " + userProfileDtos.size() + " Users for Search Criteria", userProfileDtos);
 	}
 }

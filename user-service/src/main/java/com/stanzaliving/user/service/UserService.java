@@ -96,4 +96,6 @@ public interface UserService {
 	UserDto addUserV3(AddUserRequestDto addUserRequestDto);
 	
 	List<String> getUserProfileDtoWhoseBirthdayIsToday();
+
+	Set<UserProfileDto> searchUserList(UserFilterDto userFilterDto);
 }
