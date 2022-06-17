@@ -421,6 +421,10 @@ public class UserServiceImpl implements UserService {
 				// Assigning default role
 				addUserOrConsumerRole(userEntity);
 			} else {
+				List<String> validRoles = validateRole(addUserAndRoleRequestDto);
+
+				if (CollectionUtils.isEmpty(validRoles)) return;
+
 				aclUserService.addRole(
 						AddUserDeptLevelRoleRequestDto.builder()
 								.userUuid(userEntity.getUuid())
@@ -431,6 +435,19 @@ public class UserServiceImpl implements UserService {
 								.build()
 				);
 			}
+	}
+
+	private List<String> validateRole(AddUserAndRoleRequestDto addUserAndRoleRequestDto) {
+
+		List<String> validRoles = new ArrayList<>();
+
+		addUserAndRoleRequestDto.getRolesUuid().forEach(roleUuid -> {
+			RoleDto roleDto = roleService.getRoleByUuid(roleUuid);
+			if (roleDto.getDepartment() == addUserAndRoleRequestDto.getRoleDepartment() && roleDto.getAccessLevel() == addUserAndRoleRequestDto.getAccessLevel()) {
+				validRoles.add(roleUuid);
+			}
+		});
+		return validRoles;
 	}
 
 	private void publishToKafka(Object object) {
