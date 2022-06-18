@@ -439,12 +439,14 @@ public class UserServiceImpl implements UserService {
 
 	private List<String> validateRole(AddUserAndRoleRequestDto addUserAndRoleRequestDto) {
 
+		// validating the role department and the accessLevel while bulk upload
 		List<String> validRoles = new ArrayList<>();
 
-		addUserAndRoleRequestDto.getRolesUuid().forEach(roleUuid -> {
-			RoleDto roleDto = roleService.getRoleByUuid(roleUuid);
+		List<RoleDto> roleDtoList = roleService.getRoleByUuidIn(addUserAndRoleRequestDto.getRolesUuid());
+
+		roleDtoList.forEach(roleDto -> {
 			if (roleDto.getDepartment() == addUserAndRoleRequestDto.getRoleDepartment() && roleDto.getAccessLevel() == addUserAndRoleRequestDto.getAccessLevel()) {
-				validRoles.add(roleUuid);
+				validRoles.add(roleDto.getUuid());
 			}
 		});
 		return validRoles;
