@@ -78,7 +78,7 @@ public class CashReconServiceImpl implements CashReconService {
                 residenceIds = Arrays.asList(userDepartmentLevelEntity.get().getCsvAccessLevelEntityUuid().split(","));
                 for (String residenceId : residenceIds) {
                     microMarketId = ventaAggregationServiceApi.getAggregatedResidenceInformation(residenceId).getData().getMicroMarketId();
-                    if (!microMarketIds.contains(microMarketId))
+                    if (!StringUtils.isEmpty(microMarketId) && !microMarketIds.contains(microMarketId))
                         microMarketIds.add(microMarketId);
                 }
                 return getClusterManagerOrNodalList(microMarketIds, transferTo);
