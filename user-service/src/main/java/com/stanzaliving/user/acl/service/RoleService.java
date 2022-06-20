@@ -12,6 +12,8 @@ public interface RoleService {
     RoleDto addRole(AddRoleRequestDto addRoleRequestDto);
 
     RoleDto getRoleByUuid(String roleUuid);
+
+    List<RoleDto> getRoleByUuidIn(List<String> roleUuidList);
     
     RoleDto findByRoleName(String roleName);
     
