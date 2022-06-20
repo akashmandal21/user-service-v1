@@ -162,7 +162,6 @@ public class AuthController {
 		return ResponseDto.success("OTP Successfully Resent");
 	}
 
-
 	@GetMapping("logout")
 	public ResponseDto<Void> logout(
 			@CookieValue(name = SecurityConstants.TOKEN_HEADER_NAME) String token,
@@ -192,5 +191,4 @@ public class AuthController {
 			response.addCookie(SecureCookieUtil.create(SecurityConstants.TOKEN_HEADER_NAME, token, Optional.of(isLocalFrontEnd), Optional.of(isApp)));
 		}
 	}
-
 }
