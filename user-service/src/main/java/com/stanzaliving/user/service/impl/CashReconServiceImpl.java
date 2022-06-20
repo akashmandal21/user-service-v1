@@ -59,7 +59,7 @@ public class CashReconServiceImpl implements CashReconService {
         TransferTo transferTo = cashReconReceiverRequest.getTransferTo();
 
         List<UserDepartmentLevelEntity> userDepartmentLevelEntityList =
-                userDepartmentLevelDbService.findByUserUuidAndDepartmentAndStatus(userUuidOfDepositor, Department.SALES, true);
+                userDepartmentLevelDbService.findByUserUuidAndDepartmentAndStatus(userUuidOfDepositor, Department.OPS, true);
 
         if (CollectionUtils.isEmpty(userDepartmentLevelEntityList))
             return cashReceiverInfoList;
