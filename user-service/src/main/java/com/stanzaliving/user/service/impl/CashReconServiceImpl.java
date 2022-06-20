@@ -182,12 +182,14 @@ public class CashReconServiceImpl implements CashReconService {
             Set<String> userIds = userIdMapping.keySet();
             for (String userId : userIds) {
                 UserEntity userEntity = userDbService.findByUuidAndStatus(userId, true);
-                cashReconReceiverInfoList.add(CashReconReceiverInfo.builder()
-                        .userUuid(userId)
-                        .name(userEntity.getUserProfile().getFirstName() + " " + userEntity.getUserProfile().getLastName())
-                        .phone(userEntity.getMobile())
-                        .email(userEntity.getEmail())
-                        .build());
+                if(Objects.nonNull(userEntity)) {
+                    cashReconReceiverInfoList.add(CashReconReceiverInfo.builder()
+                            .userUuid(userId)
+                            .name(userEntity.getUserProfile().getFirstName() + " " + userEntity.getUserProfile().getLastName())
+                            .phone(userEntity.getMobile())
+                            .email(userEntity.getEmail())
+                            .build());
+                }
             }
         }
     }
