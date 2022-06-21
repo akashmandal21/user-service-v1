@@ -123,11 +123,14 @@ public class CashReconServiceImpl implements CashReconService {
                 if (userDepartmentLevelEntity.isPresent()) {
                     microMarketIds = Arrays.asList(userDepartmentLevelEntity.get().getCsvAccessLevelEntityUuid().split(","));
                     for (String microMarketid : microMarketIds) {
-                        List<BookingResidenceAggregationEntityDto> bookingResidenceAggregationEntityDtoList = ventaAggregationServiceApi.getResidenceListing(ResidenceFilterRequestDto.builder().
-                                microMarketIdList(Collections.singleton(microMarketid)).build()).getData().getContent();
-                        for(BookingResidenceAggregationEntityDto bookingResidenceAggregationEntityDto : bookingResidenceAggregationEntityDtoList){
-                            if(Objects.nonNull(bookingResidenceAggregationEntityDto))
-                                cityIds.add(bookingResidenceAggregationEntityDto.getCityId()+"");
+                        ResponseDto<RestResponsePage<BookingResidenceAggregationEntityDto>> bookingResidenceAggregationEntityDtoResponse = ventaAggregationServiceApi.getResidenceListing(ResidenceFilterRequestDto.builder().
+                                microMarketIdList(Collections.singleton(microMarketid)).build());
+                        if(Objects.nonNull(bookingResidenceAggregationEntityDtoResponse) && Objects.nonNull(bookingResidenceAggregationEntityDtoResponse.getData())) {
+                            List<BookingResidenceAggregationEntityDto> bookingResidenceAggregationEntityDtoList = bookingResidenceAggregationEntityDtoResponse.getData().getContent();
+                            for (BookingResidenceAggregationEntityDto bookingResidenceAggregationEntityDto : bookingResidenceAggregationEntityDtoList) {
+                                if (Objects.nonNull(bookingResidenceAggregationEntityDto))
+                                    cityIds.add(bookingResidenceAggregationEntityDto.getCityId() + "");
+                            }
                         }
                     }
                     return getClusterManagerOrNodalList(cityIds, transferTo, userUuidOfDepositor);
