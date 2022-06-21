@@ -88,14 +88,14 @@ public class CashReconServiceImpl implements CashReconService {
                         }
                     }
                 }
-                return getClusterManagerOrNodalList(microMarketIds, transferTo);
+                return getClusterManagerOrNodalList(microMarketIds, transferTo, userUuidOfDepositor);
             } else {
                 userDepartmentLevelEntity =
                         userDepartmentLevelEntityList.stream().filter(x -> x.getAccessLevel().equals(AccessLevel.MICROMARKET))
                                 .findFirst();
                 if (userDepartmentLevelEntity.isPresent()) {
                     microMarketIds = Arrays.asList(userDepartmentLevelEntity.get().getCsvAccessLevelEntityUuid().split(","));
-                    return getClusterManagerOrNodalList(microMarketIds, transferTo);
+                    return getClusterManagerOrNodalList(microMarketIds, transferTo, userUuidOfDepositor);
                 }
             }
 
@@ -114,7 +114,7 @@ public class CashReconServiceImpl implements CashReconService {
                             cityIds.add(cityId);
                     }
                 }
-                return getClusterManagerOrNodalList(cityIds, transferTo);
+                return getClusterManagerOrNodalList(cityIds, transferTo, userUuidOfDepositor);
             } else {
                 userDepartmentLevelEntity =
                         userDepartmentLevelEntityList.stream().filter(x -> x.getAccessLevel().equals(AccessLevel.MICROMARKET))
@@ -129,14 +129,14 @@ public class CashReconServiceImpl implements CashReconService {
                                 cityIds.add(bookingResidenceAggregationEntityDto.getCityId()+"");
                         }
                     }
-                    return getClusterManagerOrNodalList(cityIds, transferTo);
+                    return getClusterManagerOrNodalList(cityIds, transferTo, userUuidOfDepositor);
                 } else {
                     userDepartmentLevelEntity =
                             userDepartmentLevelEntityList.stream().filter(x -> x.getAccessLevel().equals(AccessLevel.CITY))
                                     .findFirst();
                     if (userDepartmentLevelEntity.isPresent()) {
                         cityIds = Arrays.asList(userDepartmentLevelEntity.get().getCsvAccessLevelEntityUuid().split(","));
-                        return getClusterManagerOrNodalList(cityIds, transferTo);
+                        return getClusterManagerOrNodalList(cityIds, transferTo, userUuidOfDepositor);
                     }
                 }
             }
@@ -172,7 +172,7 @@ public class CashReconServiceImpl implements CashReconService {
         return nodalOfficerInfoList;
     }
 
-    private List<CashReconReceiverInfo> getClusterManagerOrNodalList(List<String> ids, TransferTo transferTo) {
+    private List<CashReconReceiverInfo> getClusterManagerOrNodalList(List<String> ids, TransferTo transferTo, String userUuidOfDepositor) {
         List<CashReconReceiverInfo> cashReconReceiverInfoList = new ArrayList<>();
         Map<String, List<String>> userIdMapping = new HashMap<>();
         if (TransferTo.CLUSTER_MANAGER.equals(transferTo)) {
@@ -181,6 +181,7 @@ public class CashReconServiceImpl implements CashReconService {
             userIdMapping = aclUserService.getActiveUsersForRoles(Department.OPS, "NODAL_CASH_LEDGER_EDITOR", ids);
         }
         if(Objects.nonNull(userIdMapping) && userIdMapping.size() > 0){
+            userIdMapping.remove(userUuidOfDepositor);
             buildCashReceiverInfo(cashReconReceiverInfoList, userIdMapping);
         }
         log.info("cashReconReceiverInfoList is {}", cashReconReceiverInfoList);
