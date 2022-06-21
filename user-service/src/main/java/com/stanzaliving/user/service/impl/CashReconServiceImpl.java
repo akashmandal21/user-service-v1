@@ -1,6 +1,7 @@
 package com.stanzaliving.user.service.impl;
 
 import com.stanzaliving.core.base.common.dto.AbstractDto;
+import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
@@ -77,9 +78,15 @@ public class CashReconServiceImpl implements CashReconService {
             if (userDepartmentLevelEntity.isPresent()) {
                 residenceIds = Arrays.asList(userDepartmentLevelEntity.get().getCsvAccessLevelEntityUuid().split(","));
                 for (String residenceId : residenceIds) {
-                    microMarketId = ventaAggregationServiceApi.getAggregatedResidenceInformation(residenceId).getData().getMicroMarketId();
-                    if (!StringUtils.isEmpty(microMarketId) && !microMarketIds.contains(microMarketId))
-                        microMarketIds.add(microMarketId);
+                    ResponseDto<ResidenceFilterRequestDto> residenceFilterRequestDtoResponseDto = ventaAggregationServiceApi.getAggregatedResidenceInformation(residenceId);
+                    if (Objects.nonNull(residenceFilterRequestDtoResponseDto)) {
+                        ResidenceFilterRequestDto residenceFilterRequestDto = residenceFilterRequestDtoResponseDto.getData();
+                        if (Objects.nonNull(residenceFilterRequestDto)) {
+                            microMarketId = residenceFilterRequestDtoResponseDto.getMicroMarketId();
+                            if (!StringUtils.isEmpty(microMarketId) && !microMarketIds.contains(microMarketId))
+                                microMarketIds.add(microMarketId);
+                        }
+                    }
                 }
                 return getClusterManagerOrNodalList(microMarketIds, transferTo);
             } else {
@@ -99,10 +106,13 @@ public class CashReconServiceImpl implements CashReconService {
             if (userDepartmentLevelEntity.isPresent()) {
                 residenceIds = Arrays.asList(userDepartmentLevelEntity.get().getCsvAccessLevelEntityUuid().split(","));
                 for (String residenceId : residenceIds) {
-                    ResidenceAggregationEntityDto aggregationEntityDto = ventaAggregationServiceApi.getAggregatedResidenceInformation(residenceId).getData();
-                    cityId = Objects.nonNull(aggregationEntityDto) ? aggregationEntityDto.getCityId() + "" : null;
-                    if(!StringUtils.isEmpty(cityId))
-                        cityIds.add(cityId);
+                    ResponseDto<ResidenceAggregationEntityDto> aggregationEntityResponseDto = ventaAggregationServiceApi.getAggregatedResidenceInformation(residenceId);
+                    if (Objects.nonNull(aggregationEntityResponseDto)) {
+                        ResidenceAggregationEntityDto aggregationEntityDto = aggregationEntityResponseDto.getData();
+                        cityId = Objects.nonNull(aggregationEntityDto) ? aggregationEntityDto.getCityId() + "" : null;
+                        if (!StringUtils.isEmpty(cityId))
+                            cityIds.add(cityId);
+                    }
                 }
                 return getClusterManagerOrNodalList(cityIds, transferTo);
             } else {
