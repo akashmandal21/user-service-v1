@@ -6,6 +6,7 @@ import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
 import com.stanzaliving.core.venta_aggregation_client.api.VentaAggregationServiceApi;
+import com.stanzaliving.core.venta_aggregation_client.config.RestResponsePage;
 import com.stanzaliving.core.ventaaggregationservice.dto.BookingResidenceAggregationEntityDto;
 import com.stanzaliving.core.ventaaggregationservice.dto.ResidenceAggregationEntityDto;
 import com.stanzaliving.core.ventaaggregationservice.dto.ResidenceFilterRequestDto;
@@ -78,11 +79,11 @@ public class CashReconServiceImpl implements CashReconService {
             if (userDepartmentLevelEntity.isPresent()) {
                 residenceIds = Arrays.asList(userDepartmentLevelEntity.get().getCsvAccessLevelEntityUuid().split(","));
                 for (String residenceId : residenceIds) {
-                    ResponseDto<ResidenceFilterRequestDto> residenceFilterRequestDtoResponseDto = ventaAggregationServiceApi.getAggregatedResidenceInformation(residenceId);
-                    if (Objects.nonNull(residenceFilterRequestDtoResponseDto)) {
-                        ResidenceFilterRequestDto residenceFilterRequestDto = residenceFilterRequestDtoResponseDto.getData();
+                    ResponseDto<ResidenceAggregationEntityDto> residenceAggregationEntityDtoResponseDto = ventaAggregationServiceApi.getAggregatedResidenceInformation(residenceId);
+                    if (Objects.nonNull(residenceAggregationEntityDtoResponseDto)) {
+                        ResidenceAggregationEntityDto residenceFilterRequestDto = residenceAggregationEntityDtoResponseDto.getData();
                         if (Objects.nonNull(residenceFilterRequestDto)) {
-                            microMarketId = residenceFilterRequestDtoResponseDto.getMicroMarketId();
+                            microMarketId = residenceFilterRequestDto.getMicroMarketId();
                             if (!StringUtils.isEmpty(microMarketId) && !microMarketIds.contains(microMarketId))
                                 microMarketIds.add(microMarketId);
                         }
