@@ -170,11 +170,13 @@ public class UserServiceImpl implements UserService {
 
 		if (Objects.isNull(userEntity)) {
 
+			log.error("User Not Found with Uuid: {}", userUuid);
 			throw new ApiValidationException("User Not Found with Uuid: " + userUuid);
 		}
 
 		if (!userEntity.isStatus()) {
 
+			log.error("User Account is Disabled for Uuid : {}", userUuid);
 			throw new ApiValidationException("User Account is Disabled for Uuid " + userUuid);
 		}
 
