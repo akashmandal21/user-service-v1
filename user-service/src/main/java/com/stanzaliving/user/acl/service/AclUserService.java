@@ -56,6 +56,8 @@ public interface AclUserService {
 
 	List<UserAccessModuleDto> getUserAccessModulesByUserUuid(String userUuid);
 
+	List<UserAccessModuleDto> getAccessModules();
+
 	List<CityMetadataDto> getCitiesByUserAcessAndDepartment(String userUuid, Department department);
 
 	List<UsersByAccessModulesAndCitiesResponseDto> getUsersByAccessModulesAndCitites(UsersByAccessModulesAndCitiesRequestDto usersByAccessModulesAndCitiesRequestDto,
