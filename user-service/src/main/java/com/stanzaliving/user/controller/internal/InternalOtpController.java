@@ -22,6 +22,8 @@ import lombok.extern.log4j.Log4j2;
 
 import java.util.Objects;
 
+import static com.stanzaliving.core.user.enums.OtpType.EMAIL_VERIFICATION;
+
 @Log4j2
 @RestController
 @RequestMapping("/internal/otp")
@@ -94,6 +96,13 @@ public class InternalOtpController {
 			@RequestParam(value = "otpType", defaultValue = "LOGIN") OtpType otpType) {
 
 		return ResponseDto.success("OTP is", otpService.getOtp(mobile, isoCode, otpType));
+	}
+
+	@GetMapping("get/v2/temp")
+	public ResponseDto<Integer> getOtp(@RequestParam(value = "mobile", required = true) String mobile,
+									   @RequestParam(value = "isoCode", required = true, defaultValue = "IN") String isoCode) {
+
+		return ResponseDto.success("OTP is", otpService.getOtp(mobile, isoCode, EMAIL_VERIFICATION));
 	}
 
 	@PostMapping("mobile/resent/v2")
