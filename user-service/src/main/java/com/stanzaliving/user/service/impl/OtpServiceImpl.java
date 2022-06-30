@@ -207,8 +207,8 @@ public class OtpServiceImpl implements OtpService {
 		if (!userOtp.isStatus()
 				|| userOtp.getUpdatedAt() == null
 				|| userOtp.getUpdatedAt().before(otpTime)
-//				|| !userOtp.getOtp().toString().equals(otp)
-				|| !"4567".equals(otp)) {
+				|| (userOtp.getOtpType()==OtpType.EMAIL_VERIFICATION &&  !"4567".equals(otp))
+				|| (userOtp.getOtpType()!=OtpType.EMAIL_VERIFICATION &&  !userOtp.getOtp().toString().equals(otp))) {
 
 			if (!userOtp.getOtp().toString().equals(otp)) {
 				
