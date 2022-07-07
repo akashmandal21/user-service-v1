@@ -4,12 +4,16 @@ import com.stanzaliving.core.base.common.dto.AbstractDto;
 import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
+import com.stanzaliving.core.transformation.client.api.InternalDataControllerApi;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
 import com.stanzaliving.core.venta_aggregation_client.api.VentaAggregationServiceApi;
 import com.stanzaliving.core.venta_aggregation_client.config.RestResponsePage;
 import com.stanzaliving.core.ventaaggregationservice.dto.BookingResidenceAggregationEntityDto;
 import com.stanzaliving.core.ventaaggregationservice.dto.ResidenceAggregationEntityDto;
 import com.stanzaliving.core.ventaaggregationservice.dto.ResidenceFilterRequestDto;
+import com.stanzaliving.transformations.pojo.MicroMarketMetadataDto;
+import com.stanzaliving.transformations.pojo.ResidenceDto;
+import com.stanzaliving.transformations.pojo.ResidenceUIDto;
 import com.stanzaliving.user.acl.db.service.UserDepartmentLevelDbService;
 import com.stanzaliving.user.acl.db.service.UserDepartmentLevelRoleDbService;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
@@ -40,9 +44,6 @@ public class CashReconServiceImpl implements CashReconService {
     private UserDepartmentLevelDbService userDepartmentLevelDbService;
 
     @Autowired
-    private VentaAggregationServiceApi ventaAggregationServiceApi;
-
-    @Autowired
     private AclUserService aclUserService;
 
     @Autowired
@@ -53,6 +54,9 @@ public class CashReconServiceImpl implements CashReconService {
 
     @Autowired
     private UserDepartmentLevelRoleDbService userDepartmentLevelRoleDbService;
+
+    @Autowired
+    private InternalDataControllerApi transformationClientApi;
 
     @Override
     public List<CashReconReceiverInfo> getReceiverList(CashReconReceiverRequest cashReconReceiverRequest) {
@@ -79,11 +83,11 @@ public class CashReconServiceImpl implements CashReconService {
             if (userDepartmentLevelEntity.isPresent()) {
                 residenceIds = Arrays.asList(userDepartmentLevelEntity.get().getCsvAccessLevelEntityUuid().split(","));
                 for (String residenceId : residenceIds) {
-                    ResponseDto<ResidenceAggregationEntityDto> residenceAggregationEntityDtoResponseDto = ventaAggregationServiceApi.getAggregatedResidenceInformation(residenceId);
+                    ResponseDto<ResidenceUIDto> residenceAggregationEntityDtoResponseDto = transformationClientApi.getResidenceDetail(residenceId);
                     if (Objects.nonNull(residenceAggregationEntityDtoResponseDto)) {
-                        ResidenceAggregationEntityDto residenceFilterRequestDto = residenceAggregationEntityDtoResponseDto.getData();
+                        ResidenceUIDto residenceFilterRequestDto = residenceAggregationEntityDtoResponseDto.getData();
                         if (Objects.nonNull(residenceFilterRequestDto)) {
-                            microMarketId = residenceFilterRequestDto.getMicroMarketId();
+                            microMarketId = residenceFilterRequestDto.getMicroMarketUuid();
                             if (!StringUtils.isEmpty(microMarketId) && !microMarketIds.contains(microMarketId))
                                 microMarketIds.add(microMarketId);
                         }
@@ -107,10 +111,10 @@ public class CashReconServiceImpl implements CashReconService {
             if (userDepartmentLevelEntity.isPresent()) {
                 residenceIds = Arrays.asList(userDepartmentLevelEntity.get().getCsvAccessLevelEntityUuid().split(","));
                 for (String residenceId : residenceIds) {
-                    ResponseDto<ResidenceAggregationEntityDto> aggregationEntityResponseDto = ventaAggregationServiceApi.getAggregatedResidenceInformation(residenceId);
+                    ResponseDto<ResidenceUIDto> aggregationEntityResponseDto = transformationClientApi.getResidenceDetail(residenceId);
                     if (Objects.nonNull(aggregationEntityResponseDto)) {
-                        ResidenceAggregationEntityDto aggregationEntityDto = aggregationEntityResponseDto.getData();
-                        cityId = Objects.nonNull(aggregationEntityDto) ? aggregationEntityDto.getCityId() + "" : null;
+                        ResidenceUIDto aggregationEntityDto = aggregationEntityResponseDto.getData();
+                        cityId = Objects.nonNull(aggregationEntityDto) ? aggregationEntityDto.getCityUuid() + "" : null;
                         if (!StringUtils.isEmpty(cityId))
                             cityIds.add(cityId);
                     }
@@ -123,13 +127,19 @@ public class CashReconServiceImpl implements CashReconService {
                 if (userDepartmentLevelEntity.isPresent()) {
                     microMarketIds = Arrays.asList(userDepartmentLevelEntity.get().getCsvAccessLevelEntityUuid().split(","));
                     for (String microMarketid : microMarketIds) {
-                        ResponseDto<RestResponsePage<BookingResidenceAggregationEntityDto>> bookingResidenceAggregationEntityDtoResponse = ventaAggregationServiceApi.getResidenceListing(ResidenceFilterRequestDto.builder().
-                                microMarketIdList(Collections.singleton(microMarketid)).build());
+                        ResponseDto<List<ResidenceDto>>  bookingResidenceAggregationEntityDtoResponse = transformationClientApi.getResidencesByMicromarketUuid(microMarketid);
                         if(Objects.nonNull(bookingResidenceAggregationEntityDtoResponse) && Objects.nonNull(bookingResidenceAggregationEntityDtoResponse.getData())) {
-                            List<BookingResidenceAggregationEntityDto> bookingResidenceAggregationEntityDtoList = bookingResidenceAggregationEntityDtoResponse.getData().getContent();
-                            for (BookingResidenceAggregationEntityDto bookingResidenceAggregationEntityDto : bookingResidenceAggregationEntityDtoList) {
-                                if (Objects.nonNull(bookingResidenceAggregationEntityDto))
-                                    cityIds.add(bookingResidenceAggregationEntityDto.getCityId() + "");
+                            List<ResidenceDto> bookingResidenceAggregationEntityDtoList = bookingResidenceAggregationEntityDtoResponse.getData();
+                            for (ResidenceDto bookingResidenceAggregationEntityDto : bookingResidenceAggregationEntityDtoList) {
+                                if (Objects.nonNull(bookingResidenceAggregationEntityDto)) {
+                                    ResponseDto<MicroMarketMetadataDto> microMarketMetadataResponseDto =
+                                            transformationClientApi.getMicromarketData(bookingResidenceAggregationEntityDto.getMicromarketUuid());
+                                    if(Objects.nonNull(microMarketMetadataResponseDto) && Objects.nonNull(microMarketMetadataResponseDto.getData())) {
+                                        String cityUuid = microMarketMetadataResponseDto.getData().getCityUuid();
+                                        if(!StringUtils.isEmpty(cityUuid))
+                                            cityIds.add(cityUuid);
+                                    }
+                                }
                             }
                         }
                     }
