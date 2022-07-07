@@ -87,7 +87,7 @@ public class CashReconServiceImpl implements CashReconService {
                     if (Objects.nonNull(residenceAggregationEntityDtoResponseDto)) {
                         ResidenceUIDto residenceFilterRequestDto = residenceAggregationEntityDtoResponseDto.getData();
                         if (Objects.nonNull(residenceFilterRequestDto)) {
-                            microMarketId = residenceFilterRequestDto.getMicroMarketUuid();
+                            microMarketId = residenceFilterRequestDto.getMicroMarketId() + "";
                             if (!StringUtils.isEmpty(microMarketId) && !microMarketIds.contains(microMarketId))
                                 microMarketIds.add(microMarketId);
                         }
@@ -114,7 +114,7 @@ public class CashReconServiceImpl implements CashReconService {
                     ResponseDto<ResidenceUIDto> aggregationEntityResponseDto = transformationClientApi.getResidenceDetail(residenceId);
                     if (Objects.nonNull(aggregationEntityResponseDto)) {
                         ResidenceUIDto aggregationEntityDto = aggregationEntityResponseDto.getData();
-                        cityId = Objects.nonNull(aggregationEntityDto) ? aggregationEntityDto.getCityUuid() + "" : null;
+                        cityId = Objects.nonNull(aggregationEntityDto) ? aggregationEntityDto.getCityId() + "" : null;
                         if (!StringUtils.isEmpty(cityId))
                             cityIds.add(cityId);
                     }
@@ -135,7 +135,7 @@ public class CashReconServiceImpl implements CashReconService {
                                     ResponseDto<MicroMarketMetadataDto> microMarketMetadataResponseDto =
                                             transformationClientApi.getMicromarketData(bookingResidenceAggregationEntityDto.getMicromarketUuid());
                                     if(Objects.nonNull(microMarketMetadataResponseDto) && Objects.nonNull(microMarketMetadataResponseDto.getData())) {
-                                        String cityUuid = microMarketMetadataResponseDto.getData().getCityUuid();
+                                        String cityUuid = microMarketMetadataResponseDto.getData().getCityId() + "";
                                         if(!StringUtils.isEmpty(cityUuid))
                                             cityIds.add(cityUuid);
                                     }
