@@ -6,8 +6,10 @@ package com.stanzaliving.user.service.impl;
 import java.util.List;
 import java.util.Objects;
 
+import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.base.utils.StanzaUtils;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCrypt;
@@ -65,28 +67,45 @@ public class SessionServiceImpl implements SessionService {
 
 	@Override
 	public UserSessionEntity refreshUserSession(String token) {
+		UserSessionEntity userSessionEntity = null;
+		try {
+			log.info("Request received to refresh user session");
 
-		UserSessionEntity userSessionEntity = getUserSessionByToken(token);
+			userSessionEntity = getUserSessionByToken(token);
 
-		if (Objects.isNull(userSessionEntity)) {
-			throw new AuthException("No User Session Found!! Please Login!!", UserErrorCodes.SESSION_NOT_FOUND);
+			if (Objects.isNull(userSessionEntity)) {
+				log.error("No User Session Found");
+				throw new AuthException("No User Session Found!! Please Login!!", UserErrorCodes.SESSION_NOT_FOUND);
+			}
+
+			log.info("User session found for user : {} . Getting active user ...", userSessionEntity.getUserId());
+
+			UserDto user = userService.getActiveUserByUuid(userSessionEntity.getUserId());
+
+			log.info("Refresh User Session: " + userSessionEntity.getUuid() + " for User: " + user.getUuid());
+
+			String newToken = StanzaUtils.generateUniqueId();
+
+			userSessionEntity.setToken(newToken);
+			userSessionEntity.setStatus(true);
+
+			log.info("Updating userSessionEntity {} for user {}", userSessionEntity.getUuid(),
+					userSessionEntity.getUserId());
+			userSessionEntity = userSessionDbService.updateAndFlush(userSessionEntity);
+			log.info("Successfully updated userSessionEntity {} for user {}", userSessionEntity.getUuid(),
+					userSessionEntity.getUserId());
+
+			return userSessionEntity;
+		} catch (Exception e) {
+			String userId = Objects.nonNull(userSessionEntity)? userSessionEntity.getUserId(): StringUtils.EMPTY;
+			log.error("Exception while refreshing user session : {} for user : {}", e.getMessage(), userId);
+			throw new StanzaException(e);
 		}
-
-		UserDto user = userService.getActiveUserByUuid(userSessionEntity.getUserId());
-
-		log.info("Refresh User Session: " + userSessionEntity.getUuid() + " for User: " + user.getUuid());
-
-		String newToken = StanzaUtils.generateUniqueId();
-
-		userSessionEntity.setToken(newToken);
-		userSessionEntity.setStatus(true);
-		userSessionEntity = userSessionDbService.updateAndFlush(userSessionEntity);
-
-		return userSessionEntity;
 	}
 
 	@Override
 	public UserSessionEntity getUserSessionByToken(String token) {
+		log.info("Request received for getUserSessionByToken");
 		return userSessionDbService.getUserSessionForToken(getBcryptPassword(token));
 	}
 

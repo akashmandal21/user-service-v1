@@ -170,11 +170,13 @@ public class UserServiceImpl implements UserService {
 
 		if (Objects.isNull(userEntity)) {
 
+			log.error("User Not Found with Uuid: {}", userUuid);
 			throw new ApiValidationException("User Not Found with Uuid: " + userUuid);
 		}
 
 		if (!userEntity.isStatus()) {
 
+			log.error("User Account is Disabled for Uuid : {}", userUuid);
 			throw new ApiValidationException("User Account is Disabled for Uuid " + userUuid);
 		}
 
@@ -298,6 +300,23 @@ public class UserServiceImpl implements UserService {
 		return userDtoList;
 	}
 
+	@Override
+	public List<UserProfileDto> getUserProfileList(List<String> userUuidList) {
+
+		log.info("Searching users in list: {}",userUuidList);
+
+		List<UserEntity> userEntityList = userDbService.findAllByUuidInAndStatus(userUuidList, true);
+
+		if (CollectionUtils.isEmpty(userEntityList)) {
+			throw new ApiValidationException("Users not found for UserId List: " + userUuidList);
+		}
+		List<UserProfileDto> userProfileDtoList = new ArrayList<>();
+			for (UserEntity userEntity : userEntityList) {
+				userProfileDtoList.add(UserAdapter.getUserProfileDto(userEntity));
+			}
+		return userProfileDtoList;
+	}
+
 
 	@Override
 	public UserProfileDto getUserProfile(String userId) {
@@ -404,6 +423,10 @@ public class UserServiceImpl implements UserService {
 				// Assigning default role
 				addUserOrConsumerRole(userEntity);
 			} else {
+				List<String> validRoles = validateRole(addUserAndRoleRequestDto);
+
+				if (CollectionUtils.isEmpty(validRoles)) return;
+
 				aclUserService.addRole(
 						AddUserDeptLevelRoleRequestDto.builder()
 								.userUuid(userEntity.getUuid())
@@ -414,6 +437,21 @@ public class UserServiceImpl implements UserService {
 								.build()
 				);
 			}
+	}
+
+	private List<String> validateRole(AddUserAndRoleRequestDto addUserAndRoleRequestDto) {
+
+		// validating the role department and the accessLevel while bulk upload
+		List<String> validRoles = new ArrayList<>();
+
+		List<RoleDto> roleDtoList = roleService.getRoleByUuidIn(addUserAndRoleRequestDto.getRolesUuid());
+
+		roleDtoList.forEach(roleDto -> {
+			if (roleDto.getDepartment() == addUserAndRoleRequestDto.getRoleDepartment() && roleDto.getAccessLevel() == addUserAndRoleRequestDto.getAccessLevel()) {
+				validRoles.add(roleDto.getUuid());
+			}
+		});
+		return validRoles;
 	}
 
 	private void publishToKafka(Object object) {
@@ -834,6 +872,24 @@ public class UserServiceImpl implements UserService {
 		});
 
 		return userMap;
+	}
+	
+	
+	@Override
+	public List<String> getUserProfileDto(List<String> mobileNos) {
+
+		Set<String> mobileNo = mobileNos.stream().collect(Collectors.toSet());
+
+		List<UserProfileDto> userProfileDto=UserAdapter.getUserProfileDtos(userDbService.findByMobileIn(mobileNo));
+
+		userProfileDto.forEach(user -> {
+			if(mobileNos.contains(user.getMobile())) {
+				mobileNos.remove(user.getMobile());
+				
+			}
+		});
+
+		return mobileNos;
 	}
 
 	@Override

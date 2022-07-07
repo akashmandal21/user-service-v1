@@ -85,6 +85,12 @@ public class RoleServiceImpl implements RoleService {
 	}
 
 	@Override
+	public List<RoleDto> getRoleByUuidIn(List<String> roleUuidList) {
+		List<RoleEntity> roleEntityList = roleDbService.findByUuidIn(roleUuidList);
+		return RoleAdapter.getDtoList(roleEntityList);
+	}
+
+	@Override
 	public List<RoleDto> findByDepartmentAndAccessLevel(Department department, AccessLevel accessLevel) {
 		List<RoleEntity> roleEntityList = roleDbService.findByDepartmentAndAccessLevel(department, accessLevel);
 		return RoleAdapter.getDtoList(roleEntityList);
