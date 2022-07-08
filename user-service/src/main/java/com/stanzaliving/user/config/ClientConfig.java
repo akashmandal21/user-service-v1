@@ -26,9 +26,6 @@ public class ClientConfig {
     @Value("${service.booking.url}")
     private String bookingServiceUrl;
 
-    @Value("${service.aggregation.url}")
-    private String aggregationClientUrl;
-
     @Bean
     public InternalDataControllerApi internalDataControllerApi() {
         return new InternalDataControllerApi(new StanzaRestClient(transformationUrl));
@@ -53,10 +50,5 @@ public class ClientConfig {
     @Bean
     public BookingDataControllerApi bookingDataControllerApi() {
         return new BookingDataControllerApi(new StanzaRestClient(bookingServiceUrl));
-    }
-
-    @Bean
-    public VentaAggregationServiceApi ventaAggregationServiceApi() {
-        return new VentaAggregationServiceApi(new StanzaRestClient(aggregationClientUrl));
     }
 }
