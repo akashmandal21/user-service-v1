@@ -135,6 +135,10 @@ public class AclUserServiceImpl implements AclUserService {
 	@Autowired
 	private RoleAccessModuleRepository roleAccessModuleRepository;
 
+	public static final String CITY_HEAD_ROLE = "SALES_CITY_HEAD";
+	public static final String CLUSTER_MANAGER_ROLE = "SALES_CLUSTER_MANAGER";
+	public static final String SALES_ASSOCIATE_ROLE = "SALES_ASSOCIATE";
+
 	@Override
 	public void addRole(AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleDto) {
 
@@ -843,6 +847,20 @@ public class AclUserServiceImpl implements AclUserService {
 	}
 
 	@Override
+	public List<UserAccessModuleDto> getAccessModules() {
+		log.info("Get Access Modules");
+		List<UserAccessModuleDto> userAccessModuleDtoList = new ArrayList<>();
+		AccessModule[] accessModules = AccessModule.values();
+		for (AccessModule accessModule : accessModules) {
+			UserAccessModuleDto userAccessModuleDto = new UserAccessModuleDto();
+			userAccessModuleDto.setAccessModule(accessModule);
+			userAccessModuleDto.setAccessModuleName(accessModule.getName());
+			userAccessModuleDtoList.add(userAccessModuleDto);
+		}
+		return userAccessModuleDtoList;
+	}
+
+	@Override
 	public List<CityMetadataDto> getCitiesByUserAcessAndDepartment(String userUuid, Department department) {
 		log.info("Get cities for user : {} and department : {}", userUuid, department);
 		UserDepartmentLevelEntity userDepartmentLevelEntitiesByCountry = userDepartmentLevelRepository
@@ -918,6 +936,15 @@ public class AclUserServiceImpl implements AclUserService {
 
 	private void getSalesAssociates(UsersByAccessModulesAndCitiesRequestDto requestDto, List<String> userDepartmentLevelUuids,
 									List<UsersByAccessModulesAndCitiesResponseDto> responseDtoList, String userUuid) {
+		RoleEntity roleEntity = roleRepository.findByRoleName(SALES_ASSOCIATE_ROLE);
+		if (Objects.isNull(roleEntity)) {
+			return;
+		}
+		List<UserDepartmentLevelRoleEntity> saDepartmentLevelRoleEntities = userDepartmentLevelRoleRepository.findByRoleUuid(roleEntity.getUuid());
+		if (CollectionUtils.isEmpty(saDepartmentLevelRoleEntities)) {
+			return;
+		}
+		userDepartmentLevelUuids.retainAll(saDepartmentLevelRoleEntities.stream().map(UserDepartmentLevelRoleEntity :: getUserDepartmentLevelUuid).collect(Collectors.toList()));
 		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelRepository
 			.findByUuidInAndAccessLevel(userDepartmentLevelUuids, AccessLevel.RESIDENCE);
 		if (CollectionUtils.isEmpty(userDepartmentLevelEntityList)) {
@@ -974,6 +1001,15 @@ public class AclUserServiceImpl implements AclUserService {
 
 	private void getClusterManagers(UsersByAccessModulesAndCitiesRequestDto requestDto, List<String> userDepartmentLevelUuids,
 									List<UsersByAccessModulesAndCitiesResponseDto> responseDtoList, String userUuid) {
+		RoleEntity roleEntity = roleRepository.findByRoleName(CLUSTER_MANAGER_ROLE);
+		if (Objects.isNull(roleEntity)) {
+			return;
+		}
+		List<UserDepartmentLevelRoleEntity> cmDepartmentLevelRoleEntities = userDepartmentLevelRoleRepository.findByRoleUuid(roleEntity.getUuid());
+		if (CollectionUtils.isEmpty(cmDepartmentLevelRoleEntities)) {
+			return;
+		}
+		userDepartmentLevelUuids.retainAll(cmDepartmentLevelRoleEntities.stream().map(UserDepartmentLevelRoleEntity :: getUserDepartmentLevelUuid).collect(Collectors.toList()));
 		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelRepository
 			.findByUuidInAndAccessLevel(userDepartmentLevelUuids, AccessLevel.MICROMARKET);
 		if (CollectionUtils.isEmpty(userDepartmentLevelEntityList)) {
@@ -1048,6 +1084,15 @@ public class AclUserServiceImpl implements AclUserService {
 
 	private void getCityHeads(UsersByAccessModulesAndCitiesRequestDto requestDto, List<String> userDepartmentLevelUuids,
 							  List<UsersByAccessModulesAndCitiesResponseDto> responseDtoList, String userUuid) {
+		RoleEntity roleEntity = roleRepository.findByRoleName(CITY_HEAD_ROLE);
+		if (Objects.isNull(roleEntity)) {
+			return;
+		}
+		List<UserDepartmentLevelRoleEntity> chDepartmentLevelRoleEntities = userDepartmentLevelRoleRepository.findByRoleUuid(roleEntity.getUuid());
+		if (CollectionUtils.isEmpty(chDepartmentLevelRoleEntities)) {
+			return;
+		}
+		userDepartmentLevelUuids.retainAll(chDepartmentLevelRoleEntities.stream().map(UserDepartmentLevelRoleEntity :: getUserDepartmentLevelUuid).collect(Collectors.toList()));
 		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelRepository
 			.findByUuidInAndAccessLevel(userDepartmentLevelUuids, AccessLevel.CITY);
 		if (CollectionUtils.isEmpty(userDepartmentLevelEntityList)) {

@@ -112,6 +112,14 @@ public class AclUserController {
         }
     }
 
+    @GetMapping("/accessModule/v2")
+    public ResponseDto<List<UserAccessModuleDto>> getAccessModules() {
+
+        log.info("Get Access Modules");
+        List<UserAccessModuleDto> userAccessModuleDtoList = aclUserService.getAccessModules();
+        return ResponseDto.success("List of Access Modules", userAccessModuleDtoList);
+    }
+
     @GetMapping("/cities/{department}")
     public ResponseDto<List<CityMetadataDto>> getCitiesByUserAcessAndDepartment(@RequestAttribute(name = SecurityConstants.USER_ID) @NotBlank(message = "User Id is mandatory to get user profile") String userUuid,
                                                                                 @PathVariable @NotBlank(message = "Department must not be blank") Department department) {
