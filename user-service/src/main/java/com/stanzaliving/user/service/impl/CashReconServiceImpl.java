@@ -78,7 +78,7 @@ public class CashReconServiceImpl implements CashReconService {
         String microMarketId;
         if (TransferTo.CLUSTER_MANAGER.equals(transferTo)) {
             userDepartmentLevelEntity =
-                    userDepartmentLevelEntityList.stream().filter(x -> x.getAccessLevel().equals(AccessLevel.RESIDENCE))
+                    userDepartmentLevelEntityList.stream().filter(x -> AccessLevel.RESIDENCE.equals(x.getAccessLevel()))
                             .findFirst();
             if (userDepartmentLevelEntity.isPresent()) {
                 residenceIds = Arrays.asList(userDepartmentLevelEntity.get().getCsvAccessLevelEntityUuid().split(","));
@@ -96,7 +96,7 @@ public class CashReconServiceImpl implements CashReconService {
                 return getClusterManagerOrNodalList(microMarketIds, transferTo, userUuidOfDepositor);
             } else {
                 userDepartmentLevelEntity =
-                        userDepartmentLevelEntityList.stream().filter(x -> x.getAccessLevel().equals(AccessLevel.MICROMARKET))
+                        userDepartmentLevelEntityList.stream().filter(x -> AccessLevel.MICROMARKET.equals(x.getAccessLevel()))
                                 .findFirst();
                 if (userDepartmentLevelEntity.isPresent()) {
                     microMarketIds = Arrays.asList(userDepartmentLevelEntity.get().getCsvAccessLevelEntityUuid().split(","));
@@ -106,7 +106,7 @@ public class CashReconServiceImpl implements CashReconService {
 
         } else if (TransferTo.NODAL_OFFICER.equals(transferTo)) {
             userDepartmentLevelEntity =
-                    userDepartmentLevelEntityList.stream().filter(x -> x.getAccessLevel().equals(AccessLevel.RESIDENCE))
+                    userDepartmentLevelEntityList.stream().filter(x -> AccessLevel.RESIDENCE.equals(x.getAccessLevel()))
                             .findFirst();
             if (userDepartmentLevelEntity.isPresent()) {
                 residenceIds = Arrays.asList(userDepartmentLevelEntity.get().getCsvAccessLevelEntityUuid().split(","));
@@ -122,7 +122,7 @@ public class CashReconServiceImpl implements CashReconService {
                 return getClusterManagerOrNodalList(cityIds, transferTo, userUuidOfDepositor);
             } else {
                 userDepartmentLevelEntity =
-                        userDepartmentLevelEntityList.stream().filter(x -> x.getAccessLevel().equals(AccessLevel.MICROMARKET))
+                        userDepartmentLevelEntityList.stream().filter(x -> AccessLevel.MICROMARKET.equals(x.getAccessLevel()))
                                 .findFirst();
                 if (userDepartmentLevelEntity.isPresent()) {
                     microMarketIds = Arrays.asList(userDepartmentLevelEntity.get().getCsvAccessLevelEntityUuid().split(","));
@@ -146,7 +146,7 @@ public class CashReconServiceImpl implements CashReconService {
                     return getClusterManagerOrNodalList(cityIds, transferTo, userUuidOfDepositor);
                 } else {
                     userDepartmentLevelEntity =
-                            userDepartmentLevelEntityList.stream().filter(x -> x.getAccessLevel().equals(AccessLevel.CITY))
+                            userDepartmentLevelEntityList.stream().filter(x -> AccessLevel.CITY.equals(x.getAccessLevel()))
                                     .findFirst();
                     if (userDepartmentLevelEntity.isPresent()) {
                         cityIds = Arrays.asList(userDepartmentLevelEntity.get().getCsvAccessLevelEntityUuid().split(","));
@@ -194,27 +194,27 @@ public class CashReconServiceImpl implements CashReconService {
         } else if (TransferTo.NODAL_OFFICER.equals(transferTo)) {
             userIdMapping = aclUserService.getActiveUsersForRoles(Department.OPS, "NODAL_CASH_LEDGER_EDITOR", ids);
         }
-        if(Objects.nonNull(userIdMapping) && userIdMapping.size() > 0){
-            userIdMapping.remove(userUuidOfDepositor);
-            buildCashReceiverInfo(cashReconReceiverInfoList, userIdMapping);
-        }
         log.info("cashReconReceiverInfoList is {}", cashReconReceiverInfoList);
+        if (CollectionUtils.isEmpty(userIdMapping)) return cashReconReceiverInfoList;
+
+        userIdMapping.remove(userUuidOfDepositor);
+        buildCashReceiverInfo(cashReconReceiverInfoList, userIdMapping);
+
         return cashReconReceiverInfoList;
     }
 
     private void buildCashReceiverInfo(List<CashReconReceiverInfo> cashReconReceiverInfoList, Map<String, List<String>> userIdMapping) {
-        if (Objects.nonNull(userIdMapping) && userIdMapping.size() > 0) {
-            Set<String> userIds = userIdMapping.keySet();
-            for (String userId : userIds) {
-                UserEntity userEntity = userDbService.findByUuidAndStatus(userId, true);
-                if(Objects.nonNull(userEntity)) {
-                    cashReconReceiverInfoList.add(CashReconReceiverInfo.builder()
-                            .userUuid(userId)
-                            .name(userEntity.getUserProfile().getFirstName() + " " + userEntity.getUserProfile().getLastName())
-                            .phone(userEntity.getMobile())
-                            .email(userEntity.getEmail())
-                            .build());
-                }
+        if (CollectionUtils.isEmpty(userIdMapping)) return;
+        Set<String> userIds = userIdMapping.keySet();
+        for (String userId : userIds) {
+            UserEntity userEntity = userDbService.findByUuidAndStatus(userId, true);
+            if (Objects.nonNull(userEntity)) {
+                cashReconReceiverInfoList.add(CashReconReceiverInfo.builder()
+                        .userUuid(userId)
+                        .name(userEntity.getUserProfile().getFirstName() + " " + userEntity.getUserProfile().getLastName())
+                        .phone(userEntity.getMobile())
+                        .email(userEntity.getEmail())
+                        .build());
             }
         }
     }
