@@ -39,7 +39,7 @@ public class InternalUserDetailsController {
 		return ResponseDto.success("Found User for userUuid", includeDeactivated ? userService.getUserByUserId(userUuid) : userService.getActiveUserByUserId(userUuid));
 	}
 
-	@GetMapping("getUserProfileList")
+	@PostMapping("getUserProfileList")
 	public ResponseDto<List<UserProfileDto>> getUserProfileList(@RequestBody UserProfileRequestDto userProfileRequestDto) {
 
 		log.info("Got UserProfileRequestDto: {}",userProfileRequestDto);
