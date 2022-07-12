@@ -50,17 +50,6 @@ public class InternalUserDetailsController {
 		return ResponseDto.success("Found User for userUuid", userService.getUserProfileList(userProfileRequestDto.getUserUuids()));
 	}
 
-	@PostMapping("getUserProfileList")
-	public ResponseDto<List<UserProfileDto>> getUserProfileListPost(@RequestBody UserProfileRequestDto userProfileRequestDto) {
-
-		log.info("Got UserProfileRequestDto: {}",userProfileRequestDto);
-
-		if(Objects.isNull(userProfileRequestDto))
-			throw new ApiValidationException("User id's not found");
-
-		return ResponseDto.success("Found User for userUuid", userService.getUserProfileList(userProfileRequestDto.getUserUuids()));
-	}
-
 
 	@GetMapping("email")
 	public ResponseDto<UserProfileDto> getUserProfileDtoByEmail(@RequestParam(name = "email", required = true) String email) {

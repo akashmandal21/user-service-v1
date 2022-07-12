@@ -19,7 +19,7 @@
 		<groupId>com.stanzaliving</groupId>
 		<artifactId>user-parent</artifactId>
 		<version>1.0.0</version>
-		<relativePath>../pom.xml</relativePath>
+		<relativePath>..</relativePath>
 	</parent>
 
 	<dependencies>
