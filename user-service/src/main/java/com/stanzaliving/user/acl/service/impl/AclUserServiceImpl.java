@@ -298,7 +298,7 @@ public class AclUserServiceImpl implements AclUserService {
 
 		if (Objects.nonNull(roleDto) && roleDto.getDepartment().equals(department)) {
 
-			List<UserDepartmentLevelRoleEntity> departmentLevelRoleEntities = userDepartmentLevelRoleDbService.findByRoleUuid(roleDto.getUuid());
+			List<UserDepartmentLevelRoleEntity> departmentLevelRoleEntities = userDepartmentLevelRoleDbService.findByRoleUuidInAndStatus(Collections.singletonList(roleDto.getUuid()), true);
 
 			if (CollectionUtils.isNotEmpty(departmentLevelRoleEntities)) {
 
