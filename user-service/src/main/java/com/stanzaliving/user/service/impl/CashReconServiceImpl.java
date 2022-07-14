@@ -60,67 +60,63 @@ public class CashReconServiceImpl implements CashReconService {
         TransferTo transferTo = cashReconReceiverRequest.getTransferTo();
 
         List<UserDepartmentLevelEntity> userDepartmentLevelEntityList =
-                userDepartmentLevelDbService.findByUserUuidAndDepartmentAndStatus(userUuidOfDepositor, Department.OPS, true);
+                userDepartmentLevelDbService.findByUserUuidAndStatus(userUuidOfDepositor, true);
 
         if (CollectionUtils.isEmpty(userDepartmentLevelEntityList))
             return cashReceiverInfoList;
         log.info("userDepartmentLevelEntityList is {}", userDepartmentLevelEntityList);
-        Optional<UserDepartmentLevelEntity> userDepartmentLevelEntity;
-        List<String> residenceIds;
-        List<String> microMarketIds = new ArrayList<>();
-        List<String> cityIds = new ArrayList<>();
+        List<UserDepartmentLevelEntity> userDepartmentLevelEntities;
+        Set<String> residenceIds;
+        Set<String> microMarketIds = new HashSet<>();
+        Set<String> cityIds = new HashSet<>();
         String cityId;
         String microMarketId;
         if (TransferTo.CLUSTER_MANAGER.equals(transferTo)) {
-            userDepartmentLevelEntity =
-                    userDepartmentLevelEntityList.stream().filter(x -> AccessLevel.RESIDENCE.equals(x.getAccessLevel()))
-                            .findFirst();
-            if (userDepartmentLevelEntity.isPresent()) {
-                residenceIds = Arrays.asList(userDepartmentLevelEntity.get().getCsvAccessLevelEntityUuid().split(","));
+            userDepartmentLevelEntities =
+                    userDepartmentLevelEntityList.stream().filter(x -> AccessLevel.RESIDENCE.equals(x.getAccessLevel())).collect(Collectors.toList());
+            if (!CollectionUtils.isEmpty(userDepartmentLevelEntities)) {
+                residenceIds = getAccessLevelEntityIds(userDepartmentLevelEntities);
                 for (String residenceId : residenceIds) {
                     ResponseDto<ResidenceUIDto> residenceAggregationEntityDtoResponseDto = transformationClientApi.getResidenceDetail(residenceId);
                     if (Objects.nonNull(residenceAggregationEntityDtoResponseDto)) {
                         ResidenceUIDto residenceFilterRequestDto = residenceAggregationEntityDtoResponseDto.getData();
                         if (Objects.nonNull(residenceFilterRequestDto)) {
-                            microMarketId = residenceFilterRequestDto.getMicroMarketId() + "";
-                            if (!StringUtils.isEmpty(microMarketId) && !microMarketIds.contains(microMarketId))
+                            microMarketId = residenceFilterRequestDto.getMicroMarketUuid();
+                            if (!StringUtils.isEmpty(microMarketId))
                                 microMarketIds.add(microMarketId);
                         }
                     }
                 }
                 return getClusterManagerOrNodalList(microMarketIds, transferTo, userUuidOfDepositor);
             } else {
-                userDepartmentLevelEntity =
-                        userDepartmentLevelEntityList.stream().filter(x -> AccessLevel.MICROMARKET.equals(x.getAccessLevel()))
-                                .findFirst();
-                if (userDepartmentLevelEntity.isPresent()) {
-                    microMarketIds = Arrays.asList(userDepartmentLevelEntity.get().getCsvAccessLevelEntityUuid().split(","));
+                userDepartmentLevelEntities =
+                        userDepartmentLevelEntityList.stream().filter(x -> AccessLevel.MICROMARKET.equals(x.getAccessLevel())).collect(Collectors.toList());
+                if (!CollectionUtils.isEmpty(userDepartmentLevelEntities)) {
+                    microMarketIds = getAccessLevelEntityIds(userDepartmentLevelEntities);
                     return getClusterManagerOrNodalList(microMarketIds, transferTo, userUuidOfDepositor);
                 }
             }
 
         } else if (TransferTo.NODAL_OFFICER.equals(transferTo)) {
-            userDepartmentLevelEntity =
-                    userDepartmentLevelEntityList.stream().filter(x -> AccessLevel.RESIDENCE.equals(x.getAccessLevel()))
-                            .findFirst();
-            if (userDepartmentLevelEntity.isPresent()) {
-                residenceIds = Arrays.asList(userDepartmentLevelEntity.get().getCsvAccessLevelEntityUuid().split(","));
+            userDepartmentLevelEntities =
+                    userDepartmentLevelEntityList.stream().filter(x -> AccessLevel.RESIDENCE.equals(x.getAccessLevel())).collect(Collectors.toList());
+            if (!CollectionUtils.isEmpty(userDepartmentLevelEntities)) {
+                residenceIds = getAccessLevelEntityIds(userDepartmentLevelEntities);
                 for (String residenceId : residenceIds) {
                     ResponseDto<ResidenceUIDto> aggregationEntityResponseDto = transformationClientApi.getResidenceDetail(residenceId);
                     if (Objects.nonNull(aggregationEntityResponseDto)) {
                         ResidenceUIDto aggregationEntityDto = aggregationEntityResponseDto.getData();
-                        cityId = Objects.nonNull(aggregationEntityDto) ? aggregationEntityDto.getCityId() + "" : null;
+                        cityId = Objects.nonNull(aggregationEntityDto) ? aggregationEntityDto.getCityUuid() : null;
                         if (!StringUtils.isEmpty(cityId))
                             cityIds.add(cityId);
                     }
                 }
                 return getClusterManagerOrNodalList(cityIds, transferTo, userUuidOfDepositor);
             } else {
-                userDepartmentLevelEntity =
-                        userDepartmentLevelEntityList.stream().filter(x -> AccessLevel.MICROMARKET.equals(x.getAccessLevel()))
-                                .findFirst();
-                if (userDepartmentLevelEntity.isPresent()) {
-                    microMarketIds = Arrays.asList(userDepartmentLevelEntity.get().getCsvAccessLevelEntityUuid().split(","));
+                userDepartmentLevelEntities =
+                        userDepartmentLevelEntityList.stream().filter(x -> AccessLevel.MICROMARKET.equals(x.getAccessLevel())).collect(Collectors.toList());
+                if (!CollectionUtils.isEmpty(userDepartmentLevelEntities)) {
+                    microMarketIds = getAccessLevelEntityIds(userDepartmentLevelEntities);
                     for (String microMarketid : microMarketIds) {
                         ResponseDto<List<ResidenceDto>>  bookingResidenceAggregationEntityDtoResponse = transformationClientApi.getResidencesByMicromarketUuid(microMarketid);
                         if(Objects.nonNull(bookingResidenceAggregationEntityDtoResponse) && Objects.nonNull(bookingResidenceAggregationEntityDtoResponse.getData())) {
@@ -130,7 +126,7 @@ public class CashReconServiceImpl implements CashReconService {
                                     ResponseDto<MicroMarketMetadataDto> microMarketMetadataResponseDto =
                                             transformationClientApi.getMicromarketData(bookingResidenceAggregationEntityDto.getMicromarketUuid());
                                     if(Objects.nonNull(microMarketMetadataResponseDto) && Objects.nonNull(microMarketMetadataResponseDto.getData())) {
-                                        String cityUuid = microMarketMetadataResponseDto.getData().getCityId() + "";
+                                        String cityUuid = microMarketMetadataResponseDto.getData().getCityUuid();
                                         if(!StringUtils.isEmpty(cityUuid))
                                             cityIds.add(cityUuid);
                                     }
@@ -140,11 +136,10 @@ public class CashReconServiceImpl implements CashReconService {
                     }
                     return getClusterManagerOrNodalList(cityIds, transferTo, userUuidOfDepositor);
                 } else {
-                    userDepartmentLevelEntity =
-                            userDepartmentLevelEntityList.stream().filter(x -> AccessLevel.CITY.equals(x.getAccessLevel()))
-                                    .findFirst();
-                    if (userDepartmentLevelEntity.isPresent()) {
-                        cityIds = Arrays.asList(userDepartmentLevelEntity.get().getCsvAccessLevelEntityUuid().split(","));
+                    userDepartmentLevelEntities =
+                            userDepartmentLevelEntityList.stream().filter(x -> AccessLevel.CITY.equals(x.getAccessLevel())).collect(Collectors.toList());
+                    if (!CollectionUtils.isEmpty(userDepartmentLevelEntities)) {
+                        cityIds = getAccessLevelEntityIds(userDepartmentLevelEntities);
                         return getClusterManagerOrNodalList(cityIds, transferTo, userUuidOfDepositor);
                     }
                 }
@@ -152,6 +147,14 @@ public class CashReconServiceImpl implements CashReconService {
         }
 
         return cashReceiverInfoList;
+    }
+
+    private Set<String> getAccessLevelEntityIds(List<UserDepartmentLevelEntity> userDepartmentLevelEntities) {
+        Set<String> accessLevelEntityIds = new HashSet<>();
+        for(UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntities) {
+            accessLevelEntityIds.addAll(Arrays.asList(userDepartmentLevelEntity.getCsvAccessLevelEntityUuid().split(",")));
+        }
+        return accessLevelEntityIds;
     }
 
     @Override
@@ -181,13 +184,13 @@ public class CashReconServiceImpl implements CashReconService {
         return nodalOfficerInfoList;
     }
 
-    private List<CashReconReceiverInfo> getClusterManagerOrNodalList(List<String> ids, TransferTo transferTo, String userUuidOfDepositor) {
+    private List<CashReconReceiverInfo> getClusterManagerOrNodalList(Set<String> ids, TransferTo transferTo, String userUuidOfDepositor) {
         List<CashReconReceiverInfo> cashReconReceiverInfoList = new ArrayList<>();
         Map<String, List<String>> userIdMapping = new HashMap<>();
         if (TransferTo.CLUSTER_MANAGER.equals(transferTo)) {
-            userIdMapping = aclUserService.getActiveUsersForRoles(Department.OPS, "CM_CASH_LEDGER_EDITOR", ids);
+            userIdMapping = aclUserService.getActiveUsersForRole("CM_CASH_LEDGER_EDITOR", ids);
         } else if (TransferTo.NODAL_OFFICER.equals(transferTo)) {
-            userIdMapping = aclUserService.getActiveUsersForRoles(Department.OPS, "NODAL_CASH_LEDGER_EDITOR", ids);
+            userIdMapping = aclUserService.getActiveUsersForRole("NODAL_CASH_LEDGER_EDITOR", ids);
         }
         log.info("cashReconReceiverInfoList is {}", cashReconReceiverInfoList);
         if (CollectionUtils.isEmpty(userIdMapping)) return cashReconReceiverInfoList;

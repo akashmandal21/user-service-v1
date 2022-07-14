@@ -335,6 +335,52 @@ public class AclUserServiceImpl implements AclUserService {
 		return userIdAccessLevelIdListMap;
 	}
 
+
+	@Override
+	public Map<String, List<String>> getActiveUsersForRole(String roleName, Set<String> accessLevelEntityList) {
+
+		log.info("Got request to get list of userid by rolename {}", roleName);
+
+		RoleDto roleDto = roleService.findByRoleName(roleName);
+
+		Map<String, List<String>> userIdAccessLevelIdListMap = new HashMap<>();
+
+		if (Objects.nonNull(roleDto) ) {
+
+			List<UserDepartmentLevelRoleEntity> departmentLevelRoleEntities = userDepartmentLevelRoleDbService.findByRoleUuid(roleDto.getUuid());
+
+			if (CollectionUtils.isNotEmpty(departmentLevelRoleEntities)) {
+
+				List<String> uuids = departmentLevelRoleEntities.stream().map(UserDepartmentLevelRoleEntity::getUserDepartmentLevelUuid).collect(Collectors.toList());
+
+				List<UserDepartmentLevelEntity> departmentLevelEntities = userDepartmentLevelDbService.findByUuidInAndAccessLevel(uuids, roleDto.getAccessLevel());
+
+				if (CollectionUtils.isNotEmpty(departmentLevelEntities)) {
+
+					departmentLevelEntities.forEach(entity -> {
+
+						UserEntity user = userDbService.findByUuid(entity.getUserUuid());
+
+						if(user.isStatus()) {
+							Set<String> accessLevelUuids = new HashSet<>(Arrays.asList((entity.getCsvAccessLevelEntityUuid().split(","))));
+
+							for (String accessLevelEntity : accessLevelEntityList) {
+								if (accessLevelUuids.contains(accessLevelEntity)) {
+									List<String> accessLevelIds = userIdAccessLevelIdListMap.getOrDefault(entity.getUserUuid(), new ArrayList<>());
+									accessLevelIds.add(accessLevelEntity);
+									userIdAccessLevelIdListMap.put(entity.getUserUuid(), accessLevelIds);
+								}
+							}
+						}
+					});
+				}
+			}
+
+		}
+
+		return userIdAccessLevelIdListMap;
+	}
+
 	@Override
 	public List<UserContactDetailsResponseDto> getUserContactDetails(Department department, String roleName, List<String> accessLevelEntity) {
 		List<String> userUuids = new ArrayList<>(getUsersForRoles(department, roleName, accessLevelEntity).keySet());
