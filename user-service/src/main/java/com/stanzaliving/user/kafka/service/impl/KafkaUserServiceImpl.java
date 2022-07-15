@@ -202,9 +202,11 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 					message = propertyManager.getProperty("default.otp.msg", UserConstants.DEFAULT_OTP_TEXT);
 			}
 		}
-
+		String Hash = " CiJzL9hCIpd";
+		String front = "<#> ";
 		message = message.replaceAll("<otp>", String.valueOf(otpEntity.getOtp()));
-		
+		message = message.concat((Hash));
+		message = front.concat((message));
 		return message;
 	}
 
