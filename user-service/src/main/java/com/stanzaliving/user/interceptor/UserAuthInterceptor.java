@@ -63,6 +63,7 @@ public class UserAuthInterceptor extends HandlerInterceptorAdapter {
 
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+		log.info("request recieved for :{}",request.getRequestURI());
 		String token = extractTokenFromRequest(request);
 
 		try {
