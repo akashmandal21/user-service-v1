@@ -89,7 +89,7 @@ public class UserAuthInterceptor extends HandlerInterceptorAdapter {
 					log.error("No User Session found with Token: " + token + ". Cann't authorize user.");
 				}
 			} else {
-				log.error("User Token is null/empty. Can't authorize user. Send to login for url :{}, cookies detail {}",request.getRequestURI(),request.getCookies());
+				log.error("User Token is null/empty. Can't authorize user. Send to login for url :{}, cookies detail {}",request.getRequestURI(), Arrays.stream(request.getCookies()).anyMatch(s->s.getName().equalsIgnoreCase(SecurityConstants.TOKEN_HEADER_NAME)||s.getName().equalsIgnoreCase(SecurityConstants.AUTHORIZATION_HEADER)));
 			}
 		} catch (Exception e) {
 			log.error("Error validating user token: ", e);
