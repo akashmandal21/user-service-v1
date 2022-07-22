@@ -19,6 +19,7 @@ import javax.persistence.Query;
 import javax.validation.Valid;
 
 import com.stanzaliving.core.base.exception.StanzaException;
+import com.stanzaliving.core.base.exception.UserValidationException;
 import com.stanzaliving.user.acl.repository.UserDepartmentLevelRepository;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.ListUtils;
@@ -147,7 +148,7 @@ public class UserServiceImpl implements UserService {
 		UserEntity userEntity = userDbService.findByUuidAndStatus(userId, true);
 
 		if (Objects.isNull(userEntity)) {
-			throw new ApiValidationException("User not found for UserId: " + userId);
+			throw new UserValidationException("User not found for UserId: " + userId);
 		}
 
 		return UserAdapter.getUserProfileDto(userEntity);
