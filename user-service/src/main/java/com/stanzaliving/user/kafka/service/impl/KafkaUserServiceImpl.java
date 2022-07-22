@@ -87,7 +87,7 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 				.smsType(SmsType.OTP)
 				.isoCode(otpEntity.getIsoCode())
 				.mobile(otpEntity.getMobile())
-				.text(getOtpMessageForUserType(otpEntity, null))
+				.text(getOtpMessageForUserType(otpEntity, null, false))
 				.templateId(getNotificationTemplateId(otpEntity))
 				.build();
 	}
@@ -137,12 +137,12 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 
 		emailDto.setSubject("OTP to access Stanza Living");
 
-		emailDto.setContent(getOtpMessageForUserType(otpEntity, userEntity));
+		emailDto.setContent(getOtpMessageForUserType(otpEntity, userEntity, true));
 
 		return emailDto;
 	}
 
-	private String getOtpMessageForUserType(OtpEntity otpEntity, UserEntity userEntity) {
+	private String getOtpMessageForUserType(OtpEntity otpEntity, UserEntity userEntity, boolean isMail) {
 		String message;
 
 		if (OtpType.MOBILE_VERIFICATION == otpEntity.getOtpType()) {
@@ -201,6 +201,12 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 				default:
 					message = propertyManager.getProperty("default.otp.msg", UserConstants.DEFAULT_OTP_TEXT);
 			}
+			if(!isMail){
+				String Hash = " CiJzL9hCIpd";
+				String front = "<#> ";
+				message = message.concat((Hash));
+				message = front.concat((message));
+			}
 		}
 
 		message = message.replaceAll("<otp>", String.valueOf(otpEntity.getOtp()));
@@ -218,21 +224,21 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 		} else {
 			switch (otpEntity.getUserType()) {
 				case STUDENT:
-					return NotificationKeys.STUDENT_OTP_MSG;
+					return NotificationKeys.STUDENT_OTP_MSG_NEW;
 				case PARENT:
-					return NotificationKeys.PARENT_OTP_MSG;
+					return NotificationKeys.PARENT_OTP_MSG_NEW;
 				case LEGAL:
-					return NotificationKeys.LEGAL_OTP_MSG;
+					return NotificationKeys.LEGAL_OTP_MSG_NEW;
 				case HR:
-					return NotificationKeys.HR_OTP_MSG;
+					return NotificationKeys.HR_OTP_MSG_NEW;
 				case TECH:
-					return NotificationKeys.TECH_OTP_MSG;
+					return NotificationKeys.TECH_OTP_MSG_NEW;
 				case FINANCE:
-					return NotificationKeys.FINANCE_OTP_MSG;
+					return NotificationKeys.FINANCE_OTP_MSG_NEW;
 				case PROCUREMENT:
-					return NotificationKeys.PROCUREMENT_OTP_MSG;
+					return NotificationKeys.PROCUREMENT_OTP_MSG_NEW;
 				default:
-					return NotificationKeys.DEFAULT_OTP_MSG;
+					return NotificationKeys.DEFAULT_OTP_MSG_NEW;
 			}
 		}
 	}
