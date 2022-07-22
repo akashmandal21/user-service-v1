@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.stanzaliving.user.controller;
 
@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.user.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.stanzaliving.booking.dto.BookingResponseDto;
 import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.base.constants.SecurityConstants;
 import com.stanzaliving.core.base.utils.ObjectMapperUtil;
@@ -27,6 +29,7 @@ import com.stanzaliving.core.base.utils.SecureCookieUtil;
 import com.stanzaliving.core.base.utils.StanzaUtils;
 import com.stanzaliving.core.user.acl.dto.AclUserDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
+import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.EmailOtpValidateRequestDto;
 import com.stanzaliving.core.user.request.dto.EmailVerificationRequestDto;
 import com.stanzaliving.core.user.request.dto.LoginRequestDto;
@@ -36,6 +39,7 @@ import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.entity.UserSessionEntity;
 import com.stanzaliving.user.service.AuthService;
+import com.stanzaliving.user.service.OnboardGuestService;
 import com.stanzaliving.user.service.SessionService;
 
 import lombok.extern.log4j.Log4j2;
@@ -62,6 +66,9 @@ public class AuthController {
 	@Autowired
 	private AclService aclService;
 
+	@Autowired
+	private OnboardGuestService onboardGuestService;
+
 	@PostMapping("login")
 	public ResponseDto<Void> login(@RequestBody @Valid LoginRequestDto loginRequestDto) {
 
@@ -69,21 +76,33 @@ public class AuthController {
 
 		return ResponseDto.success("OTP Sent for Login");
 	}
-	
+
 	@PostMapping("validateOtp")
 	public ResponseDto<AclUserDto> validateOtp(
 			@RequestBody @Valid OtpValidateRequestDto otpValidateRequestDto, HttpServletRequest request, HttpServletResponse response) {
 
 		UserProfileDto userProfileDto = authService.validateOtp(otpValidateRequestDto);
 
-		log.info("OTP Successfully Validated for User: " + userProfileDto.getUuid() + ". Creating User Session now");
+		log.info("OTP Successfully Validated for User: " + userProfileDto.getUuid() + ". Creating User Session now " + userProfileDto.getUserType());
 
 		String token = StanzaUtils.generateUniqueId();
 
 		UserSessionEntity userSessionEntity = sessionService.createUserSession(userProfileDto, token);
 
 		if (Objects.nonNull(userSessionEntity)) {
-			addTokenToResponse(request, response, token);
+			addTokenToResponse(request, response, token, userSessionEntity);
+			if(UserType.INVITED_GUEST.equals(userProfileDto.getUserType())) {
+
+				log.info("UserType for user is INVITED_GUEST {} " + userProfileDto.getUuid());
+				ResponseDto<BookingResponseDto> bookingResponseDto = onboardGuestService.createGuestBooking(userProfileDto.getMobile());
+				
+				log.info("\n\n\n\n\n OTP Successfully bookingResponseDto " + bookingResponseDto);
+				if (Objects.isNull(bookingResponseDto) ) {    
+					return ResponseDto.failure("Failed to create guest booking for " + userProfileDto.getMobile());
+				}
+
+			}
+
 			return ResponseDto.success("User Login Successfull", UserAdapter.getAclUserDto(userProfileDto, aclService.getUserDeptLevelRoleNameUrlExpandedDtoFe(userProfileDto.getUuid())));
 		}
 
@@ -97,40 +116,47 @@ public class AuthController {
 		UserSessionEntity userSessionEntity = sessionService.refreshUserSession(token);
 
 		if (Objects.nonNull(userSessionEntity)) {
-			addTokenToResponse(request, response, userSessionEntity.getToken());
-			return ResponseDto.success("Token refreshed Successfull", UserAdapter.getAclUserDto(userService.getUserProfile(userSessionEntity.getUserId()), aclService.getUserDeptLevelRoleNameUrlExpandedDtoFe(userSessionEntity.getUserId())));
+			log.info("Successfully refreshed userSessionEntity for user : {} . Adding token to response ...",
+					userSessionEntity.getUuid());
+			addTokenToResponse(request, response, userSessionEntity.getToken(), userSessionEntity);
+			ResponseDto<AclUserDto> aclUserDtoResponseDto = ResponseDto.success("Token refreshed Successfully",
+					UserAdapter.getAclUserDto(userService.getUserProfile(userSessionEntity.getUserId()),
+							aclService.getUserDeptLevelRoleNameUrlExpandedDtoFe(userSessionEntity.getUserId())));
+			log.info("Successfully refreshSession for user : {}", userSessionEntity.getUserId());
+			return aclUserDtoResponseDto;
 		}
 
+		log.error("Cannot refreshSession. userSessionEntity is null");
 		return ResponseDto.failure("Failed to refresh user session");
 	}
-	
+
 	@PostMapping("sendEmailVerificationOtp")
 	public ResponseDto<Void> sendEmailVerificationOtp(@RequestBody @Valid EmailVerificationRequestDto emailVerificationRequestDto) {
 
 		log.info("Request received to send otp for email verification: {}", emailVerificationRequestDto);
-		
+
 		authService.sendEmailOtp(emailVerificationRequestDto);
 
 		return ResponseDto.success("Email OTP Sent");
 	}
-	
+
 	@PostMapping("resendEmailVerificationOtp")
 	public ResponseDto<Void> resendEmailVerificationOtp(@RequestBody @Valid EmailVerificationRequestDto emailVerificationRequestDto) {
 
 		log.info("Request received to re-send otp for email verification: {}", emailVerificationRequestDto);
-		
+
 		authService.resendEmailOtp(emailVerificationRequestDto);
 
 		return ResponseDto.success("OTP Successfully Resent");
 	}
-	
+
 	@PostMapping("validateEmailVerificationOtp")
 	public ResponseDto<String> validateEmailVerificationOtp(@RequestBody EmailOtpValidateRequestDto emailOtpValidateRequestDto) {
 
 		log.info("Request received to validate otp for email verification and update Deatils: {}", ObjectMapperUtil.getString(emailOtpValidateRequestDto));
-		
+
 		UserEntity userEntity = authService.validateEmailVerificationOtpAndUpdateUserDetails(emailOtpValidateRequestDto);
-		
+
 		log.info("Email OTP Successfully verified for User: " + userEntity.getUuid());
 
 		return ResponseDto.success("Email OTP Successfully verified for User: " + userEntity.getUuid() + " with Email: " + userEntity.getEmail() + " and User Details Updated Successfully.");
@@ -160,17 +186,29 @@ public class AuthController {
 		return ResponseDto.success("Successfully Logged Out");
 	}
 
-	private void addTokenToResponse(HttpServletRequest request, HttpServletResponse response, String token) {
+	private void addTokenToResponse(HttpServletRequest request, HttpServletResponse response, String token,
+									UserSessionEntity userSessionEntity) {
 
-		if (StringUtils.isNotBlank(token)) {
+		try {
+			log.info("Request received for addTokenToResponse for user : {}", userSessionEntity.getUserId());
 
-			String frontEnv = request.getHeader(SecurityConstants.FRONT_ENVIRONMENT);
-			boolean isLocalFrontEnd = StringUtils.isNotBlank(frontEnv) && SecurityConstants.FRONT_ENVIRONMENT_LOCAL.equals(frontEnv);
+			if (StringUtils.isNotBlank(token)) {
 
-			String appEnv = request.getHeader(SecurityConstants.APP_ENVIRONMENT);
-			boolean isApp = StringUtils.isNotBlank(appEnv) && SecurityConstants.APP_ENVIRONMENT_TRUE.equals(appEnv);
+				String frontEnv = request.getHeader(SecurityConstants.FRONT_ENVIRONMENT);
+				boolean isLocalFrontEnd = StringUtils.isNotBlank(frontEnv) && SecurityConstants.FRONT_ENVIRONMENT_LOCAL.equals(frontEnv);
 
-			response.addCookie(SecureCookieUtil.create(SecurityConstants.TOKEN_HEADER_NAME, token, Optional.of(isLocalFrontEnd), Optional.of(isApp)));
+				String appEnv = request.getHeader(SecurityConstants.APP_ENVIRONMENT);
+				boolean isApp = StringUtils.isNotBlank(appEnv) && SecurityConstants.APP_ENVIRONMENT_TRUE.equals(appEnv);
+
+				response.addCookie(SecureCookieUtil.create(SecurityConstants.TOKEN_HEADER_NAME, token, Optional.of(isLocalFrontEnd), Optional.of(isApp)));
+				log.info("Successfully added token to response for user : {}", userSessionEntity.getUserId());
+			} else {
+				log.warn("Cannot add token to response, token not present for user :{}", userSessionEntity.getUserId());
+			}
+		} catch (Exception e) {
+			log.error("Exception while addTokenToResponse for user : {} , exception : {}",
+					userSessionEntity.getUserId(), e.getMessage());
+			throw new StanzaException(e);
 		}
 	}
 }

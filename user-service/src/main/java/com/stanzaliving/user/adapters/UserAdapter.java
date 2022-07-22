@@ -65,6 +65,7 @@ public class UserAdapter {
 				.secondaryMobile(addUserRequestDto.getSecondaryMobile())
 				.secondaryMobileVerified(false)
 				.gender(addUserRequestDto.getGender())
+				.nationality(addUserRequestDto.getNationality())
 				.profilePicture(addUserRequestDto.getProfilePicture())
 				.birthday(addUserRequestDto.getBirthday())
 				.maritalStatus(addUserRequestDto.getMaritalStatus())

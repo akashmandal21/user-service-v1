@@ -10,6 +10,7 @@ import java.util.Set;
 
 import javax.validation.Valid;
 
+import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.generic.dto.UIKeyValue;
 import com.stanzaliving.core.user.dto.UserRoleCacheDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,6 +124,15 @@ public class InternalUserController {
 
 		return userService.getUserForAccessLevelAndRole(cityRolesRequestDto);
 	}
+
+	@PostMapping("user/role")
+	@ApiOperation(value = "Get user for a particular role")
+	public ResponseDto<List<UserDto>> getUsersForRole(@RequestBody @Valid AccessLevelRoleRequestDto cityRolesRequestDto) {
+
+		log.info("Request received for getting users for Role: {}  and AccessLevel: {}  with AccessUuid:{}", cityRolesRequestDto.getRoleName(), cityRolesRequestDto.getAccessLevel(), cityRolesRequestDto.getAccessLevelUuid());
+
+		return ResponseDto.success(userService.getUsersForRole(cityRolesRequestDto));
+	}
 	
 
 	@PostMapping("/search/get/userUuid")
@@ -145,6 +155,22 @@ public class InternalUserController {
 
 		return ResponseDto.success("Found User", userService.getCacheableForRoles(roles));
 	}
+
+	@PostMapping("/save/userDeptLevel/{newDepartment}/{refDepartment}")
+	public ResponseDto<String> saveUserDeptLevelForNewDept(@PathVariable Department newDepartment, @PathVariable Department refDepartment) {
+
+		log.info("saving UserDeptLevelForNewDept ");
+		userService.saveUserDeptLevelForNewDept(newDepartment, refDepartment);
+		return ResponseDto.success("saved data");
+	}
+
+	@PostMapping("/roll-back/userDeptLevel/{newDepartment}")
+	public ResponseDto<String> rollBack(@PathVariable Department newDepartment) {
+
+		log.info("rolling back UserDeptLevelForNewDept ");
+		userService.rollBack(newDepartment);
+		return ResponseDto.success("saved data");
+	}
 	
 	@GetMapping("/getUserWhoseBirthdayIsToday")
 	public ResponseDto<List<String>> getUser(){
@@ -152,4 +178,15 @@ public class InternalUserController {
 		
 		return ResponseDto.success("Found list",userService.getUserProfileDtoWhoseBirthdayIsToday());
 	}
+	
+	
+	@PostMapping("/getFilteredContacts")
+	public ResponseDto<List<String>> getContacts(@RequestBody List<String> mobileNos){
+		log.info("Fetching Filtered contact ");
+		
+		return ResponseDto.success("Found list",userService.getUserProfileDto(mobileNos));
+	}
+	
+	
+	
 }

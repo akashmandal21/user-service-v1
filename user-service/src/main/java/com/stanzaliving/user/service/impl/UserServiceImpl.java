@@ -3,6 +3,35 @@
  */
 package com.stanzaliving.user.service.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import javax.validation.Valid;
+
+import com.stanzaliving.core.base.exception.StanzaException;
+import com.stanzaliving.user.acl.repository.UserDepartmentLevelRepository;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.ListUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+
 import com.stanzaliving.core.base.common.dto.PageResponse;
 import com.stanzaliving.core.base.common.dto.PaginationRequest;
 import com.stanzaliving.core.base.enums.AccessLevel;
@@ -46,31 +75,11 @@ import com.stanzaliving.user.entity.UserProfileEntity;
 import com.stanzaliving.user.service.UserManagerMappingService;
 import com.stanzaliving.user.service.UserService;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.ListUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
-import javax.validation.Valid;
 import javax.validation.Validator;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author naveen
@@ -110,6 +119,12 @@ public class UserServiceImpl implements UserService {
 	
 	@Autowired
 	private RoleRepository roleRepository;
+
+	@Autowired
+	private UserDepartmentLevelRepository userDepartmentLevelRepository;
+
+	@PersistenceContext
+	private EntityManager entityManager;
 
 	@Autowired
 	private Validator validator;
@@ -160,11 +175,13 @@ public class UserServiceImpl implements UserService {
 
 		if (Objects.isNull(userEntity)) {
 
+			log.error("User Not Found with Uuid: {}", userUuid);
 			throw new ApiValidationException("User Not Found with Uuid: " + userUuid);
 		}
 
 		if (!userEntity.isStatus()) {
 
+			log.error("User Account is Disabled for Uuid : {}", userUuid);
 			throw new ApiValidationException("User Account is Disabled for Uuid " + userUuid);
 		}
 
@@ -289,6 +306,23 @@ public class UserServiceImpl implements UserService {
 		return userDtoList;
 	}
 
+	@Override
+	public List<UserProfileDto> getUserProfileList(List<String> userUuidList) {
+
+		log.info("Searching users in list: {}",userUuidList);
+
+		List<UserEntity> userEntityList = userDbService.findAllByUuidInAndStatus(userUuidList, true);
+
+		if (CollectionUtils.isEmpty(userEntityList)) {
+			throw new ApiValidationException("Users not found for UserId List: " + userUuidList);
+		}
+		List<UserProfileDto> userProfileDtoList = new ArrayList<>();
+			for (UserEntity userEntity : userEntityList) {
+				userProfileDtoList.add(UserAdapter.getUserProfileDto(userEntity));
+			}
+		return userProfileDtoList;
+	}
+
 
 	@Override
 	public UserProfileDto getUserProfile(String userId) {
@@ -404,6 +438,10 @@ public class UserServiceImpl implements UserService {
 				// Assigning default role
 				addUserOrConsumerRole(userEntity);
 			} else {
+				List<String> validRoles = validateRole(addUserAndRoleRequestDto);
+
+				if (CollectionUtils.isEmpty(validRoles)) return;
+
 				aclUserService.addRole(
 						AddUserDeptLevelRoleRequestDto.builder()
 								.userUuid(userEntity.getUuid())
@@ -414,6 +452,21 @@ public class UserServiceImpl implements UserService {
 								.build()
 				);
 			}
+	}
+
+	private List<String> validateRole(AddUserAndRoleRequestDto addUserAndRoleRequestDto) {
+
+		// validating the role department and the accessLevel while bulk upload
+		List<String> validRoles = new ArrayList<>();
+
+		List<RoleDto> roleDtoList = roleService.getRoleByUuidIn(addUserAndRoleRequestDto.getRolesUuid());
+
+		roleDtoList.forEach(roleDto -> {
+			if (roleDto.getDepartment() == addUserAndRoleRequestDto.getRoleDepartment() && roleDto.getAccessLevel() == addUserAndRoleRequestDto.getAccessLevel()) {
+				validRoles.add(roleDto.getUuid());
+			}
+		});
+		return validRoles;
 	}
 
 	private void publishToKafka(Object object) {
@@ -756,6 +809,31 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public List<UserDto> getUsersForRole(AccessLevelRoleRequestDto cityRolesRequestDto){
+		RoleDto roleDto = roleService.findByRoleNameAndDepartment(cityRolesRequestDto.getRoleName(),
+				cityRolesRequestDto.getDepartment());
+		List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = userDepartmentLevelRoleService
+				.findByRoleUuid(roleDto.getUuid());
+
+		if (CollectionUtils.isEmpty(userDepartmentLevelRoleEntityList)) {
+			return null;
+		}
+		List<UserDto> userDtos=new ArrayList<>();
+
+		for (UserDepartmentLevelRoleEntity userDepartmentLevelRoleEntity : userDepartmentLevelRoleEntityList) {
+			UserDepartmentLevelEntity userDepartmentLevelEntity = userDepartmentLevelService
+					.findByUuid(userDepartmentLevelRoleEntity.getUserDepartmentLevelUuid());
+
+			UserEntity userEntity = userDbService.findByUuid(userDepartmentLevelEntity.getUserUuid());
+			if(userEntity.getDepartment().equals(cityRolesRequestDto.getDepartment())) {
+				userDtos.add(UserAdapter.getUserDto(userEntity));
+			}
+
+		}
+		return userDtos;
+	}
+
+	@Override
 	public boolean createRoleBaseUser(UserType userType) {
 
 		List<UserEntity> userEntity = userDbService.findByUserType(userType);
@@ -845,6 +923,24 @@ public class UserServiceImpl implements UserService {
 		});
 
 		return userMap;
+	}
+	
+	
+	@Override
+	public List<String> getUserProfileDto(List<String> mobileNos) {
+
+		Set<String> mobileNo = mobileNos.stream().collect(Collectors.toSet());
+
+		List<UserProfileDto> userProfileDto=UserAdapter.getUserProfileDtos(userDbService.findByMobileIn(mobileNo));
+
+		userProfileDto.forEach(user -> {
+			if(mobileNos.contains(user.getMobile())) {
+				mobileNos.remove(user.getMobile());
+				
+			}
+		});
+
+		return mobileNos;
 	}
 
 	@Override
@@ -987,6 +1083,43 @@ public class UserServiceImpl implements UserService {
 		}
 
 		return UserAdapter.getUserProfileDto(userEntity);
+	}
+
+	@Override
+	public void saveUserDeptLevelForNewDept(Department newDept, Department refDept) {
+
+		List<UserDepartmentLevelEntity> entityList = userDepartmentLevelRepository.findByDepartment(refDept);
+		List<UserDepartmentLevelEntity> entityListNewDept = userDepartmentLevelRepository.findByDepartment(newDept);
+
+		//handled for duplicate entries
+		if(CollectionUtils.isNotEmpty(entityListNewDept)){
+
+			log.info("already configured for new department: {}", newDept);
+			return;
+		}
+
+		if (CollectionUtils.isNotEmpty(entityList)) {
+			List<UserDepartmentLevelEntity> list = entityList.stream().map(entity ->
+					UserDepartmentLevelEntity.builder()
+							.department(newDept)
+							.accessLevel(entity.getAccessLevel())
+							.userUuid(entity.getUserUuid())
+							.csvAccessLevelEntityUuid(entity.getCsvAccessLevelEntityUuid())
+							.status(entity.isStatus()).build()).collect(Collectors.toList());
+
+			userDepartmentLevelRepository.saveAll(list);
+		}
+	}
+
+	@Override
+	public void rollBack(Department newDepartment) {
+
+		List<UserDepartmentLevelEntity> entityListNewDept = userDepartmentLevelRepository.findByDepartment(newDepartment);
+
+		if(CollectionUtils.isNotEmpty(entityListNewDept)){
+
+			userDepartmentLevelRepository.deleteAll(entityListNewDept);
+		}
 	}
 
 	public UserDto addUserV3(AddUserRequestDto addUserRequestDto) {

@@ -2,6 +2,7 @@ package com.stanzaliving.user.interceptor;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Date;
 
 import javax.servlet.http.Cookie;
@@ -62,13 +63,16 @@ public class UserAuthInterceptor extends HandlerInterceptorAdapter {
 
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+		log.info("request recieved for {}",request.getRequestURI());
 		String token = extractTokenFromRequest(request);
 
 		try {
 			if (StringUtils.isNotBlank(token)) {
+				log.info("Extract the token successfully");
 				UserSessionEntity userSession = sessionService.getUserSessionByToken(token);
 
 				if (userSession != null && userSession.getUserType() != null) {
+					log.info("token found for user {}",userSession.getUserId());
 
 					boolean isSessionExpired = userSessionExpiredCheck(userSession);
 
@@ -85,7 +89,7 @@ public class UserAuthInterceptor extends HandlerInterceptorAdapter {
 					log.error("No User Session found with Token: " + token + ". Cann't authorize user.");
 				}
 			} else {
-				log.error("User Token is null/empty. Can't authorize user. Send to login for url :" + request.getRequestURI());
+				log.error("User Token is null/empty. Can't authorize user. Send to login for url :{}",request.getRequestURI());
 			}
 		} catch (Exception e) {
 			log.error("Error validating user token: ", e);
@@ -100,9 +104,7 @@ public class UserAuthInterceptor extends HandlerInterceptorAdapter {
 		String token = null;
 
 		if (request.getCookies() != null) {
-
 			for (Cookie cookie : request.getCookies()) {
-
 				if (SecurityConstants.TOKEN_HEADER_NAME.equals(cookie.getName())) {
 					token = cookie.getValue();
 					break;
@@ -111,6 +113,7 @@ public class UserAuthInterceptor extends HandlerInterceptorAdapter {
 		}
 
 		if (token == null) {
+
 			token = request.getHeader(SecurityConstants.AUTHORIZATION_HEADER);
 			if (token != null && token.startsWith(SecurityConstants.VENTA_TOKEN_PREFIX)) {		//only if it follows bearer schema, then we would consider valid token
 				token = token.replace(SecurityConstants.VENTA_TOKEN_PREFIX, "");
@@ -118,7 +121,7 @@ public class UserAuthInterceptor extends HandlerInterceptorAdapter {
 				token = null;
 			}
 		}
-
+		log.debug("token captured: {}",token);
 		return token;
 	}
 

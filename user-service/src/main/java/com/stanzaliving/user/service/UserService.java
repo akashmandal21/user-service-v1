@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
+import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.user.dto.AccessLevelRoleRequestDto;
 import com.stanzaliving.core.user.dto.UserDto;
 import com.stanzaliving.core.user.dto.UserFilterDto;
@@ -40,6 +41,7 @@ public interface UserService {
 	UserDto addUser(AddUserRequestDto addUserRequestDto);
 
 	List<UserDto> addBulkUserAndRole(List<AddUserAndRoleRequestDto> addUserRequestDtoList);
+	List<UserProfileDto> getUserProfileList(List<String> userUuidList);
 
 	UserProfileDto getUserProfile(String userId);
 
@@ -69,9 +71,13 @@ public interface UserService {
 
 	UserDto getUserForAccessLevelAndRole(AccessLevelRoleRequestDto cityRolesRequestDto);
 
+	List<UserDto> getUsersForRole(AccessLevelRoleRequestDto cityRolesRequestDto);
+
 	boolean createRoleBaseUser(UserType userType);
 
 	Map<String, UserProfileDto> getUserProfileDto(Set<String> mobileNos);
+	
+	List<String> getUserProfileDto(List<String> mobileNos);
 
 	boolean createRoleBaseUser(List<String> mobiles);
 
@@ -82,6 +88,10 @@ public interface UserService {
 	List<UserRoleCacheDto> getCacheableForRoles(List<String> roleNames);
 
 	UserProfileDto getUserProfileDtoByEmail(String email);
+
+	void saveUserDeptLevelForNewDept(Department newDept, Department refDept);
+
+	void rollBack(Department newDepartment);
 
 	UserDto addUserV3(AddUserRequestDto addUserRequestDto);
 	
