@@ -734,7 +734,7 @@ public class UserServiceImpl implements UserService {
 		UserEntity userEntity = userDbService.getUserForMobile(mobileNo, isoCode);
 
 		if (Objects.isNull(userEntity)) {
-			throw new ApiValidationException("User does not exists for Mobile Number: " + mobileNo + " and isoCode :" + isoCode);
+			throw new UserValidationException("User does not exists for Mobile Number: " + mobileNo + " and isoCode :" + isoCode);
 		}
 
 		if (Objects.nonNull(userType)) {
