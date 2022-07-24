@@ -174,12 +174,10 @@ public class AuthServiceImpl implements AuthService {
 		UserEntity userEntity = userDbService.findByUuid(userUuid);
 
 		if (Objects.isNull(userEntity)) {
-			
 			throw new UserValidationException("User Not Found with Uuid: " + userUuid);
 		}
 
 		if (!userEntity.isStatus()) {
-			
 			throw new UserValidationException("User Account is Disabled for Uuid " + userUuid);
 		}
 		

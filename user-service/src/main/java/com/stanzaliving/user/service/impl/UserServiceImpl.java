@@ -170,13 +170,11 @@ public class UserServiceImpl implements UserService {
 		UserEntity userEntity = userDbService.findByUuid(userUuid);
 
 		if (Objects.isNull(userEntity)) {
-
 			log.error("User Not Found with Uuid: {}", userUuid);
 			throw new UserValidationException("User Not Found with Uuid: " + userUuid);
 		}
 
 		if (!userEntity.isStatus()) {
-
 			log.error("User Account is Disabled for Uuid : {}", userUuid);
 			throw new UserValidationException("User Account is Disabled for Uuid " + userUuid);
 		}
@@ -736,8 +734,7 @@ public class UserServiceImpl implements UserService {
 		UserEntity userEntity = userDbService.getUserForMobile(mobileNo, isoCode);
 
 		if (Objects.isNull(userEntity)) {
-			throw new ApiValidationException(
-					"User does not exists for Mobile Number: " + mobileNo + " and isoCode :" + isoCode);
+			throw new ApiValidationException("User does not exists for Mobile Number: " + mobileNo + " and isoCode :" + isoCode);
 		}
 
 		if (Objects.nonNull(userType)) {
