@@ -6,6 +6,7 @@ package com.stanzaliving.user.service.impl;
 import java.util.Objects;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
+import com.stanzaliving.core.base.exception.UserValidationException;
 import com.stanzaliving.core.bookingservice.dto.request.*;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.base.exception.StanzaException;
@@ -174,12 +175,12 @@ public class AuthServiceImpl implements AuthService {
 
 		if (Objects.isNull(userEntity)) {
 			
-			throw new ApiValidationException("User Not Found with Uuid: " + userUuid);
+			throw new UserValidationException("User Not Found with Uuid: " + userUuid);
 		}
 
 		if (!userEntity.isStatus()) {
 			
-			throw new ApiValidationException("User Account is Disabled for Uuid " + userUuid);
+			throw new UserValidationException("User Account is Disabled for Uuid " + userUuid);
 		}
 		
 		log.info("Found User: " + userEntity.getUuid() + " of Type: " + userEntity.getUserType());

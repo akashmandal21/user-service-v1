@@ -172,13 +172,13 @@ public class UserServiceImpl implements UserService {
 		if (Objects.isNull(userEntity)) {
 
 			log.error("User Not Found with Uuid: {}", userUuid);
-			throw new ApiValidationException("User Not Found with Uuid: " + userUuid);
+			throw new UserValidationException("User Not Found with Uuid: " + userUuid);
 		}
 
 		if (!userEntity.isStatus()) {
 
 			log.error("User Account is Disabled for Uuid : {}", userUuid);
-			throw new ApiValidationException("User Account is Disabled for Uuid " + userUuid);
+			throw new UserValidationException("User Account is Disabled for Uuid " + userUuid);
 		}
 
 		log.info("Found User: " + userEntity.getUuid() + " of Type: " + userEntity.getUserType());
@@ -325,7 +325,7 @@ public class UserServiceImpl implements UserService {
 		UserEntity userEntity = userDbService.findByUuid(userId);
 
 		if (Objects.isNull(userEntity)) {
-			throw new ApiValidationException("User not found for UserId: " + userId);
+			throw new UserValidationException("User not found for UserId: " + userId);
 		}
 
 		return UserAdapter.getUserProfileDto(userEntity);
@@ -604,7 +604,7 @@ public class UserServiceImpl implements UserService {
 				Boolean.TRUE);
 
 		if (Objects.isNull(userEntity)) {
-			throw new ApiValidationException("User not found for UserId: " + updateDepartmentUserTypeDto.getUserId());
+			throw new UserValidationException("User not found for UserId: " + updateDepartmentUserTypeDto.getUserId());
 		}
 
 		userEntity.setUserType(updateDepartmentUserTypeDto.getUserType());
@@ -623,7 +623,7 @@ public class UserServiceImpl implements UserService {
 		UserEntity userEntity = userDbService.findByUuid(updateUserRequestDto.getUserId());
 
 		if (Objects.isNull(userEntity)) {
-			throw new ApiValidationException("User not found for UserId: " + updateUserRequestDto.getUserId());
+			throw new UserValidationException("User not found for UserId: " + updateUserRequestDto.getUserId());
 		}
 
 		if (Objects.nonNull(updateUserRequestDto.getAddress())) {
@@ -901,7 +901,7 @@ public class UserServiceImpl implements UserService {
 			UserEntity userEntity = userDbService.findByMobile(mobileNo);
 
 			if (Objects.isNull(userEntity)) {
-				throw new ApiValidationException("User not found for mobileNo: " + mobileNo);
+				throw new UserValidationException("User not found for mobileNo: " + mobileNo);
 			}
 
 			return UserAdapter.getUserProfileDto(userEntity);
