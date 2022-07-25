@@ -86,7 +86,7 @@ public class SessionServiceImpl implements SessionService {
 
 			String newToken = StanzaUtils.generateUniqueId();
 
-			userSessionEntity.setToken(newToken);
+			userSessionEntity.setToken(getBcryptPassword(newToken));
 			userSessionEntity.setStatus(true);
 
 			log.info("Updating userSessionEntity {} for user {}", userSessionEntity.getUuid(),
