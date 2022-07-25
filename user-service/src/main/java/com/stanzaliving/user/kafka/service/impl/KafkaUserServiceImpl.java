@@ -10,6 +10,7 @@ import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
@@ -48,6 +49,9 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 
 	@Autowired
 	private NotificationProducer notificationProducer;
+
+	@Value("${mobile.otp.HashKey}")
+	private String hashKey;
 
 	@Override
 	public void sendOtpToKafka(OtpEntity otpEntity, UserEntity userEntity) {
@@ -202,9 +206,8 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 					message = propertyManager.getProperty("default.otp.msg", UserConstants.DEFAULT_OTP_TEXT);
 			}
 			if(!isMail){
-				String Hash = " CiJzL9hCIpd";
 				String front = "<#> ";
-				message = message.concat((Hash));
+				message = message.concat((hashKey));
 				message = front.concat((message));
 			}
 		}
