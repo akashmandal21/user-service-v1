@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.stanzaliving.user.acl.service.impl;
 
@@ -125,9 +125,9 @@ public class AclServiceImpl implements AclService {
 		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelDbService.findByUserUuidAndStatus(userUuid, true);
 
 		for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
-			
+
 			Pair<List<String>, List<String>> roleUuidApiUuidList = getRoleUuidApiUuidListOfUser(userDepartmentLevelEntity);
-			
+
 			List<RoleEntity> roleEntityList = roleDbService.findByUuidInAndStatus(roleUuidApiUuidList.getFirst(), true);
 			List<ApiEntity> apiEntityList = apiDbService.findByUuidInAndStatus(roleUuidApiUuidList.getSecond(), true);
 
@@ -154,8 +154,9 @@ public class AclServiceImpl implements AclService {
 		Set<String> roleUuidSetChild;
 		Set<String> apiUuidSetChild;
 
+		roleAccessEntityListChild = roleAccessDbService.findByRoleUuidInAndStatus(roleUuidListParent, true);
+
 		while (CollectionUtils.isNotEmpty(roleUuidListParent)) {
-			roleAccessEntityListChild = roleAccessDbService.findByRoleUuidInAndStatus(roleUuidListParent, true);
 			roleUuidSetChild =
 					roleAccessEntityListChild.stream().filter(entity -> RoleAccessType.ROLE.equals(entity.getRoleAccessType())).map(entity -> entity.getAccessUuid()).collect(Collectors.toSet());
 			apiUuidSetChild =
