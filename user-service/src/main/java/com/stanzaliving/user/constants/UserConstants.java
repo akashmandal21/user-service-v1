@@ -13,7 +13,7 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class UserConstants {
 
-	public static final String DEFAULT_OTP_TEXT = "<otp> is the OTP to verify your phone number for accessing Stanza Living application.";
+	public static final String DEFAULT_OTP_TEXT = "<otp> is OTP to verify your phone number for accessing Stanza Living.";
 
 	public static final String MOBILE_VERIFICATION_OTP_TEXT = "<otp> is OTP to verify your phone number with Stanza Living";
 
