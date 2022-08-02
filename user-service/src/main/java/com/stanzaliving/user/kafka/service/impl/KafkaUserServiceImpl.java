@@ -10,7 +10,6 @@ import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
@@ -50,9 +49,6 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 	@Autowired
 	private NotificationProducer notificationProducer;
 
-	@Value("${mobile.otp.HashKey}")
-	private String hashKey;
-
 	@Override
 	public void sendOtpToKafka(OtpEntity otpEntity, UserEntity userEntity) {
 		try {
@@ -91,7 +87,7 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 				.smsType(SmsType.OTP)
 				.isoCode(otpEntity.getIsoCode())
 				.mobile(otpEntity.getMobile())
-				.text(getOtpMessageForUserType(otpEntity, null, false))
+				.text(getOtpMessageForUserType(otpEntity, null))
 				.templateId(getNotificationTemplateId(otpEntity))
 				.build();
 	}
@@ -141,12 +137,12 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 
 		emailDto.setSubject("OTP to access Stanza Living");
 
-		emailDto.setContent(getOtpMessageForUserType(otpEntity, userEntity, true));
+		emailDto.setContent(getOtpMessageForUserType(otpEntity, userEntity));
 
 		return emailDto;
 	}
 
-	private String getOtpMessageForUserType(OtpEntity otpEntity, UserEntity userEntity, boolean isMail) {
+	private String getOtpMessageForUserType(OtpEntity otpEntity, UserEntity userEntity) {
 		String message;
 
 		if (OtpType.MOBILE_VERIFICATION == otpEntity.getOtpType()) {
@@ -205,11 +201,6 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 				default:
 					message = propertyManager.getProperty("default.otp.msg", UserConstants.DEFAULT_OTP_TEXT);
 			}
-			if(!isMail){
-				String front = "<#> ";
-				message = message.concat((hashKey));
-				message = front.concat((message));
-			}
 		}
 
 		message = message.replaceAll("<otp>", String.valueOf(otpEntity.getOtp()));
@@ -227,21 +218,21 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 		} else {
 			switch (otpEntity.getUserType()) {
 				case STUDENT:
-					return NotificationKeys.STUDENT_OTP_MSG_NEW;
+					return NotificationKeys.STUDENT_OTP_MSG;
 				case PARENT:
-					return NotificationKeys.PARENT_OTP_MSG_NEW;
+					return NotificationKeys.PARENT_OTP_MSG;
 				case LEGAL:
-					return NotificationKeys.LEGAL_OTP_MSG_NEW;
+					return NotificationKeys.LEGAL_OTP_MSG;
 				case HR:
-					return NotificationKeys.HR_OTP_MSG_NEW;
+					return NotificationKeys.HR_OTP_MSG;
 				case TECH:
-					return NotificationKeys.TECH_OTP_MSG_NEW;
+					return NotificationKeys.TECH_OTP_MSG;
 				case FINANCE:
-					return NotificationKeys.FINANCE_OTP_MSG_NEW;
+					return NotificationKeys.FINANCE_OTP_MSG;
 				case PROCUREMENT:
-					return NotificationKeys.PROCUREMENT_OTP_MSG_NEW;
+					return NotificationKeys.PROCUREMENT_OTP_MSG;
 				default:
-					return NotificationKeys.DEFAULT_OTP_MSG_NEW;
+					return NotificationKeys.DEFAULT_OTP_MSG;
 			}
 		}
 	}
