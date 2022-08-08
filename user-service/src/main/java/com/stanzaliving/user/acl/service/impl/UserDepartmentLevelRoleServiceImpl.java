@@ -1,9 +1,6 @@
 package com.stanzaliving.user.acl.service.impl;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.stanzaliving.user.acl.db.service.UserDepartmentLevelDbService;
@@ -49,15 +46,15 @@ public class UserDepartmentLevelRoleServiceImpl implements UserDepartmentLevelRo
 		List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityListExisting =
 				userDepartmentLevelRoleDbService.findByUserDepartmentLevelUuidAndRoleUuidInAndStatus(userDepartmentLevelUuid, rolesUuid, true);
 
-		UserDepartmentLevelEntity departmentLevelEntity = userDepartmentLevelDbService.findByUuid(userDepartmentLevelRoleEntityListExisting.get(0).getUserDepartmentLevelUuid());
-
 		if (CollectionUtils.isEmpty(userDepartmentLevelRoleEntityListExisting)) {
 			throw new ApiValidationException("Roles does not belong to user");
 		}
 
 		userDepartmentLevelRoleDbService.delete(userDepartmentLevelRoleEntityListExisting);
-		userDepartmentLevelDbService.delete(departmentLevelEntity);
-
+		if(CollectionUtils.isNotEmpty(userDepartmentLevelRoleEntityListExisting) && Objects.nonNull(userDepartmentLevelRoleEntityListExisting.get(0).getUserDepartmentLevelUuid())){
+			UserDepartmentLevelEntity departmentLevelEntity = userDepartmentLevelDbService.findByUuid(userDepartmentLevelRoleEntityListExisting.get(0).getUserDepartmentLevelUuid());
+			userDepartmentLevelDbService.delete(departmentLevelEntity);
+		}
 	}
 
 	@Override
