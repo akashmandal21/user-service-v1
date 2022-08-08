@@ -5,6 +5,8 @@ package com.stanzaliving.user.service.impl;
 
 import java.util.Objects;
 
+import com.stanzaliving.core.base.common.dto.ResponseDto;
+import com.stanzaliving.core.base.exception.UserValidationException;
 import com.stanzaliving.core.bookingservice.dto.request.*;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.base.exception.StanzaException;
@@ -85,15 +87,19 @@ public class AuthServiceImpl implements AuthService {
 
 		try {
 			if (Objects.isNull(userEntity)) {
-				
+
 				if (UserType.VENDOR == loginRequestDto.getUserType()) {
 					throw new AuthException("No user exists with this number", UserErrorCodes.USER_NOT_EXISTS);
 				}
-				
-				LeadDetailEntity leadDetail = leadserviceClientApi.search(loginRequestDto.getMobile(), null).getData();
+
+				ResponseDto<LeadDetailEntity> leadDetailResponseDto = leadserviceClientApi.search(loginRequestDto.getMobile(), null);
+				if(Objects.isNull(leadDetailResponseDto) || Objects.isNull(leadDetailResponseDto.getData())) {
+					throw new AuthException("No user exists with this number", UserErrorCodes.USER_NOT_EXISTS);
+				}
+				LeadDetailEntity leadDetail = leadDetailResponseDto.getData();
 				if (Objects.isNull(leadDetail) || !(leadDetail.getPhone().equals(loginRequestDto.getMobile()))) {
-					throw new AuthException("No booking found for this number");
-				} else {
+					throw new AuthException("No user exists with this number", UserErrorCodes.USER_NOT_EXISTS);
+				} else if(StringUtils.isNotBlank(leadDetail.getLeadTag()) && leadDetail.getLeadTag().equals("GUEST_LEAD")) {
 					GuestRequestPayloadDto guestRequestPayloadDto = bookingDataControllerApi.getGuestDetailsByPhone(leadDetail.getPhone()).getData();
 					AddUserRequestDto addUserRequestDto = new AddUserRequestDto();
 					addUserRequestDto.setMobile(leadDetail.getPhone());
@@ -123,7 +129,11 @@ public class AuthServiceImpl implements AuthService {
 			log.error("Error in getActiveUser, error is ", e);
 		}
 
-		if (Objects.isNull(userEntity) || !userEntity.isStatus()) {
+		if (Objects.isNull(userEntity)) {
+			throw new AuthException("No user exists with this number", UserErrorCodes.USER_NOT_EXISTS);
+		}
+
+		if (!userEntity.isStatus()) {
 			throw new AuthException("The booking is disabled for this number", UserErrorCodes.USER_ACCOUNT_INACTIVE);
 		}
 
@@ -169,13 +179,11 @@ public class AuthServiceImpl implements AuthService {
 		UserEntity userEntity = userDbService.findByUuid(userUuid);
 
 		if (Objects.isNull(userEntity)) {
-			
-			throw new ApiValidationException("User Not Found with Uuid: " + userUuid);
+			throw new UserValidationException("User Not Found with Uuid: " + userUuid);
 		}
 
 		if (!userEntity.isStatus()) {
-			
-			throw new ApiValidationException("User Account is Disabled for Uuid " + userUuid);
+			throw new UserValidationException("User Account is Disabled for Uuid " + userUuid);
 		}
 		
 		log.info("Found User: " + userEntity.getUuid() + " of Type: " + userEntity.getUserType());

@@ -29,7 +29,7 @@ public class UserSessionDbServiceImpl extends AbstractJpaServiceImpl<UserSession
 
 	@Override
 	public UserSessionEntity getUserSessionForToken(String token) {
-		return userSessionRepository.findByTokenAndStatus(token, true);
+		return userSessionRepository.findByToken(token);
 	}
 
 }

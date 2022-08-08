@@ -19,6 +19,7 @@ import javax.persistence.Query;
 import javax.validation.Valid;
 
 import com.stanzaliving.core.base.exception.StanzaException;
+import com.stanzaliving.core.base.exception.UserValidationException;
 import com.stanzaliving.user.acl.repository.UserDepartmentLevelRepository;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.ListUtils;
@@ -152,7 +153,7 @@ public class UserServiceImpl implements UserService {
 		UserEntity userEntity = userDbService.findByUuidAndStatus(userId, true);
 
 		if (Objects.isNull(userEntity)) {
-			throw new ApiValidationException("User not found for UserId: " + userId);
+			throw new UserValidationException("User not found for UserId: " + userId);
 		}
 
 		return UserAdapter.getUserProfileDto(userEntity);
@@ -174,13 +175,13 @@ public class UserServiceImpl implements UserService {
 		UserEntity userEntity = userDbService.findByUuid(userUuid);
 
 		if (Objects.isNull(userEntity)) {
-
-			throw new ApiValidationException("User Not Found with Uuid: " + userUuid);
+			log.error("User Not Found with Uuid: {}", userUuid);
+			throw new UserValidationException("User Not Found with Uuid: " + userUuid);
 		}
 
 		if (!userEntity.isStatus()) {
-
-			throw new ApiValidationException("User Account is Disabled for Uuid " + userUuid);
+			log.error("User Account is Disabled for Uuid : {}", userUuid);
+			throw new UserValidationException("User Account is Disabled for Uuid " + userUuid);
 		}
 
 		log.info("Found User: " + userEntity.getUuid() + " of Type: " + userEntity.getUserType());
@@ -328,7 +329,7 @@ public class UserServiceImpl implements UserService {
 		UserEntity userEntity = userDbService.findByUuid(userId);
 
 		if (Objects.isNull(userEntity)) {
-			throw new ApiValidationException("User not found for UserId: " + userId);
+			throw new UserValidationException("User not found for UserId: " + userId);
 		}
 
 		return UserAdapter.getUserProfileDto(userEntity);
@@ -436,6 +437,10 @@ public class UserServiceImpl implements UserService {
 				// Assigning default role
 				addUserOrConsumerRole(userEntity);
 			} else {
+				List<String> validRoles = validateRole(addUserAndRoleRequestDto);
+
+				if (CollectionUtils.isEmpty(validRoles)) return;
+
 				aclUserService.addRole(
 						AddUserDeptLevelRoleRequestDto.builder()
 								.userUuid(userEntity.getUuid())
@@ -446,6 +451,21 @@ public class UserServiceImpl implements UserService {
 								.build()
 				);
 			}
+	}
+
+	private List<String> validateRole(AddUserAndRoleRequestDto addUserAndRoleRequestDto) {
+
+		// validating the role department and the accessLevel while bulk upload
+		List<String> validRoles = new ArrayList<>();
+
+		List<RoleDto> roleDtoList = roleService.getRoleByUuidIn(addUserAndRoleRequestDto.getRolesUuid());
+
+		roleDtoList.forEach(roleDto -> {
+			if (roleDto.getDepartment() == addUserAndRoleRequestDto.getRoleDepartment() && roleDto.getAccessLevel() == addUserAndRoleRequestDto.getAccessLevel()) {
+				validRoles.add(roleDto.getUuid());
+			}
+		});
+		return validRoles;
 	}
 
 	private void publishToKafka(Object object) {
@@ -604,7 +624,7 @@ public class UserServiceImpl implements UserService {
 				Boolean.TRUE);
 
 		if (Objects.isNull(userEntity)) {
-			throw new ApiValidationException("User not found for UserId: " + updateDepartmentUserTypeDto.getUserId());
+			throw new UserValidationException("User not found for UserId: " + updateDepartmentUserTypeDto.getUserId());
 		}
 
 		userEntity.setUserType(updateDepartmentUserTypeDto.getUserType());
@@ -623,7 +643,7 @@ public class UserServiceImpl implements UserService {
 		UserEntity userEntity = userDbService.findByUuid(updateUserRequestDto.getUserId());
 
 		if (Objects.isNull(userEntity)) {
-			throw new ApiValidationException("User not found for UserId: " + updateUserRequestDto.getUserId());
+			throw new UserValidationException("User not found for UserId: " + updateUserRequestDto.getUserId());
 		}
 
 		if (Objects.nonNull(updateUserRequestDto.getAddress())) {
@@ -744,8 +764,7 @@ public class UserServiceImpl implements UserService {
 		UserEntity userEntity = userDbService.getUserForMobile(mobileNo, isoCode);
 
 		if (Objects.isNull(userEntity)) {
-			throw new ApiValidationException(
-					"User does not exists for Mobile Number: " + mobileNo + " and isoCode :" + isoCode);
+			throw new UserValidationException("User does not exists for Mobile Number: " + mobileNo + " and isoCode :" + isoCode);
 		}
 
 		if (Objects.nonNull(userType)) {
@@ -930,7 +949,7 @@ public class UserServiceImpl implements UserService {
 			UserEntity userEntity = userDbService.findByMobile(mobileNo);
 
 			if (Objects.isNull(userEntity)) {
-				throw new ApiValidationException("User not found for mobileNo: " + mobileNo);
+				throw new UserValidationException("User not found for mobileNo: " + mobileNo);
 			}
 
 			return UserAdapter.getUserProfileDto(userEntity);
