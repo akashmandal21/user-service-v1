@@ -18,7 +18,7 @@ public class NotificationKeys {
 	public static final String PROCUREMENT_OTP_MSG="1707163695477631286";
 	public static final String DEFAULT_OTP_MSG="1707163695477631286";
 
-	//<#> #var# is the OTP to verify your phone number for accessing Stanza Living application. CiJzL9hCIpd
+	//<#> #var# is the OTP to verify your phone number for accessing Stanza Living application. 5t82KfAB8Hz
 	public static final String STUDENT_OTP_MSG_NEW="1707165955200998708";
 	public static final String PARENT_OTP_MSG_NEW="1707165955200998708";
 	public static final String LEGAL_OTP_MSG_NEW="1707165955200998708";
