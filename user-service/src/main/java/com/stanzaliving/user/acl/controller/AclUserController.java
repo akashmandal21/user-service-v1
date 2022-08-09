@@ -108,7 +108,7 @@ public class AclUserController {
         if (CollectionUtils.isNotEmpty(userAccessModuleDtoList)) {
             return ResponseDto.success("List of Modules that the user has access to", userAccessModuleDtoList);
         } else {
-            return ResponseDto.failure("Access to modules denied");
+            return ResponseDto.success("Access to modules denied",userAccessModuleDtoList);
         }
     }
 
