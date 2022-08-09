@@ -726,7 +726,8 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	private void addUserOrConsumerRoleByRoleNames(UserEntity userEntity, List<String> roleNames) {
-		if (UserType.VENDOR == userEntity.getUserType()) {
+		
+		if (Objects.nonNull(userEntity) && UserType.VENDOR == userEntity.getUserType()) {
 			AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetailsForListOfRoleNames(userEntity, roleNames);
 
 			aclUserService.addRole(addUserDeptLevelRoleRequestDto);
@@ -893,7 +894,7 @@ public class UserServiceImpl implements UserService {
 		addUserDeptLevelRoleRequestDto.setUserUuid(user.getUuid());
 		addUserDeptLevelRoleRequestDto.setAccessLevelEntityListUuid(Arrays.asList(countryUuid));
 
-		if (UserType.VENDOR == user.getUserType()) {
+		if (Objects.nonNull(user) && UserType.VENDOR == user.getUserType()) {
 
 			if (CollectionUtils.isNotEmpty(roleNames)) {
 				List<RoleEntity> roleEntities = roleRepository.findByRoleNameInAndDepartment(roleNames, user.getDepartment());
