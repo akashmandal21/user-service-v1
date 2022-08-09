@@ -51,11 +51,12 @@ public class UserDepartmentLevelRoleServiceImpl implements UserDepartmentLevelRo
 		}
 
 		userDepartmentLevelRoleDbService.delete(userDepartmentLevelRoleEntityListExisting);
-		if(CollectionUtils.isNotEmpty(userDepartmentLevelRoleEntityListExisting) && Objects.nonNull(userDepartmentLevelRoleEntityListExisting.get(0).getUserDepartmentLevelUuid())){
+		/*if(CollectionUtils.isNotEmpty(userDepartmentLevelRoleEntityListExisting) && Objects.nonNull(userDepartmentLevelRoleEntityListExisting.get(0).getUserDepartmentLevelUuid())){
 			UserDepartmentLevelEntity departmentLevelEntity = userDepartmentLevelDbService.findByUuid(userDepartmentLevelRoleEntityListExisting.get(0).getUserDepartmentLevelUuid());
 			if(Objects.nonNull(departmentLevelEntity))
-				userDepartmentLevelDbService.delete(departmentLevelEntity);
-		}
+				departmentLevelEntity.setStatus(false);
+				userDepartmentLevelDbService.save(departmentLevelEntity);
+		}*/
 	}
 
 	@Override
