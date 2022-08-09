@@ -1,11 +1,10 @@
 package com.stanzaliving.user.acl.service.impl;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.stanzaliving.user.acl.db.service.UserDepartmentLevelDbService;
+import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +19,9 @@ public class UserDepartmentLevelRoleServiceImpl implements UserDepartmentLevelRo
 
 	@Autowired
 	private UserDepartmentLevelRoleDbService userDepartmentLevelRoleDbService;
+
+	@Autowired
+	private UserDepartmentLevelDbService userDepartmentLevelDbService;
 
 	@Override
 	public List<UserDepartmentLevelRoleEntity> addRoles(String userDepartmentLevelUuid, List<String> rolesUuid) {
@@ -49,7 +51,11 @@ public class UserDepartmentLevelRoleServiceImpl implements UserDepartmentLevelRo
 		}
 
 		userDepartmentLevelRoleDbService.delete(userDepartmentLevelRoleEntityListExisting);
-
+		if(CollectionUtils.isNotEmpty(userDepartmentLevelRoleEntityListExisting) && Objects.nonNull(userDepartmentLevelRoleEntityListExisting.get(0).getUserDepartmentLevelUuid())){
+			UserDepartmentLevelEntity departmentLevelEntity = userDepartmentLevelDbService.findByUuid(userDepartmentLevelRoleEntityListExisting.get(0).getUserDepartmentLevelUuid());
+			if(Objects.nonNull(departmentLevelEntity))
+				userDepartmentLevelDbService.delete(departmentLevelEntity);
+		}
 	}
 
 	@Override
