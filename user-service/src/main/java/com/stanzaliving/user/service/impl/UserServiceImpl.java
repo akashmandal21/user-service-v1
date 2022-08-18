@@ -218,6 +218,7 @@ public class UserServiceImpl implements UserService {
 
 			if (addUserRequestDto.getUserType().equals(UserType.CONSUMER) || addUserRequestDto.getUserType().equals(UserType.EXTERNAL) || addUserRequestDto.getUserType().equals(UserType.VENDOR)) {
 				userEntity.setUserType(addUserRequestDto.getUserType());
+				userEntity.setDepartment(addUserRequestDto.getDepartment());
 				try {
 					if (addUserRequestDto.getUserType().equals(UserType.CONSUMER) || addUserRequestDto.getUserType().equals(UserType.EXTERNAL))
 						addUserOrConsumerRole(userEntity);
