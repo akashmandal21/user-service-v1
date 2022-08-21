@@ -217,8 +217,8 @@ public class UserServiceImpl implements UserService {
 					+ ", ISO Code: " + addUserRequestDto.getIsoCode() + " of type: " + addUserRequestDto.getUserType());
 
 			if (addUserRequestDto.getUserType().equals(UserType.CONSUMER) || addUserRequestDto.getUserType().equals(UserType.EXTERNAL) || addUserRequestDto.getUserType().equals(UserType.VENDOR)) {
-
 				userEntity.setUserType(addUserRequestDto.getUserType());
+				userEntity.setDepartment(addUserRequestDto.getDepartment());
 				try {
 					if (addUserRequestDto.getUserType().equals(UserType.CONSUMER) || addUserRequestDto.getUserType().equals(UserType.EXTERNAL))
 						addUserOrConsumerRole(userEntity);
@@ -227,6 +227,7 @@ public class UserServiceImpl implements UserService {
 				} catch (Exception e) {
 					log.error("Got error while adding role", e);
 				}
+				userDbService.update(userEntity);
 			}
 
 			return UserAdapter.getUserDto(userEntity);
