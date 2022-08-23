@@ -6,6 +6,7 @@ package com.stanzaliving.user.service.impl;
 import java.util.Objects;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
+import com.stanzaliving.core.base.exception.UserValidationException;
 import com.stanzaliving.core.bookingservice.dto.request.*;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.base.exception.StanzaException;
@@ -23,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.stanzaliving.core.base.exception.ApiValidationException;
 import com.stanzaliving.core.base.exception.AuthException;
 import com.stanzaliving.core.kafka.dto.KafkaDTO;
 import com.stanzaliving.core.kafka.producer.NotificationProducer;
@@ -86,6 +86,11 @@ public class AuthServiceImpl implements AuthService {
 
 		try {
 			if (Objects.isNull(userEntity)) {
+
+				if (UserType.VENDOR == loginRequestDto.getUserType()) {
+					throw new AuthException("No user exists with this number", UserErrorCodes.USER_NOT_EXISTS);
+				}
+
 				ResponseDto<LeadDetailEntity> leadDetailResponseDto = leadserviceClientApi.search(loginRequestDto.getMobile(), null);
 				if(Objects.isNull(leadDetailResponseDto) || Objects.isNull(leadDetailResponseDto.getData())) {
 					throw new AuthException("No user exists with this number", UserErrorCodes.USER_NOT_EXISTS);
@@ -173,13 +178,11 @@ public class AuthServiceImpl implements AuthService {
 		UserEntity userEntity = userDbService.findByUuid(userUuid);
 
 		if (Objects.isNull(userEntity)) {
-			
-			throw new ApiValidationException("User Not Found with Uuid: " + userUuid);
+			throw new UserValidationException("User Not Found with Uuid: " + userUuid);
 		}
 
 		if (!userEntity.isStatus()) {
-			
-			throw new ApiValidationException("User Account is Disabled for Uuid " + userUuid);
+			throw new UserValidationException("User Account is Disabled for Uuid " + userUuid);
 		}
 		
 		log.info("Found User: " + userEntity.getUuid() + " of Type: " + userEntity.getUserType());

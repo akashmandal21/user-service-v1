@@ -19,6 +19,7 @@ import javax.persistence.Query;
 import javax.validation.Valid;
 
 import com.stanzaliving.core.base.exception.StanzaException;
+import com.stanzaliving.core.base.exception.UserValidationException;
 import com.stanzaliving.user.acl.repository.UserDepartmentLevelRepository;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.ListUtils;
@@ -59,8 +60,10 @@ import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
 import com.stanzaliving.core.user.request.dto.AddUserAndRoleRequestDto;
 import com.stanzaliving.user.acl.db.service.UserDepartmentLevelDbService;
 import com.stanzaliving.user.acl.db.service.UserDepartmentLevelRoleDbService;
+import com.stanzaliving.user.acl.entity.RoleEntity;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity;
+import com.stanzaliving.user.acl.repository.RoleRepository;
 import com.stanzaliving.user.acl.service.AclUserService;
 import com.stanzaliving.user.acl.service.RoleService;
 import com.stanzaliving.user.acl.service.UserDepartmentLevelRoleService;
@@ -114,6 +117,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private NotificationProducer notificationProducer;
+	
+	@Autowired
+	private RoleRepository roleRepository;
 
 	@Autowired
 	private UserDepartmentLevelRepository userDepartmentLevelRepository;
@@ -147,7 +153,7 @@ public class UserServiceImpl implements UserService {
 		UserEntity userEntity = userDbService.findByUuidAndStatus(userId, true);
 
 		if (Objects.isNull(userEntity)) {
-			throw new ApiValidationException("User not found for UserId: " + userId);
+			throw new UserValidationException("User not found for UserId: " + userId);
 		}
 
 		return UserAdapter.getUserProfileDto(userEntity);
@@ -169,15 +175,13 @@ public class UserServiceImpl implements UserService {
 		UserEntity userEntity = userDbService.findByUuid(userUuid);
 
 		if (Objects.isNull(userEntity)) {
-
 			log.error("User Not Found with Uuid: {}", userUuid);
-			throw new ApiValidationException("User Not Found with Uuid: " + userUuid);
+			throw new UserValidationException("User Not Found with Uuid: " + userUuid);
 		}
 
 		if (!userEntity.isStatus()) {
-
 			log.error("User Account is Disabled for Uuid : {}", userUuid);
-			throw new ApiValidationException("User Account is Disabled for Uuid " + userUuid);
+			throw new UserValidationException("User Account is Disabled for Uuid " + userUuid);
 		}
 
 		log.info("Found User: " + userEntity.getUuid() + " of Type: " + userEntity.getUserType());
@@ -204,7 +208,7 @@ public class UserServiceImpl implements UserService {
 
 		if (Objects.nonNull(userEntity)) {
 
-			if(!userEntity.isStatus()){
+			if (!userEntity.isStatus()) {
 				userEntity.setStatus(true);
 				userDbService.update(userEntity);
 			}
@@ -212,18 +216,21 @@ public class UserServiceImpl implements UserService {
 			log.warn("User: " + userEntity.getUuid() + " already exists for Mobile: " + addUserRequestDto.getMobile()
 					+ ", ISO Code: " + addUserRequestDto.getIsoCode() + " of type: " + addUserRequestDto.getUserType());
 
-			if(addUserRequestDto.getUserType().equals(UserType.CONSUMER)|| addUserRequestDto.getUserType().equals(UserType.EXTERNAL)) {
+			if (addUserRequestDto.getUserType().equals(UserType.CONSUMER) || addUserRequestDto.getUserType().equals(UserType.EXTERNAL) || addUserRequestDto.getUserType().equals(UserType.VENDOR)) {
 				userEntity.setUserType(addUserRequestDto.getUserType());
+				userEntity.setDepartment(addUserRequestDto.getDepartment());
 				try {
-					addUserOrConsumerRole(userEntity);
-				}catch (Exception e) {
-					log.error("Got error while adding role",e);
+					if (addUserRequestDto.getUserType().equals(UserType.CONSUMER) || addUserRequestDto.getUserType().equals(UserType.EXTERNAL))
+						addUserOrConsumerRole(userEntity);
+					else if (addUserRequestDto.getUserType().equals(UserType.VENDOR))
+						addUserOrConsumerRoleByRoleNames(userEntity, addUserRequestDto.getRoleNames());
+				} catch (Exception e) {
+					log.error("Got error while adding role", e);
 				}
+				userDbService.update(userEntity);
 			}
 
-
 			return UserAdapter.getUserDto(userEntity);
-
 		}
 
 		log.info("Adding new User [Mobile: " + addUserRequestDto.getMobile() + ", ISOCode: "
@@ -240,9 +247,8 @@ public class UserServiceImpl implements UserService {
 
 		userEntity = userDbService.saveAndFlush(userEntity);
 
-
 		addUserOrConsumerRole(userEntity);
-
+		addUserOrConsumerRoleByRoleNames(userEntity, addUserRequestDto.getRoleNames());
 
 		log.info("Added New User with Id: " + userEntity.getUuid());
 
@@ -324,7 +330,7 @@ public class UserServiceImpl implements UserService {
 		UserEntity userEntity = userDbService.findByUuid(userId);
 
 		if (Objects.isNull(userEntity)) {
-			throw new ApiValidationException("User not found for UserId: " + userId);
+			throw new UserValidationException("User not found for UserId: " + userId);
 		}
 
 		return UserAdapter.getUserProfileDto(userEntity);
@@ -377,6 +383,15 @@ public class UserServiceImpl implements UserService {
 		return new PageResponse<>(pageNo, userPage.getNumberOfElements(), userPage.getTotalPages(),
 				userPage.getTotalElements(), userDtos);
 
+	}
+	
+	@Override
+	public Set<UserProfileDto> searchUserList(UserFilterDto userFilterDto) {
+
+		Set<UserProfileDto> userDtos = getUserList(userFilterDto).stream().map(UserAdapter::getUserProfileDto)
+				.collect(Collectors.toSet());
+
+		return userDtos;
 	}
 
 	private void validateConstraint(List<AddUserAndRoleRequestDto> addUserAndRoleRequestDtoList) {
@@ -530,6 +545,13 @@ public class UserServiceImpl implements UserService {
 
 		return userDbService.findAll(specification, pagination);
 	}
+	
+	private List<UserEntity> getUserList(UserFilterDto userFilterDto) {
+
+		Specification<UserEntity> specification = userDbService.getSearchQuery(userFilterDto);
+
+		return userDbService.findAll(specification);
+	}
 
 	private Pageable getPaginationForSearchRequest(int pageNo, int limit) {
 
@@ -603,7 +625,7 @@ public class UserServiceImpl implements UserService {
 				Boolean.TRUE);
 
 		if (Objects.isNull(userEntity)) {
-			throw new ApiValidationException("User not found for UserId: " + updateDepartmentUserTypeDto.getUserId());
+			throw new UserValidationException("User not found for UserId: " + updateDepartmentUserTypeDto.getUserId());
 		}
 
 		userEntity.setUserType(updateDepartmentUserTypeDto.getUserType());
@@ -622,7 +644,7 @@ public class UserServiceImpl implements UserService {
 		UserEntity userEntity = userDbService.findByUuid(updateUserRequestDto.getUserId());
 
 		if (Objects.isNull(userEntity)) {
-			throw new ApiValidationException("User not found for UserId: " + updateUserRequestDto.getUserId());
+			throw new UserValidationException("User not found for UserId: " + updateUserRequestDto.getUserId());
 		}
 
 		if (Objects.nonNull(updateUserRequestDto.getAddress())) {
@@ -697,8 +719,17 @@ public class UserServiceImpl implements UserService {
 	}
 
 	private void addUserOrConsumerRole(UserEntity userEntity) {
-		if(userEntity.getUserType().equals(UserType.CONSUMER) || userEntity.getUserType().equals(UserType.EXTERNAL)) {
+		if (userEntity.getUserType().equals(UserType.CONSUMER) || userEntity.getUserType().equals(UserType.EXTERNAL)) {
 			AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetails(userEntity);
+
+			aclUserService.addRole(addUserDeptLevelRoleRequestDto);
+		}
+	}
+	
+	private void addUserOrConsumerRoleByRoleNames(UserEntity userEntity, List<String> roleNames) {
+		
+		if (Objects.nonNull(userEntity) && UserType.VENDOR == userEntity.getUserType()) {
+			AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetailsForListOfRoleNames(userEntity, roleNames);
 
 			aclUserService.addRole(addUserDeptLevelRoleRequestDto);
 		}
@@ -735,8 +766,7 @@ public class UserServiceImpl implements UserService {
 		UserEntity userEntity = userDbService.getUserForMobile(mobileNo, isoCode);
 
 		if (Objects.isNull(userEntity)) {
-			throw new ApiValidationException(
-					"User does not exists for Mobile Number: " + mobileNo + " and isoCode :" + isoCode);
+			throw new UserValidationException("User does not exists for Mobile Number: " + mobileNo + " and isoCode :" + isoCode);
 		}
 
 		if (Objects.nonNull(userType)) {
@@ -838,8 +868,6 @@ public class UserServiceImpl implements UserService {
 		return Boolean.TRUE;
 	}
 
-
-
 	private AddUserDeptLevelRoleRequestDto getRoleDetails(UserEntity user) {
 		AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = AddUserDeptLevelRoleRequestDto.builder()
 				.build();
@@ -857,6 +885,29 @@ public class UserServiceImpl implements UserService {
 			addUserDeptLevelRoleRequestDto.setDepartment(user.getDepartment());
 		}
 
+		return addUserDeptLevelRoleRequestDto;
+	}
+	
+	private AddUserDeptLevelRoleRequestDto getRoleDetailsForListOfRoleNames(UserEntity user, List<String> roleNames){
+		AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = AddUserDeptLevelRoleRequestDto.builder()
+				.build();
+
+		addUserDeptLevelRoleRequestDto.setUserUuid(user.getUuid());
+		addUserDeptLevelRoleRequestDto.setAccessLevelEntityListUuid(Arrays.asList(countryUuid));
+
+		if (Objects.nonNull(user) && UserType.VENDOR == user.getUserType()) {
+
+			if (CollectionUtils.isNotEmpty(roleNames)) {
+				List<RoleEntity> roleEntities = roleRepository.findByRoleNameInAndDepartment(roleNames, user.getDepartment());
+				List<String> roleUuids = roleEntities.stream().map(RoleEntity::getUuid).collect(Collectors.toList());
+
+				addUserDeptLevelRoleRequestDto.setRolesUuid(roleUuids);
+			}
+
+			addUserDeptLevelRoleRequestDto.setAccessLevel(AccessLevel.valueOf("COUNTRY"));
+			addUserDeptLevelRoleRequestDto.setDepartment(user.getDepartment());
+		}
+		
 		return addUserDeptLevelRoleRequestDto;
 	}
 
@@ -900,7 +951,7 @@ public class UserServiceImpl implements UserService {
 			UserEntity userEntity = userDbService.findByMobile(mobileNo);
 
 			if (Objects.isNull(userEntity)) {
-				throw new ApiValidationException("User not found for mobileNo: " + mobileNo);
+				throw new UserValidationException("User not found for mobileNo: " + mobileNo);
 			}
 
 			return UserAdapter.getUserProfileDto(userEntity);
