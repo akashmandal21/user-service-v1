@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.stanzaliving.core.base.exception.ApiValidationException;
 import com.stanzaliving.core.base.exception.AuthException;
 import com.stanzaliving.core.kafka.dto.KafkaDTO;
 import com.stanzaliving.core.kafka.producer.NotificationProducer;
@@ -87,6 +86,11 @@ public class AuthServiceImpl implements AuthService {
 
 		try {
 			if (Objects.isNull(userEntity)) {
+
+				if (UserType.VENDOR == loginRequestDto.getUserType()) {
+					throw new AuthException("No user exists with this number", UserErrorCodes.USER_NOT_EXISTS);
+				}
+
 				ResponseDto<LeadDetailEntity> leadDetailResponseDto = leadserviceClientApi.search(loginRequestDto.getMobile(), null);
 				if(Objects.isNull(leadDetailResponseDto) || Objects.isNull(leadDetailResponseDto.getData())) {
 					throw new AuthException("No user exists with this number", UserErrorCodes.USER_NOT_EXISTS);
