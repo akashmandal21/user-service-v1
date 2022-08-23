@@ -202,7 +202,7 @@ public class AuthController {
 
 				String domain = request.getHeader(SecurityConstants.FRONT_ENVIRONMENT);
 
-				response.addCookie(SecureCookieUtil.create(SecurityConstants.TOKEN_HEADER_NAME, token, Optional.of(isLocalFrontEnd), Optional.of(isApp)), domain);
+				response.addCookie(SecureCookieUtil.create(SecurityConstants.TOKEN_HEADER_NAME, token, Optional.of(isLocalFrontEnd), Optional.of(isApp), domain));
 				log.info("Successfully added token to response for user : {}", userSessionEntity.getUserId());
 			} else {
 				log.warn("Cannot add token to response, token not present for user :{}", userSessionEntity.getUserId());
