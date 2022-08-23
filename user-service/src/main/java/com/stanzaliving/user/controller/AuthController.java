@@ -95,9 +95,9 @@ public class AuthController {
 
 				log.info("UserType for user is INVITED_GUEST {} " + userProfileDto.getUuid());
 				ResponseDto<BookingResponseDto> bookingResponseDto = onboardGuestService.createGuestBooking(userProfileDto.getMobile());
-				
+
 				log.info("\n\n\n\n\n OTP Successfully bookingResponseDto " + bookingResponseDto);
-				if (Objects.isNull(bookingResponseDto) ) {    
+				if (Objects.isNull(bookingResponseDto) ) {
 					return ResponseDto.failure("Failed to create guest booking for " + userProfileDto.getMobile());
 				}
 
@@ -200,7 +200,9 @@ public class AuthController {
 				String appEnv = request.getHeader(SecurityConstants.APP_ENVIRONMENT);
 				boolean isApp = StringUtils.isNotBlank(appEnv) && SecurityConstants.APP_ENVIRONMENT_TRUE.equals(appEnv);
 
-				response.addCookie(SecureCookieUtil.create(SecurityConstants.TOKEN_HEADER_NAME, token, Optional.of(isLocalFrontEnd), Optional.of(isApp)));
+				String domain = request.getHeader(SecurityConstants.FRONT_ENVIRONMENT);
+
+				response.addCookie(SecureCookieUtil.create(SecurityConstants.TOKEN_HEADER_NAME, token, Optional.of(isLocalFrontEnd), Optional.of(isApp)), domain);
 				log.info("Successfully added token to response for user : {}", userSessionEntity.getUserId());
 			} else {
 				log.warn("Cannot add token to response, token not present for user :{}", userSessionEntity.getUserId());
