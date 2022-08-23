@@ -14,6 +14,8 @@ import javax.validation.constraints.NotBlank;
 
 import com.stanzaliving.user.entity.UserSessionEntity;
 import com.stanzaliving.user.service.SessionService;
+import org.apache.commons.collections.CollectionUtils;
+import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -172,9 +174,10 @@ public class UserController {
 		String updatedStatus = requestDto.getStatus() ? "activated" : "deactivated";
 		try {
 			String token  = extractTokenFromRequest(request);
-			UserSessionEntity userSessionEntity =sessionService.getUserSessionByToken(token);
-			log.info("Request has been initiated by user Id {}  ", userSessionEntity.getUserId());
-
+			if (StringUtils.isNotBlank(token)){
+				UserSessionEntity userSessionEntity =sessionService.getUserSessionByToken(token);
+				log.info("User Status update request has been initiated by user Id {}  ", userSessionEntity.getUserId());
+			}
 		}catch(Exception e ){
 			log.error("exception occured while user update status :",e);
 		}
