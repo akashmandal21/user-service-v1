@@ -156,10 +156,11 @@ public class UserController {
 	}
 
 	@PostMapping("update/userStatus")
-	public ResponseDto<Boolean> updateUserStatus(@RequestBody UserStatusRequestDto requestDto) {
+	public ResponseDto<Boolean> updateUserStatus(@RequestAttribute(name = SecurityConstants.USER_ID) String currentUserId ,@RequestBody UserStatusRequestDto requestDto) {
 
-		log.info("Received request to deactivate user");
+		log.info("Received request to deactivate user : {}",requestDto);
 		String updatedStatus = requestDto.getStatus() ? "activated" : "deactivated";
+		log.info("Request has been initiated by user Id : "+currentUserId);
 
 		return ResponseDto.success("Successfully " + updatedStatus + " user.", userService.updateUserStatus(requestDto.getUserId(), requestDto.getStatus()));
 	}
