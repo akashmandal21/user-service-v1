@@ -3,6 +3,7 @@
  */
 package com.stanzaliving.user.controller;
 
+import java.net.URI;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
@@ -201,9 +202,16 @@ public class AuthController {
 				String appEnv = request.getHeader(SecurityConstants.APP_ENVIRONMENT);
 				boolean isApp = StringUtils.isNotBlank(appEnv) && SecurityConstants.APP_ENVIRONMENT_TRUE.equals(appEnv);
 
-				log.info("Request Headers: {}", String.valueOf(Collections.list(request.getHeaderNames())));
-				String domain = request.getHeader("authority");
-
+				String domain = "";
+				try {
+					String origin = request.getHeader("origin");
+					log.info("Request Headers: Origin: {} - {}", origin, String.valueOf(Collections.list(request.getHeaderNames())));
+					if (StringUtils.isNotBlank(origin)) {
+						domain = new URI(origin).getHost();
+					}
+				} catch (Exception e) {
+					log.error("error while fetching domain", e);
+				}
 				response.addCookie(SecureCookieUtil.create(SecurityConstants.TOKEN_HEADER_NAME, token, Optional.of(isLocalFrontEnd), Optional.of(isApp), domain));
 				log.info("Successfully added token to response for user : {}", userSessionEntity.getUserId());
 			} else {
