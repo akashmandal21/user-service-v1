@@ -16,6 +16,7 @@ import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.user.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -202,16 +203,7 @@ public class AuthController {
 				String appEnv = request.getHeader(SecurityConstants.APP_ENVIRONMENT);
 				boolean isApp = StringUtils.isNotBlank(appEnv) && SecurityConstants.APP_ENVIRONMENT_TRUE.equals(appEnv);
 
-				String domain = "";
-				try {
-					String origin = request.getHeader("origin");
-					log.info("Request Headers: Origin: {} - {}", origin, String.valueOf(Collections.list(request.getHeaderNames())));
-					if (StringUtils.isNotBlank(origin)) {
-						domain = new URI(origin).getHost();
-					}
-				} catch (Exception e) {
-					log.error("error while fetching domain", e);
-				}
+				String domain = getDomain(request);
 				response.addCookie(SecureCookieUtil.create(SecurityConstants.TOKEN_HEADER_NAME, token, Optional.of(isLocalFrontEnd), Optional.of(isApp), domain));
 				log.info("Successfully added token to response for user : {}", userSessionEntity.getUserId());
 			} else {
@@ -222,5 +214,18 @@ public class AuthController {
 					userSessionEntity.getUserId(), e.getMessage());
 			throw new StanzaException(e);
 		}
+	}
+
+	private String getDomain(HttpServletRequest request) {
+		try {
+			String origin = request.getHeader(HttpHeaders.ORIGIN);
+			log.info("Request Headers: Origin: {} - {}", origin, String.valueOf(Collections.list(request.getHeaderNames())));
+			if (StringUtils.isNotBlank(origin)) {
+				return new URI(origin).getHost();
+			}
+		} catch (Exception e) {
+			log.error("error while fetching domain", e);
+		}
+		return "";
 	}
 }
