@@ -88,7 +88,7 @@ public class InternalOtpController {
 		return ResponseDto.success("OTP sent to mobile & email");
 	}
 	
-	@GetMapping("get")
+	@GetMapping("getotp")
 	public ResponseDto<Integer> getOtp(@RequestParam(value = "mobile", required = true) String mobile,
 			@RequestParam(value = "isoCode", required = true, defaultValue = "IN") String isoCode,
 			@RequestParam(value = "otpType", defaultValue = "LOGIN") OtpType otpType) {
