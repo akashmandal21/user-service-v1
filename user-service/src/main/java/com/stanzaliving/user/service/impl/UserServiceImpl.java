@@ -228,6 +228,8 @@ public class UserServiceImpl implements UserService {
 					log.error("Got error while adding role", e);
 				}
 				userDbService.update(userEntity);
+			} else if (addUserRequestDto.getUserType().equals(UserType.FOOD_DELIVERY_AGENT)) {
+				addUserOrConsumerRoleByRoleNames(userEntity, addUserRequestDto.getRoleNames());
 			}
 
 			return UserAdapter.getUserDto(userEntity);
@@ -728,7 +730,7 @@ public class UserServiceImpl implements UserService {
 	
 	private void addUserOrConsumerRoleByRoleNames(UserEntity userEntity, List<String> roleNames) {
 		
-		if (Objects.nonNull(userEntity) && UserType.VENDOR == userEntity.getUserType()) {
+		if (Objects.nonNull(userEntity) && (UserType.VENDOR == userEntity.getUserType() || UserType.FOOD_DELIVERY_AGENT == userEntity.getUserType())) {
 			AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetailsForListOfRoleNames(userEntity, roleNames);
 
 			aclUserService.addRole(addUserDeptLevelRoleRequestDto);
@@ -895,7 +897,7 @@ public class UserServiceImpl implements UserService {
 		addUserDeptLevelRoleRequestDto.setUserUuid(user.getUuid());
 		addUserDeptLevelRoleRequestDto.setAccessLevelEntityListUuid(Arrays.asList(countryUuid));
 
-		if (Objects.nonNull(user) && UserType.VENDOR == user.getUserType()) {
+		if (Objects.nonNull(user) && (UserType.VENDOR == user.getUserType() || UserType.FOOD_DELIVERY_AGENT == user.getUserType())) {
 
 			if (CollectionUtils.isNotEmpty(roleNames)) {
 				List<RoleEntity> roleEntities = roleRepository.findByRoleNameInAndDepartment(roleNames, user.getDepartment());
