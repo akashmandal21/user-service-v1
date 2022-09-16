@@ -20,6 +20,7 @@ import javax.validation.Valid;
 
 import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.base.exception.UserValidationException;
+import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
 import com.stanzaliving.user.acl.repository.UserDepartmentLevelRepository;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.ListUtils;
@@ -229,7 +230,26 @@ public class UserServiceImpl implements UserService {
 				}
 				userDbService.update(userEntity);
 			} else if (addUserRequestDto.getUserType().equals(UserType.FOOD_DELIVERY_AGENT)) {
-				addUserOrConsumerRoleByRoleNames(userEntity, addUserRequestDto.getRoleNames());
+				List<UserDeptLevelRoleDto> userDeptLevelRoleList = aclUserService.getActiveUserDeptLevelRole(userEntity.getUuid());
+
+				UserDeptLevelRoleDto foodOpsRole = userDeptLevelRoleList.stream()
+						.filter(userDeptLevelRole ->  userDeptLevelRole.getDepartment().equals(Department.FOOD_OPS))
+						.findFirst().orElse(null);
+				if(Objects.isNull(foodOpsRole)) {
+					addUserOrConsumerRoleByRoleNames(userEntity, addUserRequestDto.getRoleNames());
+					return UserAdapter.getUserDto(userEntity);
+				}
+
+				List<RoleEntity> roleEntities = roleRepository.findByRoleNameInAndDepartment(addUserRequestDto.getRoleNames(), Department.FOOD_OPS);
+				if(CollectionUtils.isNotEmpty(roleEntities)) {
+					Set<String> roleUuids = roleEntities.stream().map(RoleEntity::getUuid).collect(Collectors.toSet());
+					for(String roleUuid : roleUuids) {
+						if(!foodOpsRole.getRolesUuid().contains(roleUuid)) {
+							addUserOrConsumerRoleByRoleNames(userEntity, addUserRequestDto.getRoleNames());
+							return UserAdapter.getUserDto(userEntity);
+						}
+					}
+				}
 			}
 
 			return UserAdapter.getUserDto(userEntity);
