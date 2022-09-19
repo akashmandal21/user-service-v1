@@ -3,48 +3,20 @@
  */
 package com.stanzaliving.user.service.impl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-import javax.validation.Valid;
-
-import com.stanzaliving.core.base.exception.StanzaException;
-import com.stanzaliving.core.base.exception.UserValidationException;
-import com.stanzaliving.user.acl.repository.UserDepartmentLevelRepository;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.ListUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
-
 import com.stanzaliving.core.base.common.dto.PageResponse;
 import com.stanzaliving.core.base.common.dto.PaginationRequest;
 import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.base.exception.ApiValidationException;
 import com.stanzaliving.core.base.exception.NoRecordException;
+import com.stanzaliving.core.base.exception.UserValidationException;
 import com.stanzaliving.core.base.utils.PhoneNumberUtils;
 import com.stanzaliving.core.generic.dto.UIKeyValue;
 import com.stanzaliving.core.kafka.dto.KafkaDTO;
 import com.stanzaliving.core.kafka.producer.NotificationProducer;
 import com.stanzaliving.core.sqljpa.adapter.AddressAdapter;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
+import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleDto;
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleRequestDto;
 import com.stanzaliving.core.user.dto.AccessLevelRoleRequestDto;
 import com.stanzaliving.core.user.dto.UserDto;
@@ -54,16 +26,17 @@ import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.dto.UserRoleCacheDto;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.ActiveUserRequestDto;
+import com.stanzaliving.core.user.request.dto.AddUserAndRoleRequestDto;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
-import com.stanzaliving.core.user.request.dto.AddUserAndRoleRequestDto;
 import com.stanzaliving.user.acl.db.service.UserDepartmentLevelDbService;
 import com.stanzaliving.user.acl.db.service.UserDepartmentLevelRoleDbService;
 import com.stanzaliving.user.acl.entity.RoleEntity;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity;
 import com.stanzaliving.user.acl.repository.RoleRepository;
+import com.stanzaliving.user.acl.repository.UserDepartmentLevelRepository;
 import com.stanzaliving.user.acl.service.AclUserService;
 import com.stanzaliving.user.acl.service.RoleService;
 import com.stanzaliving.user.acl.service.UserDepartmentLevelRoleService;
@@ -76,11 +49,33 @@ import com.stanzaliving.user.entity.UserProfileEntity;
 import com.stanzaliving.user.service.UserManagerMappingService;
 import com.stanzaliving.user.service.UserService;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.transaction.annotation.Transactional;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.ListUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+import javax.validation.Valid;
 import javax.validation.Validator;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author naveen
@@ -228,6 +223,27 @@ public class UserServiceImpl implements UserService {
 					log.error("Got error while adding role", e);
 				}
 				userDbService.update(userEntity);
+			} else if (addUserRequestDto.getUserType().equals(UserType.FOOD_DELIVERY_AGENT)) {
+				List<UserDeptLevelRoleDto> userDeptLevelRoleList = aclUserService.getActiveUserDeptLevelRole(userEntity.getUuid());
+
+				UserDeptLevelRoleDto foodOpsRole = userDeptLevelRoleList.stream()
+						.filter(userDeptLevelRole ->  userDeptLevelRole.getDepartment().equals(Department.FOOD_OPS))
+						.findFirst().orElse(null);
+				if(Objects.isNull(foodOpsRole)) {
+					log.error("User: {} does not belong FOOD_OPS", userEntity.getUuid());
+					return UserAdapter.getUserDto(userEntity);
+				}
+
+				List<RoleEntity> roleEntities = roleRepository.findByRoleNameInAndDepartment(addUserRequestDto.getRoleNames(), Department.FOOD_OPS);
+				if(CollectionUtils.isNotEmpty(roleEntities)) {
+					Set<String> roleUuids = roleEntities.stream().map(RoleEntity::getUuid).collect(Collectors.toSet());
+					for(String roleUuid : roleUuids) {
+						if(!foodOpsRole.getRolesUuid().contains(roleUuid)) {
+							addUserOrConsumerRoleByRoleNames(userEntity, addUserRequestDto.getRoleNames());
+							return UserAdapter.getUserDto(userEntity);
+						}
+					}
+				}
 			}
 
 			return UserAdapter.getUserDto(userEntity);
@@ -728,7 +744,7 @@ public class UserServiceImpl implements UserService {
 	
 	private void addUserOrConsumerRoleByRoleNames(UserEntity userEntity, List<String> roleNames) {
 		
-		if (Objects.nonNull(userEntity) && UserType.VENDOR == userEntity.getUserType()) {
+		if (Objects.nonNull(userEntity) && (UserType.VENDOR == userEntity.getUserType() || UserType.FOOD_DELIVERY_AGENT == userEntity.getUserType())) {
 			AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleRequestDto = getRoleDetailsForListOfRoleNames(userEntity, roleNames);
 
 			aclUserService.addRole(addUserDeptLevelRoleRequestDto);
@@ -895,7 +911,7 @@ public class UserServiceImpl implements UserService {
 		addUserDeptLevelRoleRequestDto.setUserUuid(user.getUuid());
 		addUserDeptLevelRoleRequestDto.setAccessLevelEntityListUuid(Arrays.asList(countryUuid));
 
-		if (Objects.nonNull(user) && UserType.VENDOR == user.getUserType()) {
+		if (Objects.nonNull(user) && (UserType.VENDOR == user.getUserType() || UserType.FOOD_DELIVERY_AGENT == user.getUserType())) {
 
 			if (CollectionUtils.isNotEmpty(roleNames)) {
 				List<RoleEntity> roleEntities = roleRepository.findByRoleNameInAndDepartment(roleNames, user.getDepartment());
