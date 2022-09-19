@@ -230,7 +230,7 @@ public class UserServiceImpl implements UserService {
 						.filter(userDeptLevelRole ->  userDeptLevelRole.getDepartment().equals(Department.FOOD_OPS))
 						.findFirst().orElse(null);
 				if(Objects.isNull(foodOpsRole)) {
-					addUserOrConsumerRoleByRoleNames(userEntity, addUserRequestDto.getRoleNames());
+					log.error("User: {} does not belong FOOD_OPS", userEntity.getUuid());
 					return UserAdapter.getUserDto(userEntity);
 				}
 
