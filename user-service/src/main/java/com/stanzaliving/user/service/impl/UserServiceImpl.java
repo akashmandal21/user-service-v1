@@ -720,6 +720,10 @@ public class UserServiceImpl implements UserService {
 		if (Objects.nonNull(updateUserRequestDto.getMiddleName())) {
 			userEntity.getUserProfile().setMiddleName(updateUserRequestDto.getMiddleName());
 		}
+
+		if(!userEntity.isStatus())
+			userEntity.setStatus(true);
+
 		userEntity = userDbService.update(userEntity);
 
 		UserProfileDto userProfileDto = UserAdapter.getUserProfileDto(userEntity);
