@@ -298,7 +298,7 @@ public class AclUserServiceImpl implements AclUserService {
 
 		if (Objects.nonNull(roleDto) && roleDto.getDepartment().equals(department)) {
 
-			List<UserDepartmentLevelRoleEntity> departmentLevelRoleEntities = userDepartmentLevelRoleDbService.findByRoleUuid(roleDto.getUuid());
+			List<UserDepartmentLevelRoleEntity> departmentLevelRoleEntities = userDepartmentLevelRoleDbService.findByRoleUuidInAndStatus(Collections.singletonList(roleDto.getUuid()), true);
 
 			if (CollectionUtils.isNotEmpty(departmentLevelRoleEntities)) {
 
@@ -326,6 +326,52 @@ public class AclUserServiceImpl implements AclUserService {
 						// if (!Collections.disjoint(accessLevelEntityList, accessLevelUuids)) {
 						// userIds.add(entity.getUserUuid());
 						// }
+					});
+				}
+			}
+
+		}
+
+		return userIdAccessLevelIdListMap;
+	}
+
+
+	@Override
+	public Map<String, List<String>> getActiveUsersForRole(String roleName, Set<String> accessLevelEntityList) {
+
+		log.info("Got request to get list of userid by rolename {}", roleName);
+
+		RoleDto roleDto = roleService.findByRoleName(roleName);
+
+		Map<String, List<String>> userIdAccessLevelIdListMap = new HashMap<>();
+
+		if (Objects.nonNull(roleDto) ) {
+
+			List<UserDepartmentLevelRoleEntity> departmentLevelRoleEntities = userDepartmentLevelRoleDbService.findByRoleUuid(roleDto.getUuid());
+
+			if (CollectionUtils.isNotEmpty(departmentLevelRoleEntities)) {
+
+				List<String> uuids = departmentLevelRoleEntities.stream().map(UserDepartmentLevelRoleEntity::getUserDepartmentLevelUuid).collect(Collectors.toList());
+
+				List<UserDepartmentLevelEntity> departmentLevelEntities = userDepartmentLevelDbService.findByUuidInAndAccessLevel(uuids, roleDto.getAccessLevel());
+
+				if (CollectionUtils.isNotEmpty(departmentLevelEntities)) {
+
+					departmentLevelEntities.forEach(entity -> {
+
+						UserEntity user = userDbService.findByUuid(entity.getUserUuid());
+
+						if(user.isStatus()) {
+							Set<String> accessLevelUuids = new HashSet<>(Arrays.asList((entity.getCsvAccessLevelEntityUuid().split(","))));
+
+							for (String accessLevelEntity : accessLevelEntityList) {
+								if (accessLevelUuids.contains(accessLevelEntity)) {
+									List<String> accessLevelIds = userIdAccessLevelIdListMap.getOrDefault(entity.getUserUuid(), new ArrayList<>());
+									accessLevelIds.add(accessLevelEntity);
+									userIdAccessLevelIdListMap.put(entity.getUserUuid(), accessLevelIds);
+								}
+							}
+						}
 					});
 				}
 			}

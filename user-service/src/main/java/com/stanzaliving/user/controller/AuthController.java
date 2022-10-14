@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.user.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,7 +90,7 @@ public class AuthController {
 		UserSessionEntity userSessionEntity = sessionService.createUserSession(userProfileDto, token);
 
 		if (Objects.nonNull(userSessionEntity)) {
-			addTokenToResponse(request, response, token);
+			addTokenToResponse(request, response, token, userSessionEntity);
 			if(UserType.INVITED_GUEST.equals(userProfileDto.getUserType())) {
 
 				log.info("UserType for user is INVITED_GUEST {} " + userProfileDto.getUuid());
@@ -115,10 +116,17 @@ public class AuthController {
 		UserSessionEntity userSessionEntity = sessionService.refreshUserSession(token);
 
 		if (Objects.nonNull(userSessionEntity)) {
-			addTokenToResponse(request, response, userSessionEntity.getToken());
-			return ResponseDto.success("Token refreshed Successfull", UserAdapter.getAclUserDto(userService.getUserProfile(userSessionEntity.getUserId()), aclService.getUserDeptLevelRoleNameUrlExpandedDtoFe(userSessionEntity.getUserId())));
+			log.info("Successfully refreshed userSessionEntity for user : {} . Adding token to response ...",
+					userSessionEntity.getUuid());
+			addTokenToResponse(request, response, userSessionEntity.getToken(), userSessionEntity);
+			ResponseDto<AclUserDto> aclUserDtoResponseDto = ResponseDto.success("Token refreshed Successfully",
+					UserAdapter.getAclUserDto(userService.getUserProfile(userSessionEntity.getUserId()),
+							aclService.getUserDeptLevelRoleNameUrlExpandedDtoFe(userSessionEntity.getUserId())));
+			log.info("Successfully refreshSession for user : {}", userSessionEntity.getUserId());
+			return aclUserDtoResponseDto;
 		}
 
+		log.error("Cannot refreshSession. userSessionEntity is null");
 		return ResponseDto.failure("Failed to refresh user session");
 	}
 
@@ -178,17 +186,29 @@ public class AuthController {
 		return ResponseDto.success("Successfully Logged Out");
 	}
 
-	private void addTokenToResponse(HttpServletRequest request, HttpServletResponse response, String token) {
+	private void addTokenToResponse(HttpServletRequest request, HttpServletResponse response, String token,
+									UserSessionEntity userSessionEntity) {
 
-		if (StringUtils.isNotBlank(token)) {
+		try {
+			log.info("Request received for addTokenToResponse for user : {}", userSessionEntity.getUserId());
 
-			String frontEnv = request.getHeader(SecurityConstants.FRONT_ENVIRONMENT);
-			boolean isLocalFrontEnd = StringUtils.isNotBlank(frontEnv) && SecurityConstants.FRONT_ENVIRONMENT_LOCAL.equals(frontEnv);
+			if (StringUtils.isNotBlank(token)) {
 
-			String appEnv = request.getHeader(SecurityConstants.APP_ENVIRONMENT);
-			boolean isApp = StringUtils.isNotBlank(appEnv) && SecurityConstants.APP_ENVIRONMENT_TRUE.equals(appEnv);
+				String frontEnv = request.getHeader(SecurityConstants.FRONT_ENVIRONMENT);
+				boolean isLocalFrontEnd = StringUtils.isNotBlank(frontEnv) && SecurityConstants.FRONT_ENVIRONMENT_LOCAL.equals(frontEnv);
 
-			response.addCookie(SecureCookieUtil.create(SecurityConstants.TOKEN_HEADER_NAME, token, Optional.of(isLocalFrontEnd), Optional.of(isApp)));
+				String appEnv = request.getHeader(SecurityConstants.APP_ENVIRONMENT);
+				boolean isApp = StringUtils.isNotBlank(appEnv) && SecurityConstants.APP_ENVIRONMENT_TRUE.equals(appEnv);
+
+				response.addCookie(SecureCookieUtil.create(SecurityConstants.TOKEN_HEADER_NAME, token, Optional.of(isLocalFrontEnd), Optional.of(isApp)));
+				log.info("Successfully added token to response for user : {}", userSessionEntity.getUserId());
+			} else {
+				log.warn("Cannot add token to response, token not present for user :{}", userSessionEntity.getUserId());
+			}
+		} catch (Exception e) {
+			log.error("Exception while addTokenToResponse for user : {} , exception : {}",
+					userSessionEntity.getUserId(), e.getMessage());
+			throw new StanzaException(e);
 		}
 	}
 }

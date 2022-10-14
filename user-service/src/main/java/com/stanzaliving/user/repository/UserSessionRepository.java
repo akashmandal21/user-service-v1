@@ -16,5 +16,5 @@ import com.stanzaliving.user.entity.UserSessionEntity;
 @Repository
 public interface UserSessionRepository extends AbstractJpaRepository<UserSessionEntity, Long> {
 
-	UserSessionEntity findByTokenAndStatus(String token, boolean status);
+	UserSessionEntity findByToken(String token);
 }

@@ -3,12 +3,19 @@
  */
 package com.stanzaliving.user.controller;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 
+import com.stanzaliving.user.entity.UserSessionEntity;
+import com.stanzaliving.user.service.SessionService;
+import org.apache.commons.collections.CollectionUtils;
+import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,17 +39,19 @@ import com.stanzaliving.core.user.dto.UserManagerAndRoleDto;
 import com.stanzaliving.core.user.dto.UserProfileDto;
 import com.stanzaliving.core.user.enums.EnumListing;
 import com.stanzaliving.core.user.enums.UserType;
+import com.stanzaliving.core.user.request.dto.AddUserAndRoleRequestDto;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.core.user.request.dto.UpdateDepartmentUserTypeDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
 import com.stanzaliving.core.user.request.dto.UserRequestDto;
 import com.stanzaliving.core.user.request.dto.UserStatusRequestDto;
-import com.stanzaliving.core.user.request.dto.AddUserAndRoleRequestDto;
 import com.stanzaliving.user.acl.service.AclService;
 import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.service.UserService;
 
 import lombok.extern.log4j.Log4j2;
+
+import static com.stanzaliving.core.security.helper.SecurityUtils.extractTokenFromRequest;
 
 /**
  * @author naveen
@@ -59,6 +68,9 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private SessionService sessionService;
 
 	@GetMapping("details")
 	public ResponseDto<UserProfileDto> getUser(
@@ -156,10 +168,20 @@ public class UserController {
 	}
 
 	@PostMapping("update/userStatus")
-	public ResponseDto<Boolean> updateUserStatus(@RequestBody UserStatusRequestDto requestDto) {
+	public ResponseDto<Boolean> updateUserStatus(@RequestBody UserStatusRequestDto requestDto,HttpServletRequest request) {
 
-		log.info("Received request to deactivate user");
+		log.info("Received request to deactivate user : {}",requestDto);
 		String updatedStatus = requestDto.getStatus() ? "activated" : "deactivated";
+		try {
+			String token  = extractTokenFromRequest(request);
+			if (StringUtils.isNotBlank(token)){
+				UserSessionEntity userSessionEntity =sessionService.getUserSessionByToken(token);
+				log.info("User Status update request has been initiated by user Id {}  ", userSessionEntity.getUserId());
+			}
+		}catch(Exception e ){
+			log.error("exception occured while user update status :",e);
+		}
+
 
 		return ResponseDto.success("Successfully " + updatedStatus + " user.", userService.updateUserStatus(requestDto.getUserId(), requestDto.getStatus()));
 	}
@@ -203,4 +225,30 @@ public class UserController {
 
 		return ResponseDto.success("Found " + userDtos.getRecords() + " Users for Search Criteria", userDtos);
 	}
+	
+	@PostMapping("search/user/list")
+	public ResponseDto<Set<UserProfileDto>> searchUsersDetailAll(@RequestBody UserRequestDto userRequestDto) {
+
+		log.info("Post Request received to search user details for user list UserRequestDto {} ", userRequestDto);
+
+		Set<UserProfileDto> userProfileDtos = new HashSet<UserProfileDto>();
+
+		UserFilterDto userFilterDto = UserFilterDto.builder()
+				.userIds(userRequestDto.getUserIds())
+				.mobile(userRequestDto.getMobile())
+				.isoCode(userRequestDto.getIsoCode())
+				.email(userRequestDto.getEmail())
+				.userType(userRequestDto.getUserType())
+				.status(userRequestDto.getStatus())
+				.department(userRequestDto.getDepartment())
+				.name(userRequestDto.getName())
+				.build();
+
+		userProfileDtos = userService.searchUserList(userFilterDto);
+
+		return ResponseDto.success("Found " + userProfileDtos.size() + " Users for Search Criteria", userProfileDtos);
+	}
+
+
+
 }
