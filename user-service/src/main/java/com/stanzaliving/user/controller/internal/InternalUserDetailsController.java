@@ -80,8 +80,12 @@ public class InternalUserDetailsController {
 	public ResponseDto<UserProfileDto> getUserDetails(@RequestParam(name = "mobileNo", required = true) String mobileNo) {
 
 		log.info("Fetching User with mobileNo: {}", mobileNo);
-
-		return ResponseDto.success("Found User for userUuid", userService.getUserDetails(mobileNo));
+		try {
+			return ResponseDto.success("Found User for userUuid", userService.getUserDetails(mobileNo));
+		}catch (Exception e) {
+			log.error("Exception occurred to fetch user by mobile no {}",mobileNo, e);
+			return ResponseDto.failure(e.getMessage());
+		}
 	}
 	
 	@PostMapping("/userProfiles")
