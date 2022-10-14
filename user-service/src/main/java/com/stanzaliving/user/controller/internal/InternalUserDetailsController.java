@@ -55,8 +55,12 @@ public class InternalUserDetailsController {
 	public ResponseDto<UserProfileDto> getUserProfileDtoByEmail(@RequestParam(name = "email", required = true) String email) {
 
 		log.info("Fetching User with userUuid: {}", email);
-
-		return ResponseDto.success("Found User for email", userService.getUserProfileDtoByEmail(email));
+		try {
+			return ResponseDto.success("Found User for email", userService.getUserProfileDtoByEmail(email));
+		}catch (Exception e) {
+			log.error("Exception occurred to fetch user by email {}",email, e);
+			return ResponseDto.failure(e.getMessage());
+		}
 	}
 
 	@GetMapping("all")
@@ -81,7 +85,12 @@ public class InternalUserDetailsController {
 
 		log.info("Fetching User with mobileNo: {}", mobileNo);
 
-		return ResponseDto.success("Found User for userUuid", userService.getUserDetails(mobileNo));
+		try {
+			return ResponseDto.success("Found User for userUuid", userService.getUserDetails(mobileNo));
+		}catch (Exception e) {
+			log.error("Exception occurred to fetch user by mobile no {}",mobileNo, e);
+			return ResponseDto.failure(e.getMessage());
+		}
 	}
 	
 	@PostMapping("/userProfiles")
