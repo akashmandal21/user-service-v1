@@ -950,7 +950,7 @@ public class UserServiceImpl implements UserService {
 			UserEntity userEntity = userDbService.findByMobile(mobileNo);
 
 			if (Objects.isNull(userEntity)) {
-				throw new UserValidationException("User not found for mobileNo: " + mobileNo);
+				throw new StanzaException("User not found for mobileNo: " + mobileNo);
 			}
 
 			return UserAdapter.getUserProfileDto(userEntity);
