@@ -898,7 +898,7 @@ public class UserServiceImpl implements UserService {
 			UserEntity userEntity = userDbService.findByMobile(mobileNo);
 
 			if (Objects.isNull(userEntity)) {
-				throw new ApiValidationException("User not found for mobileNo: " + mobileNo);
+				throw new StanzaException("User not found for mobileNo: " + mobileNo);
 			}
 
 			return UserAdapter.getUserProfileDto(userEntity);
@@ -1026,7 +1026,7 @@ public class UserServiceImpl implements UserService {
 		UserEntity userEntity = userDbService.findTop1ByEmailOrderByCreatedAtDesc(email);
 
 		if (Objects.isNull(userEntity)) {
-			throw new ApiValidationException("User not found for email: " + email);
+			throw new StanzaException("User not found for email: " + email);
 		}
 
 		return UserAdapter.getUserProfileDto(userEntity);
