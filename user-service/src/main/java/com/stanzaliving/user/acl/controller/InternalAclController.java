@@ -4,14 +4,15 @@ import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleNameUrlExpandedDto;
 import com.stanzaliving.user.acl.service.AclService;
 import lombok.extern.log4j.Log4j2;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotBlank;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @Log4j2
 @RestController
@@ -27,5 +28,14 @@ public class InternalAclController {
         log.info("Request received to getUserRolesFe for user : " + email);
         return ResponseDto.success(aclService.getUserDeptLevelRoleNameUrlExpandedDtoFeFromEmail(email));
 
+    }
+    @PostMapping("user/getList")
+    public ResponseDto<String> getList(@RequestBody Map<String,Object> jsonObject) throws IOException {
+        List<String> roleUuids = (List<String>) jsonObject.get("roleUuids");
+        List<String> accessLevels = (List<String>)jsonObject.get("accessLevels");
+        List<String> departments = (List<String>)jsonObject.get("departments");
+        String userUuids = jsonObject.get("userUuids").toString();
+        List<String> mmIds = (List<String>)jsonObject.get("mmIds");
+        return ResponseDto.success(aclService.make_list(roleUuids,accessLevels,departments,userUuids,mmIds));
     }
 }

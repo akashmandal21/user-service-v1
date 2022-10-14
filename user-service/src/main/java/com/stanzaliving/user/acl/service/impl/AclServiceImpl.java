@@ -3,6 +3,10 @@
  */
 package com.stanzaliving.user.acl.service.impl;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -167,5 +171,27 @@ public class AclServiceImpl implements AclService {
 
 		return Pair.of(new ArrayList<>(finalRoleUuidSet), new ArrayList<>(finalApiUuidSet));
 
+	}
+
+	@Override
+	public String make_list(List<String> roleUuids, List<String> accessLevels, List<String> departments, String userUuids, List<String> mmIds) throws IOException {
+		/*File myObj = new File("listing.txt");
+		FileWriter myWriter = new FileWriter(myObj);*/
+		StringBuilder builder = new StringBuilder();
+		builder.append("roleUuids  accessLevels  departments  userUuids  mmIds");
+		builder.append("/n");
+		for (int j = 0; j < mmIds.size(); j++) {
+			for (int i = 0; i <roleUuids.size();i++){
+				List<String> newRow = new ArrayList<>();
+				newRow.add(roleUuids.get(i));
+				newRow.add(accessLevels.get(i));
+				newRow.add(departments.get(i));
+				newRow.add(userUuids);
+				newRow.add(mmIds.get(j));
+				builder.append(newRow);
+				builder.append("/n");
+			}
+		}
+		return builder.toString();
 	}
 }

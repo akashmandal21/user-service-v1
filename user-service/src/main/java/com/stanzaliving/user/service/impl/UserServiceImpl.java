@@ -9,6 +9,7 @@ import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.base.exception.ApiValidationException;
 import com.stanzaliving.core.base.exception.NoRecordException;
+import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.base.exception.UserValidationException;
 import com.stanzaliving.core.base.utils.PhoneNumberUtils;
 import com.stanzaliving.core.generic.dto.UIKeyValue;
@@ -971,7 +972,7 @@ public class UserServiceImpl implements UserService {
 			UserEntity userEntity = userDbService.findByMobile(mobileNo);
 
 			if (Objects.isNull(userEntity)) {
-				throw new UserValidationException("User not found for mobileNo: " + mobileNo);
+				throw new StanzaException("User not found for mobileNo: " + mobileNo);
 			}
 
 			return UserAdapter.getUserProfileDto(userEntity);
@@ -1099,7 +1100,7 @@ public class UserServiceImpl implements UserService {
 		UserEntity userEntity = userDbService.findTop1ByEmailOrderByCreatedAtDesc(email);
 
 		if (Objects.isNull(userEntity)) {
-			throw new ApiValidationException("User not found for email: " + email);
+			throw new StanzaException("User not found for email: " + email);
 		}
 
 		return UserAdapter.getUserProfileDto(userEntity);
