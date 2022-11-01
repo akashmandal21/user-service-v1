@@ -193,7 +193,7 @@ public class CashReconServiceImpl implements CashReconService {
             userIdMapping = aclUserService.getActiveUsersForRole("NODAL_CASH_LEDGER_EDITOR", ids);
         }
         else if (TransferTo.CITY_HEAD.equals(transferTo)) {
-            userIdMapping = aclUserService.getActiveUsersForRole("CITY_HEAD_EDITOR", ids);
+            userIdMapping = aclUserService.getActiveUsersForRole("CITY_HEAD_CASH_LEDGER_EDITOR", ids);
         }
         log.info("cashReconReceiverInfoList is {}", cashReconReceiverInfoList);
         if (CollectionUtils.isEmpty(userIdMapping)) return cashReconReceiverInfoList;
