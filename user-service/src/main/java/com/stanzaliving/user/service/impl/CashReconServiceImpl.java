@@ -97,7 +97,7 @@ public class CashReconServiceImpl implements CashReconService {
                 }
             }
 
-        } else if (TransferTo.NODAL_OFFICER.equals(transferTo)) {
+        } else if (TransferTo.NODAL_OFFICER.equals(transferTo) || TransferTo.CITY_HEAD.equals(transferTo)) {
             userDepartmentLevelEntities =
                     userDepartmentLevelEntityList.stream().filter(x -> AccessLevel.RESIDENCE.equals(x.getAccessLevel())).collect(Collectors.toList());
             if (!CollectionUtils.isEmpty(userDepartmentLevelEntities)) {
@@ -191,6 +191,9 @@ public class CashReconServiceImpl implements CashReconService {
             userIdMapping = aclUserService.getActiveUsersForRole("CM_CASH_LEDGER_EDITOR", ids);
         } else if (TransferTo.NODAL_OFFICER.equals(transferTo)) {
             userIdMapping = aclUserService.getActiveUsersForRole("NODAL_CASH_LEDGER_EDITOR", ids);
+        }
+        else if (TransferTo.CITY_HEAD.equals(transferTo)) {
+            userIdMapping = aclUserService.getActiveUsersForRole("CITY_HEAD_CASH_LEDGER_EDITOR", ids);
         }
         log.info("cashReconReceiverInfoList is {}", cashReconReceiverInfoList);
         if (CollectionUtils.isEmpty(userIdMapping)) return cashReconReceiverInfoList;

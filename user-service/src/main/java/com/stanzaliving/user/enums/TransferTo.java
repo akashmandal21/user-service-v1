@@ -10,7 +10,8 @@ public enum TransferTo {
     CLUSTER_MANAGER("Cluster Manager"),
     NODAL_OFFICER("Nodal Officer"),
     RESIDENT_CAPTAIN("Resident Captain"),
-    STANZA_ACCOUNT("Stanza Account");
+    STANZA_ACCOUNT("Stanza Account"),
+    CITY_HEAD("City Head");
 
     private final String name;
 }
