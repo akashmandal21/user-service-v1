@@ -91,9 +91,6 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
 	@Autowired
-	private Userv2HttpService userv2HttpService;
-
-	@Autowired
 	private UserV2FeignService userV2FeignService;
 
 	@Autowired
