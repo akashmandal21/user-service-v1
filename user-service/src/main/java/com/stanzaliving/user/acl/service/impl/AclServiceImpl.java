@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 
 import com.stanzaliving.core.transformation.client.cache.TransformationCache;
 import com.stanzaliving.user.entity.UserEntity;
+import com.stanzaliving.user.feignclient.UserV2FeignService;
+import com.stanzaliving.user.feignclient.Userv2HttpService;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
@@ -61,6 +63,12 @@ public class AclServiceImpl implements AclService {
 
 	@Autowired
 	private TransformationCache transformationCache;
+
+	@Autowired
+	private Userv2HttpService userv2HttpService;
+
+	@Autowired
+	private UserV2FeignService userV2FeignService;
 
 	@Override
 	public boolean isAccessible(String userId, String url) {
@@ -122,12 +130,15 @@ public class AclServiceImpl implements AclService {
 
 		List<UserDeptLevelRoleNameUrlExpandedDto> userDeptLevelRoleNameUrlExpandedDtoList = new ArrayList<>();
 
-		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelDbService.findByUserUuidAndStatus(userUuid, true);
+		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList=null;
 
+		List<UserDeptLevelRoleNameUrlExpandedDto> userV2DepartmentLevelEntityList=userV2FeignService.getUserDeptRoleNameList(userUuid);
+
+		userDepartmentLevelEntityList = userDepartmentLevelDbService.findByUserUuidAndStatus(userUuid, true);
 		for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
-			
+
 			Pair<List<String>, List<String>> roleUuidApiUuidList = getRoleUuidApiUuidListOfUser(userDepartmentLevelEntity);
-			
+
 			List<RoleEntity> roleEntityList = roleDbService.findByUuidInAndStatus(roleUuidApiUuidList.getFirst(), true);
 			List<ApiEntity> apiEntityList = apiDbService.findByUuidInAndStatus(roleUuidApiUuidList.getSecond(), true);
 
@@ -137,8 +148,9 @@ public class AclServiceImpl implements AclService {
 						UserDepartmentLevelRoleAdapter.getUserDeptLevelRoleNameUrlExpandedDto(userDepartmentLevelEntity, roleEntityList, apiEntityList, transformationCache));
 			}
 		}
+		userV2DepartmentLevelEntityList.addAll(userDeptLevelRoleNameUrlExpandedDtoList);
 
-		return userDeptLevelRoleNameUrlExpandedDtoList;
+		return userV2DepartmentLevelEntityList;
 	}
 
 	private Pair<List<String>, List<String>> getRoleUuidApiUuidListOfUser(UserDepartmentLevelEntity userDepartmentLevelEntity) {

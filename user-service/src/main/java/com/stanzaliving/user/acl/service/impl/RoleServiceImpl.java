@@ -2,9 +2,12 @@ package com.stanzaliving.user.acl.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.stanzaliving.estate_v2.dto.KeyValueDto;
+import com.stanzaliving.user.feignclient.UserV2FeignService;
+import com.stanzaliving.user.feignclient.Userv2HttpService;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,6 +40,12 @@ public class RoleServiceImpl implements RoleService {
 
 	@Autowired
 	private KafkaUserService kafkaUserService;
+
+	@Autowired
+	private Userv2HttpService userv2HttpService;
+
+	@Autowired
+	private UserV2FeignService userV2FeignService;
 
 	private static String PARENT_UUID_TO_SKIP_PARENT_ROLE = "SELF";
 
@@ -75,6 +84,13 @@ public class RoleServiceImpl implements RoleService {
 
 	@Override
 	public RoleDto getRoleByUuid(String roleUuid) {
+
+		RoleDto roleDto= userV2FeignService.getRoleByUuid(roleUuid);
+
+		if(Objects.nonNull(roleDto)){
+			return roleDto;
+		}
+
 		RoleEntity roleEntity = roleDbService.findByUuid(roleUuid);
 
 		if (null == roleEntity) {
@@ -108,8 +124,14 @@ public class RoleServiceImpl implements RoleService {
 
 	@Override
 	public List<RoleDto> filter(RoleDto roleDto) {
+
+		List<RoleDto> roleDtos= userV2FeignService.findFilteredRoles(roleDto);
+
 		List<RoleEntity> roleEntities = roleDbService.filter(roleDto);
-		return RoleAdapter.getDtoList(roleEntities);
+		if(roleEntities.size()>0) {
+			roleDtos.addAll(RoleAdapter.getDtoList(roleEntities));
+		}
+		return roleDtos;
 	}
 
 	@Override
@@ -145,13 +167,20 @@ public class RoleServiceImpl implements RoleService {
 
 		log.info("Searching roles by name: {}", roleNames);
 
+		List<RoleDto> roleV2Dtos=userV2FeignService.findByRoleNameInAndDepartment(roleNames,department);
+
+
 		List<RoleEntity> roleEntity = roleDbService.findByRoleNameAndDepartment(roleNames, department);
 
 		if (null == roleEntity) {
 			throw new ApiValidationException("Unable to find rule by roleNames ");
 		}
 
-		return roleEntity.stream().map(f->RoleAdapter.getDto(f)).collect(Collectors.toList());
+		List<RoleDto> roleDtos= roleEntity.stream().map(f->RoleAdapter.getDto(f)).collect(Collectors.toList());
+		if(roleV2Dtos.size()>0){
+			roleDtos.addAll(roleV2Dtos);
+		}
+		return roleDtos;
 	}
 
 	@Override

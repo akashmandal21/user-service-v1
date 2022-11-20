@@ -16,4 +16,5 @@ public interface UserDepartmentLevelRoleDbService extends AbstractJpaService<Use
 
     List<UserDepartmentLevelRoleEntity> findByRoleUuidInAndStatus(List<String> rolesUuid, boolean status);
 
+    List<UserDepartmentLevelRoleEntity> findByUserDepartmentLevelUuidIn(List<String> udUuids);
 }

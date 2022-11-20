@@ -48,4 +48,6 @@ public interface UserDbService extends AbstractJpaService<UserEntity, Long> {
 	Optional<List<String>> getUserWhoseBirthdayIsToday();
 
 	List<UserEntity> findAllByUuidInAndStatus(List<String> userId, boolean b);
+
+	List<UserEntity> findByUserTypeIn(List<UserType> asList);
 }

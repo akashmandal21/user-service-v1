@@ -43,6 +43,9 @@ import com.stanzaliving.user.acl.repository.RoleAccessModuleRepository;
 import com.stanzaliving.user.acl.repository.RoleRepository;
 import com.stanzaliving.user.acl.repository.UserDepartmentLevelRepository;
 import com.stanzaliving.user.acl.repository.UserDepartmentLevelRoleRepository;
+import com.stanzaliving.user.adapters.Userv2ToUserAdapter;
+import com.stanzaliving.user.feignclient.UserV2FeignService;
+import com.stanzaliving.user.feignclient.Userv2HttpService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -135,6 +138,12 @@ public class AclUserServiceImpl implements AclUserService {
 	@Autowired
 	private RoleAccessModuleRepository roleAccessModuleRepository;
 
+	@Autowired
+	private Userv2HttpService userv2HttpService;
+
+	@Autowired
+	private UserV2FeignService userV2FeignService;
+
 	@Override
 	public void addRole(AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleDto) {
 
@@ -189,6 +198,9 @@ public class AclUserServiceImpl implements AclUserService {
 
 	@Override
 	public List<RoleDto> getUserRoles(String userUuid) {
+
+		List<RoleDto> roleDtos=userV2FeignService.getRolesFromUserUuid(userUuid);
+
 		List<RoleDto> roleDtoList = new ArrayList<>();
 		List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList;
 		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelDbService.findByUserUuidAndStatus(userUuid, true);
@@ -199,6 +211,10 @@ public class AclUserServiceImpl implements AclUserService {
 			roleUuids = userDepartmentLevelRoleEntityList.parallelStream().map(UserDepartmentLevelRoleEntity::getRoleUuid).collect(Collectors.toList());
 			List<RoleEntity> roleEntities = roleDbService.findByUuidInAndStatus(roleUuids, true);
 			roleDtoList.addAll(RoleAdapter.getDtoList(roleEntities));
+		}
+
+		if(Objects.nonNull(roleDtos) && roleDtos.size()>0){
+			roleDtoList.addAll(roleDtos);
 		}
 		return roleDtoList;
 	}
@@ -248,7 +264,25 @@ public class AclUserServiceImpl implements AclUserService {
 
 		log.info("Got request to get list of userid by rolename {} and department {}", roleName, department);
 
-		RoleDto roleDto = roleService.findByRoleNameAndDepartment(roleName, department);
+		Map<String,List<String>> userAccessLevelMap=userV2FeignService.getUserAndAccessLevelMapForRole(roleName,department);
+		Map<String, List<String>> userv2IdAccessLevelIdListMap = new HashMap<>();
+		for(Map.Entry<String,List<String>> entry:userAccessLevelMap.entrySet()) {
+			for (String accessLevelEntity : accessLevelEntityList) {
+				if (entry.getValue().contains(accessLevelEntity)) {
+					List<String> accessLevelIds = userv2IdAccessLevelIdListMap.getOrDefault(entry.getKey(), new ArrayList<>());
+					accessLevelIds.add(accessLevelEntity);
+					userv2IdAccessLevelIdListMap.put(entry.getKey(), accessLevelIds);
+				}
+			}
+		}
+
+		RoleDto roleDto=null;
+		try {
+			roleDto = roleService.findByRoleNameAndDepartment(roleName, department);
+		}
+		catch (ApiValidationException e){
+
+		}
 
 		Map<String, List<String>> userIdAccessLevelIdListMap = new HashMap<>();
 
@@ -281,7 +315,14 @@ public class AclUserServiceImpl implements AclUserService {
 					});
 				}
 			}
+		}
 
+		if(Objects.nonNull(userv2IdAccessLevelIdListMap) && userv2IdAccessLevelIdListMap.size()>0){
+			userv2IdAccessLevelIdListMap.forEach((k,v)->{
+				if(!userIdAccessLevelIdListMap.containsKey(k)) {
+					userIdAccessLevelIdListMap.put(k, v);
+				}
+			});
 		}
 
 		return userIdAccessLevelIdListMap;
@@ -292,9 +333,28 @@ public class AclUserServiceImpl implements AclUserService {
 
 		log.info("Got request to get list of userid by rolename {} and department {}", roleName, department);
 
-		RoleDto roleDto = roleService.findByRoleNameAndDepartment(roleName, department);
-
+		//call feign client to get roles by role and department
+		Map<String,List<String>> userAccessLevelMap=userV2FeignService.getActiveUserAndAccessLevelMapForRole(roleName,department);
 		Map<String, List<String>> userIdAccessLevelIdListMap = new HashMap<>();
+		if(userAccessLevelMap.size()>0) {
+			for (Map.Entry<String, List<String>> entry : userAccessLevelMap.entrySet()) {
+				for (String accessLevelEntity : accessLevelEntityList) {
+					if (entry.getValue().contains(accessLevelEntity)) {
+						List<String> accessLevelIds = userIdAccessLevelIdListMap.getOrDefault(entry.getKey(), new ArrayList<>());
+						accessLevelIds.add(accessLevelEntity);
+						userIdAccessLevelIdListMap.put(entry.getKey(), accessLevelIds);
+					}
+				}
+			}
+		}
+
+		RoleDto roleDto=null;
+		try{
+			roleDto = roleService.findByRoleNameAndDepartment(roleName, department);
+		}
+		catch (ApiValidationException e){}
+
+		//Map<String, List<String>> userIdAccessLevelIdListMap = new HashMap<>();
 
 		if (Objects.nonNull(roleDto) && roleDto.getDepartment().equals(department)) {
 
@@ -389,7 +449,21 @@ public class AclUserServiceImpl implements AclUserService {
 			return Collections.emptyList();
 		}
 
-		List<UserEntity> userEntities = userDbService.findByUuidInAndStatus(userUuids, true);
+		List<com.stanzaliving.user.dto.userv2.UserDto> userDtos=userV2FeignService.getUsersList(userUuids);
+
+		List<UserEntity> userEntities=new ArrayList<>();
+
+		if(Objects.nonNull(userDtos)) {
+			for (com.stanzaliving.user.dto.userv2.UserDto userDto : userDtos) {
+				userEntities.add(Userv2ToUserAdapter.getUserEntityFromUserv2(userDto));
+			}
+		}
+
+		List<UserEntity> userEntities2 = userDbService.findByUuidInAndStatus(userUuids, true);
+
+		if(Objects.nonNull(userEntities2)) {
+			userEntities.addAll(userEntities2);
+		}
 
 		if (CollectionUtils.isEmpty(userEntities)) {
 			return Collections.emptyList();
