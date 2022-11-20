@@ -170,7 +170,7 @@ public class AuthServiceImpl implements AuthService {
 		userEntity.setMobileVerified(true);
 
 		//call userv2 to update
-		if(Objects.nonNull(userDbService.findByUuid(userEntity.getUuid()))) {
+		if(Objects.nonNull(userDbService.findByUuidAndStatus(userEntity.getUuid(),true))) {
 			userDbService.update(userEntity);
 		}
 		userV2FeignService.updateUser(UpdateUserDto.builder()
