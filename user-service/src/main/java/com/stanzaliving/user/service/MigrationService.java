@@ -74,7 +74,7 @@ public class MigrationService {
                         .nationality(userProfile.getNationality())
                         .userProfileDto(UserProfileDto.builder()
                                 .department(userEntity.getDepartment())
-                                .userType(UserType.EMPLOYEE)
+                                .userType(userEntity.getUserType())
                                 .addressLine1("")
                                 .addressLine2("")
                                 .build())
@@ -85,7 +85,7 @@ public class MigrationService {
                                 .build())
                         .build();
                 userDtos.add(userDto);
-                userEntity.setUuid("MIG_"+userEntity.getUuid());
+                userEntity.setUuid(userEntity.getUuid());
                 userEntity.setStatus(false);
                 userEntities.add(userEntity);
             }
