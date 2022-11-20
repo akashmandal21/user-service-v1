@@ -21,7 +21,7 @@ public class Userv2ToUserAdapter {
                 .department(userv2.getUserProfileDto().getDepartment())
                 .email(userv2.getEmailId())
                 .mobile(String.valueOf(userv2.getMobileNumber()))
-                .userType(userv2.getUserProfileDto().getUserType())
+                .userType(userv2.getUserProfileDto().getOldUserType())
                 .isoCode("IN")
                 .userProfile(UserProfileEntity.builder()
                         .bloodGroup(userv2.getBloodGroup())

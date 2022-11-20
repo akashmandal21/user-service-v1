@@ -13,6 +13,7 @@ import lombok.*;
 public class UserProfileDto {
     private Department department;
     private UserType userType;
+    private UserType oldUserType;
     private String addressLine1;
     private String addressLine2;
 
