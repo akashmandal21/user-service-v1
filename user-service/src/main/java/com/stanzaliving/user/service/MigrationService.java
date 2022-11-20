@@ -86,6 +86,10 @@ public class MigrationService {
                         .build();
                 userDtos.add(userDto);
                 userEntity.setUuid(userEntity.getUuid());
+                if(Objects.nonNull(userProfile)) {
+                    userProfile.setStatus(false);
+                    userEntity.setUserProfile(userProfile);
+                }
                 userEntity.setStatus(false);
                 userEntities.add(userEntity);
             }
