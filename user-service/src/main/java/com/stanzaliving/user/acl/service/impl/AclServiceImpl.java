@@ -65,9 +65,6 @@ public class AclServiceImpl implements AclService {
 	private TransformationCache transformationCache;
 
 	@Autowired
-	private Userv2HttpService userv2HttpService;
-
-	@Autowired
 	private UserV2FeignService userV2FeignService;
 
 	@Override

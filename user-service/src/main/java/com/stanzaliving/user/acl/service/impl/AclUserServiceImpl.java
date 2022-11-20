@@ -139,9 +139,6 @@ public class AclUserServiceImpl implements AclUserService {
 	private RoleAccessModuleRepository roleAccessModuleRepository;
 
 	@Autowired
-	private Userv2HttpService userv2HttpService;
-
-	@Autowired
 	private UserV2FeignService userV2FeignService;
 
 	@Override

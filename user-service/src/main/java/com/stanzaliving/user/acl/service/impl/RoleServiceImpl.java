@@ -42,9 +42,6 @@ public class RoleServiceImpl implements RoleService {
 	private KafkaUserService kafkaUserService;
 
 	@Autowired
-	private Userv2HttpService userv2HttpService;
-
-	@Autowired
 	private UserV2FeignService userV2FeignService;
 
 	private static String PARENT_UUID_TO_SKIP_PARENT_ROLE = "SELF";
