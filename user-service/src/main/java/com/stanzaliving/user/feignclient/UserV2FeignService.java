@@ -47,8 +47,13 @@ public class UserV2FeignService {
         catch (Exception e){}
         return null;
     }
-//
-//    public void updateUser(@RequestBody UpdateUserDto updateUserDto);
+
+    public void updateUser(@RequestBody UpdateUserDto updateUserDto){
+        try {
+            userv2HttpService.updateUser(updateUserDto);
+        }
+        catch (Exception e){}
+    }
 //
 //    public ResponseDto<UserAttributesDto> getOrCreateUserAttributes(@RequestBody UserAttributesDto userAttributesDto);
 //

@@ -173,7 +173,7 @@ public class AuthServiceImpl implements AuthService {
 		if(Objects.nonNull(userDbService.findByUuid(userEntity.getUuid()))) {
 			userDbService.update(userEntity);
 		}
-		userv2HttpService.updateUser(UpdateUserDto.builder()
+		userV2FeignService.updateUser(UpdateUserDto.builder()
 						.mobile(Long.parseLong(otpValidateRequestDto.getMobile()))
 						.mobileVerified(true)
 				.build());
@@ -241,7 +241,7 @@ public class AuthServiceImpl implements AuthService {
 
 		//call user v2 http service to update
 //		userEntity = userDbService.update(userEntity);
-		userv2HttpService.updateUser(UpdateUserDto.builder()
+		userV2FeignService.updateUser(UpdateUserDto.builder()
 						.emailVerified(true)
 						.firstName(emailOtpValidateRequestDto.getFirstName())
 						.lastName(emailOtpValidateRequestDto.getLastName())
