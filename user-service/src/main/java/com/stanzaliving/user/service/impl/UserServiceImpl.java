@@ -445,7 +445,7 @@ public class UserServiceImpl implements UserService {
 						.pageNo(userFilterDto.getPageRequest().getPageNo())
 				.build());
 
-		userFilterDto.setMigrated(false);
+		userFilterDto.setMigrated(Boolean.FALSE);
 		Page<UserEntity> userPage = getUserPage(userFilterDto);
 
 		Integer pageNo = userFilterDto.getPageRequest().getPageNo();

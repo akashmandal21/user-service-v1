@@ -61,7 +61,7 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 		if (CollectionUtils.isNotEmpty(userFilterDto.getUserIds())) {
 
 			specificationBuilder.with(UserQueryConstants.UUID, CriteriaOperation.IN, userFilterDto.getUserIds());
-			specificationBuilder.with("migrated",CriteriaOperation.EQ,false);
+			specificationBuilder.with("migrated",CriteriaOperation.FALSE,false);
 
 		} else {
 
@@ -85,10 +85,10 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 
 			if(userFilterDto.getMigrated()!=null){
 				if(userFilterDto.getMigrated()) {
-					specificationBuilder.with("migrated", CriteriaOperation.TRUE, true);
+					specificationBuilder.with("migrated", CriteriaOperation.TRUE, Boolean.TRUE);
 				}
 				else{
-					specificationBuilder.with("migrated",CriteriaOperation.FALSE,false);
+					specificationBuilder.with("migrated",CriteriaOperation.FALSE,Boolean.FALSE);
 				}
 			}
 
