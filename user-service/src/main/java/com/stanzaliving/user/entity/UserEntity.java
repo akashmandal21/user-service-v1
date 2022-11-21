@@ -54,4 +54,6 @@ public class UserEntity extends AbstractJpaEntity {
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private UserProfileEntity userProfile;
 
+	@Column(name = "migrated", columnDefinition = "bit(1) default 0")
+	private boolean migrated;
 }
