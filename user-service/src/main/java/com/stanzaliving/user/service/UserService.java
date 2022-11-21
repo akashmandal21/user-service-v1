@@ -98,4 +98,6 @@ public interface UserService {
 	List<String> getUserProfileDtoWhoseBirthdayIsToday();
 
 	Set<UserProfileDto> searchUserList(UserFilterDto userFilterDto);
+
+	UserProfileDto getActiveUsersByEmail(String email);
 }
