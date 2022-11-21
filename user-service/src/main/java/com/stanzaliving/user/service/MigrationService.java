@@ -91,13 +91,14 @@ public class MigrationService {
                     userEntity.setUserProfile(userProfile);
                 }
                 userEntity.setStatus(false);
+                userEntity.setMigrated(true);
                 userEntities.add(userEntity);
             }
             catch (Exception e){
                 //throw new StanzaException("failed for useruuid "+userEntity.getUuid());
             }
         }
-        migrationHttpService.migrateUsers(userDtos);
+//        migrationHttpService.migrateUsers(userDtos);
         userDbService.save(userEntities);
     }
 
