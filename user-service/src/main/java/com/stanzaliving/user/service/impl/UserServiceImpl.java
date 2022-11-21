@@ -9,6 +9,7 @@ import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.base.exception.ApiValidationException;
 import com.stanzaliving.core.base.exception.NoRecordException;
+import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.base.exception.UserValidationException;
 import com.stanzaliving.core.base.utils.PhoneNumberUtils;
 import com.stanzaliving.core.generic.dto.UIKeyValue;
