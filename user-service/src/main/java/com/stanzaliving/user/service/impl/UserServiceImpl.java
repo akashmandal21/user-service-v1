@@ -410,6 +410,19 @@ public class UserServiceImpl implements UserService {
 		return userDtos;
 	}
 
+	@Override
+	public UserProfileDto getActiveUsersByEmail(String email) {
+		log.info("Searching User by email: " + email);
+
+		UserEntity userEntity = userDbService.findActiveUserByEmail(email);
+
+		if (Objects.isNull(userEntity)) {
+			throw new StanzaException("User not found for email: " + email);
+		}
+
+		return UserAdapter.getUserProfileDto(userEntity);
+	}
+
 	private void validateConstraint(List<AddUserAndRoleRequestDto> addUserAndRoleRequestDtoList) {
 		Set<ConstraintViolation<AddUserAndRoleRequestDto>> violations = new HashSet<>();
 
