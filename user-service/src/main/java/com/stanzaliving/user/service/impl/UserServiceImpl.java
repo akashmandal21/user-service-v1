@@ -44,8 +44,10 @@ import com.stanzaliving.user.acl.service.UserDepartmentLevelService;
 import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.constants.UserConstants;
 import com.stanzaliving.user.db.service.UserDbService;
+import com.stanzaliving.user.dto.external.UserData;
 import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.entity.UserProfileEntity;
+import com.stanzaliving.user.kafka.service.KafkaUserService;
 import com.stanzaliving.user.service.UserManagerMappingService;
 import com.stanzaliving.user.service.UserService;
 import lombok.extern.log4j.Log4j2;
@@ -124,6 +126,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private Validator validator;
+
+	@Autowired
+	private KafkaUserService kafkaUserService;
 
 	@Value("${kafka.resident.detail.topic}")
 	private String kafkaResidentDetailTopic;
@@ -274,6 +279,7 @@ public class UserServiceImpl implements UserService {
 		kafkaDTO.setData(userDto);
 
 		notificationProducer.publish(kafkaResidentDetailTopic, KafkaDTO.class.getName(), kafkaDTO);
+		publishUserData(userEntity);
 
 		return userDto;
 	}
@@ -310,6 +316,7 @@ public class UserServiceImpl implements UserService {
 		newUserEntityCreatedList.forEach(newUserEntityCreated -> {
 			userDtoList.add(UserAdapter.getUserDto(newUserEntityCreated));
 			log.info("Added New User with Id: " + newUserEntityCreated.getUuid());
+			this.publishUserData(newUserEntityCreated);
 		});
 
 		log.info("Assigning roles to each created user is started");
@@ -1197,6 +1204,7 @@ public class UserServiceImpl implements UserService {
 		kafkaDTO.setData(userDto);
 
 		notificationProducer.publish(kafkaResidentDetailTopic, KafkaDTO.class.getName(), kafkaDTO);
+		this.publishUserData(userEntity);
 
 		return userDto;
 	}
@@ -1215,4 +1223,45 @@ public class UserServiceImpl implements UserService {
 
 		return userList;
 	}
+
+
+	private void publishUserData(final UserEntity userEntity) {
+
+		if(Objects.nonNull(userEntity) && !getNotStanzaEmployees().contains(userEntity.getUserType())) {
+			log.info("Publishing the user data to the food-service.");
+			UserProfileEntity userProfileEntity =  userEntity.getUserProfile();
+			String userName = null;
+			if(Objects.nonNull(userProfileEntity)) {
+				userName = userProfileEntity.getFirstName() + " "
+						+ (Objects.isNull(userProfileEntity.getMiddleName()) ? "" : userProfileEntity.getMiddleName() + " ")
+						+ userProfileEntity.getLastName();
+			}
+			UserData userData = UserData.builder()
+					.id(userEntity.getId())
+					.uuid(userEntity.getUuid())
+					.name(userName)
+					.userType(userEntity.getUserType())
+					.mobileNumber(userEntity.getMobile())
+					.emailId(userEntity.getEmail())
+					.department(userEntity.getDepartment())
+					.status(userEntity.isStatus())
+					.createdAt(userEntity.getCreatedAt())
+					.createdBy(userEntity.getCreatedBy())
+					.updatedAt(userEntity.getUpdatedAt())
+					.updatedBy(userEntity.getUpdatedBy())
+					.build();
+			kafkaUserService.sendNewUserDataToKafka(userData);
+		}
+	}
+
+	private HashSet<UserType> getNotStanzaEmployees() {
+		HashSet<UserType> notStanzaEmployees = new HashSet<>();
+		notStanzaEmployees.add(UserType.CONSUMER);
+		notStanzaEmployees.add(UserType.EXTERNAL);
+		notStanzaEmployees.add(UserType.PARENT);
+		notStanzaEmployees.add(UserType.STUDENT);
+		notStanzaEmployees.add(UserType.INVITED_GUEST);
+		return notStanzaEmployees;
+	}
+
 }

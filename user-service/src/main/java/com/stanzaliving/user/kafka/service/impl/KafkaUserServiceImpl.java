@@ -8,6 +8,7 @@ import com.stanzaliving.user.constants.NotificationKeys;
 
 import java.util.Objects;
 
+import com.stanzaliving.user.dto.external.UserData;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -254,6 +255,12 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 			log.error("Role Queue Overflow for : " + roleDto, e);
 		}
 
+	}
+
+	@Override
+	public void sendNewUserDataToKafka(UserData userData) {
+		String foodUserData = propertyManager.getProperty("kafka.topic.food.userdata", "food_user_data");
+		notificationProducer.publish(foodUserData, UserData.class.getName(), userData);
 	}
 
 	private void sendMessage(RoleDto roleDto) {
