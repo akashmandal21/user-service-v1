@@ -25,6 +25,8 @@ public interface UserDbService extends AbstractJpaService<UserEntity, Long> {
 	
 	UserEntity getUserForMobile(String mobile, String isoCode);
 
+	UserEntity getUserForMobileNotMigrated(String mobile, String isoCode,boolean migrated);
+
 	Specification<UserEntity> getSearchQuery(UserFilterDto userFilterDto);
 
 	List<UserEntity> findByEmail(String email);
@@ -35,7 +37,11 @@ public interface UserDbService extends AbstractJpaService<UserEntity, Long> {
 	
 	UserEntity findByMobile(String mobile);
 
+	UserEntity findByMobileNotMigrated(String mobile,boolean migrated);
+
 	UserEntity findByUuid(String uuid);
+
+	UserEntity findByUuidNotMigrated(String uuid,boolean migrated);
 
 	UserEntity findByUuidAndEmail(String userUuid, String email);
 
@@ -50,4 +56,8 @@ public interface UserDbService extends AbstractJpaService<UserEntity, Long> {
 	List<UserEntity> findAllByUuidInAndStatus(List<String> userId, boolean b);
 
 	List<UserEntity> findByUserTypeIn(List<UserType> asList);
+
+	List<UserEntity> findByUuidInNotMigrated(List<String> userUuids,boolean migrated);
+
+	List<UserEntity> findByEmailNotMigrated(String email, boolean migrated);
 }

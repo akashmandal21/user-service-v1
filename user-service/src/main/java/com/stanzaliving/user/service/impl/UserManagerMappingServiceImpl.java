@@ -110,20 +110,34 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 	@Override
 	public String findManagerNameForUser(String userId) {
 
-		//UserManagerMappingEntity userManagerMappingEntity = userManagerMappingRepository.findByUserId(userId);
-		UserDto users=userV2FeignService.getManagerForUser(userId);
 
-		return (Objects.nonNull(users))
-				? users.getFirstName() + " " + users.getLastName()
-				: null;
+		UserDto users=userV2FeignService.getManagerForUser(userId);
+		if(Objects.nonNull(users)){
+			return users.getFirstName() + " " + users.getLastName();
+		}
+
+		UserManagerMappingEntity userManagerMappingEntity = userManagerMappingRepository.findByUserId(userId);
+
+		if (userManagerMappingEntity != null) {
+
+			UserProfileDto userProfileDto = userService
+					.getUserProfile(userManagerMappingEntity.getManagerId());
+
+			return (Objects.nonNull(userProfileDto))
+					? userProfileDto.getFirstName() + " " + userProfileDto.getLastName()
+					: null;
+		}
+		return null;
 	}
 
 	@Override
 	public UserProfileDto getManagerProfileForUser(String userId) {
 
 		UserDto user=userV2FeignService.getManagerForUser(userId);
-		UserEntity userEntity=Userv2ToUserAdapter.getUserEntityFromUserv2(user);
-		if (Objects.nonNull(userEntity)) {
+		UserEntity userEntity=null;
+
+		if (Objects.nonNull(user)) {
+			userEntity=Userv2ToUserAdapter.getUserEntityFromUserv2(user);
 			return UserAdapter.getUserProfileDto(userEntity);
 		}
 		UserManagerMappingEntity userManagerMappingEntity = userManagerMappingRepository.findByUserId(userId);

@@ -96,7 +96,7 @@ public class AuthServiceImpl implements AuthService {
 			userEntity = Userv2ToUserAdapter.getUserEntityFromUserv2(userv2);
 		}
 		else {
-			userEntity = userDbService.getUserForMobile(loginRequestDto.getMobile(), loginRequestDto.getIsoCode());
+			userEntity = userDbService.getUserForMobileNotMigrated(loginRequestDto.getMobile(), loginRequestDto.getIsoCode(),false);
 		}
 
 		// userEntity = createUserIfUserIsConsumer(loginRequestDto, userEntity);
@@ -201,7 +201,14 @@ public class AuthServiceImpl implements AuthService {
 
 		//UserEntity userEntity = userDbService.findByUuid(userUuid);
 		UserDto users=userV2FeignService.getUserByUuid(userUuid);
-		UserEntity userEntity=Userv2ToUserAdapter.getUserEntityFromUserv2(users);
+		UserEntity userEntity=null;
+		if(Objects.nonNull(users)) {
+			userEntity = Userv2ToUserAdapter.getUserEntityFromUserv2(users);
+		}
+
+		if(Objects.isNull(userEntity)){
+			userEntity = userDbService.findByUuidNotMigrated(userUuid,false);
+		}
 
 		if (Objects.isNull(userEntity)) {
 			throw new UserValidationException("User Not Found with Uuid: " + userUuid);
@@ -241,11 +248,13 @@ public class AuthServiceImpl implements AuthService {
 
 		//call user v2 http service to update
 //		userEntity = userDbService.update(userEntity);
-		userV2FeignService.updateUser(UpdateUserDto.builder()
-						.emailVerified(true)
-						.firstName(emailOtpValidateRequestDto.getFirstName())
-						.lastName(emailOtpValidateRequestDto.getLastName())
-				.build());
+		if(userEntity.isMigrated()) {
+			userV2FeignService.updateUser(UpdateUserDto.builder()
+					.emailVerified(true)
+					.firstName(emailOtpValidateRequestDto.getFirstName())
+					.lastName(emailOtpValidateRequestDto.getLastName())
+					.build());
+		}
 		
 		UserProfileDto userProfileDto = UserAdapter.getUserProfileDto(userEntity);
 		

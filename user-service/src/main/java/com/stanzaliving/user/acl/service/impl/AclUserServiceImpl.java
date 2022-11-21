@@ -206,7 +206,7 @@ public class AclUserServiceImpl implements AclUserService {
 		for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
 			userDepartmentLevelRoleEntityList = userDepartmentLevelRoleDbService.findByUserDepartmentLevelUuidAndStatus(userDepartmentLevelEntity.getUuid(), true);
 			roleUuids = userDepartmentLevelRoleEntityList.parallelStream().map(UserDepartmentLevelRoleEntity::getRoleUuid).collect(Collectors.toList());
-			List<RoleEntity> roleEntities = roleDbService.findByUuidInAndStatus(roleUuids, true);
+			List<RoleEntity> roleEntities = roleDbService.findByUuidInAndStatusNotMigrated(roleUuids, true,false);
 			roleDtoList.addAll(RoleAdapter.getDtoList(roleEntities));
 		}
 
@@ -332,14 +332,14 @@ public class AclUserServiceImpl implements AclUserService {
 
 		//call feign client to get roles by role and department
 		Map<String,List<String>> userAccessLevelMap=userV2FeignService.getActiveUserAndAccessLevelMapForRole(roleName,department);
-		Map<String, List<String>> userIdAccessLevelIdListMap = new HashMap<>();
+		Map<String, List<String>> userIdV2AccessLevelIdListMap = new HashMap<>();
 		if(userAccessLevelMap.size()>0) {
 			for (Map.Entry<String, List<String>> entry : userAccessLevelMap.entrySet()) {
 				for (String accessLevelEntity : accessLevelEntityList) {
 					if (entry.getValue().contains(accessLevelEntity)) {
-						List<String> accessLevelIds = userIdAccessLevelIdListMap.getOrDefault(entry.getKey(), new ArrayList<>());
+						List<String> accessLevelIds = userIdV2AccessLevelIdListMap.getOrDefault(entry.getKey(), new ArrayList<>());
 						accessLevelIds.add(accessLevelEntity);
-						userIdAccessLevelIdListMap.put(entry.getKey(), accessLevelIds);
+						userIdV2AccessLevelIdListMap.put(entry.getKey(), accessLevelIds);
 					}
 				}
 			}
@@ -351,7 +351,7 @@ public class AclUserServiceImpl implements AclUserService {
 		}
 		catch (ApiValidationException e){}
 
-		//Map<String, List<String>> userIdAccessLevelIdListMap = new HashMap<>();
+		Map<String, List<String>> userIdAccessLevelIdListMap = new HashMap<>();
 
 		if (Objects.nonNull(roleDto) && roleDto.getDepartment().equals(department)) {
 
@@ -389,7 +389,13 @@ public class AclUserServiceImpl implements AclUserService {
 
 		}
 
-		return userIdAccessLevelIdListMap;
+		userIdAccessLevelIdListMap.forEach((k,v)->{
+			if(!userIdV2AccessLevelIdListMap.containsKey(k)){
+				userIdV2AccessLevelIdListMap.put(k,v);
+			}
+		});
+
+		return userIdV2AccessLevelIdListMap;
 	}
 
 

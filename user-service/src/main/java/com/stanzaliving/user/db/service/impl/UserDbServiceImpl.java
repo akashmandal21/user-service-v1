@@ -49,6 +49,11 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 	}
 
 	@Override
+	public UserEntity getUserForMobileNotMigrated(String mobile, String isoCode, boolean migrated) {
+		return getJpaRepository().findByMobileAndIsoCodeAndMigrated(mobile, isoCode,migrated);
+	}
+
+	@Override
 	public Specification<UserEntity> getSearchQuery(UserFilterDto userFilterDto) {
 
 		StanzaSpecificationBuilder<UserEntity> specificationBuilder = new StanzaSpecificationBuilder<>();
@@ -56,6 +61,7 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 		if (CollectionUtils.isNotEmpty(userFilterDto.getUserIds())) {
 
 			specificationBuilder.with(UserQueryConstants.UUID, CriteriaOperation.IN, userFilterDto.getUserIds());
+			specificationBuilder.with("migrated",CriteriaOperation.EQ,false);
 
 		} else {
 
@@ -75,6 +81,15 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 			if (Objects.nonNull(userFilterDto.getUserType())) {
 				specificationBuilder.with(UserQueryConstants.USER_TYPE, CriteriaOperation.ENUM_EQ,
 						userFilterDto.getUserType());
+			}
+
+			if(userFilterDto.getMigrated()!=null){
+				if(userFilterDto.getMigrated()) {
+					specificationBuilder.with("migrated", CriteriaOperation.TRUE, true);
+				}
+				else{
+					specificationBuilder.with("migrated",CriteriaOperation.FALSE,false);
+				}
 			}
 
 			if (userFilterDto.getStatus() != null) {
@@ -143,6 +158,16 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 	}
 
 	@Override
+	public UserEntity findByMobileNotMigrated(String mobile, boolean migrated) {
+		return userRepository.findByMobileAndIsoCodeAndMigrated(mobile, "IN",migrated);
+	}
+
+	@Override
+	public UserEntity findByUuidNotMigrated(String uuid, boolean migrated) {
+		return getJpaRepository().findByUuidAndMigrated(uuid,migrated);
+	}
+
+	@Override
 	public UserEntity findByUuidAndEmail(String userUuid, String email) {
 		
 		return getJpaRepository().findByUuidAndEmail(userUuid, email);
@@ -176,6 +201,20 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 	@Override
 	public List<UserEntity> findByUserTypeIn(List<UserType> asList) {
 		return getJpaRepository().findByUserTypeIn(asList);
+	}
+
+	@Override
+	public List<UserEntity> findByUuidInNotMigrated(List<String> userUuids, boolean migrated) {
+		return getJpaRepository().findByUuidInAndMigrated(userUuids,migrated);
+	}
+
+	@Override
+	public List<UserEntity> findByEmailNotMigrated(String email, boolean migrated) {
+		return  findByEmailAndMigrated(email,migrated);
+	}
+
+	private List<UserEntity> findByEmailAndMigrated(String email, boolean migrated) {
+		return getJpaRepository().findByEmailAndMigrated(email,migrated);
 	}
 
 }

@@ -64,4 +64,12 @@ public interface UserRepository extends AbstractJpaRepository<UserEntity, Long> 
 	List<UserEntity> findByUuidInAndStatus(List<String> uuid, boolean status);
 
     List<UserEntity> findByUserTypeIn(List<UserType> asList);
+
+	UserEntity findByMobileAndIsoCodeAndMigrated(String mobile, String isoCode, boolean migrated);
+
+	UserEntity findByUuidAndMigrated(String uuid, boolean migrated);
+
+	List<UserEntity> findByUuidInAndMigrated(List<String> userUuids, boolean migrated);
+
+    List<UserEntity> findByEmailAndMigrated(String email, boolean migrated);
 }

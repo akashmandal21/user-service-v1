@@ -52,6 +52,7 @@ import com.stanzaliving.user.feignclient.UserV2FeignService;
 import com.stanzaliving.user.feignclient.Userv2HttpService;
 import com.stanzaliving.user.service.UserManagerMappingService;
 import com.stanzaliving.user.service.UserService;
+import io.reactivex.internal.functions.ObjectHelper;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.ListUtils;
@@ -179,7 +180,7 @@ public class UserServiceImpl implements UserService {
 			return UserAdapter.getUserProfileDto(userEntity);
 		}
 		else{
-			UserEntity userEntity = userDbService.findByUuid(userId);
+			UserEntity userEntity = userDbService.findByUuidNotMigrated(userId,false);
 			return UserAdapter.getUserProfileDto(userEntity);
 		}
 	}
@@ -189,7 +190,15 @@ public class UserServiceImpl implements UserService {
 
 		//UserEntity userEntity = userDbService.findByUuid(userUuid);
 		com.stanzaliving.user.dto.userv2.UserDto userv2=userV2FeignService.getUserByUuid(userUuid);
-		UserEntity userEntity=Userv2ToUserAdapter.getUserEntityFromUserv2(userv2);
+
+		UserEntity userEntity=null;
+		if(Objects.nonNull(userv2)) {
+			userEntity = Userv2ToUserAdapter.getUserEntityFromUserv2(userv2);
+		}
+
+		if(Objects.isNull(userEntity)){
+			userEntity = userDbService.findByUuidNotMigrated(userUuid,false);
+		}
 
 		if (Objects.isNull(userEntity)) {
 			log.error("User Not Found with Uuid: {}", userUuid);
@@ -376,7 +385,7 @@ public class UserServiceImpl implements UserService {
 			userEntity=Userv2ToUserAdapter.getUserEntityFromUserv2(user);
 		}
 		else{
-			userEntity=userDbService.findByUuid(userId);
+			userEntity=userDbService.findByUuidNotMigrated(userId,false);
 		}
 
 		if (Objects.isNull(userEntity)) {
@@ -436,6 +445,7 @@ public class UserServiceImpl implements UserService {
 						.pageNo(userFilterDto.getPageRequest().getPageNo())
 				.build());
 
+		userFilterDto.setMigrated(false);
 		Page<UserEntity> userPage = getUserPage(userFilterDto);
 
 		Integer pageNo = userFilterDto.getPageRequest().getPageNo();
@@ -712,7 +722,7 @@ public class UserServiceImpl implements UserService {
 				userV2Entities.add(Userv2ToUserAdapter.getUserEntityFromUserv2(userDto));
 			}
 		}
-		List<UserEntity> userEntityList=userDbService.findByEmail(email);
+		List<UserEntity> userEntityList=userDbService.findByEmailNotMigrated(email,false);
 		if(userEntityList.size()>0) {
 			userV2Entities.addAll(userEntityList);
 		}
@@ -919,7 +929,7 @@ public class UserServiceImpl implements UserService {
 				List<String> accessLevelEntityUuids = Arrays
 						.asList(csvStringOfUuids.split(UserConstants.DELIMITER_KEY));
 				if (accessLevelEntityUuids.contains(cityRolesRequestDto.getAccessLevelUuid())) {
-					UserEntity userEntity = userDbService.findByUuid(userDepartmentLevelEntity.getUserUuid());
+					UserEntity userEntity = userDbService.findByUuidNotMigrated(userDepartmentLevelEntity.getUserUuid(),false);
 					return UserAdapter.getUserDto(userEntity);
 				}
 			}
@@ -955,8 +965,8 @@ public class UserServiceImpl implements UserService {
 					UserDepartmentLevelEntity userDepartmentLevelEntity = userDepartmentLevelService
 							.findByUuid(userDepartmentLevelRoleEntity.getUserDepartmentLevelUuid());
 
-					UserEntity userEntity = userDbService.findByUuid(userDepartmentLevelEntity.getUserUuid());
-					if (userEntity.getDepartment().equals(cityRolesRequestDto.getDepartment())) {
+					UserEntity userEntity = userDbService.findByUuidNotMigrated(userDepartmentLevelEntity.getUserUuid(),false);
+					if (Objects.nonNull(userEntity) && userEntity.getDepartment().equals(cityRolesRequestDto.getDepartment())) {
 						userDtos.add(UserAdapter.getUserDto(userEntity));
 					}
 
@@ -1083,14 +1093,17 @@ public class UserServiceImpl implements UserService {
 
 			List<UserEntity> userEntities=new ArrayList<>(2);
 //			userEntities.parallelStream().map()
-			UserEntity userEntity = userDbService.findByMobile(mobileNo);
-			if(Objects.nonNull(userEntity)){
-				return UserAdapter.getUserProfileDto(userEntity);
-			}
+
+			UserEntity userEntity=null;
 			com.stanzaliving.user.dto.userv2.UserDto userDto=userV2FeignService.getActiveUser(Long.parseLong(mobileNo));
 			if(Objects.nonNull(userDto)) {
 				userEntity = Userv2ToUserAdapter.getUserEntityFromUserv2(userDto);
 			}
+			if(Objects.isNull(userEntity)){
+				userEntity = userDbService.findByMobileNotMigrated(mobileNo,false);
+				return UserAdapter.getUserProfileDto(userEntity);
+			}
+
 			if (Objects.isNull(userEntity)) {
 				throw new UserValidationException("User not found for mobileNo: " + mobileNo);
 			}
@@ -1111,7 +1124,7 @@ public class UserServiceImpl implements UserService {
 					userV2Entities.add(Userv2ToUserAdapter.getUserEntityFromUserv2(userDto));
 				}
 			}
-			List<UserEntity> userEntities=userDbService.findByUuidIn(userUuids);
+			List<UserEntity> userEntities=userDbService.findByUuidInNotMigrated(userUuids,false);
 			if(Objects.nonNull(userEntities) && userEntities.size()>0){
 				userV2Entities.addAll(userEntities);
 			}
