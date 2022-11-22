@@ -11,6 +11,7 @@ import lombok.experimental.UtilityClass;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @UtilityClass
 public class Userv2ToUserAdapter {
@@ -21,7 +22,9 @@ public class Userv2ToUserAdapter {
                 .department(userv2.getUserProfileDto().getDepartment())
                 .email(userv2.getEmailId())
                 .mobile(String.valueOf(userv2.getMobileNumber()))
-                .userType(userv2.getUserProfileDto().getOldUserType())
+                .userType(Objects.nonNull(userv2.getUserProfileDto().getOldUserType())?
+                        userv2.getUserProfileDto().getOldUserType():
+                        userv2.getUserProfileDto().getUserType())
                 .isoCode("IN")
                 .userProfile(UserProfileEntity.builder()
                         .bloodGroup(userv2.getBloodGroup())
