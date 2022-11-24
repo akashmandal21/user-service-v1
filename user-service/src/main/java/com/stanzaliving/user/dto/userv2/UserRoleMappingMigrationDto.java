@@ -6,6 +6,7 @@ import com.stanzaliving.core.base.enums.Department;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.kafka.common.protocol.types.Field;
 
 
 @Builder
@@ -22,4 +23,7 @@ public class UserRoleMappingMigrationDto {
     private String roleUuid;
 
     private String userUuid;
+
+    private String permission;
+
 }

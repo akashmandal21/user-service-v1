@@ -16,6 +16,7 @@ import com.stanzaliving.user.entity.UserManagerMappingEntity;
 import com.stanzaliving.user.entity.UserProfileEntity;
 import com.stanzaliving.user.feignclient.MigrationHttpService;
 import com.stanzaliving.user.repository.UserManagerMappingRepository;
+import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -95,10 +96,10 @@ public class MigrationService {
                 userEntities.add(userEntity);
             }
             catch (Exception e){
-                //throw new StanzaException("failed for useruuid "+userEntity.getUuid());
+                throw new StanzaException("failed for useruuid "+userEntity.getUuid());
             }
         }
-//        migrationHttpService.migrateUsers(userDtos);
+        migrationHttpService.migrateUsers(userDtos);
         userDbService.save(userEntities);
     }
 
@@ -120,19 +121,6 @@ public class MigrationService {
                     }
                 }
             }
-//
-//
-//            List<String> userUuids = userEntityList.stream().map(f -> f.getUuid()).collect(Collectors.toList());
-//            List<UserDepartmentLevelEntity> userDepartmentLevelEntities=userDepartmentLevelDbService.findByUserUuidIn(userUuids);
-//            if(Objects.nonNull(userDepartmentLevelEntities)){
-//                List<String> udUuids=userDepartmentLevelEntities.stream().map(f->f.getUuid()).collect(Collectors.toList());
-//                List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntities=userDepartmentLevelRoleDbService.findByUserDepartmentLevelUuidIn(udUuids);
-//                if(Objects.nonNull(userDepartmentLevelRoleEntities)){
-//                    List<String> roleUuids=userDepartmentLevelRoleEntities.stream().map(f->f.getRoleUuid()).collect(Collectors.toList());
-//                    List<RoleEntity> roleEntities=roleDbService.findByUuidIn(roleUuids);
-//                    migrationHttpService.migrateRoles(roleEntities);
-//                }
-//            }
         }
     }
 
@@ -151,10 +139,12 @@ public class MigrationService {
                                 RoleEntity roleEntity=roleDbService.findByUuid(userDepartmentLevelRoleEntity.getRoleUuid());
                                 if(Objects.nonNull(roleEntity)) {
 
+                                    String[] temp=userEntity.getUserType().toString().split("_");
+                                    String role_name= userDepartmentLevelEntity.getDepartment().getDepartmentName()+" "+temp[0]+" "+temp[1];
                                     RoleDto roleDto = RoleDto.builder()
                                             .accessLevel(userDepartmentLevelEntity.getAccessLevel())
                                             .department(userDepartmentLevelEntity.getDepartment())
-                                            .roleName(userEntity.getUserType().toString())
+                                            .roleName(role_name)
                                             .build();
 
                                     UserRoleMappingMigrationDto userRoleMappingMigrationDto=UserRoleMappingMigrationDto.builder()
@@ -163,6 +153,7 @@ public class MigrationService {
                                             .accessLevel(userDepartmentLevelEntity.getAccessLevel())
                                             .userUuid(userEntity.getUuid())
                                             .department(userDepartmentLevelEntity.getDepartment())
+                                            .permission(roleEntity.getRoleName())
                                             .build();
 
                                     UserMigrationRoleAndAssignmentDto userMigrationRoleAndAssignmentDto=UserMigrationRoleAndAssignmentDto.builder()
@@ -170,7 +161,9 @@ public class MigrationService {
                                             .userRoleMappingMigrationDto(userRoleMappingMigrationDto)
                                             .build();
                                     migrationHttpService.migrateUserRoleMapping(userMigrationRoleAndAssignmentDto);
-//                                    roleEntity.setStatus(false);
+                                    roleEntity.setMigrated(true);
+                                    roleDbService.save(roleEntity);
+                                    roleEntity.setStatus(false);
                                 }
                             }
                         }

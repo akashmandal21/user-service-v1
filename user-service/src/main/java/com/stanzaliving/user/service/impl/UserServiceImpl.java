@@ -460,10 +460,6 @@ public class UserServiceImpl implements UserService {
 			userProfileDtos.addAll(userDtos.stream().limit(userFilterDto.getPageRequest().getLimit()-userv2DtoPageResponse.getRecords()).collect(Collectors.toList()));
 		}
 
-		if(userDtos.size()>0){
-			userProfileDtos.addAll(userDtos);
-		}
-
 		int totalRecords=0;
 
 		if(userv2DtoPageResponse.getRecords()+userPage.getNumberOfElements()>userFilterDto.getPageRequest().getLimit()){
@@ -1242,7 +1238,7 @@ public class UserServiceImpl implements UserService {
 		log.info("Searching User by email: " + email);
 
 		UserEntity userEntity = userDbService.findTop1ByEmailOrderByCreatedAtDesc(email);
-		if(Objects.nonNull(userEntity)){
+		if(Objects.nonNull(userEntity) && userEntity.isStatus()){
 			return UserAdapter.getUserProfileDto(userEntity);
 		}
 
