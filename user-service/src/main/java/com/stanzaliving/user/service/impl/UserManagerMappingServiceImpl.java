@@ -13,6 +13,7 @@ import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.feignclient.UserV2FeignService;
 import com.stanzaliving.user.feignclient.Userv2HttpService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -42,9 +43,11 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 	private UserManagerMappingRepository userManagerMappingRepository;
 
 	@Autowired
+	@Lazy
 	private Userv2HttpService userv2HttpService;
 
 	@Autowired
+	@Lazy
 	private UserV2FeignService userV2FeignService;
 
 	@Override
