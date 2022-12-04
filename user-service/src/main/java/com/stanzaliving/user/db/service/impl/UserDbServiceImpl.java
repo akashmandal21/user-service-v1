@@ -204,6 +204,11 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 	}
 
 	@Override
+	public List<UserEntity> findByUserTypeInAndStatus(List<UserType> asList,boolean status) {
+		return getJpaRepository().findByUserTypeInAndStatus(asList,status);
+	}
+
+	@Override
 	public List<UserEntity> findByUuidInNotMigrated(List<String> userUuids, boolean migrated) {
 		return getJpaRepository().findByUuidInAndMigrated(userUuids,migrated);
 	}

@@ -60,4 +60,6 @@ public interface UserDbService extends AbstractJpaService<UserEntity, Long> {
 	List<UserEntity> findByUuidInNotMigrated(List<String> userUuids,boolean migrated);
 
 	List<UserEntity> findByEmailNotMigrated(String email, boolean migrated);
+
+	List<UserEntity> findByUserTypeInAndStatus(List<UserType> asList, boolean status);
 }

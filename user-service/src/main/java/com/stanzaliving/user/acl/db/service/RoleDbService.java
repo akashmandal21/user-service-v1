@@ -38,4 +38,6 @@ public interface RoleDbService extends AbstractJpaService<RoleEntity, Long> {
 	List<RoleEntity> findByUuidInAndStatusNotMigrated(List<String> roleUuids, boolean b, boolean b1);
 
 	List<RoleEntity> findByRoleNameAndDepartmentNotMigrated(List<String> roleNames, Department department, boolean migrated);
+
+    List<RoleEntity> findByUuidInAndStatusAndMigrated(List<String> first, boolean status, boolean migrated);
 }

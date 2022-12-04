@@ -195,9 +195,6 @@ public class AclUserServiceImpl implements AclUserService {
 
 	@Override
 	public List<RoleDto> getUserRoles(String userUuid) {
-
-		List<RoleDto> roleDtos=userV2FeignService.getRolesFromUserUuid(userUuid);
-
 		List<RoleDto> roleDtoList = new ArrayList<>();
 		List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList;
 		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelDbService.findByUserUuidAndStatus(userUuid, true);
@@ -206,14 +203,28 @@ public class AclUserServiceImpl implements AclUserService {
 		for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
 			userDepartmentLevelRoleEntityList = userDepartmentLevelRoleDbService.findByUserDepartmentLevelUuidAndStatus(userDepartmentLevelEntity.getUuid(), true);
 			roleUuids = userDepartmentLevelRoleEntityList.parallelStream().map(UserDepartmentLevelRoleEntity::getRoleUuid).collect(Collectors.toList());
-			List<RoleEntity> roleEntities = roleDbService.findByUuidInAndStatusNotMigrated(roleUuids, true,false);
+			List<RoleEntity> roleEntities = roleDbService.findByUuidInAndStatus(roleUuids, true);
 			roleDtoList.addAll(RoleAdapter.getDtoList(roleEntities));
 		}
-
-		if(Objects.nonNull(roleDtos) && roleDtos.size()>0){
-			roleDtoList.addAll(roleDtos);
-		}
 		return roleDtoList;
+//		List<RoleDto> roleDtos=userV2FeignService.getRolesFromUserUuid(userUuid);
+//
+//		List<RoleDto> roleDtoList = new ArrayList<>();
+//		List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList;
+//		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelDbService.findByUserUuidAndStatus(userUuid, true);
+//		List<String> roleUuids;
+//
+//		for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
+//			userDepartmentLevelRoleEntityList = userDepartmentLevelRoleDbService.findByUserDepartmentLevelUuidAndStatus(userDepartmentLevelEntity.getUuid(), true);
+//			roleUuids = userDepartmentLevelRoleEntityList.parallelStream().map(UserDepartmentLevelRoleEntity::getRoleUuid).collect(Collectors.toList());
+//			List<RoleEntity> roleEntities = roleDbService.findByUuidInAndStatus(roleUuids, true);
+//			roleDtoList.addAll(RoleAdapter.getDtoList(roleEntities));
+//		}
+//
+//		if(Objects.nonNull(roleDtos) && roleDtos.size()>0){
+//			roleDtoList.addAll(roleDtos);
+//		}
+//		return roleDtoList;
 	}
 
 	@Override
@@ -261,25 +272,7 @@ public class AclUserServiceImpl implements AclUserService {
 
 		log.info("Got request to get list of userid by rolename {} and department {}", roleName, department);
 
-		Map<String,List<String>> userAccessLevelMap=userV2FeignService.getUserAndAccessLevelMapForRole(roleName,department);
-		Map<String, List<String>> userv2IdAccessLevelIdListMap = new HashMap<>();
-		for(Map.Entry<String,List<String>> entry:userAccessLevelMap.entrySet()) {
-			for (String accessLevelEntity : accessLevelEntityList) {
-				if (entry.getValue().contains(accessLevelEntity)) {
-					List<String> accessLevelIds = userv2IdAccessLevelIdListMap.getOrDefault(entry.getKey(), new ArrayList<>());
-					accessLevelIds.add(accessLevelEntity);
-					userv2IdAccessLevelIdListMap.put(entry.getKey(), accessLevelIds);
-				}
-			}
-		}
-
-		RoleDto roleDto=null;
-		try {
-			roleDto = roleService.findByRoleNameAndDepartment(roleName, department);
-		}
-		catch (ApiValidationException e){
-
-		}
+		RoleDto roleDto = roleService.findByRoleNameAndDepartment(roleName, department);
 
 		Map<String, List<String>> userIdAccessLevelIdListMap = new HashMap<>();
 
@@ -306,20 +299,13 @@ public class AclUserServiceImpl implements AclUserService {
 								userIdAccessLevelIdListMap.put(entity.getUserUuid(), accessLevelIds);
 							}
 						}
-						// if (!Collections.disjoint(accessLevelEntityList, accessLevelUuids)) {
-						// userIds.add(entity.getUserUuid());
-						// }
+//						 if (!Collections.disjoint(accessLevelEntityList, accessLevelUuids)) {
+//						 userIds.add(entity.getUserUuid());
+//						 }
 					});
 				}
 			}
-		}
 
-		if(Objects.nonNull(userv2IdAccessLevelIdListMap) && userv2IdAccessLevelIdListMap.size()>0){
-			userv2IdAccessLevelIdListMap.forEach((k,v)->{
-				if(!userIdAccessLevelIdListMap.containsKey(k)) {
-					userIdAccessLevelIdListMap.put(k, v);
-				}
-			});
 		}
 
 		return userIdAccessLevelIdListMap;
@@ -330,26 +316,7 @@ public class AclUserServiceImpl implements AclUserService {
 
 		log.info("Got request to get list of userid by rolename {} and department {}", roleName, department);
 
-		//call feign client to get roles by role and department
-		Map<String,List<String>> userAccessLevelMap=userV2FeignService.getActiveUserAndAccessLevelMapForRole(roleName,department);
-		Map<String, List<String>> userIdV2AccessLevelIdListMap = new HashMap<>();
-		if(userAccessLevelMap.size()>0) {
-			for (Map.Entry<String, List<String>> entry : userAccessLevelMap.entrySet()) {
-				for (String accessLevelEntity : accessLevelEntityList) {
-					if (entry.getValue().contains(accessLevelEntity)) {
-						List<String> accessLevelIds = userIdV2AccessLevelIdListMap.getOrDefault(entry.getKey(), new ArrayList<>());
-						accessLevelIds.add(accessLevelEntity);
-						userIdV2AccessLevelIdListMap.put(entry.getKey(), accessLevelIds);
-					}
-				}
-			}
-		}
-
-		RoleDto roleDto=null;
-		try{
-			roleDto = roleService.findByRoleNameAndDepartment(roleName, department);
-		}
-		catch (ApiValidationException e){}
+		RoleDto roleDto = roleService.findByRoleNameAndDepartment(roleName, department);
 
 		Map<String, List<String>> userIdAccessLevelIdListMap = new HashMap<>();
 
@@ -369,7 +336,7 @@ public class AclUserServiceImpl implements AclUserService {
 
 						UserEntity user = userDbService.findByUuid(entity.getUserUuid());
 
-						if(user.isStatus()) {
+						if(user.isStatus() || (user.isMigrated())) {
 							Set<String> accessLevelUuids = new HashSet<>(Arrays.asList((entity.getCsvAccessLevelEntityUuid().split(","))));
 
 							for (String accessLevelEntity : accessLevelEntityList) {
@@ -389,13 +356,75 @@ public class AclUserServiceImpl implements AclUserService {
 
 		}
 
-		userIdAccessLevelIdListMap.forEach((k,v)->{
-			if(!userIdV2AccessLevelIdListMap.containsKey(k)){
-				userIdV2AccessLevelIdListMap.put(k,v);
-			}
-		});
-
-		return userIdV2AccessLevelIdListMap;
+		return userIdAccessLevelIdListMap;
+//		log.info("Got request to get list of userid by rolename {} and department {}", roleName, department);
+//
+//		//call feign client to get roles by role and department
+//		Map<String,List<String>> userAccessLevelMap=userV2FeignService.getActiveUserAndAccessLevelMapForRole(roleName,department);
+//		Map<String, List<String>> userIdV2AccessLevelIdListMap = new HashMap<>();
+//		if(userAccessLevelMap.size()>0) {
+//			for (Map.Entry<String, List<String>> entry : userAccessLevelMap.entrySet()) {
+//				for (String accessLevelEntity : accessLevelEntityList) {
+//					if (entry.getValue().contains(accessLevelEntity)) {
+//						List<String> accessLevelIds = userIdV2AccessLevelIdListMap.getOrDefault(entry.getKey(), new ArrayList<>());
+//						accessLevelIds.add(accessLevelEntity);
+//						userIdV2AccessLevelIdListMap.put(entry.getKey(), accessLevelIds);
+//					}
+//				}
+//			}
+//		}
+//
+//		RoleDto roleDto=null;
+//		try{
+//			roleDto = roleService.findByRoleNameAndDepartment(roleName, department);
+//		}
+//		catch (ApiValidationException e){}
+//
+//		Map<String, List<String>> userIdAccessLevelIdListMap = new HashMap<>();
+//
+//		if (Objects.nonNull(roleDto) && roleDto.getDepartment().equals(department)) {
+//
+//			List<UserDepartmentLevelRoleEntity> departmentLevelRoleEntities = userDepartmentLevelRoleDbService.findByRoleUuidInAndStatus(Collections.singletonList(roleDto.getUuid()), true);
+//
+//			if (CollectionUtils.isNotEmpty(departmentLevelRoleEntities)) {
+//
+//				List<String> uuids = departmentLevelRoleEntities.stream().map(UserDepartmentLevelRoleEntity::getUserDepartmentLevelUuid).collect(Collectors.toList());
+//
+//				List<UserDepartmentLevelEntity> departmentLevelEntities = userDepartmentLevelDbService.findByUuidInAndAccessLevel(uuids, roleDto.getAccessLevel());
+//
+//				if (CollectionUtils.isNotEmpty(departmentLevelEntities)) {
+//
+//					departmentLevelEntities.forEach(entity -> {
+//
+//						UserEntity user = userDbService.findByUuid(entity.getUserUuid());
+//
+//						if(user.isStatus()) {
+//							Set<String> accessLevelUuids = new HashSet<>(Arrays.asList((entity.getCsvAccessLevelEntityUuid().split(","))));
+//
+//							for (String accessLevelEntity : accessLevelEntityList) {
+//								if (accessLevelUuids.contains(accessLevelEntity)) {
+//									List<String> accessLevelIds = userIdAccessLevelIdListMap.getOrDefault(entity.getUserUuid(), new ArrayList<>());
+//									accessLevelIds.add(accessLevelEntity);
+//									userIdAccessLevelIdListMap.put(entity.getUserUuid(), accessLevelIds);
+//								}
+//							}
+//						}
+//						// if (!Collections.disjoint(accessLevelEntityList, accessLevelUuids)) {
+//						// userIds.add(entity.getUserUuid());
+//						// }
+//					});
+//				}
+//			}
+//
+//		}
+//
+//		userIdAccessLevelIdListMap.forEach((k,v)->{
+//			if(!userIdV2AccessLevelIdListMap.containsKey(k)){
+//				userIdV2AccessLevelIdListMap.put(k,v);
+//			}
+//		});
+//
+//		return userIdV2AccessLevelIdListMap;
 	}
 
 

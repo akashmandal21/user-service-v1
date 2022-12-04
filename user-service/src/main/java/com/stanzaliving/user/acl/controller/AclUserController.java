@@ -46,7 +46,7 @@ public class AclUserController {
     @Autowired
     AclUserService aclUserService;
 
-    @PostMapping("add/role")
+    @PostMapping("addx/role")
     public ResponseDto<Void> addRole(@RequestBody @Valid AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleDto) {
         log.info("Received request to add role " + addUserDeptLevelRoleDto);
         aclUserService.addRole(addUserDeptLevelRoleDto);

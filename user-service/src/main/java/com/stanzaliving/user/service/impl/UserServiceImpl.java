@@ -153,13 +153,13 @@ public class UserServiceImpl implements UserService {
 
 		log.info("Searching User by UserId: " + userId);
 
-		com.stanzaliving.user.dto.userv2.UserDto user=userV2FeignService.getActiveUserByUuid(userId);
 		UserEntity userEntity=null;
-		if(Objects.nonNull(user)){
-			userEntity=Userv2ToUserAdapter.getUserEntityFromUserv2(user);
-		}
-		else{
-			userEntity = userDbService.findByUuidAndStatus(userId, true);
+		userEntity = userDbService.findByUuidAndStatus(userId, true);
+		if(Objects.isNull(userEntity)){
+			com.stanzaliving.user.dto.userv2.UserDto user=userV2FeignService.getActiveUserByUuid(userId);
+			if(Objects.nonNull(user)) {
+				userEntity = Userv2ToUserAdapter.getUserEntityFromUserv2(user);
+			}
 		}
 
 		if (Objects.isNull(userEntity)) {
@@ -380,12 +380,12 @@ public class UserServiceImpl implements UserService {
 	public UserProfileDto getUserProfile(String userId) {
 
 		UserEntity userEntity=null;
-		com.stanzaliving.user.dto.userv2.UserDto user=userV2FeignService.getUserByUuid(userId);
-		if(Objects.nonNull(user)){
-			userEntity=Userv2ToUserAdapter.getUserEntityFromUserv2(user);
-		}
-		else{
-			userEntity=userDbService.findByUuidNotMigrated(userId,false);
+		userEntity=userDbService.findByUuidNotMigrated(userId,false);
+		if(Objects.isNull(userEntity)) {
+			com.stanzaliving.user.dto.userv2.UserDto user = userV2FeignService.getUserByUuid(userId);
+			if (Objects.nonNull(user)) {
+				userEntity = Userv2ToUserAdapter.getUserEntityFromUserv2(user);
+			}
 		}
 
 		if (Objects.isNull(userEntity)) {
@@ -899,14 +899,39 @@ public class UserServiceImpl implements UserService {
 
 	public UserDto getUserForAccessLevelAndRole(@Valid AccessLevelRoleRequestDto cityRolesRequestDto) {
 
-		Map<String,List<String>> userAccessLevelMap=userV2FeignService.getUserAndAccessLevelMapForRole(cityRolesRequestDto.getRoleName()
-				,cityRolesRequestDto.getDepartment());
-
-		for(Map.Entry<String,List<String>> entry:userAccessLevelMap.entrySet()){
-			if(entry.getValue().contains(cityRolesRequestDto.getAccessLevelUuid())){
-				return UserAdapter.getUserDto(Userv2ToUserAdapter.getUserEntityFromUserv2(userV2FeignService.getUserByUuid(entry.getKey())));
-			}
-		}
+//		Map<String,List<String>> userAccessLevelMap=userV2FeignService.getUserAndAccessLevelMapForRole(cityRolesRequestDto.getRoleName()
+//				,cityRolesRequestDto.getDepartment());
+//
+//		for(Map.Entry<String,List<String>> entry:userAccessLevelMap.entrySet()){
+//			if(entry.getValue().contains(cityRolesRequestDto.getAccessLevelUuid())){
+//				return UserAdapter.getUserDto(Userv2ToUserAdapter.getUserEntityFromUserv2(userV2FeignService.getUserByUuid(entry.getKey())));
+//			}
+//		}
+//		RoleDto roleDto = roleService.findByRoleNameAndDepartment(cityRolesRequestDto.getRoleName(),
+//				cityRolesRequestDto.getDepartment());
+//		List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = userDepartmentLevelRoleService
+//				.findByRoleUuid(roleDto.getUuid());
+//
+//		if (CollectionUtils.isEmpty(userDepartmentLevelRoleEntityList)) {
+//			return null;
+//		}
+//
+//		for (UserDepartmentLevelRoleEntity userDepartmentLevelRoleEntity : userDepartmentLevelRoleEntityList) {
+//			UserDepartmentLevelEntity userDepartmentLevelEntity = userDepartmentLevelService
+//					.findByUuid(userDepartmentLevelRoleEntity.getUserDepartmentLevelUuid());
+//			String csvStringOfUuids = userDepartmentLevelEntity.getCsvAccessLevelEntityUuid();
+//
+//			if (StringUtils.isNotEmpty(csvStringOfUuids)) {
+//				List<String> accessLevelEntityUuids = Arrays
+//						.asList(csvStringOfUuids.split(UserConstants.DELIMITER_KEY));
+//				if (accessLevelEntityUuids.contains(cityRolesRequestDto.getAccessLevelUuid())) {
+//					UserEntity userEntity = userDbService.findByUuidNotMigrated(userDepartmentLevelEntity.getUserUuid(),false);
+//					return UserAdapter.getUserDto(userEntity);
+//				}
+//			}
+//
+//		}
+//		return null;
 		RoleDto roleDto = roleService.findByRoleNameAndDepartment(cityRolesRequestDto.getRoleName(),
 				cityRolesRequestDto.getDepartment());
 		List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = userDepartmentLevelRoleService
@@ -925,7 +950,7 @@ public class UserServiceImpl implements UserService {
 				List<String> accessLevelEntityUuids = Arrays
 						.asList(csvStringOfUuids.split(UserConstants.DELIMITER_KEY));
 				if (accessLevelEntityUuids.contains(cityRolesRequestDto.getAccessLevelUuid())) {
-					UserEntity userEntity = userDbService.findByUuidNotMigrated(userDepartmentLevelEntity.getUserUuid(),false);
+					UserEntity userEntity = userDbService.findByUuid(userDepartmentLevelEntity.getUserUuid());
 					return UserAdapter.getUserDto(userEntity);
 				}
 			}
@@ -936,38 +961,59 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public List<UserDto> getUsersForRole(AccessLevelRoleRequestDto cityRolesRequestDto){
+//
+//		List<com.stanzaliving.user.dto.userv2.UserDto> userV2Dtos=userV2FeignService.findUsersForRoleNameAndDepartment(cityRolesRequestDto.getRoleName(),cityRolesRequestDto.getDepartment());
+//		List<UserDto> userDtos=new ArrayList<>();
+//
+//		if(Objects.nonNull(userV2Dtos) && userV2Dtos.size()>0) {
+//			for (com.stanzaliving.user.dto.userv2.UserDto userDto : userV2Dtos) {
+//				userDtos.add(UserAdapter.getUserDto(Userv2ToUserAdapter.getUserEntityFromUserv2(userDto)));
+//			}
+//		}
+//
+//		RoleDto roleDto=null;
+//		try {
+//			roleDto = roleService.findByRoleNameAndDepartment(cityRolesRequestDto.getRoleName(),
+//					cityRolesRequestDto.getDepartment());
+//		}
+//		catch (ApiValidationException e){}
+//		if(Objects.nonNull(roleDto)) {
+//			List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = userDepartmentLevelRoleService
+//					.findByRoleUuid(roleDto.getUuid());
+//
+//			if (CollectionUtils.isNotEmpty(userDepartmentLevelRoleEntityList)) {
+//				for (UserDepartmentLevelRoleEntity userDepartmentLevelRoleEntity : userDepartmentLevelRoleEntityList) {
+//					UserDepartmentLevelEntity userDepartmentLevelEntity = userDepartmentLevelService
+//							.findByUuid(userDepartmentLevelRoleEntity.getUserDepartmentLevelUuid());
+//
+//					UserEntity userEntity = userDbService.findByUuidNotMigrated(userDepartmentLevelEntity.getUserUuid(),false);
+//					if (Objects.nonNull(userEntity) && userEntity.getDepartment().equals(cityRolesRequestDto.getDepartment())) {
+//						userDtos.add(UserAdapter.getUserDto(userEntity));
+//					}
+//
+//				}
+//			}
+//		}
+//		return userDtos;
+		RoleDto roleDto = roleService.findByRoleNameAndDepartment(cityRolesRequestDto.getRoleName(),
+				cityRolesRequestDto.getDepartment());
+		List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = userDepartmentLevelRoleService
+				.findByRoleUuid(roleDto.getUuid());
 
-		List<com.stanzaliving.user.dto.userv2.UserDto> userV2Dtos=userV2FeignService.findUsersForRoleNameAndDepartment(cityRolesRequestDto.getRoleName(),cityRolesRequestDto.getDepartment());
+		if (CollectionUtils.isEmpty(userDepartmentLevelRoleEntityList)) {
+			return null;
+		}
 		List<UserDto> userDtos=new ArrayList<>();
 
-		if(Objects.nonNull(userV2Dtos) && userV2Dtos.size()>0) {
-			for (com.stanzaliving.user.dto.userv2.UserDto userDto : userV2Dtos) {
-				userDtos.add(UserAdapter.getUserDto(Userv2ToUserAdapter.getUserEntityFromUserv2(userDto)));
+		for (UserDepartmentLevelRoleEntity userDepartmentLevelRoleEntity : userDepartmentLevelRoleEntityList) {
+			UserDepartmentLevelEntity userDepartmentLevelEntity = userDepartmentLevelService
+					.findByUuid(userDepartmentLevelRoleEntity.getUserDepartmentLevelUuid());
+
+			UserEntity userEntity = userDbService.findByUuid(userDepartmentLevelEntity.getUserUuid());
+			if(userEntity.getDepartment().equals(cityRolesRequestDto.getDepartment())) {
+				userDtos.add(UserAdapter.getUserDto(userEntity));
 			}
-		}
 
-		RoleDto roleDto=null;
-		try {
-			roleDto = roleService.findByRoleNameAndDepartment(cityRolesRequestDto.getRoleName(),
-					cityRolesRequestDto.getDepartment());
-		}
-		catch (ApiValidationException e){}
-		if(Objects.nonNull(roleDto)) {
-			List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = userDepartmentLevelRoleService
-					.findByRoleUuid(roleDto.getUuid());
-
-			if (CollectionUtils.isNotEmpty(userDepartmentLevelRoleEntityList)) {
-				for (UserDepartmentLevelRoleEntity userDepartmentLevelRoleEntity : userDepartmentLevelRoleEntityList) {
-					UserDepartmentLevelEntity userDepartmentLevelEntity = userDepartmentLevelService
-							.findByUuid(userDepartmentLevelRoleEntity.getUserDepartmentLevelUuid());
-
-					UserEntity userEntity = userDbService.findByUuidNotMigrated(userDepartmentLevelEntity.getUserUuid(),false);
-					if (Objects.nonNull(userEntity) && userEntity.getDepartment().equals(cityRolesRequestDto.getDepartment())) {
-						userDtos.add(UserAdapter.getUserDto(userEntity));
-					}
-
-				}
-			}
 		}
 		return userDtos;
 	}
@@ -1088,16 +1134,15 @@ public class UserServiceImpl implements UserService {
 			log.info("Searching User by UserId: " + mobileNo);
 
 			List<UserEntity> userEntities=new ArrayList<>(2);
-//			userEntities.parallelStream().map()
 
 			UserEntity userEntity=null;
-			com.stanzaliving.user.dto.userv2.UserDto userDto=userV2FeignService.getActiveUser(Long.parseLong(mobileNo));
-			if(Objects.nonNull(userDto)) {
-				userEntity = Userv2ToUserAdapter.getUserEntityFromUserv2(userDto);
-			}
+			userEntity = userDbService.findByMobileNotMigrated(mobileNo,false);
+
 			if(Objects.isNull(userEntity)){
-				userEntity = userDbService.findByMobileNotMigrated(mobileNo,false);
-				return UserAdapter.getUserProfileDto(userEntity);
+				com.stanzaliving.user.dto.userv2.UserDto userDto=userV2FeignService.getActiveUser(Long.parseLong(mobileNo));
+				if(Objects.nonNull(userDto)) {
+					userEntity = Userv2ToUserAdapter.getUserEntityFromUserv2(userDto);
+				}
 			}
 
 			if (Objects.isNull(userEntity)) {
@@ -1243,8 +1288,9 @@ public class UserServiceImpl implements UserService {
 		}
 
 		List<com.stanzaliving.user.dto.userv2.UserDto> userDtos=userV2FeignService.getUserFromEmail(email);
-
-		userEntity=Userv2ToUserAdapter.getUserEntityFromUserv2(userDtos.get(0));
+		if(userDtos.size()>0) {
+			userEntity = Userv2ToUserAdapter.getUserEntityFromUserv2(userDtos.get(0));
+		}
 
 		if (Objects.isNull(userEntity)) {
 			throw new ApiValidationException("User not found for email: " + email);

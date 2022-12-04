@@ -113,4 +113,9 @@ public class RoleDbServiceImpl extends AbstractJpaServiceImpl<RoleEntity, Long, 
 		return getJpaRepository().findByRoleNameInAndDepartmentAndMigrated(roleNames,department,migrated);
 	}
 
+	@Override
+	public List<RoleEntity> findByUuidInAndStatusAndMigrated(List<String> first, boolean status, boolean migrated) {
+		return getJpaRepository().findByUuidInAndStatusAndMigrated(first,status,migrated);
+	}
+
 }

@@ -82,11 +82,11 @@ public class RoleServiceImpl implements RoleService {
 	@Override
 	public RoleDto getRoleByUuid(String roleUuid) {
 
-		RoleDto roleDto= userV2FeignService.getRoleByUuid(roleUuid);
-
-		if(Objects.nonNull(roleDto)){
-			return roleDto;
-		}
+//		RoleDto roleDto= userV2FeignService.getRoleByUuid(roleUuid);
+//
+//		if(Objects.nonNull(roleDto)){
+//			return roleDto;
+//		}
 
 		RoleEntity roleEntity = roleDbService.findByUuid(roleUuid);
 
@@ -122,9 +122,10 @@ public class RoleServiceImpl implements RoleService {
 	@Override
 	public List<RoleDto> filter(RoleDto roleDto) {
 
-		List<RoleDto> roleDtos= userV2FeignService.findFilteredRoles(roleDto);
-
-		roleDto.setMigrated(false);
+//		List<RoleDto> roleDtos= userV2FeignService.findFilteredRoles(roleDto);
+//
+//		roleDto.setMigrated(false);
+		List<RoleDto> roleDtos=new ArrayList<>();
 		List<RoleEntity> roleEntities = roleDbService.filter(roleDto);
 		if(roleEntities.size()>0) {
 			roleDtos.addAll(RoleAdapter.getDtoList(roleEntities));
@@ -165,19 +166,19 @@ public class RoleServiceImpl implements RoleService {
 
 		log.info("Searching roles by name: {}", roleNames);
 
-		List<RoleDto> roleV2Dtos=userV2FeignService.findByRoleNameInAndDepartment(roleNames,department);
+//		List<RoleDto> roleV2Dtos=userV2FeignService.findByRoleNameInAndDepartment(roleNames,department);
 
 
-		List<RoleEntity> roleEntity = roleDbService.findByRoleNameAndDepartmentNotMigrated(roleNames, department,false);
+		List<RoleEntity> roleEntity = roleDbService.findByRoleNameAndDepartment(roleNames, department);
 
 		if (null == roleEntity) {
-			throw new ApiValidationException("Unable to find rule by roleNames ");
+			throw new ApiValidationException("Unable to find role by roleNames ");
 		}
 
 		List<RoleDto> roleDtos= roleEntity.stream().map(f->RoleAdapter.getDto(f)).collect(Collectors.toList());
-		if(roleV2Dtos.size()>0){
-			roleDtos.addAll(roleV2Dtos);
-		}
+//		if(roleV2Dtos.size()>0){
+//			roleDtos.addAll(roleV2Dtos);
+//		}
 		return roleDtos;
 	}
 
