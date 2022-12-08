@@ -16,6 +16,7 @@ import com.stanzaliving.user.entity.UserManagerMappingEntity;
 import com.stanzaliving.user.entity.UserProfileEntity;
 import com.stanzaliving.user.feignclient.MigrationHttpService;
 import com.stanzaliving.user.repository.UserManagerMappingRepository;
+import lombok.extern.log4j.Log4j2;
 import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
+@Log4j2
 public class MigrationService {
 
     @Autowired
@@ -97,6 +99,7 @@ public class MigrationService {
                 userEntities.add(userEntity);
             }
             catch (Exception e){
+                log.info("failed for user entity {}",userEntity);
                 throw new StanzaException("failed for useruuid "+userEntity.getUuid());
             }
         }
