@@ -63,4 +63,5 @@ public interface UserRepository extends AbstractJpaRepository<UserEntity, Long> 
 
 	List<UserEntity> findByUuidInAndStatus(List<String> uuid, boolean status);
 
+	UserEntity findByEmailAndStatus(String email, boolean b);
 }
