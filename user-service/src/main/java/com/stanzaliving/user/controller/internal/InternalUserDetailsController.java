@@ -59,6 +59,14 @@ public class InternalUserDetailsController {
 		return ResponseDto.success("Found User for email", userService.getUserProfileDtoByEmail(email));
 	}
 
+	@GetMapping("/activeUsersBy/email")
+	public ResponseDto<UserProfileDto> getActiveUsersByEmail(@RequestParam(name = "email", required = true) String email) {
+
+		log.info("Fetching Active User with email: {}", email);
+
+		return ResponseDto.success("Found User for email", userService.getActiveUsersByEmail(email));
+	}
+
 	@GetMapping("all")
 	public ResponseDto<List<UserProfileDto>> getAllUsers() {
 

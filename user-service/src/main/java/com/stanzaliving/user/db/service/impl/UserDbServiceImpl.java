@@ -189,6 +189,12 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 	}
 
 	@Override
+	public UserEntity findActiveUserByEmail(String emailId) {
+		UserEntity user = getJpaRepository().findByEmailAndStatus(emailId,true);
+		return user;
+	}
+
+	@Override
 	public Optional<List<String>> getUserWhoseBirthdayIsToday() {
 		return getJpaRepository().findUsersWhoseBirthdayIsToday();
 	}

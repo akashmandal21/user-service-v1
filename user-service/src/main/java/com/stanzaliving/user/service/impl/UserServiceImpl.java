@@ -9,6 +9,7 @@ import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.base.exception.ApiValidationException;
 import com.stanzaliving.core.base.exception.NoRecordException;
+import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.base.exception.UserValidationException;
 import com.stanzaliving.core.base.utils.PhoneNumberUtils;
 import com.stanzaliving.core.generic.dto.UIKeyValue;
@@ -483,6 +484,19 @@ public class UserServiceImpl implements UserService {
 				.collect(Collectors.toSet());
 
 		return userDtos;
+	}
+
+	@Override
+	public UserProfileDto getActiveUsersByEmail(String email) {
+		log.info("Searching User by email: " + email);
+
+		UserEntity userEntity = userDbService.findActiveUserByEmail(email);
+
+		if (Objects.isNull(userEntity)) {
+			throw new StanzaException("User not found for email: " + email);
+		}
+
+		return UserAdapter.getUserProfileDto(userEntity);
 	}
 
 	private void validateConstraint(List<AddUserAndRoleRequestDto> addUserAndRoleRequestDtoList) {

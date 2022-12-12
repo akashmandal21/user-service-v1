@@ -50,6 +50,8 @@ public interface UserDbService extends AbstractJpaService<UserEntity, Long> {
 	UserEntity findTop1ByEmailOrderByCreatedAtDesc(String email);
 
 	Map<String, String> getUuidByEmail(List<String> emails);
+
+	UserEntity findActiveUserByEmail(String emailId);
 	
 	Optional<List<String>> getUserWhoseBirthdayIsToday();
 
