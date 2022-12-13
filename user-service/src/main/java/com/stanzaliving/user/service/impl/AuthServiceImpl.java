@@ -9,7 +9,6 @@ import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.base.exception.UserValidationException;
 import com.stanzaliving.core.bookingservice.dto.request.*;
 import com.stanzaliving.core.base.enums.Department;
-import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.client.api.BookingDataControllerApi;
 import com.stanzaliving.core.leadservice.client.api.LeadserviceClientApi;
 import com.stanzaliving.core.user.enums.Gender;
@@ -231,5 +230,18 @@ public class AuthServiceImpl implements AuthService {
 		UserEntity userEntity = getActiveUserByUuid(emailVerificationRequestDto.getUserUuid());
 		
 		otpService.resendEmailVerificationOtp(emailVerificationRequestDto, userEntity);		
+	}
+
+	@Override
+	public UserProfileDto loginWithTrueCaller(LoginRequestDto loginRequestDto) {
+		UserEntity userEntity = getActiveUser(loginRequestDto);
+
+		log.info("OTP verification completed for User: " + userEntity.getUuid());
+
+		userEntity.setMobileVerified(true);
+
+		userDbService.update(userEntity);
+
+		return UserAdapter.getUserProfileDto(userEntity);
 	}
 }

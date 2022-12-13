@@ -95,9 +95,9 @@ public class AuthController {
 
 				log.info("UserType for user is INVITED_GUEST {} " + userProfileDto.getUuid());
 				ResponseDto<BookingResponseDto> bookingResponseDto = onboardGuestService.createGuestBooking(userProfileDto.getMobile());
-				
+
 				log.info("\n\n\n\n\n OTP Successfully bookingResponseDto " + bookingResponseDto);
-				if (Objects.isNull(bookingResponseDto) ) {    
+				if (Objects.isNull(bookingResponseDto) ) {
 					return ResponseDto.failure("Failed to create guest booking for " + userProfileDto.getMobile());
 				}
 
@@ -210,5 +210,39 @@ public class AuthController {
 					userSessionEntity.getUserId(), e.getMessage());
 			throw new StanzaException(e);
 		}
+	}
+
+	@PostMapping("login/trueCaller")
+	public ResponseDto<AclUserDto> loginWithTrueCaller(
+			@RequestBody @Valid LoginRequestDto loginRequestDto,
+			HttpServletRequest request,
+			HttpServletResponse response) {
+
+		UserProfileDto userProfileDto = authService.loginWithTrueCaller(loginRequestDto);
+
+		log.info("OTP Successfully Validated for User: " + userProfileDto.getUuid() + ". Creating User Session now " + userProfileDto.getUserType());
+
+		String token = StanzaUtils.generateUniqueId();
+
+		UserSessionEntity userSessionEntity = sessionService.createUserSession(userProfileDto, token);
+
+		if (Objects.nonNull(userSessionEntity)) {
+			addTokenToResponse(request, response, token, userSessionEntity);
+			if(UserType.INVITED_GUEST.equals(userProfileDto.getUserType())) {
+
+				log.info("UserType for user is INVITED_GUEST {} " + userProfileDto.getUuid());
+				ResponseDto<BookingResponseDto> bookingResponseDto = onboardGuestService.createGuestBooking(userProfileDto.getMobile());
+
+				log.info("\n\n\n\n\n OTP Successfully bookingResponseDto " + bookingResponseDto);
+				if (Objects.isNull(bookingResponseDto) ) {
+					return ResponseDto.failure("Failed to create guest booking for " + userProfileDto.getMobile());
+				}
+
+			}
+
+			return ResponseDto.success("User Login with TrueCaller Successful", UserAdapter.getAclUserDto(userProfileDto, aclService.getUserDeptLevelRoleNameUrlExpandedDtoFe(userProfileDto.getUuid())));
+		}
+
+		return ResponseDto.failure("Failed to create user session");
 	}
 }

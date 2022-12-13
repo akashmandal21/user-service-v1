@@ -29,4 +29,5 @@ public interface AuthService {
 
 	void resendEmailOtp(EmailVerificationRequestDto emailVerificationRequestDto);
 
+	UserProfileDto loginWithTrueCaller(LoginRequestDto loginRequestDto);
 }
