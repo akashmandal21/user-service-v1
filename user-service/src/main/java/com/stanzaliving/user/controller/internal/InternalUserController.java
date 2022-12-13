@@ -13,6 +13,8 @@ import javax.validation.Valid;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.generic.dto.UIKeyValue;
 import com.stanzaliving.core.user.dto.UserRoleCacheDto;
+import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
+import com.stanzaliving.user.acl.service.UserDepartmentLevelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,6 +48,9 @@ public class InternalUserController {
 
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private UserDepartmentLevelService userDepartmentLevelService;
 
 	@PostMapping("update")
 	public ResponseDto<UserDto> updateUser(@RequestBody @Valid UpdateUserRequestDto updateUserRequestDto) {
@@ -186,7 +191,17 @@ public class InternalUserController {
 		
 		return ResponseDto.success("Found list",userService.getUserProfileDto(mobileNos));
 	}
-	
+
+	@GetMapping("get-first-user/{userUuid}/department/{department}")
+	public ResponseDto<UserDepartmentLevelEntity> getFirstUserByDepartment(@PathVariable String userUuid, @PathVariable Department department) {
+		log.info("Fetching user {} {}", userUuid, department);
+		try {
+			UserDepartmentLevelEntity userDepartmentLevel = userDepartmentLevelService.findFirstByUserUuidAndDepartment(userUuid, department);
+			return ResponseDto.success("Found list", userDepartmentLevel);
+		} catch (Exception ex) {
+			return ResponseDto.failure(ex.getMessage());
+		}
+	}
 	
 	
 }

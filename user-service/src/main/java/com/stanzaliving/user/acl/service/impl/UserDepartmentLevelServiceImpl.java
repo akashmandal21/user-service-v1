@@ -1,9 +1,12 @@
 package com.stanzaliving.user.acl.service.impl;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import com.stanzaliving.core.base.enums.Department;
+import com.stanzaliving.user.acl.repository.UserDepartmentLevelRepository;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +33,10 @@ public class UserDepartmentLevelServiceImpl implements UserDepartmentLevelServic
 
 	@Autowired
 	private UserDepartmentLevelRoleDbService userDepartmentLevelRoleDbService;
+
+	@Autowired
+	private UserDepartmentLevelRepository userDepartmentLevelRepository;
+
 
 	@Override
 	public UserDepartmentLevelEntity add(AddUserDeptLevelRequestDto addUserDeptLevelRequestDto) {
@@ -91,5 +98,15 @@ public class UserDepartmentLevelServiceImpl implements UserDepartmentLevelServic
 	@Override
 	public UserDepartmentLevelEntity findByUuid(String userDepartmentLevelUuid) {
 		return userDepartmentLevelDbService.findByUuid(userDepartmentLevelUuid);
+	}
+
+	@Override
+	public UserDepartmentLevelEntity findFirstByUserUuidAndDepartment(String userUuid, Department department) {
+		UserDepartmentLevelEntity userDepartmentLevel =
+				userDepartmentLevelRepository.findFirstByUserUuidAndDepartmentAndStatusOrderByIdAsc(userUuid, department, Boolean.TRUE);
+
+		if (Objects.isNull(userDepartmentLevel)) throw new StanzaException("User Not Exist!");
+
+		return userDepartmentLevel;
 	}
 }
