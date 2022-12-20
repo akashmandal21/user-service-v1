@@ -769,7 +769,7 @@ public class UserServiceImpl implements UserService {
 			return UserAdapter.getUserProfileDto(Userv2ToUserAdapter.getUserEntityFromUserv2(userDto));
 		}
 
-		UserEntity userEntity = userDbService.findByUuid(updateUserRequestDto.getUserId());
+		UserEntity userEntity = userDbService.findByUuidNotMigrated(updateUserRequestDto.getUserId(),false);
 		if (Objects.isNull(userEntity)) {
 			throw new UserValidationException("User not found for UserId: " + updateUserRequestDto.getUserId());
 		}
