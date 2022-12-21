@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.stanzaliving.core.base.enums.AccessModule;
+import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.transformation.client.cache.TransformationCache;
 import com.stanzaliving.core.user.acl.dto.AddUserAndRoleDto;
 import com.stanzaliving.core.user.acl.dto.CityMicromarketDropdownResponseDto;
@@ -143,6 +144,12 @@ public class AclUserServiceImpl implements AclUserService {
 
 	@Override
 	public void addRole(AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleDto) {
+
+		UserEntity user=userDbService.findByUuidNotMigrated(addUserDeptLevelRoleDto.getUserUuid(),false);
+		if(Objects.nonNull(user)){
+			throw new StanzaException("User might be migrated/created in acl2.0,please use new user management to assing permissions for this user.");
+		}
+
 
 		userService.assertActiveUserByUserUuid(addUserDeptLevelRoleDto.getUserUuid());
 
