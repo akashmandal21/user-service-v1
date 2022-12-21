@@ -51,9 +51,7 @@ public class MigrationService {
     private UserDepartmentLevelRoleDbService userDepartmentLevelRoleDbService;
 
     public void migrateUsers() {
-        List<UserEntity> userEntityList=userDbService.findByUserTypeInAndStatus(Arrays.asList(UserType.MANAGER,UserType.DESIGN_COORDINATOR,
-                UserType.PROJECT_MANAGER,UserType.SITE_ENGINEER,UserType.ZONAL_HEAD,UserType.NATIONAL_HEAD,
-                UserType.MANAGER),true);
+        List<UserEntity> userEntityList=userDbService.findByUserTypeInAndStatus(UserType.getMigratedUserTypes(),true);
 
         List<UserDto> userDtos=new ArrayList<>();
         List<UserEntity> userEntities=new ArrayList<>();
@@ -108,9 +106,7 @@ public class MigrationService {
     }
 
     public void migrateRoles(){
-        List<UserEntity> userEntityList=userDbService.findByUserTypeIn(Arrays.asList(UserType.MANAGER,UserType.DESIGN_COORDINATOR,
-                UserType.PROJECT_MANAGER,UserType.SITE_ENGINEER,UserType.ZONAL_HEAD,UserType.NATIONAL_HEAD,
-                UserType.MANAGER));
+        List<UserEntity> userEntityList=userDbService.findByUserTypeIn(UserType.getMigratedUserTypes());
         if(Objects.nonNull(userEntityList)) {
 
             for(UserEntity userEntity:userEntityList){
@@ -130,9 +126,7 @@ public class MigrationService {
     }
 
     public void migrateUserRoleMapping(){
-        List<UserEntity> userEntityList=userDbService.findByUserTypeIn(Arrays.asList(UserType.MANAGER,UserType.DESIGN_COORDINATOR,
-                UserType.PROJECT_MANAGER,UserType.SITE_ENGINEER,UserType.ZONAL_HEAD,UserType.NATIONAL_HEAD,
-                UserType.MANAGER));
+        List<UserEntity> userEntityList=userDbService.findByUserTypeIn(UserType.getMigratedUserTypes());
         if(Objects.nonNull(userEntityList)) {
 
             for(UserEntity userEntity: userEntityList){

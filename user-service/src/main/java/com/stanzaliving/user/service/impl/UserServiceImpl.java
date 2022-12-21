@@ -224,6 +224,10 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserDto addUser(AddUserRequestDto addUserRequestDto) {
 
+		if(UserType.getMigratedUserTypes().contains(addUserRequestDto.getUserType())){
+			throw new StanzaException("Users of this user type are migrated to acl2.0,and should be created from there.");
+		}
+
 		if (!PhoneNumberUtils.isValidMobileForCountry(addUserRequestDto.getMobile(), addUserRequestDto.getIsoCode())) {
 			log.error("Number: " + addUserRequestDto.getMobile() + " and ISO: " + addUserRequestDto.getIsoCode()
 					+ " doesn't appear to be a valid mobile combination");
