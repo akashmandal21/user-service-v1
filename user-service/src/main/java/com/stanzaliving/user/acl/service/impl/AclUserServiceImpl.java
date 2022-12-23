@@ -147,7 +147,7 @@ public class AclUserServiceImpl implements AclUserService {
 
 		UserEntity user=userDbService.findByUuidNotMigrated(addUserDeptLevelRoleDto.getUserUuid(),false);
 		if(Objects.isNull(user)){
-			throw new StanzaException("User might be migrated/created in acl2.0,please use new user management to assing permissions for this user.");
+			throw new StanzaException("User might be migrated/created in acl2.0,please use new user management to assign permissions for this user.");
 		}
 
 
