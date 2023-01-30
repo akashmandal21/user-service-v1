@@ -255,6 +255,9 @@ public class AuthServiceImpl implements AuthService {
 					.lastName(emailOtpValidateRequestDto.getLastName())
 					.build());
 		}
+		else{
+			userEntity=userDbService.update(userEntity);
+		}
 		
 		UserProfileDto userProfileDto = UserAdapter.getUserProfileDto(userEntity);
 		
