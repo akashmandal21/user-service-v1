@@ -78,7 +78,7 @@ public class UserV2FeignService {
             }
         }
         catch (Exception e){}
-        return Collections.emptyList();
+        return new ArrayList<>();
     }
 
     public Map<String,UserDto> getUserManagers(List<String> userIds){
@@ -89,7 +89,7 @@ public class UserV2FeignService {
             }
         }
         catch (Exception e){}
-        return Collections.emptyMap();
+        return new HashMap<>();
     }
 
     public List<UserDto> getUsersReportingToManager(@PathVariable String managerId){
@@ -100,7 +100,7 @@ public class UserV2FeignService {
             }
         }
         catch (Exception e){}
-        return Collections.emptyList();
+        return new ArrayList<>();
     }
 //
 //    void deleteManagerUuidFromUserAttributes(@PathVariable String userUuid);
@@ -113,7 +113,7 @@ public class UserV2FeignService {
             }
         }
         catch (Exception e){}
-        return Collections.emptyList();
+        return new ArrayList<>();
     }
 //
     public Map<String,List<String>> getActiveUserAndAccessLevelMapForRole(String roleName, Department department){
@@ -124,7 +124,7 @@ public class UserV2FeignService {
             }
         }
         catch (Exception e){}
-        return Collections.emptyMap();
+        return new HashMap<>();
     }
 
     public Map<String,List<String>> getUserAndAccessLevelMapForRole(String roleName, Department department){
@@ -135,7 +135,7 @@ public class UserV2FeignService {
             }
         }
         catch (Exception e){}
-        return Collections.emptyMap();
+        return new HashMap<>();
     }
 
     public List<UserDto> findUsersForRoleNameAndDepartment(String roleName,Department department){
@@ -146,7 +146,7 @@ public class UserV2FeignService {
             }
         }
         catch (Exception e){}
-        return Collections.emptyList();
+        return new ArrayList<>();
     }
 
     public PageResponse<UserDto> searchOrFilterUsers(UserFilterDto userFilterDto){
@@ -157,7 +157,7 @@ public class UserV2FeignService {
             }
         }
         catch (Exception e){}
-        return PageResponse.of(userFilterDto.getPageRequest().getPageNo(),userFilterDto.getPageRequest().getLimit(),Collections.emptyList());
+        return PageResponse.of(userFilterDto.getPageRequest().getPageNo(),userFilterDto.getPageRequest().getLimit(),new ArrayList<>());
     }
 
     public List<UserDto> getUserFromEmail(String email){
@@ -168,7 +168,7 @@ public class UserV2FeignService {
             }
         }
         catch (Exception e){}
-        return Collections.emptyList();
+        return new ArrayList<>();
     }
 
     public List<RoleDto> findFilteredRoles(RoleDto roleDto){
@@ -179,7 +179,7 @@ public class UserV2FeignService {
             }
         }
         catch (Exception e){}
-        return Collections.emptyList();
+        return new ArrayList<>();
     }
 
     public List<RoleDto> getRolesFromUserUuid(String userUuid){
@@ -190,7 +190,7 @@ public class UserV2FeignService {
             }
         }
         catch (Exception e){}
-        return Collections.emptyList();
+        return new ArrayList<>();
     }
 
     public UserDto updateWithUser(UpdateUserRequestDto updateUserRequestDto){
@@ -234,7 +234,7 @@ public class UserV2FeignService {
             }
         }
         catch (Exception e){}
-        return Collections.emptyList();
+        return new ArrayList<>();
 
     }
 
