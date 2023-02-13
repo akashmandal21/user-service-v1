@@ -277,4 +277,17 @@ public class AuthServiceImpl implements AuthService {
 		
 		otpService.resendEmailVerificationOtp(emailVerificationRequestDto, userEntity);
 	}
+
+	@Override
+	public UserProfileDto loginWithTrueCaller(LoginRequestDto loginRequestDto) {
+		UserEntity userEntity = getActiveUser(loginRequestDto);
+
+		log.info("OTP verification completed for User: " + userEntity.getUuid());
+
+		userEntity.setMobileVerified(true);
+
+		userDbService.update(userEntity);
+
+		return UserAdapter.getUserProfileDto(userEntity);
+	}
 }

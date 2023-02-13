@@ -39,7 +39,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
 						"/auth/sendEmailVerificationOtp",
 						"/auth/resendEmailVerificationOtp",
 						"/auth/validateEmailVerificationOtp",
-						"/update/userStatus")
+						"/update/userStatus",
+						"/auth/login/trueCaller")
 				.excludePathPatterns(
 						"/search/**",
 						"/mapping/**",
