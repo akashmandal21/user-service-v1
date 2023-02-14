@@ -201,7 +201,10 @@ public class AuthController {
 				String appEnv = request.getHeader(SecurityConstants.APP_ENVIRONMENT);
 				boolean isApp = StringUtils.isNotBlank(appEnv) && SecurityConstants.APP_ENVIRONMENT_TRUE.equals(appEnv);
 				String domainName = request.getHeader("origin");
-				domainName = domainName.substring(domainName.indexOf("://") + 3);
+				if(StringUtils.isNotBlank(domainName)) {
+					if(domainName.trim().contains("://"))
+						domainName = domainName.substring(domainName.indexOf("://") + 3);
+				}
 				log.info("domainName {}", domainName);
 				response.addCookie(SecureCookieUtil.create(SecurityConstants.TOKEN_HEADER_NAME, token, Optional.of(isLocalFrontEnd), Optional.of(isApp), domainName));
 				log.info("Successfully added token to response for user : {}", userSessionEntity.getUserId());
