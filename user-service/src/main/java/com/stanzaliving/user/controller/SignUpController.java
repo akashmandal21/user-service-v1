@@ -78,16 +78,16 @@ public class SignUpController {
 	}
 
 	private void addTokenToResponse(HttpServletRequest request, HttpServletResponse response, String token) {
-
+		log.info("Request received for addTokenToResponse for token : {}", token);
 		if (StringUtils.isNotBlank(token)) {
-
 			String frontEnv = request.getHeader(SecurityConstants.FRONT_ENVIRONMENT);
 			boolean isLocalFrontEnd = StringUtils.isNotBlank(frontEnv) && SecurityConstants.FRONT_ENVIRONMENT_LOCAL.equals(frontEnv);
 
 			String appEnv = request.getHeader(SecurityConstants.APP_ENVIRONMENT);
 			boolean isApp = StringUtils.isNotBlank(appEnv) && SecurityConstants.APP_ENVIRONMENT_TRUE.equals(appEnv);
-
-			response.addCookie(SecureCookieUtil.create(SecurityConstants.TOKEN_HEADER_NAME, token, Optional.of(isLocalFrontEnd), Optional.of(isApp)));
+			String domainName = request.getHeader(":authority");
+			log.info("domainName {}", domainName);
+			response.addCookie(SecureCookieUtil.create(SecurityConstants.TOKEN_HEADER_NAME, token, Optional.of(isLocalFrontEnd), Optional.of(isApp), domainName));
 		}
 	}
 }
