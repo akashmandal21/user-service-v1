@@ -1,5 +1,6 @@
 package com.stanzaliving.user.controller;
 
+import java.util.Enumeration;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -85,7 +86,13 @@ public class SignUpController {
 
 			String appEnv = request.getHeader(SecurityConstants.APP_ENVIRONMENT);
 			boolean isApp = StringUtils.isNotBlank(appEnv) && SecurityConstants.APP_ENVIRONMENT_TRUE.equals(appEnv);
-			String domainName = request.getHeader(":authority");
+			String domainName = null;
+			Enumeration headerNames = request.getHeaderNames();
+			while (headerNames.hasMoreElements()) {
+				String key = (String) headerNames.nextElement();
+				String value = request.getHeader(key);
+				log.info("key {}, value {}", key, value);
+			}
 			log.info("domainName {}", domainName);
 			response.addCookie(SecureCookieUtil.create(SecurityConstants.TOKEN_HEADER_NAME, token, Optional.of(isLocalFrontEnd), Optional.of(isApp), domainName));
 		}
