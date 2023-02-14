@@ -86,7 +86,8 @@ public class SignUpController {
 
 			String appEnv = request.getHeader(SecurityConstants.APP_ENVIRONMENT);
 			boolean isApp = StringUtils.isNotBlank(appEnv) && SecurityConstants.APP_ENVIRONMENT_TRUE.equals(appEnv);
-			String domainName = request.getHeader("host");
+			String domainName = request.getHeader("origin");
+			domainName = domainName.substring(domainName.indexOf("://") + 3);
 			log.info("domainName {}", domainName);
 			response.addCookie(SecureCookieUtil.create(SecurityConstants.TOKEN_HEADER_NAME, token, Optional.of(isLocalFrontEnd), Optional.of(isApp), domainName));
 		}
