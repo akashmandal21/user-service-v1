@@ -165,8 +165,8 @@ public class MigrationService {
                                             .build();
                                     try {
                                         migrationHttpService.migrateUserRoleMapping(userMigrationRoleAndAssignmentDto);
-                                        roleEntity.setMigrated(true);
-                                        roleDbService.save(roleEntity);
+//                                        roleEntity.setMigrated(true);
+//                                        roleDbService.save(roleEntity);
                                     }catch (Exception e){
 
                                     }
