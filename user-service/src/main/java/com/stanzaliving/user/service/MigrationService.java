@@ -133,7 +133,7 @@ public class MigrationService {
                 List<UserDepartmentLevelEntity> userDepartmentLevelEntities=userDepartmentLevelDbService.findByUserUuidAndStatus(userEntity.getUuid(),true);
                 if (Objects.nonNull(userDepartmentLevelEntities)) {
                     for(UserDepartmentLevelEntity userDepartmentLevelEntity: userDepartmentLevelEntities){
-                        List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntities=userDepartmentLevelRoleDbService.findByUserDepartmentLevelUuid(userDepartmentLevelEntity.getUuid());
+                        List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntities=userDepartmentLevelRoleDbService.findByUserDepartmentLevelUuidAndStatus(userDepartmentLevelEntity.getUuid(),true);
                         if(Objects.nonNull(userDepartmentLevelRoleEntities)){
                             for(UserDepartmentLevelRoleEntity userDepartmentLevelRoleEntity: userDepartmentLevelRoleEntities){
                                 RoleEntity roleEntity=roleDbService.findByUuid(userDepartmentLevelRoleEntity.getRoleUuid());
@@ -171,6 +171,8 @@ public class MigrationService {
 
                                     }
                                 }
+                                userDepartmentLevelRoleEntity.setStatus(false);
+                                userDepartmentLevelRoleDbService.save(userDepartmentLevelRoleEntity);
                             }
                         }
                     }
