@@ -39,7 +39,7 @@ public class RoleEntity extends AbstractJpaEntity {
 	@Column(name = "access_level", columnDefinition = "varchar(30)", nullable = false)
 	private AccessLevel accessLevel;
 
-	@Column(name = "migrated",columnDefinition = "bit(1) default 1")
+	@Column(name = "migrated",columnDefinition = "bit(1) default 0")
 	private boolean migrated;
 
 }
