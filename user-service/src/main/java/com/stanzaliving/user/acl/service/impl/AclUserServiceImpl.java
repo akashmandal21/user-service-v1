@@ -214,24 +214,6 @@ public class AclUserServiceImpl implements AclUserService {
 			roleDtoList.addAll(RoleAdapter.getDtoList(roleEntities));
 		}
 		return roleDtoList;
-//		List<RoleDto> roleDtos=userV2FeignService.getRolesFromUserUuid(userUuid);
-//
-//		List<RoleDto> roleDtoList = new ArrayList<>();
-//		List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList;
-//		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelDbService.findByUserUuidAndStatus(userUuid, true);
-//		List<String> roleUuids;
-//
-//		for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
-//			userDepartmentLevelRoleEntityList = userDepartmentLevelRoleDbService.findByUserDepartmentLevelUuidAndStatus(userDepartmentLevelEntity.getUuid(), true);
-//			roleUuids = userDepartmentLevelRoleEntityList.parallelStream().map(UserDepartmentLevelRoleEntity::getRoleUuid).collect(Collectors.toList());
-//			List<RoleEntity> roleEntities = roleDbService.findByUuidInAndStatus(roleUuids, true);
-//			roleDtoList.addAll(RoleAdapter.getDtoList(roleEntities));
-//		}
-//
-//		if(Objects.nonNull(roleDtos) && roleDtos.size()>0){
-//			roleDtoList.addAll(roleDtos);
-//		}
-//		return roleDtoList;
 	}
 
 	@Override
