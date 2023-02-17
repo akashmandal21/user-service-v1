@@ -346,74 +346,7 @@ public class AclUserServiceImpl implements AclUserService {
 		}
 
 		return userIdAccessLevelIdListMap;
-//		log.info("Got request to get list of userid by rolename {} and department {}", roleName, department);
-//
-//		//call feign client to get roles by role and department
-//		Map<String,List<String>> userAccessLevelMap=userV2FeignService.getActiveUserAndAccessLevelMapForRole(roleName,department);
-//		Map<String, List<String>> userIdV2AccessLevelIdListMap = new HashMap<>();
-//		if(userAccessLevelMap.size()>0) {
-//			for (Map.Entry<String, List<String>> entry : userAccessLevelMap.entrySet()) {
-//				for (String accessLevelEntity : accessLevelEntityList) {
-//					if (entry.getValue().contains(accessLevelEntity)) {
-//						List<String> accessLevelIds = userIdV2AccessLevelIdListMap.getOrDefault(entry.getKey(), new ArrayList<>());
-//						accessLevelIds.add(accessLevelEntity);
-//						userIdV2AccessLevelIdListMap.put(entry.getKey(), accessLevelIds);
-//					}
-//				}
-//			}
-//		}
-//
-//		RoleDto roleDto=null;
-//		try{
-//			roleDto = roleService.findByRoleNameAndDepartment(roleName, department);
-//		}
-//		catch (ApiValidationException e){}
-//
-//		Map<String, List<String>> userIdAccessLevelIdListMap = new HashMap<>();
-//
-//		if (Objects.nonNull(roleDto) && roleDto.getDepartment().equals(department)) {
-//
-//			List<UserDepartmentLevelRoleEntity> departmentLevelRoleEntities = userDepartmentLevelRoleDbService.findByRoleUuidInAndStatus(Collections.singletonList(roleDto.getUuid()), true);
-//
-//			if (CollectionUtils.isNotEmpty(departmentLevelRoleEntities)) {
-//
-//				List<String> uuids = departmentLevelRoleEntities.stream().map(UserDepartmentLevelRoleEntity::getUserDepartmentLevelUuid).collect(Collectors.toList());
-//
-//				List<UserDepartmentLevelEntity> departmentLevelEntities = userDepartmentLevelDbService.findByUuidInAndAccessLevel(uuids, roleDto.getAccessLevel());
-//
-//				if (CollectionUtils.isNotEmpty(departmentLevelEntities)) {
-//
-//					departmentLevelEntities.forEach(entity -> {
-//
-//						UserEntity user = userDbService.findByUuid(entity.getUserUuid());
-//
-//						if(user.isStatus()) {
-//							Set<String> accessLevelUuids = new HashSet<>(Arrays.asList((entity.getCsvAccessLevelEntityUuid().split(","))));
-//
-//							for (String accessLevelEntity : accessLevelEntityList) {
-//								if (accessLevelUuids.contains(accessLevelEntity)) {
-//									List<String> accessLevelIds = userIdAccessLevelIdListMap.getOrDefault(entity.getUserUuid(), new ArrayList<>());
-//									accessLevelIds.add(accessLevelEntity);
-//									userIdAccessLevelIdListMap.put(entity.getUserUuid(), accessLevelIds);
-//								}
-//							}
-//						}
-//						// if (!Collections.disjoint(accessLevelEntityList, accessLevelUuids)) {
-//						// userIds.add(entity.getUserUuid());
-//						// }
-//					});
-//				}
-//			}
-//
-//		}
-//
-//		userIdAccessLevelIdListMap.forEach((k,v)->{
-//			if(!userIdV2AccessLevelIdListMap.containsKey(k)){
-//				userIdV2AccessLevelIdListMap.put(k,v);
-//			}
-//		});
-//
-//		return userIdV2AccessLevelIdListMap;
+
 	}
 
 
