@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.stanzaliving.core.base.enums.AccessModule;
+import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.transformation.client.cache.TransformationCache;
 import com.stanzaliving.core.user.acl.dto.AddUserAndRoleDto;
 import com.stanzaliving.core.user.acl.dto.CityMicromarketDropdownResponseDto;
@@ -43,6 +44,9 @@ import com.stanzaliving.user.acl.repository.RoleAccessModuleRepository;
 import com.stanzaliving.user.acl.repository.RoleRepository;
 import com.stanzaliving.user.acl.repository.UserDepartmentLevelRepository;
 import com.stanzaliving.user.acl.repository.UserDepartmentLevelRoleRepository;
+import com.stanzaliving.user.adapters.Userv2ToUserAdapter;
+import com.stanzaliving.user.feignclient.UserV2FeignService;
+import com.stanzaliving.user.feignclient.Userv2HttpService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -135,8 +139,17 @@ public class AclUserServiceImpl implements AclUserService {
 	@Autowired
 	private RoleAccessModuleRepository roleAccessModuleRepository;
 
+	@Autowired
+	private UserV2FeignService userV2FeignService;
+
 	@Override
 	public void addRole(AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleDto) {
+
+		UserEntity user=userDbService.findByUuidNotMigrated(addUserDeptLevelRoleDto.getUserUuid(),false);
+		if(Objects.isNull(user)){
+			throw new StanzaException("User might be migrated/created in acl2.0,please use new user management to assign permissions for this user.");
+		}
+
 
 		userService.assertActiveUserByUserUuid(addUserDeptLevelRoleDto.getUserUuid());
 
@@ -275,9 +288,9 @@ public class AclUserServiceImpl implements AclUserService {
 								userIdAccessLevelIdListMap.put(entity.getUserUuid(), accessLevelIds);
 							}
 						}
-						// if (!Collections.disjoint(accessLevelEntityList, accessLevelUuids)) {
-						// userIds.add(entity.getUserUuid());
-						// }
+//						 if (!Collections.disjoint(accessLevelEntityList, accessLevelUuids)) {
+//						 userIds.add(entity.getUserUuid());
+//						 }
 					});
 				}
 			}
@@ -312,7 +325,7 @@ public class AclUserServiceImpl implements AclUserService {
 
 						UserEntity user = userDbService.findByUuid(entity.getUserUuid());
 
-						if(user.isStatus()) {
+						if(user.isStatus() || (user.isMigrated())) {
 							Set<String> accessLevelUuids = new HashSet<>(Arrays.asList((entity.getCsvAccessLevelEntityUuid().split(","))));
 
 							for (String accessLevelEntity : accessLevelEntityList) {
@@ -333,6 +346,7 @@ public class AclUserServiceImpl implements AclUserService {
 		}
 
 		return userIdAccessLevelIdListMap;
+
 	}
 
 
@@ -389,7 +403,21 @@ public class AclUserServiceImpl implements AclUserService {
 			return Collections.emptyList();
 		}
 
-		List<UserEntity> userEntities = userDbService.findByUuidInAndStatus(userUuids, true);
+		List<com.stanzaliving.user.dto.userv2.UserDto> userDtos=userV2FeignService.getUsersList(userUuids);
+
+		List<UserEntity> userEntities=new ArrayList<>();
+
+		if(Objects.nonNull(userDtos)) {
+			for (com.stanzaliving.user.dto.userv2.UserDto userDto : userDtos) {
+				userEntities.add(Userv2ToUserAdapter.getUserEntityFromUserv2(userDto));
+			}
+		}
+
+		List<UserEntity> userEntities2 = userDbService.findByUuidInAndStatus(userUuids, true);
+
+		if(Objects.nonNull(userEntities2)) {
+			userEntities.addAll(userEntities2);
+		}
 
 		if (CollectionUtils.isEmpty(userEntities)) {
 			return Collections.emptyList();

@@ -54,6 +54,15 @@ public class RoleDbServiceImpl extends AbstractJpaServiceImpl<RoleEntity, Long, 
 			specificationBuilder.with(QueryConstants.Role.ROLE_UUID, CriteriaOperation.EQ, roleDto.getUuid());
 		}
 
+		if(Objects.nonNull(roleDto.getMigrated())){
+			if(roleDto.getMigrated()) {
+				specificationBuilder.with("migrated", CriteriaOperation.TRUE, true);
+			}
+			{
+				specificationBuilder.with("migrated", CriteriaOperation.FALSE, false);
+			}
+		}
+
 		if (Objects.nonNull(roleDto.getAccessLevel())) {
 			specificationBuilder = specificationBuilder.with(QueryConstants.Role.ACCESS_LEVEL, CriteriaOperation.ENUM_EQ, roleDto.getAccessLevel());
 		}
@@ -92,6 +101,21 @@ public class RoleDbServiceImpl extends AbstractJpaServiceImpl<RoleEntity, Long, 
 	@Override
 	public List<RoleEntity> findByDepartmentAndRoleNameEndsWithIgnoreCase(Department department, String suffix){
 		return  getJpaRepository().findByDepartmentAndRoleNameEndsWithIgnoreCase(department, suffix);
+	}
+
+	@Override
+	public List<RoleEntity> findByUuidInAndStatusNotMigrated(List<String> roleUuids, boolean b, boolean b1) {
+		return getJpaRepository().findByUuidInAndStatusAndMigrated(roleUuids,b,b1);
+	}
+
+	@Override
+	public List<RoleEntity> findByRoleNameAndDepartmentNotMigrated(List<String> roleNames, Department department, boolean migrated) {
+		return getJpaRepository().findByRoleNameInAndDepartmentAndMigrated(roleNames,department,migrated);
+	}
+
+	@Override
+	public List<RoleEntity> findByUuidInAndStatusAndMigrated(List<String> first, boolean status, boolean migrated) {
+		return getJpaRepository().findByUuidInAndStatusAndMigrated(first,status,migrated);
 	}
 
 }

@@ -1,10 +1,8 @@
 package com.stanzaliving.user.controller.internal;
 
+import com.stanzaliving.user.entity.UserSessionEntity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.user.dto.SessionRequestDto;
@@ -37,4 +35,15 @@ public class InternalSessionController {
         return ResponseDto.success("Session Removed Successfully");
 
     }
+
+    @PostMapping("update")
+    public void updateUserSession(@RequestBody UserSessionEntity userSessionEntity){
+        sessionService.updateUserSession(userSessionEntity);
+    }
+
+    @PostMapping("get")
+    public UserSessionEntity getUserSessionEntity(@RequestParam String token){
+        return sessionService.getUserSessionByToken(token);
+    }
+
 }

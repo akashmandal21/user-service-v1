@@ -56,4 +56,9 @@ public class UserDepartmentLevelDbServiceImpl extends AbstractJpaServiceImpl<Use
     public List<UserDepartmentLevelEntity> findByUuidInAndDepartmentAndAccessLevel(List<String> userUuid, Department department, AccessLevel accessLevel){
         return getJpaRepository().findByUuidInAndDepartmentAndAccessLevel(userUuid,department,accessLevel);
     }
+
+    @Override
+    public List<UserDepartmentLevelEntity> findByUserUuidIn(List<String> userUuids) {
+        return getJpaRepository().findByUserUuidIn(userUuids);
+    }
 }

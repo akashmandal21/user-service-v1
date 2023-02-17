@@ -15,7 +15,12 @@ import com.stanzaliving.core.user.enums.Gender;
 import com.stanzaliving.core.user.enums.Nationality;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.*;
+import com.stanzaliving.user.adapters.Userv2ToUserAdapter;
+import com.stanzaliving.user.dto.userv2.UpdateUserDto;
+import com.stanzaliving.user.dto.userv2.UserDto;
 import com.stanzaliving.user.entity.UserProfileEntity;
+import com.stanzaliving.user.feignclient.UserV2FeignService;
+import com.stanzaliving.user.feignclient.Userv2HttpService;
 import com.stanzaliving.user.service.UserService;
 import com.stanzaliving.website.response.dto.LeadDetailEntity;
 import org.codehaus.plexus.util.StringUtils;
@@ -49,6 +54,12 @@ public class AuthServiceImpl implements AuthService {
 	private OtpService otpService;
 
 	@Autowired
+	private Userv2HttpService userv2HttpService;
+
+	@Autowired
+	private UserV2FeignService userV2FeignService;
+
+	@Autowired
 	private UserDbService userDbService;
 	
 	@Value("${kafka.resident.detail.topic}")
@@ -79,7 +90,14 @@ public class AuthServiceImpl implements AuthService {
 
 	private UserEntity getActiveUser(LoginRequestDto loginRequestDto) {
 
-		UserEntity userEntity = userDbService.getUserForMobile(loginRequestDto.getMobile(), loginRequestDto.getIsoCode());
+		UserDto userv2 = userV2FeignService.getActiveUser(Long.parseLong(loginRequestDto.getMobile()));
+		UserEntity userEntity=null;
+		if(Objects.nonNull(userv2)) {
+			userEntity = Userv2ToUserAdapter.getUserEntityFromUserv2(userv2);
+		}
+		else {
+			userEntity = userDbService.getUserForMobileNotMigrated(loginRequestDto.getMobile(), loginRequestDto.getIsoCode(),false);
+		}
 
 		// userEntity = createUserIfUserIsConsumer(loginRequestDto, userEntity);
 
@@ -151,7 +169,14 @@ public class AuthServiceImpl implements AuthService {
 
 		userEntity.setMobileVerified(true);
 
-		userDbService.update(userEntity);
+		//call userv2 to update
+		if(Objects.nonNull(userDbService.findByUuidAndStatus(userEntity.getUuid(),true))) {
+			userDbService.update(userEntity);
+		}
+		userV2FeignService.updateUser(UpdateUserDto.builder()
+						.mobile(Long.parseLong(otpValidateRequestDto.getMobile()))
+						.mobileVerified(true)
+				.build());
 
 		return UserAdapter.getUserProfileDto(userEntity);
 	}
@@ -163,7 +188,7 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	@Override
-	public void sendEmailOtp(EmailVerificationRequestDto emailVerificationRequestDto) {
+	public void  sendEmailOtp(EmailVerificationRequestDto emailVerificationRequestDto) {
 
 		UserEntity userEntity = getActiveUserByUuid(emailVerificationRequestDto.getUserUuid());
 
@@ -173,8 +198,17 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	private UserEntity getActiveUserByUuid(String userUuid) {
-		
-		UserEntity userEntity = userDbService.findByUuid(userUuid);
+
+		//UserEntity userEntity = userDbService.findByUuid(userUuid);
+		UserDto users=userV2FeignService.getUserByUuid(userUuid);
+		UserEntity userEntity=null;
+		if(Objects.nonNull(users)) {
+			userEntity = Userv2ToUserAdapter.getUserEntityFromUserv2(users);
+		}
+
+		if(Objects.isNull(userEntity)){
+			userEntity = userDbService.findByUuidNotMigrated(userUuid,false);
+		}
 
 		if (Objects.isNull(userEntity)) {
 			throw new UserValidationException("User Not Found with Uuid: " + userUuid);
@@ -211,7 +245,19 @@ public class AuthServiceImpl implements AuthService {
 		if(UserType.INVITED_GUEST.equals(userEntity.getUserType())){
 			bookingDataControllerApi.emailVerifiedUpdate(userEntity.getMobile());
 		}
-		userEntity = userDbService.update(userEntity);
+
+		//call user v2 http service to update
+//		userEntity = userDbService.update(userEntity);
+		if(userEntity.isMigrated()) {
+			userV2FeignService.updateUser(UpdateUserDto.builder()
+					.emailVerified(true)
+					.firstName(emailOtpValidateRequestDto.getFirstName())
+					.lastName(emailOtpValidateRequestDto.getLastName())
+					.build());
+		}
+		else{
+			userEntity=userDbService.update(userEntity);
+		}
 		
 		UserProfileDto userProfileDto = UserAdapter.getUserProfileDto(userEntity);
 		
@@ -229,7 +275,7 @@ public class AuthServiceImpl implements AuthService {
 		
 		UserEntity userEntity = getActiveUserByUuid(emailVerificationRequestDto.getUserUuid());
 		
-		otpService.resendEmailVerificationOtp(emailVerificationRequestDto, userEntity);		
+		otpService.resendEmailVerificationOtp(emailVerificationRequestDto, userEntity);
 	}
 
 	@Override

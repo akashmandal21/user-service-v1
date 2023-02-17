@@ -33,4 +33,8 @@ public interface RoleRepository extends AbstractJpaRepository<RoleEntity, Long> 
 	List<RoleEntity> findByDepartmentAndAccessLevel(Department department, AccessLevel accessLevel);
 
 	List<RoleEntity> findByDepartmentAndRoleNameEndsWithIgnoreCase(Department department, String suffix);
+
+    List<RoleEntity> findByUuidInAndStatusAndMigrated(List<String> roleUuids, boolean status, boolean migrated);
+
+	List<RoleEntity> findByRoleNameInAndDepartmentAndMigrated(List<String> roleNames, Department department, boolean migrated);
 }
