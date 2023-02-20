@@ -52,6 +52,10 @@ public class MigrationService {
 
     public void migrateUsers() {
         List<UserEntity> userEntityList=userDbService.findByUserTypeInAndStatus(UserType.getMigratedUserTypes(),true);
+        migrateUsers(userEntityList);
+    }
+
+    public void migrateUsers(List<UserEntity> userEntityList){
 
         List<UserDto> userDtos=new ArrayList<>();
         List<UserEntity> userEntities=new ArrayList<>();
@@ -127,6 +131,10 @@ public class MigrationService {
 
     public void migrateUserRoleMapping(){
         List<UserEntity> userEntityList=userDbService.findByUserTypeIn(UserType.getMigratedUserTypes());
+        migrateUserRoleMapping(userEntityList);
+    }
+
+    public void migrateUserRoleMapping(List<UserEntity> userEntityList){
         if(Objects.nonNull(userEntityList)) {
 
             for(UserEntity userEntity: userEntityList){
@@ -175,10 +183,22 @@ public class MigrationService {
                                 userDepartmentLevelRoleDbService.save(userDepartmentLevelRoleEntity);
                             }
                         }
+                        userDepartmentLevelEntity.setStatus(false);
+                        userDepartmentLevelDbService.save(userDepartmentLevelEntity);
                     }
                 }
 
             }
         }
+    }
+
+    public void migrateSpecificUsers(List<String> userUuids) {
+        List<UserEntity> userEntityList=userDbService.findByUuidIn(userUuids);
+        migrateUsers(userEntityList);
+    }
+
+    public void migrateSpecificUserRoleMapping(List<String> userUuids) {
+        List<UserEntity> userEntityList=userDbService.findByUuidIn(userUuids);
+        migrateUserRoleMapping(userEntityList);
     }
 }
