@@ -3,10 +3,7 @@ package com.stanzaliving.user.controller.internal;
 import com.stanzaliving.user.service.MigrationService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -22,7 +19,7 @@ public class InternalMigrationController {
     public void migrateUsers(){
         migrationService.migrateUsers();
     }
-    @GetMapping("/users/list")
+    @PostMapping("/users/list")
     public void migrateSpecificUsers(@RequestBody List<String> userUuids){
         migrationService.migrateSpecificUsers(userUuids);
     }
@@ -37,7 +34,7 @@ public class InternalMigrationController {
         migrationService.migrateUserRoleMapping();
     }
 
-    @GetMapping("assign/roles/list")
+    @PostMapping("assign/roles/list")
     public void migrateSpecificUserRoleMapping(@RequestBody List<String> userUuids){
         migrationService.migrateSpecificUserRoleMapping(userUuids);
     }
