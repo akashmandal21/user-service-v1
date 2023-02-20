@@ -175,6 +175,8 @@ public class MigrationService {
                                 userDepartmentLevelRoleDbService.save(userDepartmentLevelRoleEntity);
                             }
                         }
+                        userDepartmentLevelEntity.setStatus(true);
+                        userDepartmentLevelDbService.save(userDepartmentLevelEntity);
                     }
                 }
 
