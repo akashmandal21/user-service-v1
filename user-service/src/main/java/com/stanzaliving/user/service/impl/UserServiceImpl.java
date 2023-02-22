@@ -896,7 +896,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public boolean updateUserAndMigratedStatus(String userUuid, Boolean userStatus, Boolean migrationStatus) {
+	public boolean updateUserAndMigratedStatus(String userUuid, Boolean userStatus, Boolean migrationStatus,Boolean enableRoles) {
 
 		UserEntity user = userDbService.findByUuid(userUuid);
 
@@ -915,7 +915,7 @@ public class UserServiceImpl implements UserService {
 		userDbService.save(user);
 
 		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList=userDepartmentLevelDbService.findByUserUuidAndStatus(userUuid,false);
-		if(Objects.nonNull(userDepartmentLevelEntityList)) {
+		if(enableRoles && Objects.nonNull(userDepartmentLevelEntityList)) {
 			List<String> userDepartmentLevelUuids = userDepartmentLevelEntityList.stream().map(f -> f.getUuid()).collect(Collectors.toList());
 
 			userDepartmentLevelEntityList = userDepartmentLevelEntityList.stream().map(f -> {

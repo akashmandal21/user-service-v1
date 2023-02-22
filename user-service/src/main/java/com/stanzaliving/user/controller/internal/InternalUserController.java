@@ -101,13 +101,14 @@ public class InternalUserController {
 				: ResponseDto.failure("Unable to Update user Status");
 	}
 
-	@PostMapping("update/migrate/status/{userUuid}/{userStatus}/{migrationStatus}")
+	@PostMapping("update/migrate/status/{userUuid}/{userStatus}/{migrationStatus}/{enableRoles}")
 	public ResponseDto<Boolean> updateUserAndMigratedStatus(@PathVariable(value="userUuid",required=true) String userUuid,
 												 @PathVariable(name = "userStatus", required = true) Boolean userStatus,
-												 @PathVariable(name = "migrationStatus", required = true) Boolean migrationStatus
+												 @PathVariable(name = "migrationStatus", required = true) Boolean migrationStatus,
+												 @PathVariable(name = "enableRoles", required = true) Boolean enableRoles
 	) {
 
-		boolean status = userService.updateUserAndMigratedStatus(userUuid,userStatus,migrationStatus);
+		boolean status = userService.updateUserAndMigratedStatus(userUuid,userStatus,migrationStatus,enableRoles);
 
 		log.info("Status Update {} for user uuid {} ",userStatus, userUuid);
 

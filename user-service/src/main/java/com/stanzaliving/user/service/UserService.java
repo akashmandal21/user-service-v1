@@ -65,7 +65,7 @@ public interface UserService {
 
 	UserDto updateUserMobile(UpdateUserRequestDto updateUserRequestDto);
 
-	boolean updateUserAndMigratedStatus(String userUuid, Boolean userStatus,Boolean migrationStatus);
+	boolean updateUserAndMigratedStatus(String userUuid, Boolean userStatus,Boolean migrationStatus,Boolean enableRoles);
 
 	boolean updateUserStatus(String mobileNo, UserType userType, Boolean enabled);
 
