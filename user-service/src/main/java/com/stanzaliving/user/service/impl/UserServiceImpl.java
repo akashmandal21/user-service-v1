@@ -913,6 +913,27 @@ public class UserServiceImpl implements UserService {
 		user.setStatus(userStatus);
 		user.setMigrated(migrationStatus);
 		userDbService.save(user);
+
+		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList=userDepartmentLevelDbService.findByUserUuidAndStatus(userUuid,false);
+		if(Objects.nonNull(userDepartmentLevelEntityList)) {
+			List<String> userDepartmentLevelUuids = userDepartmentLevelEntityList.stream().map(f -> f.getUuid()).collect(Collectors.toList());
+
+			userDepartmentLevelEntityList = userDepartmentLevelEntityList.stream().map(f -> {
+				f.setStatus(true);
+				return f;
+			}).collect(Collectors.toList());
+
+			List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = userDepartmentLevelRoleDbService.findByUserDepartmentLevelUuidIn(userDepartmentLevelUuids);
+
+			userDepartmentLevelRoleEntityList = userDepartmentLevelRoleEntityList.stream().map(f -> {
+				f.setStatus(true);
+				return f;
+			}).collect(Collectors.toList());
+
+			userDepartmentLevelRoleDbService.save(userDepartmentLevelRoleEntityList);
+			userDepartmentLevelDbService.save(userDepartmentLevelEntityList);
+		}
+
 		return Boolean.TRUE;
 	}
 
