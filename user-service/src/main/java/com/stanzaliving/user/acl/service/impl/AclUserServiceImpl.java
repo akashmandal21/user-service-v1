@@ -243,6 +243,8 @@ public class AclUserServiceImpl implements AclUserService {
 
 	@Override
 	public void revokeRolesForDepartmentOfLevel(UserDeptLevelRoleListDto userDeptLevelRoleListDto) {
+
+
 		userService.assertActiveUserByUserUuid(userDeptLevelRoleListDto.getUserUuid());
 
 		UserDepartmentLevelEntity userDepartmentLevelEntity = userDepartmentLevelDbService.findByUserUuidAndDepartmentAndAccessLevelAndStatus(userDeptLevelRoleListDto.getUserUuid(),

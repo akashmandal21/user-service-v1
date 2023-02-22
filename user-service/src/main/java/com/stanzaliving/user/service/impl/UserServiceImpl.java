@@ -896,6 +896,49 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public boolean updateUserAndMigratedStatus(String userUuid, Boolean userStatus, Boolean migrationStatus) {
+
+		UserEntity user = userDbService.findByUuid(userUuid);
+
+		if (user == null) {
+			throw new ApiValidationException("User either does not exist.");
+		}
+		UserProfileEntity userProfile = user.getUserProfile();
+
+		if (userProfile != null) {
+			userProfile.setStatus(userStatus);
+			user.setUserProfile(userProfile);
+		}
+
+		user.setStatus(userStatus);
+		user.setMigrated(migrationStatus);
+		userDbService.save(user);
+
+		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList=userDepartmentLevelDbService.findByUserUuidAndStatus(userUuid,false);
+		if(!migrationStatus && Objects.nonNull(userDepartmentLevelEntityList)) {
+			List<String> userDepartmentLevelUuids = userDepartmentLevelEntityList.stream().map(f -> f.getUuid()).collect(Collectors.toList());
+
+			userDepartmentLevelEntityList = userDepartmentLevelEntityList.stream().map(f -> {
+				f.setStatus(true);
+				return f;
+			}).collect(Collectors.toList());
+
+			List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = userDepartmentLevelRoleDbService.findByUserDepartmentLevelUuidIn(userDepartmentLevelUuids);
+
+			userDepartmentLevelRoleEntityList = userDepartmentLevelRoleEntityList.stream().map(f -> {
+				f.setStatus(true);
+				return f;
+			}).collect(Collectors.toList());
+
+			userDepartmentLevelRoleDbService.save(userDepartmentLevelRoleEntityList);
+			userDepartmentLevelDbService.save(userDepartmentLevelEntityList);
+		}
+
+		return Boolean.TRUE;
+	}
+
+
+	@Override
 	public UserDto updateUserType(String mobileNo, String isoCode, UserType userType) {
 
 		UserEntity userEntity = userDbService.getUserForMobile(mobileNo, isoCode);
