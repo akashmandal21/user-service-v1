@@ -244,7 +244,6 @@ public class AclUserServiceImpl implements AclUserService {
 	@Override
 	public void revokeRolesForDepartmentOfLevel(UserDeptLevelRoleListDto userDeptLevelRoleListDto) {
 
-		//add check that if the user is of one of the migrated types, do role operations from userv2
 
 		userService.assertActiveUserByUserUuid(userDeptLevelRoleListDto.getUserUuid());
 
