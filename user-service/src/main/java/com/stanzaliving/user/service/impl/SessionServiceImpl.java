@@ -204,7 +204,7 @@ public class SessionServiceImpl implements SessionService {
 			userSessionEntities.forEach(x -> x.setStatus(false));
 
 			userSessionDbService.saveAndFlush(userSessionEntities);
-			if(!allowedDeviceIdList.contains(deviceId))
+			if(CollectionUtils.isNotEmpty(allowedDeviceIdList) && !allowedDeviceIdList.contains(deviceId))
 				throw new StanzaException("This device is not allowed to login for this user");
 		}
 	}
