@@ -11,6 +11,8 @@ import com.stanzaliving.user.db.service.UserSessionDbService;
 import com.stanzaliving.user.entity.UserSessionEntity;
 import com.stanzaliving.user.repository.UserSessionRepository;
 
+import java.util.List;
+
 /**
  * @author naveen
  *
@@ -29,7 +31,18 @@ public class UserSessionDbServiceImpl extends AbstractJpaServiceImpl<UserSession
 
 	@Override
 	public UserSessionEntity getUserSessionForToken(String token) {
-		return userSessionRepository.findByToken(token);
+		return userSessionRepository.findByTokenAndStatus(token, true);
 	}
+
+	@Override
+	public List<UserSessionEntity> findByUserIdAndBrowserAndStatusAndDeviceNotIn(String userId, String app, boolean status, List<String> allowedDeviceIdList){
+		return userSessionRepository.findByUserIdAndBrowserAndStatusAndDeviceNotIn(userId, app, status, allowedDeviceIdList);
+	}
+
+	@Override
+	public List<UserSessionEntity> findByUserIdAndBrowserAndStatusOrderByIdDesc(String userId, String app, boolean status){
+		return userSessionRepository.findByUserIdAndBrowserAndStatusOrderByIdDesc(userId, app, status);
+	}
+
 
 }
