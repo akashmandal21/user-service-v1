@@ -83,6 +83,8 @@ public class AuthController {
 
 		String token = StanzaUtils.generateUniqueId();
 
+		log.debug("app : {}, deviceId : {}", app, deviceId);
+
 		UserSessionEntity userSessionEntity = sessionService.createUserSession(userProfileDto, token, app, deviceId);
 
 		if (Objects.nonNull(userSessionEntity)) {
@@ -113,6 +115,8 @@ public class AuthController {
 			@RequestHeader(name = "app", required = false) App app, @RequestHeader(name = "deviceId", required = false) String deviceId) {
 
 		UserSessionEntity userSessionEntity = sessionService.refreshUserSession(token);
+
+		log.debug("app : {}, deviceId : {}", app, deviceId);
 
 		if (Objects.nonNull(userSessionEntity)) {
 			log.info("Successfully refreshed userSessionEntity for user : {} . Adding token to response ...",
@@ -230,6 +234,8 @@ public class AuthController {
 		log.info("OTP Successfully Validated for User: " + userProfileDto.getUuid() + ". Creating User Session now " + userProfileDto.getUserType());
 
 		String token = StanzaUtils.generateUniqueId();
+
+		log.debug("app : {}, deviceId : {}", app, deviceId);
 
 		UserSessionEntity userSessionEntity = sessionService.createUserSession(userProfileDto, token, app, deviceId);
 
