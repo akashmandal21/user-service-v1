@@ -63,6 +63,8 @@ public class SignUpController {
 
 		String token = StanzaUtils.generateUniqueId();
 
+		log.debug("app : {}, deviceId : {}", app, deviceId);
+
 		UserSessionEntity userSessionEntity = sessionService.createUserSession(userProfileDto, token, app, deviceId);
 
 		if (Objects.nonNull(userSessionEntity)) {
