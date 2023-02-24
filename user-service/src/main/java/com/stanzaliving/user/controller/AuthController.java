@@ -88,7 +88,6 @@ public class AuthController {
 		UserSessionEntity userSessionEntity = sessionService.createUserSession(userProfileDto, token, app, deviceId);
 
 		if (Objects.nonNull(userSessionEntity)) {
-			sessionService.validateDeviceId(userProfileDto.getUuid(), app, deviceId);
 			sessionService.validatePreviousSessions(userProfileDto.getUuid(), app, deviceId);
 			addTokenToResponse(request, response, token, userSessionEntity);
 			if(UserType.INVITED_GUEST.equals(userProfileDto.getUserType())) {
@@ -114,14 +113,13 @@ public class AuthController {
 			@CookieValue(name = SecurityConstants.TOKEN_HEADER_NAME) String token, HttpServletRequest request, HttpServletResponse response,
 			@RequestHeader(name = "app", required = false) App app, @RequestHeader(name = "deviceId", required = false) String deviceId) {
 
-		UserSessionEntity userSessionEntity = sessionService.refreshUserSession(token);
+		UserSessionEntity userSessionEntity = sessionService.refreshUserSession(token, app, deviceId);
 
 		log.debug("app : {}, deviceId : {}", app, deviceId);
 
 		if (Objects.nonNull(userSessionEntity)) {
 			log.info("Successfully refreshed userSessionEntity for user : {} . Adding token to response ...",
 					userSessionEntity.getUuid());
-			sessionService.validateDeviceId(userSessionEntity.getUuid(), app, deviceId);
 			sessionService.validatePreviousSessions(userSessionEntity.getUuid(), app, deviceId);
 			addTokenToResponse(request, response, userSessionEntity.getToken(), userSessionEntity);
 			ResponseDto<AclUserDto> aclUserDtoResponseDto = ResponseDto.success("Token refreshed Successfully",
@@ -240,7 +238,6 @@ public class AuthController {
 		UserSessionEntity userSessionEntity = sessionService.createUserSession(userProfileDto, token, app, deviceId);
 
 		if (Objects.nonNull(userSessionEntity)) {
-			sessionService.validateDeviceId(userProfileDto.getUuid(), app, deviceId);
 			sessionService.validatePreviousSessions(userProfileDto.getUuid(), app, deviceId);
 			addTokenToResponse(request, response, token, userSessionEntity);
 			if(UserType.INVITED_GUEST.equals(userProfileDto.getUserType())) {

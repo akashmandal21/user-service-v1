@@ -77,6 +77,8 @@ public class SessionServiceImpl implements SessionService {
 
 		log.info("Creating Session for User: " + userDto.getUuid());
 
+		validateDeviceId(userDto.getUuid(), app, deviceId);
+
 		UserSessionEntity userSessionEntity =
 				UserSessionEntity.builder()
 						.userId(userDto.getUuid())
@@ -94,7 +96,7 @@ public class SessionServiceImpl implements SessionService {
 	}
 
 	@Override
-	public UserSessionEntity refreshUserSession(String token) {
+	public UserSessionEntity refreshUserSession(String token, App app, String deviceId) {
 		UserSessionEntity userSessionEntity = null;
 		try {
 			log.info("Request received to refresh user session");
@@ -111,6 +113,8 @@ public class SessionServiceImpl implements SessionService {
 			UserDto user = userService.getActiveUserByUuid(userSessionEntity.getUserId());
 
 			log.info("Refresh User Session: " + userSessionEntity.getUuid() + " for User: " + user.getUuid());
+
+			validateDeviceId(userSessionEntity.getUuid(), app, deviceId);
 
 			String newToken = StanzaUtils.generateUniqueId();
 

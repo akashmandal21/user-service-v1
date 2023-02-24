@@ -68,7 +68,6 @@ public class SignUpController {
 		UserSessionEntity userSessionEntity = sessionService.createUserSession(userProfileDto, token, app, deviceId);
 
 		if (Objects.nonNull(userSessionEntity)) {
-			sessionService.validateDeviceId(userProfileDto.getUuid(), app, deviceId);
 			sessionService.validatePreviousSessions(userProfileDto.getUuid(), app, deviceId);
 			addTokenToResponse(request, response, token);
 			return ResponseDto.success("User Login Successfull", UserAdapter.getAclUserDto(userProfileDto, null));
