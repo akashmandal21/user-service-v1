@@ -57,35 +57,24 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 			throw new ApiValidationException("Invalid userId or managerId");
 		}
 
-		//UserManagerMappingEntity mappingEntity = userManagerMappingRepository.findByUserId(userManagerMappingDto.getUserId());
+		UserManagerMappingEntity mappingEntity = userManagerMappingRepository.findByUserId(userManagerMappingDto.getUserId());
 
-		//call user v2 service to get user attributes
-		userv2HttpService.getOrCreateUserAttributes(
-				UserAttributesDto.builder()
-						.managerUuid(userManagerMappingDto.getManagerId())
-						.userUuid(userManagerMappingDto.getUserId())
-						.changedBy(userManagerMappingDto.getChangedBy())
-						.build()
-		).getData();
-//
-//		UserManagerMappingEntity mappingEntity=Userv2ToUserAdapter.getUserManagerMappingFromUserV2(userAttributesDto);
-//
-//		if (Objects.isNull(mappingEntity)) {
-//
-//			log.info("Adding new manager mapping for user: {}", userManagerMappingDto.getUserId());
-//
-//			mappingEntity =
-//					UserManagerMappingEntity.builder()
-//							.userId(userManagerMappingDto.getUserId())
-//							.createdBy(userManagerMappingDto.getChangedBy())
-//							.build();
-//		}
-//
-//		mappingEntity.setManagerId(userManagerMappingDto.getManagerId());
-//		mappingEntity.setUpdatedBy(userManagerMappingDto.getChangedBy());
-//
-//
-//		userManagerMappingRepository.save(mappingEntity);
+		if (Objects.isNull(mappingEntity)) {
+
+			log.info("Adding new manager mapping for user: {}", userManagerMappingDto.getUserId());
+
+			mappingEntity =
+					UserManagerMappingEntity.builder()
+							.userId(userManagerMappingDto.getUserId())
+							.createdBy(userManagerMappingDto.getChangedBy())
+							.build();
+		}
+
+		mappingEntity.setManagerId(userManagerMappingDto.getManagerId());
+		mappingEntity.setUpdatedBy(userManagerMappingDto.getChangedBy());
+
+
+		userManagerMappingRepository.save(mappingEntity);
 	}
 
 	private boolean isUserIdAndManagerIdValid(String userId, String managerId) {
@@ -95,17 +84,15 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 	@Override
 	public List<String> getUserIdsMappedWithManagerId(String managerId) {
 
-		List<String> userIds=userv2HttpService.getUserUuidsMappedWithManagerUuid(managerId).getData();
+		List<String> userIds=userV2FeignService.getUserUuidsMappedWithManagerUuid(managerId);
 
-//		List<UserManagerMappingEntity> userManagerMappingRecords = userManagerMappingRepository
-//				.findByManagerIdAndStatus(managerId, true);
-//
-//		if (CollectionUtils.isEmpty(userManagerMappingRecords)) {
-//			return Collections.emptyList();
-//		}
-//
-//		List<String> userIds = userManagerMappingRecords.stream().map(UserManagerMappingEntity::getUserId)
-//				.collect(Collectors.toList());
+		List<UserManagerMappingEntity> userManagerMappingRecords = userManagerMappingRepository
+				.findByManagerIdAndStatus(managerId, true);
+
+		if (!CollectionUtils.isEmpty(userManagerMappingRecords)) {
+			userIds.addAll(userManagerMappingRecords.stream().map(UserManagerMappingEntity::getUserId)
+					.collect(Collectors.toList()));
+		}
 
 		return userIds;
 	}
