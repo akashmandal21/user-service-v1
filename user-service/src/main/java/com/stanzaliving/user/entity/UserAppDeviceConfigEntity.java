@@ -21,7 +21,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "user_app_device_config")
-@Table(name = "user_app_device_config")
+@Table(name = "user_app_device_config",  uniqueConstraints = { @UniqueConstraint(name = "UK_user_app_device_status", columnNames = { "user_id", "app", "device_id", "status" }) })
 public class UserAppDeviceConfigEntity extends AbstractJpaEntity {
 
     private static final long serialVersionUID = -2557796655168870412L;

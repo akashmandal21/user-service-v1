@@ -17,7 +17,7 @@ public interface SessionService {
 
 	UserSessionEntity createUserSession(UserDto userDto, String token, App app, String deviceId);
 
-	UserSessionEntity refreshUserSession(String token);
+	UserSessionEntity refreshUserSession(String token, App app, String deviceId);
 
 	UserSessionEntity getUserSessionByToken(String token);
 

@@ -22,8 +22,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "user_app_session_config")
-@Table(name = "user_app_session_config")
-//todo -> add unique key constraint here for userId, app, status
+@Table(name = "user_app_session_config",  uniqueConstraints = { @UniqueConstraint(name = "UK_user_app_access_level_status", columnNames = { "user_id", "app", "access_level", "status" }) })
 public class UserAppSessionConfigEntity extends AbstractJpaEntity {
 
     private static final long serialVersionUID = -2557796655168870412L;
