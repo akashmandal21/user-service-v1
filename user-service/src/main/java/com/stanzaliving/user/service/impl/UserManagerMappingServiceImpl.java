@@ -238,7 +238,7 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 			try {
 				userv2HttpService.deleteManagerUuidFromUserAttributes(userUuid);
 			}
-			catch (Exception e) {
+			catch (ApiValidationException e) {
 				throw new ApiValidationException("Manager mapping does not exist for id: " + userUuid);
 			}
 		}
