@@ -198,7 +198,7 @@ public class SessionServiceImpl implements SessionService {
 		if(StringUtils.isBlank(userId) || Objects.isNull(app) || StringUtils.isBlank(deviceId))
 			return;
 
-		if(App.appsEligibleForSingleSignOn().contains(app)) {
+		if(App.appsEligibleForDeviceIdCheck().contains(app)) {
 			List<UserAppDeviceConfigEntity> userAppDeviceConfigEntities = Optional.ofNullable(userAppDeviceConfigRepository.findByUserIdAndStatus(userId, true)).orElse(new ArrayList<>());
 
 			List<String> allowedDeviceIdList = Optional.of(userAppDeviceConfigEntities.stream().map(UserAppDeviceConfigEntity::getDeviceId).collect(Collectors.toList())).orElse(new ArrayList<>());
@@ -218,7 +218,7 @@ public class SessionServiceImpl implements SessionService {
 		log.info("Inside validatePreviousSessions method");
 
 		try {
-			if (Objects.nonNull(app) && App.appsEligibleForSingleSignOn().contains(app)) {
+			if (Objects.nonNull(app) && App.appsEligibleForUserSessionCheck().contains(app)) {
 				//check if the user exists in user app session config
 				int maxAllowedSessionsCount = Optional.ofNullable(userAppSessionConfigRepository.findByUserIdAndAppAndStatus(userId, app, true)).map(UserAppSessionConfigEntity::getMaxLoginAllowed).orElse(checkMaxAllowedCounts(app));
 
