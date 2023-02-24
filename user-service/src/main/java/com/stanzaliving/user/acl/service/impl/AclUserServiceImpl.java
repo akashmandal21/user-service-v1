@@ -145,12 +145,6 @@ public class AclUserServiceImpl implements AclUserService {
 	@Override
 	public void addRole(AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleDto) {
 
-		UserEntity user=userDbService.findByUuidNotMigrated(addUserDeptLevelRoleDto.getUserUuid(),false);
-		if(Objects.isNull(user)){
-			throw new StanzaException("User might be migrated/created in acl2.0,please use new user management to assign permissions for this user.");
-		}
-
-
 		userService.assertActiveUserByUserUuid(addUserDeptLevelRoleDto.getUserUuid());
 
 		AddUserDeptLevelRequestDto addUserDeptLevelRequestDto = new AddUserDeptLevelRequestDto(addUserDeptLevelRoleDto);
