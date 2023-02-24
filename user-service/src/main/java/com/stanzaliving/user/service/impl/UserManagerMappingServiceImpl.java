@@ -84,17 +84,15 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 	@Override
 	public List<String> getUserIdsMappedWithManagerId(String managerId) {
 
-		List<String> userIds=userv2HttpService.getUserUuidsMappedWithManagerUuid(managerId).getData();
+		List<String> userIds=userV2FeignService.getUserUuidsMappedWithManagerUuid(managerId);
 
-//		List<UserManagerMappingEntity> userManagerMappingRecords = userManagerMappingRepository
-//				.findByManagerIdAndStatus(managerId, true);
-//
-//		if (CollectionUtils.isEmpty(userManagerMappingRecords)) {
-//			return Collections.emptyList();
-//		}
-//
-//		List<String> userIds = userManagerMappingRecords.stream().map(UserManagerMappingEntity::getUserId)
-//				.collect(Collectors.toList());
+		List<UserManagerMappingEntity> userManagerMappingRecords = userManagerMappingRepository
+				.findByManagerIdAndStatus(managerId, true);
+
+		if (!CollectionUtils.isEmpty(userManagerMappingRecords)) {
+			userIds.addAll(userManagerMappingRecords.stream().map(UserManagerMappingEntity::getUserId)
+					.collect(Collectors.toList()));
+		}
 
 		return userIds;
 	}
