@@ -138,7 +138,6 @@ public class SessionServiceImpl implements SessionService {
 	@Override
 	public UserSessionEntity getUserSessionByToken(String token) {
 		log.info("Request received for getUserSessionByToken");
-		//
 		return userSessionDbService.getUserSessionForToken(getBcryptPassword(token));
 	}
 
@@ -199,7 +198,7 @@ public class SessionServiceImpl implements SessionService {
 			return;
 
 		if(App.appsEligibleForDeviceIdCheck().contains(app)) {
-			List<UserAppDeviceConfigEntity> userAppDeviceConfigEntities = Optional.ofNullable(userAppDeviceConfigRepository.findByUserIdAndStatus(userId, true)).orElse(new ArrayList<>());
+			List<UserAppDeviceConfigEntity> userAppDeviceConfigEntities = Optional.ofNullable(userAppDeviceConfigRepository.findByUserIdAndAppAndStatus(userId, app, true)).orElse(new ArrayList<>());
 
 			List<String> allowedDeviceIdList = Optional.of(userAppDeviceConfigEntities.stream().map(UserAppDeviceConfigEntity::getDeviceId).collect(Collectors.toList())).orElse(new ArrayList<>());
 
@@ -215,12 +214,15 @@ public class SessionServiceImpl implements SessionService {
 
 	@Override
 	public void validatePreviousSessions(String userId, App app, String deviceId){
-		log.info("Inside validatePreviousSessions method");
+		log.info("Inside validatePreviousSessions method with userId : {}, app : {}, deviceId : {}", userId, app, deviceId);
 
 		try {
 			if (Objects.nonNull(app) && App.appsEligibleForUserSessionCheck().contains(app)) {
 				//check if the user exists in user app session config
 				int maxAllowedSessionsCount = Optional.ofNullable(userAppSessionConfigRepository.findByUserIdAndAppAndStatus(userId, app, true)).map(UserAppSessionConfigEntity::getMaxLoginAllowed).orElse(checkMaxAllowedCounts(app));
+
+				if(maxAllowedSessionsCount ==0)
+					throw new StanzaException("You are not allowed to login");
 
 				List<UserSessionEntity> userSessionEntities = Optional.ofNullable(userSessionDbService.findByUserIdAndBrowserAndStatusOrderByIdDesc(userId, app.name(), true)).orElse(new ArrayList<>());
 
@@ -232,6 +234,10 @@ public class SessionServiceImpl implements SessionService {
 				sessionsToRemove.forEach(x -> x.setStatus(false));
 				userSessionDbService.saveAndFlush(sessionsToRemove);
 			}
+		}
+		catch (StanzaException se){
+			log.error(se);
+			throw se;
 		}
 		catch (Exception e){
 			log.error("Exception while validating user sessions count, Error is : {}", e.getMessage(), e);
@@ -250,6 +256,6 @@ public class SessionServiceImpl implements SessionService {
 		} catch (Exception e) {
 			log.error("Exception while fetching the max allowed sessions count from properties, error is : {}", e.getMessage(), e);
 		}
-		return 1;
+		return -1;
 	}
 }
