@@ -12,7 +12,8 @@ import javax.validation.Valid;
 
 import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.user.enums.App;
-import com.stanzaliving.user.service.UserService;
+import com.stanzaliving.core.user.enums.OtpType;
+import com.stanzaliving.user.service.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -34,9 +35,6 @@ import com.stanzaliving.user.acl.service.AclService;
 import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.entity.UserSessionEntity;
-import com.stanzaliving.user.service.AuthService;
-import com.stanzaliving.user.service.OnboardGuestService;
-import com.stanzaliving.user.service.SessionService;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -64,6 +62,9 @@ public class AuthController {
 
 	@Autowired
 	private OnboardGuestService onboardGuestService;
+
+	@Autowired
+	private OtpService otpService;
 
 	@PostMapping("login")
 	public ResponseDto<Void> login(@RequestBody @Valid LoginRequestDto loginRequestDto) {
@@ -256,5 +257,13 @@ public class AuthController {
 		}
 
 		return ResponseDto.failure("Failed to create user session");
+	}
+
+	@GetMapping("getotp")
+	public ResponseDto<Integer> getOtp(@RequestParam(value = "mobile", required = true) String mobile,
+									   @RequestParam(value = "isoCode", required = true, defaultValue = "IN") String isoCode,
+									   @RequestParam(value = "otpType", defaultValue = "LOGIN") OtpType otpType) {
+
+		return ResponseDto.success("OTP is", otpService.getOtp(mobile, isoCode, otpType));
 	}
 }
