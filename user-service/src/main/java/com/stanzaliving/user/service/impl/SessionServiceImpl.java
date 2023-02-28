@@ -224,7 +224,7 @@ public class SessionServiceImpl implements SessionService {
 					throw new StanzaException("You are not allowed to login");
 
 				List<UserSessionEntity> userSessionEntitiesBasedOnAppName = Optional.ofNullable(userSessionDbService.findByUserIdAndBrowserAndStatusOrderByIdDesc(userId, app.name(), true)).orElse(new ArrayList<>());
-				List<UserSessionEntity> userSessionEntities = Optional.ofNullable(userSessionDbService.findByUserIdAndStatusAndBrowserIsNotNullOrderByIdDesc(userId, true)).orElse(new ArrayList<>());
+				List<UserSessionEntity> userSessionEntities = Optional.ofNullable(userSessionDbService.findByUserIdAndBrowserIsNotNullAndStatusOrderByIdDesc(userId, true)).orElse(new ArrayList<>());
 
 				if(userSessionEntitiesBasedOnAppName.size() == 0 && userSessionEntities.size() > 0) { //Will be called one time
 					if (userSessionEntities.size() <= maxAllowedSessionsCount || maxAllowedSessionsCount == -1)
