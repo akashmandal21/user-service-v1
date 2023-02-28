@@ -21,5 +21,5 @@ public interface UserSessionDbService extends AbstractJpaService<UserSessionEnti
 
 	List<UserSessionEntity> findByUserIdAndBrowserAndStatusOrderByIdDesc(String userId, String app, boolean status);
 
-	List<UserSessionEntity> findByUserIdAndStatusOrderByIdDesc(String userId, boolean status);
+	List<UserSessionEntity> findByUserIdAndStatusAndBrowserIsNotNullOrderByIdDesc(String userId, boolean status);
 }
