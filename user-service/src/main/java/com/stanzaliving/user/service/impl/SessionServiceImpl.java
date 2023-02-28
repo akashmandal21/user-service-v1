@@ -224,21 +224,20 @@ public class SessionServiceImpl implements SessionService {
 					throw new StanzaException("You are not allowed to login");
 
 				List<UserSessionEntity> userSessionEntitiesBasedOnAppName = Optional.ofNullable(userSessionDbService.findByUserIdAndBrowserAndStatusOrderByIdDesc(userId, app.name(), true)).orElse(new ArrayList<>());
-				List<UserSessionEntity> userSessionEntities = Optional.ofNullable(userSessionDbService.findByUserIdAndBrowserIsNullAndStatusOrderByIdDesc(userId, true)).orElse(new ArrayList<>());
+//				List<UserSessionEntity> userSessionEntities = Optional.ofNullable(userSessionDbService.findByUserIdAndBrowserIsNullAndStatusOrderByIdDesc(userId, true)).orElse(new ArrayList<>());
 
-				if(userSessionEntitiesBasedOnAppName.size() == 0 && userSessionEntities.size() > 0) { //Will be called one time
-					if (userSessionEntities.size() <= maxAllowedSessionsCount || maxAllowedSessionsCount == -1)
-						return;
-					List<UserSessionEntity> sessionsToRemove = Optional.of(userSessionEntities.subList(maxAllowedSessionsCount, userSessionEntities.size())).orElse(new ArrayList<>());
-					sessionsToRemove.forEach(x -> x.setStatus(false));
-					userSessionDbService.saveAndFlush(sessionsToRemove);
-				} else {
-					if (userSessionEntitiesBasedOnAppName.size() <= maxAllowedSessionsCount || maxAllowedSessionsCount == -1)
-						return;
-					List<UserSessionEntity> sessionsToRemove = Optional.of(userSessionEntitiesBasedOnAppName.subList(maxAllowedSessionsCount, userSessionEntitiesBasedOnAppName.size())).orElse(new ArrayList<>());
-					sessionsToRemove.forEach(x -> x.setStatus(false));
-					userSessionDbService.saveAndFlush(sessionsToRemove);
-				}
+//				if(userSessionEntities.size() > 0) {
+//					if (userSessionEntities.size() <= maxAllowedSessionsCount || maxAllowedSessionsCount == -1)
+//						return;
+//					List<UserSessionEntity> sessionsToRemove = Optional.of(userSessionEntities.subList(maxAllowedSessionsCount, userSessionEntities.size())).orElse(new ArrayList<>());
+//					sessionsToRemove.forEach(x -> x.setStatus(false));
+//					userSessionDbService.saveAndFlush(sessionsToRemove);
+//				}
+				if (userSessionEntitiesBasedOnAppName.size() <= maxAllowedSessionsCount || maxAllowedSessionsCount == -1)
+					return;
+				List<UserSessionEntity> sessionsToRemove = Optional.of(userSessionEntitiesBasedOnAppName.subList(maxAllowedSessionsCount, userSessionEntitiesBasedOnAppName.size())).orElse(new ArrayList<>());
+				sessionsToRemove.forEach(x -> x.setStatus(false));
+				userSessionDbService.saveAndFlush(sessionsToRemove);
 			}
 		}
 		catch (StanzaException se){
