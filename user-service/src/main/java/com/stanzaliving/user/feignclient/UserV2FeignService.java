@@ -13,6 +13,7 @@ import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
 import com.stanzaliving.user.dto.userv2.UpdateUserDto;
 import com.stanzaliving.user.dto.userv2.UserAttributesDto;
 import com.stanzaliving.user.dto.userv2.UserDto;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @Service
+@Log4j2
 public class UserV2FeignService {
     @Autowired
     private Userv2HttpService userv2HttpService;
@@ -68,6 +70,19 @@ public class UserV2FeignService {
         }
         catch (Exception e){}
         return null;
+    }
+
+    public List<String> getUserUuidsMappedWithManagerUuid(String managerId){
+        try{
+            ResponseDto<List<String>> userDtoResponseDto= userv2HttpService.getUserUuidsMappedWithManagerUuid(managerId);
+            if (Objects.nonNull(userDtoResponseDto) && Objects.nonNull(userDtoResponseDto.getData())) {
+                return userDtoResponseDto.getData();
+            }
+        }
+        catch (Exception e){
+            log.info("Exception from user v2 {}",e.getMessage());
+        }
+        return new ArrayList<>();
     }
 //
     public List<UserDto> getUsersList(List<String> userIds){

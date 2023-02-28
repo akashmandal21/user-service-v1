@@ -224,10 +224,6 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserDto addUser(AddUserRequestDto addUserRequestDto) {
 
-		if(UserType.getMigratedUserTypes().contains(addUserRequestDto.getUserType())){
-			throw new StanzaException("Users of this user type are migrated to acl2.0,and should be created from there.");
-		}
-
 		if (!PhoneNumberUtils.isValidMobileForCountry(addUserRequestDto.getMobile(), addUserRequestDto.getIsoCode())) {
 			log.error("Number: " + addUserRequestDto.getMobile() + " and ISO: " + addUserRequestDto.getIsoCode()
 					+ " doesn't appear to be a valid mobile combination");
@@ -894,6 +890,49 @@ public class UserServiceImpl implements UserService {
 		userDbService.save(user);
 		return Boolean.TRUE;
 	}
+
+	@Override
+	public boolean updateUserAndMigratedStatus(String userUuid, Boolean userStatus, Boolean migrationStatus) {
+
+		UserEntity user = userDbService.findByUuid(userUuid);
+
+		if (user == null) {
+			throw new ApiValidationException("User either does not exist.");
+		}
+		UserProfileEntity userProfile = user.getUserProfile();
+
+		if (userProfile != null) {
+			userProfile.setStatus(userStatus);
+			user.setUserProfile(userProfile);
+		}
+
+		user.setStatus(userStatus);
+		user.setMigrated(migrationStatus);
+		userDbService.save(user);
+
+		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList=userDepartmentLevelDbService.findByUserUuidAndStatus(userUuid,false);
+		if(!migrationStatus && Objects.nonNull(userDepartmentLevelEntityList)) {
+			List<String> userDepartmentLevelUuids = userDepartmentLevelEntityList.stream().map(f -> f.getUuid()).collect(Collectors.toList());
+
+			userDepartmentLevelEntityList = userDepartmentLevelEntityList.stream().map(f -> {
+				f.setStatus(true);
+				return f;
+			}).collect(Collectors.toList());
+
+			List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = userDepartmentLevelRoleDbService.findByUserDepartmentLevelUuidIn(userDepartmentLevelUuids);
+
+			userDepartmentLevelRoleEntityList = userDepartmentLevelRoleEntityList.stream().map(f -> {
+				f.setStatus(true);
+				return f;
+			}).collect(Collectors.toList());
+
+			userDepartmentLevelRoleDbService.save(userDepartmentLevelRoleEntityList);
+			userDepartmentLevelDbService.save(userDepartmentLevelEntityList);
+		}
+
+		return Boolean.TRUE;
+	}
+
 
 	@Override
 	public UserDto updateUserType(String mobileNo, String isoCode, UserType userType) {
