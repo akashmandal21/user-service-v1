@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
 import com.stanzaliving.core.sqljpa.repository.AbstractJpaRepository;
 import com.stanzaliving.user.entity.UserSessionEntity;
 
+import java.util.List;
+
 /**
  * @author naveen
  *
@@ -17,4 +19,12 @@ import com.stanzaliving.user.entity.UserSessionEntity;
 public interface UserSessionRepository extends AbstractJpaRepository<UserSessionEntity, Long> {
 
 	UserSessionEntity findByToken(String token);
+
+    List<UserSessionEntity> findByUserIdAndBrowserAndStatusAndDeviceNotIn(String userId, String app, boolean status, List<String> allowedDeviceIdList);
+
+    List<UserSessionEntity> findByUserIdAndBrowserAndStatusOrderByIdDesc(String userId, String app, boolean status);
+
+    List<UserSessionEntity> findByUserIdAndBrowserIsNullAndStatusOrderByIdDesc(String userId, boolean status);
+
+    UserSessionEntity findByTokenAndStatus(String token, boolean status);
 }

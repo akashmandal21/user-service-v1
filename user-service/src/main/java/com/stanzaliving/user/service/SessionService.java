@@ -5,6 +5,7 @@ package com.stanzaliving.user.service;
 
 import com.stanzaliving.core.user.dto.SessionRequestDto;
 import com.stanzaliving.core.user.dto.UserDto;
+import com.stanzaliving.core.user.enums.App;
 import com.stanzaliving.user.entity.UserSessionEntity;
 
 /**
@@ -14,9 +15,9 @@ import com.stanzaliving.user.entity.UserSessionEntity;
  */
 public interface SessionService {
 
-	UserSessionEntity createUserSession(UserDto userDto, String token);
+	UserSessionEntity createUserSession(UserDto userDto, String token, App app, String deviceId);
 
-	UserSessionEntity refreshUserSession(String token);
+	UserSessionEntity refreshUserSession(String token, App app, String deviceId);
 
 	UserSessionEntity getUserSessionByToken(String token);
 
@@ -25,4 +26,8 @@ public interface SessionService {
 	UserSessionEntity updateUserSession(UserSessionEntity userSessionEntity);
 
 	void createSession(SessionRequestDto sessionRequestDto);
+
+	void validateDeviceId(String userId, App app, String deviceId);
+
+	void validatePreviousSessions(String userId, App app, String deviceId);
 }

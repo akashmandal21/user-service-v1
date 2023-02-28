@@ -1,6 +1,5 @@
 package com.stanzaliving.user.controller;
 
-import java.util.Enumeration;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -8,14 +7,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.stanzaliving.core.user.enums.App;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.base.constants.SecurityConstants;
@@ -57,7 +52,8 @@ public class SignUpController {
 
 	@GetMapping("validateOtp")
 	public ResponseDto<UserDto> validateSignUpOtp(@RequestParam(name = "Uuid", required = true) String uuid,
-			@RequestParam(name = "otp", required = true) String otp,HttpServletRequest request, HttpServletResponse response) {
+												  @RequestParam(name = "otp", required = true) String otp, HttpServletRequest request, HttpServletResponse response,
+												  @RequestHeader(name = "app", required = false) App app, @RequestHeader(name = "deviceId", required = false) String deviceId) {
 
 		log.info("OTP Validated for Create User: " + otp);
 
@@ -67,9 +63,12 @@ public class SignUpController {
 
 		String token = StanzaUtils.generateUniqueId();
 
-		UserSessionEntity userSessionEntity = sessionService.createUserSession(userProfileDto, token);
+		log.debug("app : {}, deviceId : {}", app, deviceId);
+
+		UserSessionEntity userSessionEntity = sessionService.createUserSession(userProfileDto, token, app, deviceId);
 
 		if (Objects.nonNull(userSessionEntity)) {
+			sessionService.validatePreviousSessions(userProfileDto.getUuid(), app, deviceId);
 			addTokenToResponse(request, response, token);
 			return ResponseDto.success("User Login Successfull", UserAdapter.getAclUserDto(userProfileDto, null));
 		}
