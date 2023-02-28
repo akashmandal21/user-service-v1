@@ -72,6 +72,9 @@ public class SessionServiceImpl implements SessionService {
 	@Value("${login.max.count.NEXUS}")
 	int nexusMaxAllowedSessionsCount;
 
+	@Value("${login.max.count.NUCLEUSX}")
+	int nucleusXMaxAllowedSessionsCount;
+
 	@Override
 	public UserSessionEntity createUserSession(UserDto userDto, String token, App app, String deviceId) {
 
@@ -259,6 +262,8 @@ public class SessionServiceImpl implements SessionService {
 			if (App.NUCLEUS.equals(app)) return nucleusMaxAllowedSessionsCount;
 
 			if (App.NEXUS.equals(app)) return nexusMaxAllowedSessionsCount;
+
+			if(App.NUCLEUSX.equals(app)) return nucleusXMaxAllowedSessionsCount;
 		} catch (Exception e) {
 			log.error("Exception while fetching the max allowed sessions count from properties, error is : {}", e.getMessage(), e);
 		}
