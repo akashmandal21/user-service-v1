@@ -45,7 +45,7 @@ public class UserSessionDbServiceImpl extends AbstractJpaServiceImpl<UserSession
 	}
 
 	@Override
-	public List<UserSessionEntity> findByUserIdAndBrowserIsNotNullAndStatusOrderByIdDesc(String userId, boolean status){
-		return userSessionRepository.findByUserIdAndBrowserIsNotNullAndStatusOrderByIdDesc(userId, status);
+	public List<UserSessionEntity> findByUserIdAndBrowserIsNullAndStatusOrderByIdDesc(String userId, boolean status){
+		return userSessionRepository.findByUserIdAndBrowserIsNullAndStatusOrderByIdDesc(userId, status);
 	}
 }
