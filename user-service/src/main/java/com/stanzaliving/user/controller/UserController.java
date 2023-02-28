@@ -12,19 +12,15 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 
+import com.stanzaliving.core.base.exception.StanzaException;
+import com.stanzaliving.core.base.exception.UserValidationException;
+import com.stanzaliving.core.user.enums.App;
 import com.stanzaliving.user.entity.UserSessionEntity;
 import com.stanzaliving.user.service.SessionService;
 import org.apache.commons.collections.CollectionUtils;
 import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.stanzaliving.core.base.common.dto.PageResponse;
 import com.stanzaliving.core.base.common.dto.PaginationRequest;
@@ -83,9 +79,18 @@ public class UserController {
 
 	@GetMapping("profile")
 	public ResponseDto<AclUserProfileDTO> getUserProfile(
-			@RequestAttribute(name = SecurityConstants.USER_ID) @NotBlank(message = "User Id is mandatory to get user profile") String userId) {
+			@RequestAttribute(name = SecurityConstants.USER_ID) @NotBlank(message = "User Id is mandatory to get user profile") String userId,
+			@RequestHeader(name = "app", required = false) App app, @RequestHeader(name = "deviceId", required = false) String deviceId) {
 
 		log.info("Fetching User Profile with UserId: " + userId);
+
+		try {
+			sessionService.validateDeviceId(userId, app, deviceId);
+		}
+		catch (StanzaException se){
+			throw new UserValidationException("User session disabled");
+		}
+		sessionService.validatePreviousSessions(userId, app, deviceId);
 
 		return ResponseDto.success("Found User Profile for User Id", UserAdapter.getAclUserProfileDTO(userService.getUserProfile(userId), aclService.getUserDeptLevelRoleNameUrlExpandedDtoFe(userId)));
 	}

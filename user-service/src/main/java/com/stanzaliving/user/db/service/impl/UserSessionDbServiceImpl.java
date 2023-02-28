@@ -44,5 +44,8 @@ public class UserSessionDbServiceImpl extends AbstractJpaServiceImpl<UserSession
 		return userSessionRepository.findByUserIdAndBrowserAndStatusOrderByIdDesc(userId, app, status);
 	}
 
-
+	@Override
+	public List<UserSessionEntity> findByUserIdAndStatusOrderByIdDesc(String userId, boolean status){
+		return userSessionRepository.findByUserIdAndStatusOrderByIdDesc(userId, status);
+	}
 }

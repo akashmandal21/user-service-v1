@@ -24,5 +24,7 @@ public interface UserSessionRepository extends AbstractJpaRepository<UserSession
 
     List<UserSessionEntity> findByUserIdAndBrowserAndStatusOrderByIdDesc(String userId, String app, boolean status);
 
+    List<UserSessionEntity> findByUserIdAndStatusOrderByIdDesc(String userId, boolean status);
+
     UserSessionEntity findByTokenAndStatus(String token, boolean status);
 }
