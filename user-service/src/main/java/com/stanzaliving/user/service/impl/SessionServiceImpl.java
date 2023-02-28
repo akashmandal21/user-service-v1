@@ -199,14 +199,13 @@ public class SessionServiceImpl implements SessionService {
 
 		if(App.appsEligibleForDeviceIdCheck().contains(app)) {
 			List<UserAppDeviceConfigEntity> userAppDeviceConfigEntities = Optional.ofNullable(userAppDeviceConfigRepository.findByUserIdAndAppAndStatus(userId, app, true)).orElse(new ArrayList<>());
-
 			List<String> allowedDeviceIdList = Optional.of(userAppDeviceConfigEntities.stream().map(UserAppDeviceConfigEntity::getDeviceId).collect(Collectors.toList())).orElse(new ArrayList<>());
 
-			List<UserSessionEntity> userSessionEntities = Optional.ofNullable(userSessionDbService.findByUserIdAndBrowserAndStatusAndDeviceNotIn(userId, app.name(), true, allowedDeviceIdList)).orElse(new ArrayList<>());
-
-			userSessionEntities.forEach(x -> x.setStatus(false));
-
-			userSessionDbService.saveAndFlush(userSessionEntities);
+			if(CollectionUtils.isNotEmpty(allowedDeviceIdList)) {
+				List<UserSessionEntity> userSessionEntities = Optional.ofNullable(userSessionDbService.findByUserIdAndBrowserAndStatusAndDeviceNotIn(userId, app.name(), true, allowedDeviceIdList)).orElse(new ArrayList<>());
+				userSessionEntities.forEach(x -> x.setStatus(false));
+				userSessionDbService.saveAndFlush(userSessionEntities);
+			}
 			if(CollectionUtils.isNotEmpty(allowedDeviceIdList) && !allowedDeviceIdList.contains(deviceId))
 				throw new StanzaException("This device is not allowed to login for this user");
 		}
