@@ -155,7 +155,8 @@ public class SessionServiceImpl implements SessionService {
 		UserSessionEntity userSessionEntity = getUserSessionByToken(token);
 
 		if (Objects.isNull(userSessionEntity)) {
-			throw new AuthException("No User Session Found!! Please Login!!", UserErrorCodes.SESSION_NOT_FOUND);
+			log.error("No User Session Found for token {} !! Please Login!!", token);
+			return;
 		}
 
 		log.info("Invalidating User Session: " + userSessionEntity.getUuid() + " for User: " + userSessionEntity.getUserId());
