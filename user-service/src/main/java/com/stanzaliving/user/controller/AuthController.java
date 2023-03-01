@@ -190,6 +190,22 @@ public class AuthController {
 		return ResponseDto.success("Successfully Logged Out");
 	}
 
+	@PostMapping("logout")
+	public ResponseDto<Void> userLogout(
+			@CookieValue(name = SecurityConstants.TOKEN_HEADER_NAME) String token,
+			HttpServletRequest request, HttpServletResponse response) {
+
+		String userId = request.getParameter(SecurityConstants.USER_ID);
+
+		log.info("Logout requested for user: " + userId);
+
+		sessionService.removeUserSession(token);
+
+		SecureCookieUtil.handleLogOutResponse(request, response);
+
+		return ResponseDto.success("Successfully Logged Out");
+	}
+
 	private void addTokenToResponse(HttpServletRequest request, HttpServletResponse response, String token,
 									UserSessionEntity userSessionEntity) {
 
