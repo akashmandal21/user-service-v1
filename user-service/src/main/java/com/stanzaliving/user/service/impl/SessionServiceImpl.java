@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.stanzaliving.core.base.exception.StanzaException;
+import com.stanzaliving.core.base.exception.UserValidationException;
 import com.stanzaliving.core.base.utils.StanzaUtils;
 import com.stanzaliving.core.user.enums.App;
 import com.stanzaliving.user.entity.UserAppDeviceConfigEntity;
@@ -117,7 +118,11 @@ public class SessionServiceImpl implements SessionService {
 
 			log.info("Refresh User Session: " + userSessionEntity.getUuid() + " for User: " + user.getUuid());
 
-			validateDeviceId(userSessionEntity.getUuid(), app, deviceId);
+			try {
+				validateDeviceId(userSessionEntity.getUuid(), app, deviceId);
+			} catch (StanzaException se) {
+				throw new UserValidationException(se.getMessage());
+			}
 
 			String newToken = StanzaUtils.generateUniqueId();
 
@@ -217,30 +222,28 @@ public class SessionServiceImpl implements SessionService {
 	@Override
 	public void validatePreviousSessions(String userId, App app, String deviceId){
 		log.info("Inside validatePreviousSessions method with userId : {}, app : {}, deviceId : {}", userId, app, deviceId);
-
 		try {
 			if (Objects.nonNull(app) && App.appsEligibleForUserSessionCheck().contains(app)) {
 				//check if the user exists in user app session config
 				int maxAllowedSessionsCount = Optional.ofNullable(userAppSessionConfigRepository.findByUserIdAndAppAndStatus(userId, app, true)).map(UserAppSessionConfigEntity::getMaxLoginAllowed).orElse(checkMaxAllowedCounts(app));
-
-				if(maxAllowedSessionsCount ==0)
+				if(maxAllowedSessionsCount == 0)
 					throw new StanzaException("You are not allowed to login");
-
+				if(maxAllowedSessionsCount == -1)
+					return;
 				List<UserSessionEntity> userSessionEntitiesBasedOnAppName = Optional.ofNullable(userSessionDbService.findByUserIdAndBrowserAndStatusOrderByIdDesc(userId, app.name(), true)).orElse(new ArrayList<>());
-//				List<UserSessionEntity> userSessionEntities = Optional.ofNullable(userSessionDbService.findByUserIdAndBrowserIsNullAndStatusOrderByIdDesc(userId, true)).orElse(new ArrayList<>());
-
-//				if(userSessionEntities.size() > 0) {
-//					if (userSessionEntities.size() <= maxAllowedSessionsCount || maxAllowedSessionsCount == -1)
-//						return;
-//					List<UserSessionEntity> sessionsToRemove = Optional.of(userSessionEntities.subList(maxAllowedSessionsCount, userSessionEntities.size())).orElse(new ArrayList<>());
-//					sessionsToRemove.forEach(x -> x.setStatus(false));
-//					userSessionDbService.saveAndFlush(sessionsToRemove);
-//				}
-				if (userSessionEntitiesBasedOnAppName.size() <= maxAllowedSessionsCount || maxAllowedSessionsCount == -1)
+				if(CollectionUtils.isEmpty(userSessionEntitiesBasedOnAppName)) {
+					if(App.SIGMA.equals(app))
+						throw new StanzaException("Please login again");
+					else
+						return;
+				}
+				if (userSessionEntitiesBasedOnAppName.size() <= maxAllowedSessionsCount)
 					return;
 				List<UserSessionEntity> sessionsToRemove = Optional.of(userSessionEntitiesBasedOnAppName.subList(maxAllowedSessionsCount, userSessionEntitiesBasedOnAppName.size())).orElse(new ArrayList<>());
-				sessionsToRemove.forEach(x -> x.setStatus(false));
-				userSessionDbService.saveAndFlush(sessionsToRemove);
+				if(CollectionUtils.isNotEmpty(sessionsToRemove)) {
+					sessionsToRemove.forEach(x -> x.setStatus(false));
+					userSessionDbService.saveAndFlush(sessionsToRemove);
+				}
 			}
 		}
 		catch (StanzaException se){

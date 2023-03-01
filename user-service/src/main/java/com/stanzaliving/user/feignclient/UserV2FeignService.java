@@ -15,6 +15,7 @@ import com.stanzaliving.user.dto.userv2.UserAttributesDto;
 import com.stanzaliving.user.dto.userv2.UserDto;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +25,7 @@ import java.util.*;
 @Log4j2
 public class UserV2FeignService {
     @Autowired
+    @Lazy
     private Userv2HttpService userv2HttpService;
 
     public UserDto getActiveUser(Long mobileNumber){
