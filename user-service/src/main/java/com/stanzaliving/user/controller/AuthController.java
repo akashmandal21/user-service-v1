@@ -16,6 +16,7 @@ import com.stanzaliving.core.user.enums.OtpType;
 import com.stanzaliving.user.service.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.*;
 
 import com.stanzaliving.booking.dto.BookingResponseDto;
@@ -49,6 +50,7 @@ import lombok.extern.log4j.Log4j2;
 public class AuthController {
 
 	@Autowired
+	@Lazy
 	private AuthService authService;
 
 	@Autowired
