@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.stanzaliving.core.base.exception.StanzaException;
+import com.stanzaliving.core.base.exception.UserValidationException;
 import com.stanzaliving.core.user.enums.App;
 import com.stanzaliving.core.user.enums.OtpType;
 import com.stanzaliving.user.service.*;
@@ -123,7 +124,11 @@ public class AuthController {
 		if (Objects.nonNull(userSessionEntity)) {
 			log.info("Successfully refreshed userSessionEntity for user : {} . Adding token to response ...",
 					userSessionEntity.getUuid());
-			sessionService.validatePreviousSessions(userSessionEntity.getUuid(), app, deviceId);
+			try {
+				sessionService.validatePreviousSessions(userSessionEntity.getUuid(), app, deviceId);
+			} catch (StanzaException se) {
+				throw new UserValidationException(se.getMessage());
+			}
 			addTokenToResponse(request, response, userSessionEntity.getToken(), userSessionEntity);
 			ResponseDto<AclUserDto> aclUserDtoResponseDto = ResponseDto.success("Token refreshed Successfully",
 					UserAdapter.getAclUserDto(userService.getUserProfile(userSessionEntity.getUserId()),

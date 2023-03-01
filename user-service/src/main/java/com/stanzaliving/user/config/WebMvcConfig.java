@@ -34,6 +34,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 				.excludePathPatterns(
 						"/signup/**",
 						"/auth/login",
+						"/auth/logout",
 						"/auth/validateOtp",
 						"/auth/resendOtp",
 						"/auth/sendEmailVerificationOtp",
