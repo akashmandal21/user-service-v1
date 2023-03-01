@@ -81,17 +81,17 @@ public class UserController {
 	public ResponseDto<AclUserProfileDTO> getUserProfile(
 			@RequestAttribute(name = SecurityConstants.USER_ID) @NotBlank(message = "User Id is mandatory to get user profile") String userId,
 			@RequestHeader(name = "app", required = false) App app, @RequestHeader(name = "deviceId", required = false) String deviceId) {
-
 		log.info("Fetching User Profile with UserId: " + userId);
-
 		try {
 			sessionService.validateDeviceId(userId, app, deviceId);
+		} catch (StanzaException se) {
+			throw new UserValidationException(se.getMessage());
 		}
-		catch (StanzaException se){
-			throw new UserValidationException("User session disabled");
+		try {
+			sessionService.validatePreviousSessions(userId, app, deviceId);
+		} catch (StanzaException se) {
+			throw new UserValidationException(se.getMessage());
 		}
-		sessionService.validatePreviousSessions(userId, app, deviceId);
-
 		return ResponseDto.success("Found User Profile for User Id", UserAdapter.getAclUserProfileDTO(userService.getUserProfile(userId), aclService.getUserDeptLevelRoleNameUrlExpandedDtoFe(userId)));
 	}
 
