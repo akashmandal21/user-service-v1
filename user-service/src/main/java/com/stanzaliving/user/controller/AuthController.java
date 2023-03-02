@@ -70,9 +70,11 @@ public class AuthController {
 	private OtpService otpService;
 
 	@PostMapping("login")
-	public ResponseDto<Void> login(@RequestBody @Valid LoginRequestDto loginRequestDto) {
+	public ResponseDto<Void> login(@RequestBody @Valid LoginRequestDto loginRequestDto, HttpServletRequest request, HttpServletResponse response) {
 
 		authService.login(loginRequestDto);
+
+		SecureCookieUtil.handleLogOutResponse(request, response);
 
 		return ResponseDto.success("OTP Sent for Login");
 	}
