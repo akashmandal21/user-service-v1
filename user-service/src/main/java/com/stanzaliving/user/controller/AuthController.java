@@ -185,14 +185,15 @@ public class AuthController {
 
 	@GetMapping("logout")
 	public ResponseDto<Void> logout(
-			@CookieValue(name = SecurityConstants.TOKEN_HEADER_NAME) String token,
+			@CookieValue(name = SecurityConstants.TOKEN_HEADER_NAME, required = false, defaultValue = "default") String token,
 			HttpServletRequest request, HttpServletResponse response) {
 
 		String userId = request.getParameter(SecurityConstants.USER_ID);
 
 		log.info("Logout requested for user: " + userId);
 
-		sessionService.removeUserSession(token);
+		if(!token.equalsIgnoreCase("default"))
+			sessionService.removeUserSession(token);
 
 		SecureCookieUtil.handleLogOutResponse(request, response);
 
@@ -201,14 +202,15 @@ public class AuthController {
 
 	@PostMapping("logout")
 	public ResponseDto<Void> userLogout(
-			@CookieValue(name = SecurityConstants.TOKEN_HEADER_NAME) String token,
+			@CookieValue(name = SecurityConstants.TOKEN_HEADER_NAME, required = false, defaultValue = "default") String token,
 			HttpServletRequest request, HttpServletResponse response) {
 
 		String userId = request.getParameter(SecurityConstants.USER_ID);
 
 		log.info("Logout requested for user: " + userId);
 
-		sessionService.removeUserSession(token);
+		if(!token.equalsIgnoreCase("default"))
+			sessionService.removeUserSession(token);
 
 		SecureCookieUtil.handleLogOutResponse(request, response);
 
