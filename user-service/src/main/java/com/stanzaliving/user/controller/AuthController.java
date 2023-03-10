@@ -3,7 +3,6 @@
  */
 package com.stanzaliving.user.controller;
 
-import java.util.Enumeration;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -12,15 +11,14 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.stanzaliving.core.base.exception.StanzaException;
-import com.stanzaliving.user.service.UserService;
+import com.stanzaliving.core.base.exception.UserValidationException;
+import com.stanzaliving.core.user.enums.App;
+import com.stanzaliving.core.user.enums.OtpType;
+import com.stanzaliving.user.service.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.web.bind.annotation.*;
 
 import com.stanzaliving.booking.dto.BookingResponseDto;
 import com.stanzaliving.core.base.common.dto.ResponseDto;
@@ -39,9 +37,6 @@ import com.stanzaliving.user.acl.service.AclService;
 import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.entity.UserSessionEntity;
-import com.stanzaliving.user.service.AuthService;
-import com.stanzaliving.user.service.OnboardGuestService;
-import com.stanzaliving.user.service.SessionService;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -56,6 +51,7 @@ import lombok.extern.log4j.Log4j2;
 public class AuthController {
 
 	@Autowired
+	@Lazy
 	private AuthService authService;
 
 	@Autowired
@@ -70,17 +66,22 @@ public class AuthController {
 	@Autowired
 	private OnboardGuestService onboardGuestService;
 
+	@Autowired
+	private OtpService otpService;
+
 	@PostMapping("login")
-	public ResponseDto<Void> login(@RequestBody @Valid LoginRequestDto loginRequestDto) {
+	public ResponseDto<Void> login(@RequestBody @Valid LoginRequestDto loginRequestDto, HttpServletRequest request, HttpServletResponse response) {
 
 		authService.login(loginRequestDto);
+
+		SecureCookieUtil.handleLogOutResponse(request, response);
 
 		return ResponseDto.success("OTP Sent for Login");
 	}
 
 	@PostMapping("validateOtp")
 	public ResponseDto<AclUserDto> validateOtp(
-			@RequestBody @Valid OtpValidateRequestDto otpValidateRequestDto, HttpServletRequest request, HttpServletResponse response) {
+			@RequestBody @Valid OtpValidateRequestDto otpValidateRequestDto, HttpServletRequest request, HttpServletResponse response, @RequestHeader(name = "app", required = false) App app, @RequestHeader(name = "deviceId", required = false) String deviceId) {
 
 		UserProfileDto userProfileDto = authService.validateOtp(otpValidateRequestDto);
 
@@ -88,9 +89,12 @@ public class AuthController {
 
 		String token = StanzaUtils.generateUniqueId();
 
-		UserSessionEntity userSessionEntity = sessionService.createUserSession(userProfileDto, token);
+		log.debug("app : {}, deviceId : {}", app, deviceId);
+
+		UserSessionEntity userSessionEntity = sessionService.createUserSession(userProfileDto, token, app, deviceId);
 
 		if (Objects.nonNull(userSessionEntity)) {
+			sessionService.validatePreviousSessions(userProfileDto.getUuid(), app, deviceId);
 			addTokenToResponse(request, response, token, userSessionEntity);
 			if(UserType.INVITED_GUEST.equals(userProfileDto.getUserType())) {
 
@@ -112,13 +116,21 @@ public class AuthController {
 
 	@GetMapping("refresh")
 	public ResponseDto<AclUserDto> refreshSession(
-			@CookieValue(name = SecurityConstants.TOKEN_HEADER_NAME) String token, HttpServletRequest request, HttpServletResponse response) {
+			@CookieValue(name = SecurityConstants.TOKEN_HEADER_NAME) String token, HttpServletRequest request, HttpServletResponse response,
+			@RequestHeader(name = "app", required = false) App app, @RequestHeader(name = "deviceId", required = false) String deviceId) {
 
-		UserSessionEntity userSessionEntity = sessionService.refreshUserSession(token);
+		UserSessionEntity userSessionEntity = sessionService.refreshUserSession(token, app, deviceId);
+
+		log.debug("app : {}, deviceId : {}", app, deviceId);
 
 		if (Objects.nonNull(userSessionEntity)) {
 			log.info("Successfully refreshed userSessionEntity for user : {} . Adding token to response ...",
 					userSessionEntity.getUuid());
+			try {
+				sessionService.validatePreviousSessions(userSessionEntity.getUuid(), app, deviceId);
+			} catch (StanzaException se) {
+				throw new UserValidationException(se.getMessage());
+			}
 			addTokenToResponse(request, response, userSessionEntity.getToken(), userSessionEntity);
 			ResponseDto<AclUserDto> aclUserDtoResponseDto = ResponseDto.success("Token refreshed Successfully",
 					UserAdapter.getAclUserDto(userService.getUserProfile(userSessionEntity.getUserId()),
@@ -187,6 +199,22 @@ public class AuthController {
 		return ResponseDto.success("Successfully Logged Out");
 	}
 
+	@PostMapping("logout")
+	public ResponseDto<Void> userLogout(
+			@CookieValue(name = SecurityConstants.TOKEN_HEADER_NAME) String token,
+			HttpServletRequest request, HttpServletResponse response) {
+
+		String userId = request.getParameter(SecurityConstants.USER_ID);
+
+		log.info("Logout requested for user: " + userId);
+
+		sessionService.removeUserSession(token);
+
+		SecureCookieUtil.handleLogOutResponse(request, response);
+
+		return ResponseDto.success("Successfully Logged Out");
+	}
+
 	private void addTokenToResponse(HttpServletRequest request, HttpServletResponse response, String token,
 									UserSessionEntity userSessionEntity) {
 
@@ -222,7 +250,8 @@ public class AuthController {
 	public ResponseDto<AclUserDto> loginWithTrueCaller(
 			@RequestBody @Valid LoginRequestDto loginRequestDto,
 			HttpServletRequest request,
-			HttpServletResponse response) {
+			HttpServletResponse response,
+			@RequestHeader(name = "app", required = false) App app, @RequestHeader(name = "deviceId", required = false) String deviceId) {
 
 		UserProfileDto userProfileDto = authService.loginWithTrueCaller(loginRequestDto);
 
@@ -230,9 +259,12 @@ public class AuthController {
 
 		String token = StanzaUtils.generateUniqueId();
 
-		UserSessionEntity userSessionEntity = sessionService.createUserSession(userProfileDto, token);
+		log.debug("app : {}, deviceId : {}", app, deviceId);
+
+		UserSessionEntity userSessionEntity = sessionService.createUserSession(userProfileDto, token, app, deviceId);
 
 		if (Objects.nonNull(userSessionEntity)) {
+			sessionService.validatePreviousSessions(userProfileDto.getUuid(), app, deviceId);
 			addTokenToResponse(request, response, token, userSessionEntity);
 			if(UserType.INVITED_GUEST.equals(userProfileDto.getUserType())) {
 
@@ -250,5 +282,13 @@ public class AuthController {
 		}
 
 		return ResponseDto.failure("Failed to create user session");
+	}
+
+	@GetMapping("getotp")
+	public ResponseDto<Integer> getOtp(@RequestParam(value = "mobile", required = true) String mobile,
+									   @RequestParam(value = "isoCode", required = true, defaultValue = "IN") String isoCode,
+									   @RequestParam(value = "otpType", defaultValue = "LOGIN") OtpType otpType) {
+
+		return ResponseDto.success("OTP is", otpService.getOtp(mobile, isoCode, otpType));
 	}
 }

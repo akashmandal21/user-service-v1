@@ -3,11 +3,20 @@
  */
 package com.stanzaliving.user.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.stanzaliving.core.base.exception.StanzaException;
+import com.stanzaliving.core.base.exception.UserValidationException;
 import com.stanzaliving.core.base.utils.StanzaUtils;
+import com.stanzaliving.core.user.enums.App;
+import com.stanzaliving.user.entity.UserAppDeviceConfigEntity;
+import com.stanzaliving.user.entity.UserAppSessionConfigEntity;
+import com.stanzaliving.user.repository.UserAppDeviceConfigRepository;
+import com.stanzaliving.user.repository.UserAppSessionConfigRepository;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,16 +55,41 @@ public class SessionServiceImpl implements SessionService {
 	@Autowired
 	private UserService userService;
 
+	@Autowired
+	private UserAppSessionConfigRepository userAppSessionConfigRepository;
+
+	@Autowired
+	private UserAppDeviceConfigRepository userAppDeviceConfigRepository;
+
+	@Value("${login.max.count.SIGMA}")
+	int sigmaMaxAllowedSessionsCount;
+
+	@Value("${login.max.count.ALFRED}")
+	int alfredMaxAllowedSessionsCount;
+
+	@Value("${login.max.count.NUCLEUS}")
+	int nucleusMaxAllowedSessionsCount;
+
+	@Value("${login.max.count.NEXUS}")
+	int nexusMaxAllowedSessionsCount;
+
+	@Value("${login.max.count.NUCLEUSX}")
+	int nucleusXMaxAllowedSessionsCount;
+
 	@Override
-	public UserSessionEntity createUserSession(UserDto userDto, String token) {
+	public UserSessionEntity createUserSession(UserDto userDto, String token, App app, String deviceId) {
 
 		log.info("Creating Session for User: " + userDto.getUuid());
+
+		validateDeviceId(userDto.getUuid(), app, deviceId);
 
 		UserSessionEntity userSessionEntity =
 				UserSessionEntity.builder()
 						.userId(userDto.getUuid())
 						.token(getBcryptPassword(token))
 						.userType(userDto.getUserType())
+						.browser(Objects.nonNull(app)  ?  app.name() : null)
+						.device(deviceId)
 						.build();
 
 		userSessionEntity = userSessionDbService.saveAndFlush(userSessionEntity);
@@ -66,7 +100,7 @@ public class SessionServiceImpl implements SessionService {
 	}
 
 	@Override
-	public UserSessionEntity refreshUserSession(String token) {
+	public UserSessionEntity refreshUserSession(String token, App app, String deviceId) {
 		UserSessionEntity userSessionEntity = null;
 		try {
 			log.info("Request received to refresh user session");
@@ -83,6 +117,12 @@ public class SessionServiceImpl implements SessionService {
 			UserDto user = userService.getActiveUserByUuid(userSessionEntity.getUserId());
 
 			log.info("Refresh User Session: " + userSessionEntity.getUuid() + " for User: " + user.getUuid());
+
+			try {
+				validateDeviceId(userSessionEntity.getUuid(), app, deviceId);
+			} catch (StanzaException se) {
+				throw new UserValidationException(se.getMessage());
+			}
 
 			String newToken = StanzaUtils.generateUniqueId();
 
@@ -115,7 +155,8 @@ public class SessionServiceImpl implements SessionService {
 		UserSessionEntity userSessionEntity = getUserSessionByToken(token);
 
 		if (Objects.isNull(userSessionEntity)) {
-			throw new AuthException("No User Session Found!! Please Login!!", UserErrorCodes.SESSION_NOT_FOUND);
+			log.error("No User Session Found for token {} !! Please Login!!", token);
+			return;
 		}
 
 		log.info("Invalidating User Session: " + userSessionEntity.getUuid() + " for User: " + userSessionEntity.getUserId());
@@ -159,4 +200,76 @@ public class SessionServiceImpl implements SessionService {
 		return BCrypt.hashpw(password, bcryptSalt);
 	}
 
+	@Override
+	public void validateDeviceId(String userId, App app, String deviceId){
+		log.info("Inside validateDeviceId for userId: {}, app: {}, userId: {}", userId, app, deviceId);
+		if(StringUtils.isBlank(userId) || Objects.isNull(app) || StringUtils.isBlank(deviceId))
+			return;
+
+		if(App.appsEligibleForDeviceIdCheck().contains(app)) {
+			List<UserAppDeviceConfigEntity> userAppDeviceConfigEntities = Optional.ofNullable(userAppDeviceConfigRepository.findByUserIdAndAppAndStatus(userId, app, true)).orElse(new ArrayList<>());
+			List<String> allowedDeviceIdList = Optional.of(userAppDeviceConfigEntities.stream().map(UserAppDeviceConfigEntity::getDeviceId).collect(Collectors.toList())).orElse(new ArrayList<>());
+
+			if(CollectionUtils.isNotEmpty(allowedDeviceIdList)) {
+				List<UserSessionEntity> userSessionEntities = Optional.ofNullable(userSessionDbService.findByUserIdAndBrowserAndStatusAndDeviceNotIn(userId, app.name(), true, allowedDeviceIdList)).orElse(new ArrayList<>());
+				userSessionEntities.forEach(x -> x.setStatus(false));
+				userSessionDbService.saveAndFlush(userSessionEntities);
+			}
+			if(CollectionUtils.isNotEmpty(allowedDeviceIdList) && !allowedDeviceIdList.contains(deviceId))
+				throw new StanzaException("This device is not allowed to login for this user");
+		}
+	}
+
+	@Override
+	public void validatePreviousSessions(String userId, App app, String deviceId){
+		log.info("Inside validatePreviousSessions method with userId : {}, app : {}, deviceId : {}", userId, app, deviceId);
+		try {
+			if (Objects.nonNull(app) && App.appsEligibleForUserSessionCheck().contains(app)) {
+				//check if the user exists in user app session config
+				int maxAllowedSessionsCount = Optional.ofNullable(userAppSessionConfigRepository.findByUserIdAndAppAndStatus(userId, app, true)).map(UserAppSessionConfigEntity::getMaxLoginAllowed).orElse(checkMaxAllowedCounts(app));
+				if(maxAllowedSessionsCount == 0)
+					throw new StanzaException("You are not allowed to login");
+				if(maxAllowedSessionsCount == -1)
+					return;
+				List<UserSessionEntity> userSessionEntitiesBasedOnAppName = Optional.ofNullable(userSessionDbService.findByUserIdAndBrowserAndStatusOrderByIdDesc(userId, app.name(), true)).orElse(new ArrayList<>());
+				if(CollectionUtils.isEmpty(userSessionEntitiesBasedOnAppName)) {
+					if(App.SIGMA.equals(app))
+						throw new StanzaException("Please login again");
+					else
+						return;
+				}
+				if (userSessionEntitiesBasedOnAppName.size() <= maxAllowedSessionsCount)
+					return;
+				List<UserSessionEntity> sessionsToRemove = Optional.of(userSessionEntitiesBasedOnAppName.subList(maxAllowedSessionsCount, userSessionEntitiesBasedOnAppName.size())).orElse(new ArrayList<>());
+				if(CollectionUtils.isNotEmpty(sessionsToRemove)) {
+					sessionsToRemove.forEach(x -> x.setStatus(false));
+					userSessionDbService.saveAndFlush(sessionsToRemove);
+				}
+			}
+		}
+		catch (StanzaException se){
+			log.error(se);
+			throw se;
+		}
+		catch (Exception e){
+			log.error("Exception while validating user sessions count, Error is : {}", e.getMessage(), e);
+		}
+	}
+
+	private int checkMaxAllowedCounts(App app) {
+		try {
+			if (App.SIGMA.equals(app)) return sigmaMaxAllowedSessionsCount;
+
+			if (App.ALFRED.equals(app)) return alfredMaxAllowedSessionsCount;
+
+			if (App.NUCLEUS.equals(app)) return nucleusMaxAllowedSessionsCount;
+
+			if (App.NEXUS.equals(app)) return nexusMaxAllowedSessionsCount;
+
+			if(App.NUCLEUSX.equals(app)) return nucleusXMaxAllowedSessionsCount;
+		} catch (Exception e) {
+			log.error("Exception while fetching the max allowed sessions count from properties, error is : {}", e.getMessage(), e);
+		}
+		return -1;
+	}
 }
