@@ -312,6 +312,8 @@ public class AclUserServiceImpl implements AclUserService {
 
 		Map<String, List<String>> userIdAccessLevelIdListMap = new HashMap<>();
 
+		Map<String, List<String>> userAndAccessLevelMap=userV2FeignService.getActiveUserAndAccessLevelMapForRole(roleName,department);
+
 		if (Objects.nonNull(roleDto) && roleDto.getDepartment().equals(department)) {
 
 			List<UserDepartmentLevelRoleEntity> departmentLevelRoleEntities = userDepartmentLevelRoleDbService.findByRoleUuidInAndStatus(Collections.singletonList(roleDto.getUuid()), true);
@@ -346,6 +348,17 @@ public class AclUserServiceImpl implements AclUserService {
 				}
 			}
 
+		}
+
+		for(Map.Entry<String,List<String>> entry:userAndAccessLevelMap.entrySet()) {
+			List<String> accessLevelUuids=entry.getValue();
+			for (String accessLevelEntity : accessLevelEntityList) {
+				if (accessLevelUuids.contains(accessLevelEntity)){
+					List<String> accessLevelIds = userIdAccessLevelIdListMap.getOrDefault(entry.getKey(), new ArrayList<>());
+					accessLevelIds.add(accessLevelEntity);
+					userIdAccessLevelIdListMap.put(entry.getKey(), accessLevelIds);
+				}
+			}
 		}
 
 		return userIdAccessLevelIdListMap;
