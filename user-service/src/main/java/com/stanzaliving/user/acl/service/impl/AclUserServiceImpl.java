@@ -308,7 +308,13 @@ public class AclUserServiceImpl implements AclUserService {
 
 		log.info("Got request to get list of userid by rolename {} and department {}", roleName, department);
 
-		RoleDto roleDto = roleService.findByRoleNameAndDepartment(roleName, department);
+		RoleDto roleDto=null;
+		try {
+			roleDto = roleService.findByRoleNameAndDepartment(roleName, department);
+		}
+		catch (Exception e){
+			e.printStackTrace();
+		}
 
 		Map<String, List<String>> userIdAccessLevelIdListMap = new HashMap<>();
 
