@@ -893,10 +893,10 @@ public class AclUserServiceImpl implements AclUserService {
 		log.info("Search for access modules for user : {}", userUuid);
 		List<UserAccessModuleDto> userAccessModuleDtoList = new ArrayList<>();
 		List<String> roleUuids = new ArrayList<>();
-		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelRepository.findByUserUuidAndStatus(userUuid, true);
+		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList = userDepartmentLevelRepository.findByUserUuid(userUuid);
 		if (CollectionUtils.isNotEmpty(userDepartmentLevelEntityList)) {
 			for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
-				List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = userDepartmentLevelRoleRepository.findByUserDepartmentLevelUuidAndStatus(userDepartmentLevelEntity.getUuid(), true);
+				List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityList = userDepartmentLevelRoleRepository.findByUserDepartmentLevelUuid(userDepartmentLevelEntity.getUuid());
 				if (CollectionUtils.isNotEmpty(userDepartmentLevelRoleEntityList)) {
 					for (UserDepartmentLevelRoleEntity userDepartmentLevelRoleEntity : userDepartmentLevelRoleEntityList) {
 						roleUuids.add(userDepartmentLevelRoleEntity.getRoleUuid());
@@ -906,7 +906,7 @@ public class AclUserServiceImpl implements AclUserService {
 		}
 		if (CollectionUtils.isNotEmpty(roleUuids)) {
 			List<AccessModule> accessModuleList = roleAccessModuleRepository
-				.findAccessModuleByRoleUuidInAndAccessLevelInAndStatus(roleUuids, Arrays.asList(AccessLevel.COUNTRY, AccessLevel.CITY), true);
+				.findAccessModuleByRoleUuidInAndAccessLevelIn(roleUuids, Arrays.asList(AccessLevel.COUNTRY, AccessLevel.CITY));
 			if (CollectionUtils.isNotEmpty(accessModuleList)) {
 				for (AccessModule accessModule : accessModuleList) {
 					UserAccessModuleDto userAccessModuleDto = new UserAccessModuleDto();
