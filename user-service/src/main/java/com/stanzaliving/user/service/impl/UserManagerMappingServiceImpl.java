@@ -4,7 +4,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.stanzaliving.core.base.common.dto.PaginationRequest;
+import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.user.dto.UserFilterDto;
+import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.adapters.Userv2ToUserAdapter;
 import com.stanzaliving.user.dto.userv2.UserAttributesDto;
@@ -229,6 +231,27 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 		}
 		return userProfileDtos;
 
+	}
+
+	@Override
+	public List<UserProfileDto> getPeopleReportingToManagerForZonalHead(String managerId, Department department) {
+		List<UserProfileDto> userProfileDtos=getPeopleReportingToManager(managerId);
+		List<UserProfileDto> filteredUserProfileDtos=new ArrayList<>();
+		if(Department.DESIGN.equals(department)){
+			for(UserProfileDto userProfileDto:userProfileDtos){
+				if(UserType.DESIGN_COORDINATOR.equals(userProfileDto.getUserType())){
+					filteredUserProfileDtos.add(userProfileDto);
+				}
+			}
+		}
+		else{
+			for(UserProfileDto userProfileDto:userProfileDtos){
+				if(UserType.PROJECT_MANAGER.equals(userProfileDto.getUserType())){
+					filteredUserProfileDtos.add(userProfileDto);
+				}
+			}
+		}
+		return filteredUserProfileDtos;
 	}
 
 	@Override

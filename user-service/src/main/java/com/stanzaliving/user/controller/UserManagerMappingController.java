@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
+import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.user.request.dto.UserUuidRequestDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
@@ -89,6 +90,19 @@ public class UserManagerMappingController {
 		log.info(" Get user profiles by " + managerId);
 
 		List<UserProfileDto> userManagerList = userManagerMappingService.getPeopleReportingToManager(managerId);
+
+		if (CollectionUtils.isEmpty(userManagerList))
+			return ResponseDto.failure("User Profiles Not Found");
+
+		return ResponseDto.success("User Profile Found!", userManagerList);
+	}
+
+	@GetMapping("/zonalhead/userprofiles/{managerId}")
+	public ResponseDto<List<UserProfileDto>> getUserProfilesByManagerIDForZonalHead(@PathVariable("managerId") String managerId,
+																					@RequestParam Department department) {
+		log.info(" Get user profiles by " + managerId);
+
+		List<UserProfileDto> userManagerList = userManagerMappingService.getPeopleReportingToManagerForZonalHead(managerId,department);
 
 		if (CollectionUtils.isEmpty(userManagerList))
 			return ResponseDto.failure("User Profiles Not Found");
