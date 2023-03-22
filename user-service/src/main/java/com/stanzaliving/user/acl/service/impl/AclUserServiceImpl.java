@@ -276,7 +276,7 @@ public class AclUserServiceImpl implements AclUserService {
 
 				List<String> uuids = departmentLevelRoleEntities.stream().map(UserDepartmentLevelRoleEntity::getUserDepartmentLevelUuid).collect(Collectors.toList());
 
-				List<UserDepartmentLevelEntity> departmentLevelEntities = userDepartmentLevelDbService.findByUuidInAndAccessLevel(uuids, roleDto.getAccessLevel());
+				List<UserDepartmentLevelEntity> departmentLevelEntities = userDepartmentLevelDbService.findByUuidInAndAccessLevelAndStatus(uuids, roleDto.getAccessLevel(),true);
 
 				if (CollectionUtils.isNotEmpty(departmentLevelEntities)) {
 
