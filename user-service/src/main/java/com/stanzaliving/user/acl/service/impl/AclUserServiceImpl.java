@@ -145,10 +145,9 @@ public class AclUserServiceImpl implements AclUserService {
 	@Override
 	public void addRole(AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleDto) {
 
-		UserEntity userEntity=userDbService.findByUuidAndStatus(addUserDeptLevelRoleDto.getUserUuid(),true);
-
-		if(Objects.isNull(userEntity)){
-			throw new ApiValidationException("User is inactive in v1.");
+		com.stanzaliving.user.dto.userv2.UserDto user=userV2FeignService.getActiveUserByUuid(addUserDeptLevelRoleDto.getUserUuid());
+		if(Objects.nonNull(user)) {
+			throw new ApiValidationException("User is active in v2.");
 		}
 
 		AddUserDeptLevelRequestDto addUserDeptLevelRequestDto = new AddUserDeptLevelRequestDto(addUserDeptLevelRoleDto);
