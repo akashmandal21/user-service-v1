@@ -61,7 +61,13 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 		if (CollectionUtils.isNotEmpty(userFilterDto.getUserIds())) {
 
 			specificationBuilder.with(UserQueryConstants.UUID, CriteriaOperation.IN, userFilterDto.getUserIds());
-			specificationBuilder.with("migrated",CriteriaOperation.FALSE,false);
+			if (userFilterDto.getStatus() != null) {
+				if (userFilterDto.getStatus()) {
+					specificationBuilder.with(UserQueryConstants.STATUS, CriteriaOperation.TRUE, true);
+				} else {
+					specificationBuilder.with(UserQueryConstants.STATUS, CriteriaOperation.FALSE, false);
+				}
+			}
 
 		} else {
 
