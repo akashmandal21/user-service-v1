@@ -253,6 +253,7 @@ public class AuthServiceImpl implements AuthService {
 		if(userEntity.isMigrated()) {
 			userV2FeignService.updateUser(UpdateUserDto.builder()
 					.emailVerified(true)
+					.mobile(Long.parseLong(userEntity.getMobile()))
 					.firstName(emailOtpValidateRequestDto.getFirstName())
 					.lastName(emailOtpValidateRequestDto.getLastName())
 					.build());
