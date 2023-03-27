@@ -264,15 +264,7 @@ public class AclUserServiceImpl implements AclUserService {
 
 		log.info("Got request to get list of userid by rolename {} and department {}", roleName, department);
 
-		RoleDto roleDto=null;
-		try {
-			roleDto = roleService.findByRoleNameAndDepartment(roleName, department);
-		}
-		catch (Exception e){
-			e.printStackTrace();
-		}
-
-		Map<String, List<String>> userAndAccessLevelMap=userV2FeignService.getUserAndAccessLevelMapForRole(roleName,department);
+		RoleDto roleDto = roleService.findByRoleNameAndDepartment(roleName, department);
 
 		Map<String, List<String>> userIdAccessLevelIdListMap = new HashMap<>();
 
@@ -306,17 +298,6 @@ public class AclUserServiceImpl implements AclUserService {
 				}
 			}
 
-		}
-
-		for(Map.Entry<String,List<String>> entry:userAndAccessLevelMap.entrySet()) {
-			List<String> accessLevelUuids=entry.getValue();
-			for (String accessLevelEntity : accessLevelEntityList) {
-				if (accessLevelUuids.contains(accessLevelEntity)){
-					List<String> accessLevelIds = userIdAccessLevelIdListMap.getOrDefault(entry.getKey(), new ArrayList<>());
-					accessLevelIds.add(accessLevelEntity);
-					userIdAccessLevelIdListMap.put(entry.getKey(), accessLevelIds);
-				}
-			}
 		}
 
 		return userIdAccessLevelIdListMap;
