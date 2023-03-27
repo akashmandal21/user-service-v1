@@ -206,6 +206,7 @@ public class AuthServiceImpl implements AuthService {
 		UserEntity userEntity=null;
 		if(Objects.nonNull(users)) {
 			userEntity = Userv2ToUserAdapter.getUserEntityFromUserv2(users);
+			userEntity.setMigrated(true);
 		}
 
 		if(Objects.isNull(userEntity)){
