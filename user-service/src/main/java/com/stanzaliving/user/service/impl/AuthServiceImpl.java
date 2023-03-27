@@ -202,8 +202,7 @@ public class AuthServiceImpl implements AuthService {
 
 	private UserEntity getActiveUserByUuid(String userUuid) {
 
-		//UserEntity userEntity = userDbService.findByUuid(userUuid);
-		UserDto users=userV2FeignService.getUserByUuid(userUuid);
+		UserDto users=userV2FeignService.getActiveUserByUuid(userUuid);
 		UserEntity userEntity=null;
 		if(Objects.nonNull(users)) {
 			userEntity = Userv2ToUserAdapter.getUserEntityFromUserv2(users);
