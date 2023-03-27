@@ -151,7 +151,6 @@ public class AclServiceImpl implements AclService {
 		}
 		userV2DepartmentLevelEntityList.addAll(userDeptLevelRoleNameUrlExpandedDtoList);
 
-
 		return userV2DepartmentLevelEntityList;
 	}
 
