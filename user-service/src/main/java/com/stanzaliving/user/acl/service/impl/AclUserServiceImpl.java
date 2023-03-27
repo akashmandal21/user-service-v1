@@ -145,10 +145,7 @@ public class AclUserServiceImpl implements AclUserService {
 	@Override
 	public void addRole(AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleDto) {
 
-		com.stanzaliving.user.dto.userv2.UserDto user=userV2FeignService.getActiveUserByUuid(addUserDeptLevelRoleDto.getUserUuid());
-		if(Objects.nonNull(user)) {
-			throw new ApiValidationException("User is active in v2.");
-		}
+		userService.assertActiveUserByUserUuid(addUserDeptLevelRoleDto.getUserUuid());
 
 		AddUserDeptLevelRequestDto addUserDeptLevelRequestDto = new AddUserDeptLevelRequestDto(addUserDeptLevelRoleDto);
 
