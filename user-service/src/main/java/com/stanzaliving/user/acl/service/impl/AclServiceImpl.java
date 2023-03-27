@@ -7,7 +7,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.stanzaliving.core.transformation.client.cache.TransformationCache;
-import com.stanzaliving.user.db.service.UserDbService;
 import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.feignclient.UserV2FeignService;
 import com.stanzaliving.user.feignclient.Userv2HttpService;
