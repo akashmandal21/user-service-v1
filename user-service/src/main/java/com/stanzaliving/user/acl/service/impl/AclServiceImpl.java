@@ -140,7 +140,7 @@ public class AclServiceImpl implements AclService {
 
 			Pair<List<String>, List<String>> roleUuidApiUuidList = getRoleUuidApiUuidListOfUser(userDepartmentLevelEntity);
 
-			List<RoleEntity> roleEntityList = roleDbService.findByUuidInAndStatusAndMigrated(roleUuidApiUuidList.getFirst(), true, false);
+			List<RoleEntity> roleEntityList = roleDbService.findByUuidInAndStatusAndMigrated(roleUuidApiUuidList.getFirst(), true,false);
 			List<ApiEntity> apiEntityList = apiDbService.findByUuidInAndStatus(roleUuidApiUuidList.getSecond(), true);
 
 			if (CollectionUtils.isNotEmpty(apiEntityList) || CollectionUtils.isNotEmpty(roleEntityList)) {
