@@ -68,9 +68,6 @@ public class AclServiceImpl implements AclService {
 	@Autowired
 	private UserV2FeignService userV2FeignService;
 
-	@Autowired
-	private UserDbService userDbService;
-
 	@Override
 	public boolean isAccessible(String userId, String url) {
 
