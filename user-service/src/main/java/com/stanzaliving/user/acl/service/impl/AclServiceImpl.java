@@ -127,7 +127,7 @@ public class AclServiceImpl implements AclService {
 
 	private List<UserDeptLevelRoleNameUrlExpandedDto> getUserDeptLevelRoleNameUrlExpandedDto(String userUuid) {
 
-		UserEntity userEntity=userDbService.findByUuidAndStatus(userUuid,true);
+		userService.assertActiveUserByUserUuid(userUuid);
 
 		List<UserDeptLevelRoleNameUrlExpandedDto> userDeptLevelRoleNameUrlExpandedDtoList = new ArrayList<>();
 
@@ -135,23 +135,21 @@ public class AclServiceImpl implements AclService {
 
 		List<UserDeptLevelRoleNameUrlExpandedDto> userV2DepartmentLevelEntityList=userV2FeignService.getUserDeptRoleNameList(userUuid);
 
-		if(Objects.nonNull(userEntity)) {
-			userDepartmentLevelEntityList = userDepartmentLevelDbService.findByUserUuidAndStatus(userUuid, true);
-			for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
+		userDepartmentLevelEntityList = userDepartmentLevelDbService.findByUserUuidAndStatus(userUuid, true);
+		for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
 
-				Pair<List<String>, List<String>> roleUuidApiUuidList = getRoleUuidApiUuidListOfUser(userDepartmentLevelEntity);
+			Pair<List<String>, List<String>> roleUuidApiUuidList = getRoleUuidApiUuidListOfUser(userDepartmentLevelEntity);
 
-				List<RoleEntity> roleEntityList = roleDbService.findByUuidInAndStatusAndMigrated(roleUuidApiUuidList.getFirst(), true, false);
-				List<ApiEntity> apiEntityList = apiDbService.findByUuidInAndStatus(roleUuidApiUuidList.getSecond(), true);
+			List<RoleEntity> roleEntityList = roleDbService.findByUuidInAndStatusAndMigrated(roleUuidApiUuidList.getFirst(), true, false);
+			List<ApiEntity> apiEntityList = apiDbService.findByUuidInAndStatus(roleUuidApiUuidList.getSecond(), true);
 
-				if (CollectionUtils.isNotEmpty(apiEntityList) || CollectionUtils.isNotEmpty(roleEntityList)) {
+			if (CollectionUtils.isNotEmpty(apiEntityList) || CollectionUtils.isNotEmpty(roleEntityList)) {
 
-					userDeptLevelRoleNameUrlExpandedDtoList.add(
-							UserDepartmentLevelRoleAdapter.getUserDeptLevelRoleNameUrlExpandedDto(userDepartmentLevelEntity, roleEntityList, apiEntityList, transformationCache));
-				}
+				userDeptLevelRoleNameUrlExpandedDtoList.add(
+						UserDepartmentLevelRoleAdapter.getUserDeptLevelRoleNameUrlExpandedDto(userDepartmentLevelEntity, roleEntityList, apiEntityList, transformationCache));
 			}
-			userV2DepartmentLevelEntityList.addAll(userDeptLevelRoleNameUrlExpandedDtoList);
 		}
+		userV2DepartmentLevelEntityList.addAll(userDeptLevelRoleNameUrlExpandedDtoList);
 
 
 		return userV2DepartmentLevelEntityList;
