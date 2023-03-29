@@ -142,7 +142,7 @@ public class AclServiceImpl implements AclService {
 		List<UserDeptLevelRoleNameUrlExpandedDto> userDeptLevelRoleNameUrlExpandedDtoList = new ArrayList<>();
 
 		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList;
-		List<UserDeptLevelRoleNameUrlExpandedDto> userV2DepartmentLevelEntityList=null;
+		List<UserDeptLevelRoleNameUrlExpandedDto> userV2DepartmentLevelEntityList=new ArrayList<>();
 
 		if(!isActiveInOldUser) {
 			if (Objects.nonNull(userEntity)) {
@@ -165,9 +165,9 @@ public class AclServiceImpl implements AclService {
 			}
 		}
 
-		if(Objects.nonNull(userV2DepartmentLevelEntityList)) {
-			userV2DepartmentLevelEntityList.addAll(userDeptLevelRoleNameUrlExpandedDtoList);
-		}
+
+		userV2DepartmentLevelEntityList.addAll(userDeptLevelRoleNameUrlExpandedDtoList);
+
 
 		return userV2DepartmentLevelEntityList;
 	}
