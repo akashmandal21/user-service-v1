@@ -145,7 +145,7 @@ public class AclServiceImpl implements AclService {
 		List<UserDeptLevelRoleNameUrlExpandedDto> userV2DepartmentLevelEntityList=null;
 
 		if(!isActiveInOldUser) {
-			if (Objects.nonNull(userEntity) && UserType.CONSUMER.equals(userEntity.getUserType())) {
+			if (Objects.nonNull(userEntity)) {
 				userV2DepartmentLevelEntityList = userV2FeignService.getUserDeptRoleNameList(userUuid);
 			}
 		}
