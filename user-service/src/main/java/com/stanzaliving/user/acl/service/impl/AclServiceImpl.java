@@ -7,6 +7,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.stanzaliving.core.transformation.client.cache.TransformationCache;
+import com.stanzaliving.core.user.enums.UserType;
+import com.stanzaliving.user.adapters.Userv2ToUserAdapter;
+import com.stanzaliving.user.db.service.UserDbService;
 import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.feignclient.UserV2FeignService;
 import com.stanzaliving.user.feignclient.Userv2HttpService;
@@ -67,6 +70,9 @@ public class AclServiceImpl implements AclService {
 	@Autowired
 	private UserV2FeignService userV2FeignService;
 
+	@Autowired
+	private UserDbService userDbService;
+
 	@Override
 	public boolean isAccessible(String userId, String url) {
 
@@ -123,13 +129,26 @@ public class AclServiceImpl implements AclService {
 
 	private List<UserDeptLevelRoleNameUrlExpandedDto> getUserDeptLevelRoleNameUrlExpandedDto(String userUuid) {
 
-		userService.assertActiveUserByUserUuid(userUuid);
+		UserEntity userEntity = userDbService.findByUuidAndStatus(userUuid, true);
+		boolean isActiveInOldUser=true;
+		if(Objects.isNull(userEntity)){
+			isActiveInOldUser=false;
+			com.stanzaliving.user.dto.userv2.UserDto user=userV2FeignService.getActiveUserByUuid(userUuid);
+			if(Objects.nonNull(user)) {
+				userEntity = Userv2ToUserAdapter.getUserEntityFromUserv2(user);
+			}
+		}
 
 		List<UserDeptLevelRoleNameUrlExpandedDto> userDeptLevelRoleNameUrlExpandedDtoList = new ArrayList<>();
 
-		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList=null;
+		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList;
+		List<UserDeptLevelRoleNameUrlExpandedDto> userV2DepartmentLevelEntityList=null;
 
-		List<UserDeptLevelRoleNameUrlExpandedDto> userV2DepartmentLevelEntityList=userV2FeignService.getUserDeptRoleNameList(userUuid);
+		if(!isActiveInOldUser) {
+			if (Objects.nonNull(userEntity)) {
+				userV2DepartmentLevelEntityList = userV2FeignService.getUserDeptRoleNameList(userUuid);
+			}
+		}
 
 		userDepartmentLevelEntityList = userDepartmentLevelDbService.findByUserUuidAndStatus(userUuid, true);
 		for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
@@ -145,7 +164,10 @@ public class AclServiceImpl implements AclService {
 						UserDepartmentLevelRoleAdapter.getUserDeptLevelRoleNameUrlExpandedDto(userDepartmentLevelEntity, roleEntityList, apiEntityList, transformationCache));
 			}
 		}
-		userV2DepartmentLevelEntityList.addAll(userDeptLevelRoleNameUrlExpandedDtoList);
+
+		if(Objects.nonNull(userV2DepartmentLevelEntityList)) {
+			userV2DepartmentLevelEntityList.addAll(userDeptLevelRoleNameUrlExpandedDtoList);
+		}
 
 		return userV2DepartmentLevelEntityList;
 	}
