@@ -101,7 +101,7 @@ public class UserController {
 
 		log.info("Fetching current User Profile with UserId: " + userId);
 
-		return ResponseDto.success("Found Current User Profile for User Id", userService.getUserProfile(userId));
+		return ResponseDto.success("Found Current User Profile for User Id", userService.getUserProfileV2(userId));
 	}
 	
 	@PostMapping("update")
