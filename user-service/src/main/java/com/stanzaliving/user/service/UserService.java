@@ -45,6 +45,8 @@ public interface UserService {
 
 	UserProfileDto getUserProfile(String userId);
 
+	UserProfileDto getUserProfileV2(String userId);
+
 	PageResponse<UserProfileDto> searchUser(UserFilterDto userFilterDto);
 
 	Map<String, UserProfileDto> getUserProfileIn(Map<String, String> userManagerUuidMap);

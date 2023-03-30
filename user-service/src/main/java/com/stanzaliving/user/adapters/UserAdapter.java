@@ -132,6 +132,56 @@ public class UserAdapter {
 				.build();
 	}
 
+	public UserProfileDto getUserProfileDtoV2(UserEntity userEntity, com.stanzaliving.user.dto.userv2.UserProfileDto profileDto) {
+
+		if(Objects.isNull(userEntity)){
+			return null;
+		}
+
+		UserProfileEntity profileEntity = userEntity.getUserProfile();
+		if (Objects.isNull(profileEntity)) {
+			return null;
+		}
+
+		return UserProfileDto.builder()
+				.id(userEntity.getId())
+				.uuid(userEntity.getUuid())
+				.createdAt(userEntity.getCreatedAt())
+				.updatedAt(userEntity.getUpdatedAt())
+				.createdBy(userEntity.getCreatedBy())
+				.updatedBy(userEntity.getUpdatedBy())
+				.status(userEntity.isStatus())
+				.userType(userEntity.getUserType())
+				.isoCode(userEntity.getIsoCode())
+				.mobile(userEntity.getMobile())
+				.mobileVerified(userEntity.isMobileVerified())
+				.email(userEntity.getEmail())
+				.emailVerified(userEntity.isEmailVerified())
+				.department(userEntity.getDepartment())
+				.departmentName(userEntity.getDepartment().getDepartmentName())
+				.firstName(profileEntity.getFirstName())
+				.middleName(profileEntity.getMiddleName())
+				.lastName(profileEntity.getLastName())
+				.secondaryEmail(profileEntity.getSecondaryEmail())
+				.secondaryEmailVerified(profileEntity.isSecondaryEmailVerified())
+				.secondaryIsoCode(profileEntity.getSecondaryIsoCode())
+				.secondaryMobile(profileEntity.getSecondaryMobile())
+				.secondaryMobileVerified(profileEntity.isSecondaryMobileVerified())
+				.gender(profileEntity.getGender())
+				.profilePicture(profileEntity.getProfilePicture())
+				.birthday(profileEntity.getBirthday())
+				.maritalStatus(profileEntity.getMaritalStatus())
+				.anniversaryDate(profileEntity.getAnniversaryDate())
+				.address(AddressAdapter.getAddressDto(profileEntity.getAddress()))
+				.nationality(profileEntity.getNationality())
+				.bloodGroup(profileEntity.getBloodGroup())
+				.arrivalDate(profileEntity.getArrivalDate())
+				.birthday(profileEntity.getBirthday())
+				.nextDestination(profileEntity.getNextDestination())
+				.companyName(Objects.nonNull(profileDto) ? profileDto.getCompanyName() : null)
+				.build();
+	}
+
 	public AclUserDto getAclUserDto(UserProfileDto userDto, List<UserDeptLevelRoleNameUrlExpandedDto> completeAcl) {
 
 		List<UserDeptLevelRoleNameUrlExpandedDto> acl = new ArrayList<>();
