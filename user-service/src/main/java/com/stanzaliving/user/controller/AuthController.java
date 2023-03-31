@@ -95,7 +95,7 @@ public class AuthController {
 
 		if (Objects.nonNull(userSessionEntity)) {
 			sessionService.validatePreviousSessions(userProfileDto.getUuid(), app, deviceId);
-			//addTokenToResponse(request, response, token, userSessionEntity);
+			addTokenToResponse(request, response, token, userSessionEntity);
 			if(UserType.INVITED_GUEST.equals(userProfileDto.getUserType())) {
 
 				log.info("UserType for user is INVITED_GUEST {} " + userProfileDto.getUuid());
