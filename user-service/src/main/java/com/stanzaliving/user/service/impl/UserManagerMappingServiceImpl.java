@@ -222,7 +222,7 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 					.map(UserManagerMappingEntity::getUserId).collect(Collectors.toList());
 
 			PaginationRequest pagination = PaginationRequest.builder().pageNo(1).limit(100).build();
-			UserFilterDto userFilterDto = UserFilterDto.builder().userIds(userIds).pageRequest(pagination).build();
+			UserFilterDto userFilterDto = UserFilterDto.builder().userIds(userIds).status(true).pageRequest(pagination).build();
 			userProfileDtos= userService.searchUser(userFilterDto).getData();
 		}
 
