@@ -5,6 +5,7 @@ package com.stanzaliving.user.controller;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -141,7 +142,7 @@ public class UserController {
 			@RequestParam(name = "isoCode", required = false) String isoCode,
 			@RequestParam(name = "email", required = false) String email,
 			@RequestParam(name = "userType", required = false) UserType userType,
-			@RequestParam(name = "status", required = false) Boolean status,
+			@RequestParam(name = "status",defaultValue = "true", required = false) Boolean status,
 			@RequestParam(name = "department", required = false) Department department,
 			@RequestParam(name = "name", required = false) String name) {
 
@@ -221,7 +222,7 @@ public class UserController {
 				.isoCode(userRequestDto.getIsoCode())
 				.email(userRequestDto.getEmail())
 				.userType(userRequestDto.getUserType())
-				.status(userRequestDto.getStatus())
+				.status(Objects.nonNull(userRequestDto.getStatus())?userRequestDto.getStatus():true)
 				.department(userRequestDto.getDepartment())
 				.name(userRequestDto.getName())
 				.pageRequest(paginationRequest)
