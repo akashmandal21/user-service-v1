@@ -397,6 +397,27 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public UserProfileDto getUserProfileV2(String userId) {
+
+		UserEntity userEntity=null;
+		userEntity=userDbService.findByUuidNotMigrated(userId,false);
+		com.stanzaliving.user.dto.userv2.UserProfileDto userProfileDto = null;
+		if(Objects.isNull(userEntity)) {
+			com.stanzaliving.user.dto.userv2.UserDto user = userV2FeignService.getUserByUuid(userId);
+			if (Objects.nonNull(user)) {
+				userEntity = Userv2ToUserAdapter.getUserEntityFromUserv2(user);
+				userProfileDto = user.getUserProfileDto();
+			}
+		}
+
+		if (Objects.isNull(userEntity)) {
+			throw new UserValidationException("User not found for UserId: " + userId);
+		}
+
+		return UserAdapter.getUserProfileDtoV2(userEntity, userProfileDto);
+	}
+
+	@Override
 	public Map<String, UserProfileDto> getUserProfileIn(Map<String, String> userManagerUuidMap) {
 
 		Map<String, UserProfileDto> managerProfileDtoMap = new HashMap<>();
