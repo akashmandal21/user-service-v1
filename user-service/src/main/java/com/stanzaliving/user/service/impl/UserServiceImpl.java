@@ -784,16 +784,15 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public UserDto updateUser(UpdateUserRequestDto updateUserRequestDto) {
-
+		log.info("updateUserRequestDto {}", updateUserRequestDto);
 		UserEntity userEntity = userDbService.findByUuidNotMigrated(updateUserRequestDto.getUserId(),false);
+		log.info("userEntity {}", userEntity);
 		if (Objects.isNull(userEntity)) {
-
 			// Go to user-v2
 			com.stanzaliving.user.dto.userv2.UserDto userDto=userV2FeignService.updateWithUser(updateUserRequestDto);
 			if(Objects.nonNull(userDto)) {
 				return UserAdapter.getUserProfileDto(Userv2ToUserAdapter.getUserEntityFromUserv2(userDto));
 			}
-
 			throw new UserValidationException("User not found for UserId: " + updateUserRequestDto.getUserId());
 		}
 
