@@ -207,7 +207,7 @@ public class AclServiceImpl implements AclService {
 		//userV2DepartmentLevelEntityList.stream().collect(Collectors.groupingBy(f->f.getDepartment(),Collectors.groupingBy(f->f.getAccessLevel()))).get().values();
 
 
-		return userV2DepartmentLevelEntityList;
+		return (List<UserDeptLevelRoleNameUrlExpandedDto>) userDeptLevelRoleNameUrlExpandedDtoMap.values();
 	}
 
 	private Pair<List<String>, List<String>> getRoleUuidApiUuidListOfUser(UserDepartmentLevelEntity userDepartmentLevelEntity) {
