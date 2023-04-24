@@ -168,6 +168,44 @@ public class AclServiceImpl implements AclService {
 
 		userV2DepartmentLevelEntityList.addAll(userDeptLevelRoleNameUrlExpandedDtoList);
 
+		Map<String,UserDeptLevelRoleNameUrlExpandedDto> userDeptLevelRoleNameUrlExpandedDtoMap=new HashMap<>();
+		for(UserDeptLevelRoleNameUrlExpandedDto userDeptLevelRoleNameUrlExpandedDto:userV2DepartmentLevelEntityList){
+			String key=userDeptLevelRoleNameUrlExpandedDto.getDepartment().toString()+userDeptLevelRoleNameUrlExpandedDto.getAccessLevel().toString();
+			UserDeptLevelRoleNameUrlExpandedDto temp=userDeptLevelRoleNameUrlExpandedDtoMap.get(key);
+			if(temp!=null){
+				if(!temp.getAccessLevelEntityListUuid().containsAll(userDeptLevelRoleNameUrlExpandedDto.getAccessLevelEntityListUuid())){
+					HashSet set=new HashSet(temp.getAccessLevelEntityListUuid());
+					set.addAll(userDeptLevelRoleNameUrlExpandedDto.getAccessLevelEntityListUuid());
+					temp.setAccessLevelEntityListUuid(new ArrayList<>(set));
+
+					for (Map.Entry<String, String> entry : userDeptLevelRoleNameUrlExpandedDto.getAccessLevelEntityNameUuidMap().entrySet()) {
+						if (!temp.getAccessLevelEntityNameUuidMap().containsKey(entry.getKey())) {
+							temp.getAccessLevelEntityNameUuidMap().put(entry.getKey(), entry.getValue());
+						}
+					}
+				}
+
+				if(!temp.getRolesList().containsAll(userDeptLevelRoleNameUrlExpandedDto.getRolesList())){
+					HashSet set=new HashSet(temp.getRolesList());
+					set.addAll(userDeptLevelRoleNameUrlExpandedDto.getRolesList());
+					temp.setRolesList(new ArrayList<>(set));
+
+					for (Map.Entry<String, String> entry : userDeptLevelRoleNameUrlExpandedDto.getRoleNameUuidMap().entrySet()) {
+						if (!temp.getRoleNameUuidMap().containsKey(entry.getKey())) {
+							temp.getRoleNameUuidMap().put(entry.getKey(), entry.getValue());
+						}
+					}
+				}
+
+			}
+			else{
+				userDeptLevelRoleNameUrlExpandedDtoMap.put(key,userDeptLevelRoleNameUrlExpandedDto);
+			}
+		}
+
+
+		//userV2DepartmentLevelEntityList.stream().collect(Collectors.groupingBy(f->f.getDepartment(),Collectors.groupingBy(f->f.getAccessLevel()))).get().values();
+
 
 		return userV2DepartmentLevelEntityList;
 	}
