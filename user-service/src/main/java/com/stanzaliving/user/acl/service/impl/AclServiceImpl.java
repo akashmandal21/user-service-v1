@@ -203,10 +203,6 @@ public class AclServiceImpl implements AclService {
 			}
 		}
 
-
-		//userV2DepartmentLevelEntityList.stream().collect(Collectors.groupingBy(f->f.getDepartment(),Collectors.groupingBy(f->f.getAccessLevel()))).get().values();
-
-
 		return new ArrayList<>(userDeptLevelRoleNameUrlExpandedDtoMap.values());
 	}
 
