@@ -255,7 +255,7 @@ public class AclUserServiceImpl implements AclUserService {
 			throw new ApiValidationException("Unable to revoke roles, User doesn't exist at this level in the department");
 		}
 
-		userDepartmentLevelRoleService.revokeRoles(userDepartmentLevelEntity.getUuid(), userDeptLevelRoleListDto.getRolesUuid());
+		userDepartmentLevelRoleService.revokeRoles(userDepartmentLevelEntity, userDeptLevelRoleListDto.getRolesUuid());
 		publishCurrentRoleSnapshot(userDeptLevelRoleListDto.getUserUuid());
 	}
 
