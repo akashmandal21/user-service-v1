@@ -6,6 +6,7 @@ package com.stanzaliving.user.service.impl;
 import java.util.Objects;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
+import com.stanzaliving.core.base.exception.ResourceNotFoundException;
 import com.stanzaliving.core.base.exception.UserValidationException;
 import com.stanzaliving.core.bookingservice.dto.request.*;
 import com.stanzaliving.core.base.enums.Department;
@@ -149,7 +150,7 @@ public class AuthServiceImpl implements AuthService {
 		}
 
 		if (Objects.isNull(userEntity)) {
-			throw new AuthException("No user exists with this number", UserErrorCodes.USER_NOT_EXISTS);
+			throw new ResourceNotFoundException("No user exists with this number", UserErrorCodes.USER_NOT_EXISTS);
 		}
 
 		if (!userEntity.isStatus()) {
