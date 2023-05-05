@@ -3,10 +3,14 @@
  */
 package com.stanzaliving.user.kafka.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
 import com.stanzaliving.user.constants.NotificationKeys;
 
 import java.util.Objects;
+import java.util.Random;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,13 +91,25 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 	}
 
 	private SmsDto getSms(OtpEntity otpEntity) {
+		//SmsType smsType = getSmsType();
 		return SmsDto.builder()
-				.smsType(SmsType.OTP)
+				.smsType(SmsType.OTP_V2)
 				.isoCode(otpEntity.getIsoCode())
 				.mobile(otpEntity.getMobile())
 				.text(getOtpMessageForUserType(otpEntity, null, false))
 				.templateId(getNotificationTemplateId(otpEntity))
+				.otp(otpEntity.getOtp().toString())
+				.retryCount(otpEntity.getResendCount())
 				.build();
+	}
+
+	private SmsType getSmsType() {
+		Random rand = new Random();
+		int randomNumber = rand.nextInt(25);
+		if(randomNumber % 2 ==0){
+			return SmsType.OTP_V2;
+		}
+		return SmsType.OTP;
 	}
 
 	private void sendMessage(SmsDto smsDto) {
@@ -104,6 +120,13 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 			smsTopic = propertyManager.getProperty("kafka.topic.sms.otp", "sms_otp");
 		}
 		log.debug("Sending OTP for user: " + smsDto);
+		ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+		try {
+			String json = ow.writeValueAsString(smsDto);
+			log.info("Json is: {}", json);
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
 		notificationProducer.publish(smsTopic, SmsDto.class.getName(), smsDto);
 	}
 
@@ -213,6 +236,7 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 		}
 
 		message = message.replaceAll("<otp>", String.valueOf(otpEntity.getOtp()));
+
 		
 		return message;
 	}
@@ -225,7 +249,10 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 		} else if (OtpType.USER_VERFICATION == otpEntity.getOtpType()) {
 			return NotificationKeys.USER_VERIFICATION_OTP_MSG;
 		} else {
-			switch (otpEntity.getUserType()) {
+			//if(SmsType.OTP_V2.equals(smsType)){
+				return NotificationKeys.OTP_V2_MSG;
+			//}
+			/*switch (otpEntity.getUserType()) {
 				case STUDENT:
 					return NotificationKeys.STUDENT_OTP_MSG_NEW;
 				case PARENT:
@@ -242,7 +269,7 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 					return NotificationKeys.PROCUREMENT_OTP_MSG_NEW;
 				default:
 					return NotificationKeys.DEFAULT_OTP_MSG_NEW;
-			}
+			}*/
 		}
 	}
 
