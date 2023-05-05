@@ -120,13 +120,13 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 			smsTopic = propertyManager.getProperty("kafka.topic.sms.otp", "sms_otp");
 		}
 		log.debug("Sending OTP for user: " + smsDto);
-		ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+		/*ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 		try {
 			String json = ow.writeValueAsString(smsDto);
 			log.info("Json is: {}", json);
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
-		}
+		}*/
 		notificationProducer.publish(smsTopic, SmsDto.class.getName(), smsDto);
 	}
 
