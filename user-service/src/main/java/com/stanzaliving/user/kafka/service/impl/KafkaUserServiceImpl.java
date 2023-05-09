@@ -116,7 +116,7 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 
 		String smsTopic = propertyManager.getProperty("kafka.topic.sms", "sms");
 
-		if (SmsType.OTP == smsDto.getSmsType()) {
+		if (SmsType.OTP == smsDto.getSmsType() || SmsType.OTP_V2 == smsDto.getSmsType()) {
 			smsTopic = propertyManager.getProperty("kafka.topic.sms.otp", "sms_otp");
 		}
 		log.debug("Sending OTP for user: " + smsDto);
