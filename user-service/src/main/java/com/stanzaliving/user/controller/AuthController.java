@@ -77,7 +77,7 @@ public class AuthController {
 	@PostMapping("login")
 	public ResponseDto<Void> login(@RequestBody @Valid LoginRequestDto loginRequestDto, HttpServletRequest request, HttpServletResponse response, @RequestHeader(name = "app", required = false) App app, @RequestHeader(name = "deviceId", required = false) String deviceId) {
 
-		if(App.ALFRED.equals(app)||App.SIGMA.equals(app)){
+		if(StringUtils.isNotBlank(deviceId)&&(App.ALFRED.equals(app)||App.SIGMA.equals(app))){
 			 deviceBlockUtil.validateDevice(deviceId,app.name() ,loginRequestDto.getMobile()) ;
 		}
 		authService.login(loginRequestDto);
@@ -115,7 +115,7 @@ public class AuthController {
 				}
 
 			}
-			if(App.ALFRED.equals(app)||App.SIGMA.equals(app)){
+			if(StringUtils.isNotBlank(deviceId)&&(App.ALFRED.equals(app)||App.SIGMA.equals(app))){
 				deviceBlockUtil.saveDeviceRedis(otpValidateRequestDto.getMobile() ,userSessionEntity) ;
 			}
 			return ResponseDto.success("User Login Successfull", UserAdapter.getAclUserDto(userProfileDto, aclService.getUserDeptLevelRoleNameUrlExpandedDtoFe(userProfileDto.getUuid())));

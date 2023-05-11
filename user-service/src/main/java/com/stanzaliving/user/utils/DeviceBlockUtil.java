@@ -1,9 +1,11 @@
 package com.stanzaliving.user.utils;
 
 import com.stanzaliving.core.base.exception.ManyDeviceLoginException;
+import com.stanzaliving.core.user.enums.App;
 import com.stanzaliving.user.entity.UserSessionEntity;
 import com.stanzaliving.user.service.RedisOperationsService;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -21,10 +23,14 @@ public class DeviceBlockUtil {
     private RedisOperationsService redisOperationsService ;
 
     public final static String LockedEntitySet = "DEVICE_LOCKED_ENTITY_SET";
-    @Value("${device.locktime}")
-    public long lockTime ;
-    @Value("${device.whitelist}")
-    private String whiteListDevice;
+    @Value("${device.locktime.ALFRED}")
+    public long lockTimeAlfred ;
+    @Value("${device.locktime.SIGMA}")
+    public long lockTimeSigma ;
+    @Value("${device.whitelist.ALFRED}")
+    private String whiteListDeviceAlfred;
+    @Value("${device.whitelist.SIGMA}")
+    private String whiteListDeviceSigma;
     @Value("${device.login.max.count.ALFRED}")
     public int maxDeviceAlfred ;
     @Value("${device.login.max.count.SIGMA}")
@@ -33,16 +39,20 @@ public class DeviceBlockUtil {
     public void saveDeviceRedis(String mobileNumber, UserSessionEntity userSessionEntity){
         String key = userSessionEntity.getDevice()+"_"+userSessionEntity.getBrowser() ;
         log.info("Taking lock on user number {} and userSessionEntity : {} " , mobileNumber , userSessionEntity);
-        Set<String> bypassDevice = Stream.of(whiteListDevice.trim().split("\\s*,\\s*")).collect(Collectors.toSet());
-        if(!bypassDevice.contains(userSessionEntity.getDevice())){
+        Map<String, Long> lockTime = new HashMap<>();
+        lockTime.put(App.ALFRED.name(), lockTimeAlfred);
+        lockTime.put(App.SIGMA.name(), lockTimeSigma);
+        Set<String> bypassDeviceAlfred = Stream.of(whiteListDeviceAlfred.trim().split("\\s*,\\s*")).collect(Collectors.toSet());
+        Set<String> bypassDeviceSigma = Stream.of(whiteListDeviceSigma.trim().split("\\s*,\\s*")).collect(Collectors.toSet());
+        if(!(bypassDeviceAlfred.contains(userSessionEntity.getDevice())||bypassDeviceSigma.contains(userSessionEntity.getDevice()) )){
             Map<String , UserSessionEntity> sessionEntityMap = (Map<String, UserSessionEntity>) redisOperationsService.getFromMap(LockedEntitySet,key);
             if(Objects.isNull(sessionEntityMap)){
                 sessionEntityMap= new HashMap<>();
                 sessionEntityMap.put(mobileNumber, userSessionEntity);
-                redisOperationsService.putToMap(LockedEntitySet , key, sessionEntityMap ,lockTime,TimeUnit.SECONDS);
+                redisOperationsService.putToMap(LockedEntitySet , key, sessionEntityMap ,lockTime.get(userSessionEntity.getBrowser()),TimeUnit.SECONDS);
             }else if (!sessionEntityMap.containsKey(mobileNumber)){
                     sessionEntityMap.put(mobileNumber,userSessionEntity);
-                    redisOperationsService.putToMap(LockedEntitySet , key, sessionEntityMap ,lockTime,TimeUnit.SECONDS);
+                    redisOperationsService.putToMap(LockedEntitySet , key, sessionEntityMap ,lockTime.get(userSessionEntity.getBrowser()),TimeUnit.SECONDS);
             }
         }
         return ;
@@ -51,24 +61,25 @@ public class DeviceBlockUtil {
     public void validateDevice(String deviceId , String appType , String  mobileNumber){
         String key = deviceId+"_"+appType ;
         log.info("checking device lock for  deviceId : {}, appName : {} user number {} " , deviceId , appType , mobileNumber);
-        Set<String> bypassDevice = Stream.of(whiteListDevice.trim().split("\\s*,\\s*")).collect(Collectors.toSet());
-        Map<String , UserSessionEntity> sessionEntityMap = (Map<String, UserSessionEntity>)  redisOperationsService.getFromMap(LockedEntitySet,key);
-        if(!bypassDevice.contains(deviceId) && Objects.nonNull(sessionEntityMap) && !sessionEntityMap.containsKey(mobileNumber)){
-            long finalLastLoginTime = 0l;
-            long lastLoginTime = sessionEntityMap.entrySet().stream()
-                    .filter(entry -> entry.getValue().getCreatedAt().getTime() > finalLastLoginTime)
-                    .mapToLong(entry -> entry.getValue().getCreatedAt().getTime())
-                    .max()
-                    .orElse(0L);
-            long currentTime = new Date().getTime();
-            long diff = TimeUnit.MILLISECONDS.toSeconds(currentTime-lastLoginTime) ;
-            long blockTime = lastLoginTime+TimeUnit.SECONDS.toMillis(lockTime) ;
-            Map<String, Integer> maxDeviceLimits = new HashMap<>();
-            maxDeviceLimits.put("ALFRED", maxDeviceAlfred);
-            maxDeviceLimits.put("SIGMA", maxDeviceSigma);
-            Integer maxDeviceLimit = maxDeviceLimits.get(appType);
-            if (maxDeviceLimit != null && sessionEntityMap.size() >= maxDeviceLimit && (diff < lockTime)) {
-                throw new ManyDeviceLoginException("Hey, you've made multiple log-ins on this device from multiple numbers. Please try with only one phone number. Or try again after " + new Date(blockTime));
+        Set<String> bypassDeviceAlfred = Stream.of(whiteListDeviceAlfred.trim().split("\\s*,\\s*")).collect(Collectors.toSet());
+        Set<String> bypassDeviceSigma = Stream.of(whiteListDeviceSigma.trim().split("\\s*,\\s*")).collect(Collectors.toSet());
+        if(!(bypassDeviceAlfred.contains(deviceId)||bypassDeviceSigma.contains(deviceId) )){
+            Map<String , UserSessionEntity> sessionEntityMap = (Map<String, UserSessionEntity>)  redisOperationsService.getFromMap(LockedEntitySet,key);
+            if( Objects.nonNull(sessionEntityMap) && !sessionEntityMap.containsKey(mobileNumber)){
+                long finalLastLoginTime = 0l;
+                long lastLoginTime = sessionEntityMap.entrySet().stream()
+                        .filter(entry -> entry.getValue().getCreatedAt().getTime() > finalLastLoginTime)
+                        .mapToLong(entry -> entry.getValue().getCreatedAt().getTime())
+                        .max()
+                        .orElse(0L);
+                long blockTime = lastLoginTime+TimeUnit.SECONDS.toMillis(lockTimeAlfred) ;
+                Map<String, Integer> maxDeviceLimits = new HashMap<>();
+                maxDeviceLimits.put(App.ALFRED.name(), maxDeviceAlfred);
+                maxDeviceLimits.put(App.SIGMA.name(), maxDeviceSigma);
+                Integer maxDeviceLimit = maxDeviceLimits.get(appType);
+                if (Objects.nonNull(maxDeviceLimit) && sessionEntityMap.size() >= maxDeviceLimit) {
+                    throw new ManyDeviceLoginException("Hey, you've made multiple log-ins on this device from multiple numbers. Please try with only one phone number. Or try again after " + new Date(blockTime));
+                }
             }
         }
         return  ;
