@@ -65,7 +65,7 @@ public class DeviceBlockUtil {
         Set<String> bypassDeviceSigma = Stream.of(whiteListDeviceSigma.trim().split("\\s*,\\s*")).collect(Collectors.toSet());
         if(!(bypassDeviceAlfred.contains(deviceId)||bypassDeviceSigma.contains(deviceId) )){
             Map<String , UserSessionEntity> sessionEntityMap = (Map<String, UserSessionEntity>)  redisOperationsService.getFromMap(LockedEntitySet,key);
-            if( Objects.nonNull(sessionEntityMap) && !sessionEntityMap.containsKey(mobileNumber)){
+            if( MapUtils.isNotEmpty(sessionEntityMap) && !sessionEntityMap.containsKey(mobileNumber)){
                 long finalLastLoginTime = 0l;
                 long lastLoginTime = sessionEntityMap.entrySet().stream()
                         .filter(entry -> entry.getValue().getCreatedAt().getTime() > finalLastLoginTime)
