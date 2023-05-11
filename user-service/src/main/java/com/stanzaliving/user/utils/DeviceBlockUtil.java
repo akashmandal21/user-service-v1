@@ -68,7 +68,7 @@ public class DeviceBlockUtil {
             maxDeviceLimits.put("SIGMA", maxDeviceSigma);
             Integer maxDeviceLimit = maxDeviceLimits.get(appType);
             if (maxDeviceLimit != null && sessionEntityMap.size() >= maxDeviceLimit && (diff < lockTime)) {
-                throw new ManyDeviceLoginException("Too Many logins on this device from different numbers. Please try with the same number, or try after " + new Date(blockTime));
+                throw new ManyDeviceLoginException("Hey, you've made multiple log-ins on this device from multiple numbers. Please try with only one phone number. Or try again after " + new Date(blockTime));
             }
         }
         return  ;
