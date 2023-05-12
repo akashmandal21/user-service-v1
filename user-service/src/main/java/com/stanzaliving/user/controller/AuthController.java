@@ -15,9 +15,11 @@ import com.stanzaliving.core.base.exception.UserValidationException;
 import com.stanzaliving.core.user.enums.App;
 import com.stanzaliving.core.user.enums.OtpType;
 import com.stanzaliving.user.service.*;
+import com.stanzaliving.user.utils.DeviceBlockUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.util.Pair;
 import org.springframework.web.bind.annotation.*;
 
 import com.stanzaliving.booking.dto.BookingResponseDto;
@@ -69,9 +71,15 @@ public class AuthController {
 	@Autowired
 	private OtpService otpService;
 
-	@PostMapping("login")
-	public ResponseDto<Void> login(@RequestBody @Valid LoginRequestDto loginRequestDto, HttpServletRequest request, HttpServletResponse response) {
+	@Autowired
+	private DeviceBlockUtil deviceBlockUtil ;
 
+	@PostMapping("login")
+	public ResponseDto<Void> login(@RequestBody @Valid LoginRequestDto loginRequestDto, HttpServletRequest request, HttpServletResponse response, @RequestHeader(name = "app", required = false) App app, @RequestHeader(name = "deviceId", required = false) String deviceId) {
+
+		if(StringUtils.isNotBlank(deviceId)&&(App.ALFRED.equals(app)||App.SIGMA.equals(app))){
+			 deviceBlockUtil.validateDevice(deviceId,app.name() ,loginRequestDto.getMobile()) ;
+		}
 		authService.login(loginRequestDto);
 
 		SecureCookieUtil.handleLogOutResponse(request, response);
@@ -107,7 +115,9 @@ public class AuthController {
 				}
 
 			}
-
+			if(StringUtils.isNotBlank(deviceId)&&(App.ALFRED.equals(app)||App.SIGMA.equals(app))){
+				deviceBlockUtil.saveDeviceRedis(otpValidateRequestDto.getMobile() ,userSessionEntity) ;
+			}
 			return ResponseDto.success("User Login Successfull", UserAdapter.getAclUserDto(userProfileDto, aclService.getUserDeptLevelRoleNameUrlExpandedDtoFe(userProfileDto.getUuid())));
 		}
 
