@@ -6,6 +6,7 @@ package com.stanzaliving.user.kafka.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.stanzaliving.core.enums.Source;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
 import com.stanzaliving.user.constants.NotificationKeys;
 
@@ -84,8 +85,40 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 		}
 	}
 
+	@Override
+	public void sendOtpToKafkaV2(OtpEntity otpEntity, UserEntity userEntity, Source source) {
+		try {
+			userExecutor.execute(() -> {
+				if(Objects.isNull(otpEntity.getOtpType())) {
+					otpEntity.setOtpType(OtpType.MOBILE_VERIFICATION);
+				}
+				switch (otpEntity.getOtpType()) {
+
+					case EMAIL_VERIFICATION:
+						sendOtpOnMail(otpEntity, userEntity);
+						break;
+
+					default:
+						log.error("sending default via mail and email");
+						sendOtpOnMobileV2(otpEntity,source);
+						sendOtpOnMail(otpEntity, null);
+						break;
+				}
+			});
+
+		} catch (Exception e) {
+			log.error("OTP Queue Overflow : ", e);
+			throw new StanzaException(Otp.ERROR_SENDING_OTP, e);
+		}
+	}
+
 	private void sendOtpOnMobile(OtpEntity otpEntity) {
 		SmsDto otpDto = getSms(otpEntity);
+
+		sendMessage(otpDto);
+	}
+	private void sendOtpOnMobileV2(OtpEntity otpEntity,Source source) {
+		SmsDto otpDto = getSmsV2(otpEntity,source);
 
 		sendMessage(otpDto);
 	}
@@ -94,6 +127,18 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 		//SmsType smsType = getSmsType();
 		return SmsDto.builder()
 				.smsType(SmsType.OTP_V2)
+				.isoCode(otpEntity.getIsoCode())
+				.mobile(otpEntity.getMobile())
+				.text(getOtpMessageForUserType(otpEntity, null, false))
+				.templateId(getNotificationTemplateId(otpEntity))
+				.otp(otpEntity.getOtp().toString())
+				.retryCount(otpEntity.getResendCount())
+				.build();
+	}
+	private SmsDto getSmsV2(OtpEntity otpEntity,Source source) {
+		//SmsType smsType = getSmsType();
+		return SmsDto.builder()
+				.smsType(Objects.nonNull(source) && Source.ALFRED.equals(source)?SmsType.OTP_V2:SmsType.OTP)
 				.isoCode(otpEntity.getIsoCode())
 				.mobile(otpEntity.getMobile())
 				.text(getOtpMessageForUserType(otpEntity, null, false))
