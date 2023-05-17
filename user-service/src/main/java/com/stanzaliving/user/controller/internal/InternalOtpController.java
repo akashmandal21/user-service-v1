@@ -68,7 +68,7 @@ public class InternalOtpController {
 
 		try {
 
-			otpService.resendMobileOtp(mobileOtpRequestDto.getMobile(), mobileOtpRequestDto.getIsoCode(), mobileOtpRequestDto.getOtpType());
+			otpService.resendMobileOtp(mobileOtpRequestDto.getMobile(), mobileOtpRequestDto.getIsoCode(), mobileOtpRequestDto.getOtpType(),null);
 
 			return ResponseDto.success("OTP resent to mobile");
 
