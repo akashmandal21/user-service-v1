@@ -124,34 +124,31 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 	}
 
 	private SmsDto getSms(OtpEntity otpEntity) {
-		//SmsType smsType = getSmsType();
 		return SmsDto.builder()
-				.smsType(SmsType.OTP_V2)
+				.smsType(SmsType.OTP)
 				.isoCode(otpEntity.getIsoCode())
 				.mobile(otpEntity.getMobile())
 				.text(getOtpMessageForUserType(otpEntity, null, false))
-				.templateId(getNotificationTemplateId(otpEntity))
+				.templateId(getNotificationTemplateId(otpEntity,SmsType.OTP))
 				.otp(otpEntity.getOtp().toString())
 				.retryCount(otpEntity.getResendCount())
 				.build();
 	}
 	private SmsDto getSmsV2(OtpEntity otpEntity,Source source) {
-		//SmsType smsType = getSmsType();
+		SmsType smsType = getSmsType(source);
 		return SmsDto.builder()
-				.smsType(Objects.nonNull(source) && Source.ALFRED.equals(source)?SmsType.OTP_V2:SmsType.OTP)
+				.smsType(smsType)
 				.isoCode(otpEntity.getIsoCode())
 				.mobile(otpEntity.getMobile())
 				.text(getOtpMessageForUserType(otpEntity, null, false))
-				.templateId(getNotificationTemplateId(otpEntity))
+				.templateId(getNotificationTemplateId(otpEntity,smsType))
 				.otp(otpEntity.getOtp().toString())
 				.retryCount(otpEntity.getResendCount())
 				.build();
 	}
 
-	private SmsType getSmsType() {
-		Random rand = new Random();
-		int randomNumber = rand.nextInt(25);
-		if(randomNumber % 2 ==0){
+	private SmsType getSmsType(Source source) {
+		if(Objects.nonNull(source) && Source.ALFRED.equals(source)){
 			return SmsType.OTP_V2;
 		}
 		return SmsType.OTP;
@@ -286,7 +283,7 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 		return message;
 	}
 
-	private String getNotificationTemplateId(OtpEntity otpEntity) {
+	private String getNotificationTemplateId(OtpEntity otpEntity,SmsType smsType) {
 		if (OtpType.MOBILE_VERIFICATION == otpEntity.getOtpType()) {
 			return NotificationKeys.MOBILE_VERIFICATION_OTP_MSG;
 		} else if (OtpType.EMAIL_VERIFICATION == otpEntity.getOtpType()) {
@@ -294,10 +291,11 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 		} else if (OtpType.USER_VERFICATION == otpEntity.getOtpType()) {
 			return NotificationKeys.USER_VERIFICATION_OTP_MSG;
 		} else {
-			//if(SmsType.OTP_V2.equals(smsType)){
+			if(SmsType.OTP_V2.equals(smsType)){
 				return NotificationKeys.OTP_V2_MSG;
-			//}
-			/*switch (otpEntity.getUserType()) {
+			}
+			else {
+			switch (otpEntity.getUserType()) {
 				case STUDENT:
 					return NotificationKeys.STUDENT_OTP_MSG_NEW;
 				case PARENT:
@@ -314,7 +312,8 @@ public class KafkaUserServiceImpl implements KafkaUserService {
 					return NotificationKeys.PROCUREMENT_OTP_MSG_NEW;
 				default:
 					return NotificationKeys.DEFAULT_OTP_MSG_NEW;
-			}*/
+			}
+			}
 		}
 	}
 
