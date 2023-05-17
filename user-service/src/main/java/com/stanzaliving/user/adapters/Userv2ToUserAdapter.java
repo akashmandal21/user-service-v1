@@ -24,6 +24,7 @@ public class Userv2ToUserAdapter {
                 .mobile(String.valueOf(userv2.getMobileNumber()))
                 .emailVerified(userv2.isEmailVerified())
                 .mobileVerified(userv2.isMobileVerified())
+                .migrated(true)
                 .userType(Objects.nonNull(userv2.getUserProfileDto().getOldUserType())?
                         userv2.getUserProfileDto().getOldUserType():
                         userv2.getUserProfileDto().getUserType())

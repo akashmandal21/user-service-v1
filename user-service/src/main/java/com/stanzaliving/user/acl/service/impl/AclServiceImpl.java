@@ -119,7 +119,7 @@ public class AclServiceImpl implements AclService {
 	private List<UserDeptLevelRoleNameUrlExpandedDto> getUserDeptLevelRoleNameUrlExpandedDto(String userUuid) {
 		UserEntity userEntity = userDbService.findByUuidAndStatus(userUuid, true);
 		boolean isActiveInOldUser = true;
-		if (Objects.isNull(userEntity)) {
+		if (Objects.isNull(userEntity) || userEntity.isMigrated()) {
 			isActiveInOldUser = false;
 			com.stanzaliving.user.dto.userv2.UserDto user = userV2FeignService.getActiveUserByUuid(userUuid);
 			if (Objects.nonNull(user)) {
