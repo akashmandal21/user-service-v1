@@ -86,7 +86,7 @@ public class AuthServiceImpl implements AuthService {
 
 		UserEntity userEntity = getActiveUser(loginRequestDto);
 
-		otpService.sendLoginOtp(userEntity);
+		otpService.sendLoginOtp(userEntity, Objects.nonNull(loginRequestDto.getUserSource())?loginRequestDto.getUserSource():null);
 
 		log.info("OTP sent for User: " + userEntity.getUuid() + " for Login");
 

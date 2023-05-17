@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.stanzaliving.core.enums.Source;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -80,7 +81,7 @@ public class OtpServiceImpl implements OtpService {
 	private PauseOtpService blacklistUserService;
 
 	@Override
-	public void sendLoginOtp(UserEntity userEntity) {
+	public void sendLoginOtp(UserEntity userEntity, Source source) {
 
 		OtpEntity currentOtp = otpDbService.getUserOtpByUserId(userEntity.getUuid(), OtpType.LOGIN);
 		OtpEntity userOtp;
@@ -97,7 +98,7 @@ public class OtpServiceImpl implements OtpService {
 		log.info("Sending OTP: " + userOtp.getOtp() + " for User: " + userOtp.getUserId() + " for login");
 		
 		if(!blacklistUserService.checkIfNeedToStop(userEntity.getMobile())) {
-			kafkaUserService.sendOtpToKafka(userOtp, null);
+			kafkaUserService.sendOtpToKafkaV2(userOtp, null,source);
 		}else {
 			log.info("Not sending as user is blacklisted");
 		}
@@ -239,11 +240,11 @@ public class OtpServiceImpl implements OtpService {
 
 	@Override
 	public void resendLoginOtp(LoginRequestDto loginRequestDto) {
-		resendMobileOtp(loginRequestDto.getMobile(), loginRequestDto.getIsoCode(), OtpType.LOGIN);
+		resendMobileOtp(loginRequestDto.getMobile(), loginRequestDto.getIsoCode(), OtpType.LOGIN,Objects.nonNull(loginRequestDto.getUserSource())?loginRequestDto.getUserSource():null);
 	}
 
 	@Override
-	public void resendMobileOtp(String mobile, String isoCode, OtpType otpType) {
+	public void resendMobileOtp(String mobile, String isoCode, OtpType otpType, Source source) {
 		OtpEntity userOtp = getLastActiveOtp(mobile, isoCode, otpType);
 
 		if (userOtp == null) {
@@ -261,7 +262,7 @@ public class OtpServiceImpl implements OtpService {
 		userOtp = otpDbService.updateAndFlush(userOtp);
 
 		log.info("Re-Sending OTP: " + userOtp.getOtp() + " for Mobile: " + userOtp.getMobile() + " of Type " + otpType);
-		kafkaUserService.sendOtpToKafka(userOtp, null);
+		kafkaUserService.sendOtpToKafkaV2(userOtp, null,source);
 	}
 
 	@Override

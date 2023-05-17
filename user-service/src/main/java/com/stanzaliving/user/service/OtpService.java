@@ -3,6 +3,7 @@
  */
 package com.stanzaliving.user.service;
 
+import com.stanzaliving.core.enums.Source;
 import com.stanzaliving.core.user.enums.OtpType;
 import com.stanzaliving.core.user.request.dto.EmailOtpValidateRequestDto;
 import com.stanzaliving.core.user.request.dto.EmailVerificationRequestDto;
@@ -20,7 +21,7 @@ import com.stanzaliving.user.entity.UserEntity;
  */
 public interface OtpService {
 
-	void sendLoginOtp(UserEntity userEntity);
+	void sendLoginOtp(UserEntity userEntity, Source source);
 
 	void validateLoginOtp(OtpValidateRequestDto otpValidateRequestDto);
 
@@ -28,7 +29,7 @@ public interface OtpService {
 
 	void resendLoginOtp(LoginRequestDto loginRequestDto);
 
-	void resendMobileOtp(String mobile, String isoCode, OtpType otpType);
+	void resendMobileOtp(String mobile, String isoCode, OtpType otpType, Source source);
 
 	void sendMobileOtp(MobileOtpRequestDto mobileOtpRequestDto);
 

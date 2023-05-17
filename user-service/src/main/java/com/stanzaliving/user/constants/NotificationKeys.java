@@ -27,4 +27,6 @@ public class NotificationKeys {
 	public static final String FINANCE_OTP_MSG_NEW="1707165955200998708";
 	public static final String PROCUREMENT_OTP_MSG_NEW="1707165955200998708";
 	public static final String DEFAULT_OTP_MSG_NEW="1707165955200998708";
+
+	public static final String OTP_V2_MSG="6450ba85d6fc05744e157f72";
 }
