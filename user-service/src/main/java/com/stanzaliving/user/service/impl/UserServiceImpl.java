@@ -359,6 +359,10 @@ public class UserServiceImpl implements UserService {
 
 		log.info("Searching users in list: {}",userUuidList);
 
+		userUuidList = userUuidList.stream().filter(Objects::nonNull).distinct().collect(Collectors.toList());
+
+		log.info("Searching distinct users in list: {}",userUuidList);
+
 		List<UserEntity> userEntityList = userDbService.findAllByUuidInAndStatus(userUuidList, true);
 		List<com.stanzaliving.user.dto.userv2.UserDto> userDtos=userV2FeignService.getUsersList(userUuidList);
 		if(userDtos.size()>0){
