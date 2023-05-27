@@ -7,10 +7,7 @@ import com.stanzaliving.core.base.common.dto.PageResponse;
 import com.stanzaliving.core.base.common.dto.PaginationRequest;
 import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
-import com.stanzaliving.core.base.exception.ApiValidationException;
-import com.stanzaliving.core.base.exception.NoRecordException;
-import com.stanzaliving.core.base.exception.StanzaException;
-import com.stanzaliving.core.base.exception.UserValidationException;
+import com.stanzaliving.core.base.exception.*;
 import com.stanzaliving.core.base.utils.PhoneNumberUtils;
 import com.stanzaliving.core.generic.dto.UIKeyValue;
 import com.stanzaliving.core.kafka.dto.KafkaDTO;
@@ -1222,14 +1219,14 @@ public class UserServiceImpl implements UserService {
 			userEntity = userDbService.findByMobileNotMigrated(mobileNo,false);
 
 			if(Objects.isNull(userEntity)){
-				com.stanzaliving.user.dto.userv2.UserDto userDto=userV2FeignService.getActiveUser(Long.parseLong(mobileNo));
+				com.stanzaliving.user.dto.userv2.UserDto userDto=userV2FeignService.getUser(Long.parseLong(mobileNo));
 				if(Objects.nonNull(userDto)) {
 					userEntity = Userv2ToUserAdapter.getUserEntityFromUserv2(userDto);
 				}
 			}
 
 			if (Objects.isNull(userEntity)) {
-				throw new UserValidationException("User not found for mobileNo: " + mobileNo);
+				throw new ResourceNotFoundException("User not found for mobileNo: " + mobileNo);
 			}
 
 			return UserAdapter.getUserProfileDto(userEntity);

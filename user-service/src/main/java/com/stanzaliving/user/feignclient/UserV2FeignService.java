@@ -38,6 +38,17 @@ public class UserV2FeignService {
         catch (Exception e){}
         return null;
     }
+
+    public UserDto getUser(Long mobileNumber){
+        try {
+            ResponseDto<UserDto> userDtoResponseDto = userv2HttpService.getUserForMobileNumber(mobileNumber);
+            if (Objects.nonNull(userDtoResponseDto) && Objects.nonNull(userDtoResponseDto.getData())) {
+                return userDtoResponseDto.getData();
+            }
+        }
+        catch (Exception e){}
+        return null;
+    }
 //
 //    public ResponseDto<UserDto> addUser(@RequestBody AddUserRequestDto addUserRequestDto);
 //

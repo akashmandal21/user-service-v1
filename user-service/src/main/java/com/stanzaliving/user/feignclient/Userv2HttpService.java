@@ -25,6 +25,9 @@ public interface Userv2HttpService {
     @GetMapping(value = "/internal/redirect/mobile/{mobileNumber}")
     ResponseDto<UserDto> getActiveUserForMobileNumber(@PathVariable Long mobileNumber);
 
+    @GetMapping(value = "/internal/redirect/mobile/details/{mobileNumber}")
+    ResponseDto<UserDto> getUserForMobileNumber(@PathVariable Long mobileNumber);
+
     @PostMapping(value = "/internal/redirect/user")
     public ResponseDto<UserDto> addUser(@RequestBody AddUserRequestDto addUserRequestDto);
 
