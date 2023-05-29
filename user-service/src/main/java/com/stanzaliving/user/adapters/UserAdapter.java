@@ -128,6 +128,7 @@ public class UserAdapter {
 				.bloodGroup(profileEntity.getBloodGroup())
 				.arrivalDate(profileEntity.getArrivalDate())
 				.birthday(profileEntity.getBirthday())
+				.isMigrated(userEntity.isMigrated())
 				.nextDestination(profileEntity.getNextDestination())
 				.build();
 	}
@@ -250,6 +251,7 @@ public class UserAdapter {
 				.nationality(userProfileDto.getNationality())
 				.bloodGroup(userProfileDto.getBloodGroup())
 				.arrivalDate(userProfileDto.getArrivalDate())
+				.isMigrated(userProfileDto.isMigrated())
 				.nextDestination(userProfileDto.getNextDestination())
 				.acl(acl)
 				.fcmEnabled(true)
