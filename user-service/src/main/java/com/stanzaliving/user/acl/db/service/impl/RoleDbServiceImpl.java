@@ -9,6 +9,7 @@ import com.stanzaliving.core.sqljpa.service.impl.AbstractJpaServiceImpl;
 import com.stanzaliving.core.sqljpa.specification.utils.CriteriaOperation;
 import com.stanzaliving.core.sqljpa.specification.utils.StanzaSpecificationBuilder;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
+import com.stanzaliving.core.user.acl.enums.Role;
 import com.stanzaliving.user.acl.constants.QueryConstants;
 import com.stanzaliving.user.acl.db.service.RoleDbService;
 import com.stanzaliving.user.acl.entity.RoleEntity;
@@ -116,6 +117,11 @@ public class RoleDbServiceImpl extends AbstractJpaServiceImpl<RoleEntity, Long, 
 	@Override
 	public List<RoleEntity> findByUuidInAndStatusAndMigrated(List<String> first, boolean status, boolean migrated) {
 		return getJpaRepository().findByUuidInAndStatusAndMigrated(first,status,migrated);
+	}
+
+	@Override
+	public List<RoleEntity> findByRoleNameIn(List<String> roleNames) {
+		return getJpaRepository().findByRoleNameIn(roleNames);
 	}
 
 }

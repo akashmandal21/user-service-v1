@@ -10,6 +10,7 @@ import com.stanzaliving.core.user.dto.UserFilterDto;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
 import com.stanzaliving.user.acl.entity.RoleEntity;
+import com.stanzaliving.user.dto.userv2.SimpleUserDto;
 import com.stanzaliving.user.dto.userv2.UpdateUserDto;
 import com.stanzaliving.user.dto.userv2.UserAttributesDto;
 import com.stanzaliving.user.dto.userv2.UserDto;
@@ -98,4 +99,7 @@ public interface Userv2HttpService {
 
     @GetMapping(value = "/internal/redirect/user/{userUuid}/active")
     ResponseDto<UserDto> getActiveUserByUuid(@PathVariable String userUuid);
+
+    @PostMapping(value = "/internal/redirect/role/user/active")
+    ResponseDto<List<SimpleUserDto>> getActiveUsersForRoleNames(@RequestBody List<String> roleNames);
 }

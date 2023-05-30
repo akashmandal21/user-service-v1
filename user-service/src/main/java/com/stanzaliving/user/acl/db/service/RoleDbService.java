@@ -7,6 +7,7 @@ import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.sqljpa.service.AbstractJpaService;
 import com.stanzaliving.core.user.acl.dto.RoleDto;
+import com.stanzaliving.core.user.acl.enums.Role;
 import com.stanzaliving.user.acl.entity.RoleEntity;
 import org.apache.kafka.common.protocol.types.Field;
 
@@ -40,4 +41,6 @@ public interface RoleDbService extends AbstractJpaService<RoleEntity, Long> {
 	List<RoleEntity> findByRoleNameAndDepartmentNotMigrated(List<String> roleNames, Department department, boolean migrated);
 
     List<RoleEntity> findByUuidInAndStatusAndMigrated(List<String> first, boolean status, boolean migrated);
+
+    List<RoleEntity> findByRoleNameIn(List<String> roleNames);
 }

@@ -20,6 +20,7 @@ import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleByEmailReq
 import com.stanzaliving.core.user.acl.request.dto.AddUserDeptLevelRoleRequestDto;
 import com.stanzaliving.core.user.dto.response.UserContactDetailsResponseDto;
 import com.stanzaliving.transformations.pojo.CityMetadataDto;
+import com.stanzaliving.user.dto.userv2.SimpleUserDto;
 
 import java.util.List;
 import java.util.Map;
@@ -74,4 +75,6 @@ public interface AclUserService {
 	List<CityMicromarketDropdownResponseDto> getCityMicromarketDropdown(MicromarketAndResidencesDropdownRequestDto requestDto);
 
 	void addRoleV2(AddUserDeptLevelRoleRequestDto addUserDeptLevelRoleDto);
+
+	List<SimpleUserDto> getActiveUsersForRoleNames(List<String> roleNames);
 }

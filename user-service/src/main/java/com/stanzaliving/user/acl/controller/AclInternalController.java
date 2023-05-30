@@ -12,6 +12,8 @@ import com.stanzaliving.core.user.acl.dto.UserAccessLevelIdsByRoleNameDto;
 import com.stanzaliving.core.user.acl.dto.UserAccessLevelIdsByRoleNameWithFiltersDto;
 import com.stanzaliving.core.user.acl.dto.UsersByFiltersRequestDto;
 import com.stanzaliving.core.user.dto.response.UserContactDetailsResponseDto;
+import com.stanzaliving.user.dto.userv2.SimpleUserDto;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -100,5 +102,14 @@ public class AclInternalController {
 		log.info("Fetching user by {} ", userAccessLevelIdsByRoleNameWithFiltersDto);
 
 		return ResponseDto.success("Found User", aclUserService.getUsersForRolesWithFilters(userAccessLevelIdsByRoleNameWithFiltersDto));
+	}
+
+	@PostMapping("/activeUsersForRoles")
+	@ApiOperation("get active list of users for roles")
+	public ResponseDto<List<SimpleUserDto>> getActiveUsersForRoles(@RequestBody List<String> roleNames) {
+
+		log.info("Fetching users for roleNames {} ", roleNames);
+
+		return ResponseDto.success("Found User", aclUserService.getActiveUsersForRoleNames(roleNames));
 	}
 }

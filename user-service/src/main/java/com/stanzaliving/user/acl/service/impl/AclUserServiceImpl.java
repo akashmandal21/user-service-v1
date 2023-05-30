@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.stanzaliving.boq_service.dto.LabelValueDto;
 import com.stanzaliving.core.base.enums.AccessModule;
 import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.transformation.client.cache.TransformationCache;
@@ -45,6 +46,8 @@ import com.stanzaliving.user.acl.repository.RoleRepository;
 import com.stanzaliving.user.acl.repository.UserDepartmentLevelRepository;
 import com.stanzaliving.user.acl.repository.UserDepartmentLevelRoleRepository;
 import com.stanzaliving.user.adapters.Userv2ToUserAdapter;
+import com.stanzaliving.user.dto.userv2.SimpleUserDto;
+import com.stanzaliving.user.entity.UserProfileEntity;
 import com.stanzaliving.user.feignclient.UserV2FeignService;
 import com.stanzaliving.user.feignclient.Userv2HttpService;
 import org.apache.commons.collections.CollectionUtils;
@@ -1446,6 +1449,43 @@ public class AclUserServiceImpl implements AclUserService {
 
 		userDepartmentLevelRoleService.addRoles(userDepartmentLevelEntity.getUuid(), addUserDeptLevelRoleDto.getRolesUuid());
 		publishCurrentRoleSnapshot(addUserDeptLevelRoleDto.getUserUuid());
+	}
+
+	@Override
+	public List<SimpleUserDto> getActiveUsersForRoleNames(List<String> roleNames) {
+		List<SimpleUserDto> simpleUserDtosV2=userV2FeignService.getActiveUsersForRoleNames(roleNames);
+		List<SimpleUserDto> simpleUserDtosV1=new ArrayList<>();
+
+		List<RoleEntity> roles=roleDbService.findByRoleNameIn(roleNames);
+
+		if(CollectionUtils.isNotEmpty(roles)){
+			List<String> roleUuids=roles.stream().map(f->f.getUuid()).collect(Collectors.toList());
+			List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntities=userDepartmentLevelRoleDbService.findByRoleUuidInAndStatus(roleUuids,true);
+			if(CollectionUtils.isNotEmpty(userDepartmentLevelRoleEntities)) {
+				List<String> userdlUuids = userDepartmentLevelRoleEntities.stream().map(f->f.getUserDepartmentLevelUuid()).collect(Collectors.toList());
+				List<UserDepartmentLevelEntity> userDepartmentLevelEntities=userDepartmentLevelDbService.findByUuidIn(userdlUuids);
+				if(CollectionUtils.isNotEmpty(userDepartmentLevelEntities)){
+					List<String> userUuids=userDepartmentLevelEntities.stream().map(f->f.getUserUuid()).collect(Collectors.toList());
+					List<UserEntity> userEntities=userDbService.findByUuidIn(userUuids);
+
+					for(UserEntity userEntity:userEntities){
+						UserProfileEntity userProfile=userEntity.getUserProfile();
+						simpleUserDtosV1.add(SimpleUserDto.builder()
+								.labelValueDto(new LabelValueDto<>(userEntity.getUuid(),userProfile.getFirstName()+" "+userProfile.getLastName()))
+								.email(userEntity.getEmail())
+								.mobile(userEntity.getMobile())
+								.build());
+					}
+
+				}
+			}
+		}
+
+		if(CollectionUtils.isNotEmpty(simpleUserDtosV2)){
+			simpleUserDtosV1.addAll(simpleUserDtosV2);
+		}
+
+		return simpleUserDtosV1;
 	}
 
 	private List<UserProfileDto> getAllActiveUserByUserUuid(List<String> userId) {

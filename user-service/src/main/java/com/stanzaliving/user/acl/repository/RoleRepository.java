@@ -6,6 +6,7 @@ package com.stanzaliving.user.acl.repository;
 import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.sqljpa.repository.AbstractJpaRepository;
+import com.stanzaliving.core.user.acl.enums.Role;
 import com.stanzaliving.user.acl.entity.RoleEntity;
 import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.stereotype.Repository;
@@ -37,4 +38,6 @@ public interface RoleRepository extends AbstractJpaRepository<RoleEntity, Long> 
     List<RoleEntity> findByUuidInAndStatusAndMigrated(List<String> roleUuids, boolean status, boolean migrated);
 
 	List<RoleEntity> findByRoleNameInAndDepartmentAndMigrated(List<String> roleNames, Department department, boolean migrated);
+
+    List<RoleEntity> findByRoleNameIn(List<String> roleNames);
 }
