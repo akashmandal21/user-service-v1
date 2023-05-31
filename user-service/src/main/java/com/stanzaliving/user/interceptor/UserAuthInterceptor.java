@@ -78,7 +78,8 @@ public class UserAuthInterceptor extends HandlerInterceptorAdapter {
 
 					markInactiveIfSessionExpired(isSessionExpired, userSession);
 
-					setUpdatedAtAndSave(userSession);
+					if(isSessionExpired)
+						setUpdatedAtAndSave(userSession);
 
 					sessionExpirationCheck(isSessionExpired, request, response);
 
