@@ -7,6 +7,9 @@ import com.stanzaliving.core.base.common.dto.ResponseDto;
 import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleNameUrlExpandedDto;
 import com.stanzaliving.core.user.acl.request.dto.UserAccessDto;
 import com.stanzaliving.user.acl.service.AclService;
+import com.stanzaliving.user.acl.service.AclUserService;
+import com.stanzaliving.user.dto.userv2.SimpleUserDto;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +32,9 @@ public class AclController {
 
 	@Autowired
 	private AclService aclService;
+
+	@Autowired
+	private AclUserService aclUserService;
 
 	@PostMapping("check")
 	public ResponseDto<Boolean> isAccessible(@RequestBody @Valid UserAccessDto userAccessDto) {
@@ -62,6 +68,15 @@ public class AclController {
 		log.info("Request received to getUserRolesBe for user : " + userUuid);
 		return ResponseDto.success(aclService.getUserDeptLevelRoleNameUrlExpandedDtoBe(userUuid));
 
+	}
+
+	@PostMapping("/activeUsersForRoles")
+	@ApiOperation("get active list of users for roles")
+	public ResponseDto<List<SimpleUserDto>> getActiveUsersForRoles(@RequestBody List<String> roleNames) {
+
+		log.info("Fetching users for roleNames {} ", roleNames);
+
+		return ResponseDto.success("Found User", aclUserService.getActiveUsersForRoleNames(roleNames));
 	}
 
 }
