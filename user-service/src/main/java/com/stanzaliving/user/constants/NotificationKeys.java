@@ -3,7 +3,7 @@ package com.stanzaliving.user.constants;
 public class NotificationKeys {
 
 	//{#var#} is OTP to verify your phone number with Stanza Living
-	public static final String MOBILE_VERIFICATION_OTP_MSG="1707163756428389949";
+	public static final String MOBILE_VERIFICATION_OTP_MSG="1707168613866522571";
 	//{#var#} is OTP to verify your email with Stanza Living
 	public static final String EMAIL_VERIFICATION_OTP_MSG="1707161200356744733";
 	//{#var#} is your OTP to authenticate with Stanza Living
