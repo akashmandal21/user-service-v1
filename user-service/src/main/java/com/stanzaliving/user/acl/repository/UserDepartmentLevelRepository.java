@@ -4,6 +4,7 @@ import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.sqljpa.repository.AbstractJpaRepository;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -34,4 +35,12 @@ public interface UserDepartmentLevelRepository extends AbstractJpaRepository<Use
     UserDepartmentLevelEntity findByUuid(String uuid);
 
     List<UserDepartmentLevelEntity> findByUserUuidIn(List<String> userUuids);
+
+    @Query("SELECT r.roleName FROM com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity udl  " +
+            "inner join com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity udlr  " +
+            "on udl.uuid=udlr.userDepartmentLevelUuid  " +
+            "inner join com.stanzaliving.user.acl.entity.RoleEntity r  " +
+            "on udlr.roleUuid=r.uuid  " +
+            "where udl.userUuid= :uuid and udl.status=1")
+    List<String> findListOfRoles(String uuid);
 }
