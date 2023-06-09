@@ -5,6 +5,7 @@ import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.sqljpa.repository.AbstractJpaRepository;
 import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -36,11 +37,19 @@ public interface UserDepartmentLevelRepository extends AbstractJpaRepository<Use
 
     List<UserDepartmentLevelEntity> findByUserUuidIn(List<String> userUuids);
 
-    @Query("SELECT r.roleName FROM com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity udl  " +
-            "inner join com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity udlr  " +
-            "on udl.uuid=udlr.userDepartmentLevelUuid  " +
-            "inner join com.stanzaliving.user.acl.entity.RoleEntity r  " +
-            "on udlr.roleUuid=r.uuid  " +
-            "where udl.userUuid= :uuid and udl.status=1")
-    List<String> findListOfRoles(String uuid);
+    @Query(value = "SELECT r.role_name FROM user_department_level udl\n" +
+            "inner join user_department_level_roles udlr\n" +
+            "on udl.uuid=udlr.user_department_level_uuid\n" +
+            "inner join roles r\n" +
+            "on udlr.role_uuid=r.uuid\n" +
+            "where udl.user_uuid=:uuid and udl.status=:status",nativeQuery = true)
+    List<String> findRoleNames(String uuid,boolean status);
+
+//    @Query(value = "SELECT r.roleName FROM com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity udl  " +
+//            "inner join com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity udlr  " +
+//            "on udl.uuid=udlr.userDepartmentLevelUuid  " +
+//            "inner join com.stanzaliving.user.acl.entity.RoleEntity r  " +
+//            "on udlr.roleUuid=r.uuid  " +
+//            "where udl.userUuid= :uuid and udl.status= :status")
+//    List<String> findRoleNames(@Param("uuid") String uuid, @Param("status") int status);
 }

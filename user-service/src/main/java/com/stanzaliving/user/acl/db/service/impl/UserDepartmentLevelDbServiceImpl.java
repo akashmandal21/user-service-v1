@@ -64,6 +64,6 @@ public class UserDepartmentLevelDbServiceImpl extends AbstractJpaServiceImpl<Use
 
     @Override
     public List<String> findListOfRoles(String uuid) {
-        return getJpaRepository().findListOfRoles(uuid);
+        return getJpaRepository().findRoleNames(uuid,true);
     }
 }
