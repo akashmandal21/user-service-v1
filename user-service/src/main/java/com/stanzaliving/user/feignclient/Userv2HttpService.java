@@ -98,4 +98,7 @@ public interface Userv2HttpService {
 
     @GetMapping(value = "/internal/redirect/user/{userUuid}/active")
     ResponseDto<UserDto> getActiveUserByUuid(@PathVariable String userUuid);
+
+    @PostMapping(value = "internal/redirect/role/permission/check")
+    ResponseDto<Boolean> checkIfPermissionPresent(@RequestParam String userUuid,@RequestBody List<String> roleNames);
 }

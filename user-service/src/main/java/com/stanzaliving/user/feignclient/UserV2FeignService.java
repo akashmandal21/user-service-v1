@@ -277,4 +277,14 @@ public class UserV2FeignService {
         return null;
     }
 
+    public boolean checkIfPermissionPresent(String userUuid,List<String> roleNames) {
+        try{
+            ResponseDto<Boolean> responseDto=userv2HttpService.checkIfPermissionPresent(userUuid,roleNames);
+            if (Objects.nonNull(responseDto) && Objects.nonNull(responseDto.getData())) {
+                return responseDto.getData();
+            }
+        }
+        catch (Exception e){}
+        return false;
+    }
 }
