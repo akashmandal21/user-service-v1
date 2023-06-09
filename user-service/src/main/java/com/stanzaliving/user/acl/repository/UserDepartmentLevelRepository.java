@@ -45,11 +45,4 @@ public interface UserDepartmentLevelRepository extends AbstractJpaRepository<Use
             "where udl.user_uuid=:uuid and udl.status=:status",nativeQuery = true)
     List<String> findRoleNames(String uuid,boolean status);
 
-//    @Query(value = "SELECT r.roleName FROM com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity udl  " +
-//            "inner join com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity udlr  " +
-//            "on udl.uuid=udlr.userDepartmentLevelUuid  " +
-//            "inner join com.stanzaliving.user.acl.entity.RoleEntity r  " +
-//            "on udlr.roleUuid=r.uuid  " +
-//            "where udl.userUuid= :uuid and udl.status= :status")
-//    List<String> findRoleNames(@Param("uuid") String uuid, @Param("status") int status);
 }
