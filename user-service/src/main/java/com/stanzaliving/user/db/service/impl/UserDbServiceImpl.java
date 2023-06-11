@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.stanzaliving.user.Projections.UserView;
+import com.stanzaliving.user.entity.UserProfileEntity;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
@@ -24,6 +25,7 @@ import com.stanzaliving.user.repository.UserRepository;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.util.StringUtils;
+import javax.persistence.criteria.Join;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -145,13 +147,15 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 			List<Predicate> predicates = new ArrayList<>();
 
 			if (StringUtils.hasText(userFilterDto.getName())) {
-				Predicate firstNamePredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get(UserQueryConstants.FIRST_NAME)),
+				Join<UserEntity, UserProfileEntity> userProfileJoin = root.join("userProfile");
+				Predicate firstNamePredicate = criteriaBuilder.like(criteriaBuilder.lower(userProfileJoin.get("firstName")),
 						"%" + userFilterDto.getName().toLowerCase() + "%");
-				Predicate lastNamePredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get(UserQueryConstants.LAST_NAME)),
+				Predicate lastNamePredicate = criteriaBuilder.like(criteriaBuilder.lower(userProfileJoin.get("lastName")),
 						"%" + userFilterDto.getName().toLowerCase() + "%");
-				predicates.add(firstNamePredicate);
-				predicates.add(lastNamePredicate);
+				Predicate namePredicate = criteriaBuilder.or(firstNamePredicate, lastNamePredicate);
+				predicates.add(namePredicate);
 			}
+
 
 			if (org.springframework.util.StringUtils.hasText(userFilterDto.getMobile())) {
 				Predicate mobilePredicate = criteriaBuilder.equal(root.get(UserQueryConstants.MOBILE),
