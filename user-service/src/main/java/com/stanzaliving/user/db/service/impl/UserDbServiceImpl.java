@@ -113,6 +113,10 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 			}
 
 			if (StringUtils.isNotBlank(userFilterDto.getName())) {
+				if (StringUtils.isNotBlank(userFilterDto.getName())) {
+					specificationBuilder.with(UserQueryConstants.FIRST_NAME, CriteriaOperation.LIKE, "%" + userFilterDto.getName() + "%");
+					specificationBuilder.with(UserQueryConstants.LAST_NAME, CriteriaOperation.LIKE, "%" + userFilterDto.getName() + "%");
+				}
 				List<UserEntity> userEntities = userRepository.searchByName(userFilterDto.getName());
 				if (CollectionUtils.isNotEmpty(userEntities)) {
 					List<String> userIdList = new ArrayList<>();
