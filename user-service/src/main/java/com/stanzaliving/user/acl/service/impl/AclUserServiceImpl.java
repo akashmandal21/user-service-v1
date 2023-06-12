@@ -1471,7 +1471,8 @@ public class AclUserServiceImpl implements AclUserService {
 					for(UserEntity userEntity:userEntities){
 						UserProfileEntity userProfile=userEntity.getUserProfile();
 						simpleUserDtosV1.add(SimpleUserDto.builder()
-								.labelValueDto(new LabelValueDto<>(userEntity.getUuid(),userProfile.getFirstName()+" "+userProfile.getLastName()))
+								.userName(userProfile.getFirstName()+" "+userProfile.getLastName())
+								.userUuid(userEntity.getUuid())
 								.email(userEntity.getEmail())
 								.mobile(userEntity.getMobile())
 								.build());

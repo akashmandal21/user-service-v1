@@ -10,7 +10,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SimpleUserDto {
-    private LabelValueDto<String> labelValueDto;
+    private String userUuid;
+    private String userName;
     private String mobile;
     private String email;
 }
