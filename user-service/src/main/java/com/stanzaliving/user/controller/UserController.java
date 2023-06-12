@@ -18,6 +18,7 @@ import com.stanzaliving.core.base.exception.UserValidationException;
 import com.stanzaliving.core.user.enums.App;
 import com.stanzaliving.user.entity.UserSessionEntity;
 import com.stanzaliving.user.service.SessionService;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.collections.CollectionUtils;
 import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -287,6 +288,13 @@ public class UserController {
 		userProfileDtos = userService.searchUserList(userFilterDto);
 
 		return ResponseDto.success("Found " + userProfileDtos.size() + " Users for Search Criteria", userProfileDtos);
+	}
+
+
+	@PostMapping("user/search")
+	@ApiOperation("User search by name")
+	public ResponseDto<List<UserProfileDto>> getUsersListByName(@RequestParam String name){
+		return ResponseDto.success("User Listing",userService.getUsersByName(name));
 	}
 
 

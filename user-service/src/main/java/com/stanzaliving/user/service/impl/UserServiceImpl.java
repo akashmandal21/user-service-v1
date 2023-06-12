@@ -66,6 +66,9 @@ import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
@@ -519,6 +522,42 @@ public class UserServiceImpl implements UserService {
 		}
 
 		return UserAdapter.getUserProfileDto(userEntity);
+	}
+
+	@Override
+	public List<UserProfileDto> getUsersByName(String name) {
+		List<com.stanzaliving.user.dto.userv2.UserDto> userv2Dtos=userV2FeignService.getUsersByName(name);
+		List<UserEntity> userV2Entities=new ArrayList<>();
+		List<UserProfileDto> userV2ProfileDtos=new ArrayList<>();
+		if(CollectionUtils.isNotEmpty(userv2Dtos)) {
+			for (com.stanzaliving.user.dto.userv2.UserDto userV2Dto : userv2Dtos) {
+				userV2Entities.add(Userv2ToUserAdapter.getUserEntityFromUserv2(userV2Dto));
+			}
+			userV2ProfileDtos=UserAdapter.getUserProfileDtos(userV2Entities);
+		}
+
+		Specification<UserEntity> specification= Specification.where((root,query,criteriaBuilder)->{
+
+			List<Predicate> predicates = new ArrayList<>();
+
+			Join<UserEntity, UserProfileEntity> userProfileJoin = root.join("userProfile");
+			Predicate firstNamePredicate = criteriaBuilder.like(criteriaBuilder.lower(userProfileJoin.get("firstName")),
+					"%" + name.toLowerCase() + "%");
+			Predicate lastNamePredicate = criteriaBuilder.like(criteriaBuilder.lower(userProfileJoin.get("lastName")),
+					"%" + name.toLowerCase() + "%");
+			Predicate namePredicate = criteriaBuilder.or(firstNamePredicate, lastNamePredicate);
+			predicates.add(namePredicate);
+
+			return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+		});
+
+		List<UserEntity> userEntities=userDbService.findAll(specification);
+		if(CollectionUtils.isNotEmpty(userEntities)) {
+			List<UserProfileDto> userProfileDtos = UserAdapter.getUserProfileDtos(userEntities);
+			userV2ProfileDtos.addAll(userProfileDtos);
+		}
+
+		return userV2ProfileDtos;
 	}
 
 	private void validateConstraint(List<AddUserAndRoleRequestDto> addUserAndRoleRequestDtoList) {

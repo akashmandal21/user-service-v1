@@ -10,10 +10,7 @@ import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleNameUrlExpandedDto;
 import com.stanzaliving.core.user.dto.UserFilterDto;
 import com.stanzaliving.core.user.request.dto.AddUserRequestDto;
 import com.stanzaliving.core.user.request.dto.UpdateUserRequestDto;
-import com.stanzaliving.user.dto.userv2.SimpleUserDto;
-import com.stanzaliving.user.dto.userv2.UpdateUserDto;
-import com.stanzaliving.user.dto.userv2.UserAttributesDto;
-import com.stanzaliving.user.dto.userv2.UserDto;
+import com.stanzaliving.user.dto.userv2.*;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -288,5 +285,17 @@ public class UserV2FeignService {
         }
         catch (Exception e){}
         return Collections.emptyList();
+    }
+
+    public List<UserDto> getUsersByName(String name) {
+        try{
+            ResponseDto<List<UserDto>> responseDto=userv2HttpService.getUsersByName(name);
+            if(Objects.nonNull(responseDto) && CollectionUtils.isNotEmpty(responseDto.getData())){
+                return responseDto.getData();
+            }
+        }
+        catch (Exception e){}
+        return Collections.emptyList();
+
     }
 }

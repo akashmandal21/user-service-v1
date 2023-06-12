@@ -102,4 +102,7 @@ public interface Userv2HttpService {
 
     @PostMapping(value = "/internal/redirect/role/user/active")
     ResponseDto<List<SimpleUserDto>> getActiveUsersForRoleNames(@RequestBody List<String> roleNames);
+
+    @GetMapping(value = "/internal/redirect/user/search/name")
+    ResponseDto<List<UserDto>> getUsersByName(@RequestParam String name);
 }

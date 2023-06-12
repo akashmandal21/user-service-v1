@@ -104,4 +104,6 @@ public interface UserService {
 	Set<UserProfileDto> searchUserList(UserFilterDto userFilterDto);
 
 	UserProfileDto getActiveUsersByEmail(String email);
+
+	List<UserProfileDto> getUsersByName(String name);
 }
