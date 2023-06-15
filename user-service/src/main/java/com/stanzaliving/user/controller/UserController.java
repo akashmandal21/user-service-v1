@@ -142,7 +142,7 @@ public class UserController {
 			@RequestParam(name = "isoCode", required = false) String isoCode,
 			@RequestParam(name = "email", required = false) String email,
 			@RequestParam(name = "userType", required = false) UserType userType,
-			@RequestParam(name = "status",defaultValue = "true", required = false) Boolean status,
+			@RequestParam(name = "status", required = false) Boolean status,
 			@RequestParam(name = "department", required = false) Department department,
 			@RequestParam(name = "name", required = false) String name) {
 
