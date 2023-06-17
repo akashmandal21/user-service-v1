@@ -170,14 +170,11 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserProfileDto getUserByUserId(String userId) {
         log.info("Searching User by UserId: " + userId);
-
-
 		com.stanzaliving.user.dto.userv2.UserDto userDto=userV2FeignService.getUserByUuid(userId);
 		if(Objects.nonNull(userDto)) {
 			UserEntity userEntity=Userv2ToUserAdapter.getUserEntityFromUserv2(userDto);
 			return UserAdapter.getUserProfileDto(userEntity);
-		}
-		else{
+		} else {
 			UserEntity userEntity = userDbService.findByUuidNotMigrated(userId,false);
 			return UserAdapter.getUserProfileDto(userEntity);
 		}
@@ -395,9 +392,9 @@ public class UserServiceImpl implements UserService {
 
 		log.info("userEntity {}", userEntity);
 
-//		if (!userEntity.isStatus()) {
-//			throw new UserValidationException("User is not active");
-//		}
+		if (!userEntity.isStatus()) {
+			throw new UserValidationException("User is not active");
+		}
 
 		return UserAdapter.getUserProfileDto(userEntity);
 	}
@@ -421,9 +418,9 @@ public class UserServiceImpl implements UserService {
 
 		log.info("userEntity {}", userEntity);
 
-//		if (!userEntity.isStatus()) {
-//			throw new UserValidationException("User is not active");
-//		}
+		if (!userEntity.isStatus()) {
+			throw new UserValidationException("User is not active");
+		}
 
 		return UserAdapter.getUserProfileDtoV2(userEntity, userProfileDto);
 	}
@@ -726,7 +723,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public UserManagerAndRoleDto getUserWithManagerAndRole(String userUuid) {
-		UserProfileDto userProfile = getUserProfile(userUuid);
+		UserProfileDto userProfile = getUserByUserId(userUuid);
 		if (userProfile == null) {
 			throw new NoRecordException("Please provide valid userId.");
 		}
