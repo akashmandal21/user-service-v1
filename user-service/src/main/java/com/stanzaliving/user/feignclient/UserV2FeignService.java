@@ -56,6 +56,7 @@ public class UserV2FeignService {
         try {
             ResponseDto<UserDto> userDtoResponseDto = userv2HttpService.getUserByUuid(userUuid);
             if (Objects.nonNull(userDtoResponseDto) && Objects.nonNull(userDtoResponseDto.getData())) {
+                log.info("userDtoResponseDto.getData() {}", userDtoResponseDto.getData());
                 return userDtoResponseDto.getData();
             }
         }

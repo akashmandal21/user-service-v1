@@ -393,9 +393,11 @@ public class UserServiceImpl implements UserService {
 			throw new UserValidationException("User not found for UserId: " + userId);
 		}
 
-		if (!userEntity.isStatus()) {
-			throw new UserValidationException("User is not active");
-		}
+		log.info("userEntity {}", userEntity);
+
+//		if (!userEntity.isStatus()) {
+//			throw new UserValidationException("User is not active");
+//		}
 
 		return UserAdapter.getUserProfileDto(userEntity);
 	}
@@ -417,9 +419,11 @@ public class UserServiceImpl implements UserService {
 			throw new UserValidationException("User not found for UserId: " + userId);
 		}
 
-		if (!userEntity.isStatus()) {
-			throw new UserValidationException("User is not active");
-		}
+		log.info("userEntity {}", userEntity);
+
+//		if (!userEntity.isStatus()) {
+//			throw new UserValidationException("User is not active");
+//		}
 
 		return UserAdapter.getUserProfileDtoV2(userEntity, userProfileDto);
 	}
