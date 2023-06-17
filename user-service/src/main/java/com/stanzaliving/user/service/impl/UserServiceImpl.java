@@ -380,7 +380,6 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public UserProfileDto getUserProfile(String userId) {
-
 		UserEntity userEntity=null;
 		userEntity=userDbService.findByUuidNotMigrated(userId,false);
 		if(Objects.isNull(userEntity)) {
@@ -394,12 +393,15 @@ public class UserServiceImpl implements UserService {
 			throw new UserValidationException("User not found for UserId: " + userId);
 		}
 
+		if (!userEntity.isStatus()) {
+			throw new UserValidationException("User is not active");
+		}
+
 		return UserAdapter.getUserProfileDto(userEntity);
 	}
 
 	@Override
 	public UserProfileDto getUserProfileV2(String userId) {
-
 		UserEntity userEntity=null;
 		userEntity=userDbService.findByUuidNotMigrated(userId,false);
 		com.stanzaliving.user.dto.userv2.UserProfileDto userProfileDto = null;
@@ -413,6 +415,10 @@ public class UserServiceImpl implements UserService {
 
 		if (Objects.isNull(userEntity)) {
 			throw new UserValidationException("User not found for UserId: " + userId);
+		}
+
+		if (!userEntity.isStatus()) {
+			throw new UserValidationException("User is not active");
 		}
 
 		return UserAdapter.getUserProfileDtoV2(userEntity, userProfileDto);
