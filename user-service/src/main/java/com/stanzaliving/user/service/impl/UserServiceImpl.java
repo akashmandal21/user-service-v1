@@ -7,10 +7,7 @@ import com.stanzaliving.core.base.common.dto.PageResponse;
 import com.stanzaliving.core.base.common.dto.PaginationRequest;
 import com.stanzaliving.core.base.enums.AccessLevel;
 import com.stanzaliving.core.base.enums.Department;
-import com.stanzaliving.core.base.exception.ApiValidationException;
-import com.stanzaliving.core.base.exception.NoRecordException;
-import com.stanzaliving.core.base.exception.StanzaException;
-import com.stanzaliving.core.base.exception.UserValidationException;
+import com.stanzaliving.core.base.exception.*;
 import com.stanzaliving.core.base.utils.PhoneNumberUtils;
 import com.stanzaliving.core.generic.dto.UIKeyValue;
 import com.stanzaliving.core.kafka.dto.KafkaDTO;
@@ -173,14 +170,11 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserProfileDto getUserByUserId(String userId) {
         log.info("Searching User by UserId: " + userId);
-
-
 		com.stanzaliving.user.dto.userv2.UserDto userDto=userV2FeignService.getUserByUuid(userId);
 		if(Objects.nonNull(userDto)) {
 			UserEntity userEntity=Userv2ToUserAdapter.getUserEntityFromUserv2(userDto);
 			return UserAdapter.getUserProfileDto(userEntity);
-		}
-		else{
+		} else {
 			UserEntity userEntity = userDbService.findByUuidNotMigrated(userId,false);
 			return UserAdapter.getUserProfileDto(userEntity);
 		}
@@ -359,6 +353,10 @@ public class UserServiceImpl implements UserService {
 
 		log.info("Searching users in list: {}",userUuidList);
 
+		userUuidList = userUuidList.stream().filter(Objects::nonNull).distinct().collect(Collectors.toList());
+
+		log.info("Searching distinct users in list: {}",userUuidList);
+
 		List<UserEntity> userEntityList = userDbService.findAllByUuidInAndStatus(userUuidList, true);
 		List<com.stanzaliving.user.dto.userv2.UserDto> userDtos=userV2FeignService.getUsersList(userUuidList);
 		if(userDtos.size()>0){
@@ -379,7 +377,6 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public UserProfileDto getUserProfile(String userId) {
-
 		UserEntity userEntity=null;
 		userEntity=userDbService.findByUuidNotMigrated(userId,false);
 		if(Objects.isNull(userEntity)) {
@@ -393,12 +390,17 @@ public class UserServiceImpl implements UserService {
 			throw new UserValidationException("User not found for UserId: " + userId);
 		}
 
+		log.info("userEntity {}", userEntity);
+
+		if (!userEntity.isStatus()) {
+			throw new UserValidationException("User is not active");
+		}
+
 		return UserAdapter.getUserProfileDto(userEntity);
 	}
 
 	@Override
 	public UserProfileDto getUserProfileV2(String userId) {
-
 		UserEntity userEntity=null;
 		userEntity=userDbService.findByUuidNotMigrated(userId,false);
 		com.stanzaliving.user.dto.userv2.UserProfileDto userProfileDto = null;
@@ -412,6 +414,12 @@ public class UserServiceImpl implements UserService {
 
 		if (Objects.isNull(userEntity)) {
 			throw new UserValidationException("User not found for UserId: " + userId);
+		}
+
+		log.info("userEntity {}", userEntity);
+
+		if (!userEntity.isStatus()) {
+			throw new UserValidationException("User is not active");
 		}
 
 		return UserAdapter.getUserProfileDtoV2(userEntity, userProfileDto);
@@ -715,7 +723,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public UserManagerAndRoleDto getUserWithManagerAndRole(String userUuid) {
-		UserProfileDto userProfile = getUserProfile(userUuid);
+		UserProfileDto userProfile = getUserByUserId(userUuid);
 		if (userProfile == null) {
 			throw new NoRecordException("Please provide valid userId.");
 		}
@@ -1218,14 +1226,14 @@ public class UserServiceImpl implements UserService {
 			userEntity = userDbService.findByMobileNotMigrated(mobileNo,false);
 
 			if(Objects.isNull(userEntity)){
-				com.stanzaliving.user.dto.userv2.UserDto userDto=userV2FeignService.getActiveUser(Long.parseLong(mobileNo));
+				com.stanzaliving.user.dto.userv2.UserDto userDto=userV2FeignService.getUser(Long.parseLong(mobileNo));
 				if(Objects.nonNull(userDto)) {
 					userEntity = Userv2ToUserAdapter.getUserEntityFromUserv2(userDto);
 				}
 			}
 
 			if (Objects.isNull(userEntity)) {
-				throw new UserValidationException("User not found for mobileNo: " + mobileNo);
+				throw new ResourceNotFoundException("User not found for mobileNo: " + mobileNo);
 			}
 
 			return UserAdapter.getUserProfileDto(userEntity);
@@ -1315,7 +1323,7 @@ public class UserServiceImpl implements UserService {
 
 			PaginationRequest paginationRequest = PaginationRequest.builder().pageNo(1).limit(users.size()).build();
 			Map<String,String> userNames = this.searchUser(UserFilterDto.builder().pageRequest(paginationRequest).userIds(users.stream().collect(Collectors.toList())).build()).getData()
-					.stream().collect(Collectors.toMap(f->f.getUuid(), f->getUserName(f)));
+					.stream().collect(Collectors.toMap(f->f.getUuid(), f->getUserName(f), (first, second) -> second));
 			return cacheDtos.values().stream().map(userRoleCacheDto -> {
 				for (Map.Entry<String, List<UIKeyValue>> entry : userRoleCacheDto.getAccessUserMap().entrySet()) {
 					entry.setValue(entry.getValue().stream().map(uiKeyValue -> new UIKeyValue(userNames.getOrDefault(uiKeyValue.getValue(),""),uiKeyValue.getValue())).collect(Collectors.toList()));

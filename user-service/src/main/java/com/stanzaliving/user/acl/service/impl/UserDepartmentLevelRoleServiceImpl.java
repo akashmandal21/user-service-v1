@@ -41,22 +41,22 @@ public class UserDepartmentLevelRoleServiceImpl implements UserDepartmentLevelRo
 	}
 
 	@Override
-	public void revokeRoles(String userDepartmentLevelUuid, List<String> rolesUuid) {
+	public void revokeRoles(UserDepartmentLevelEntity userDepartmentLevelEntity, List<String> rolesUuid) {
 
 		List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntityListExisting =
-				userDepartmentLevelRoleDbService.findByUserDepartmentLevelUuidAndRoleUuidInAndStatus(userDepartmentLevelUuid, rolesUuid, true);
+				userDepartmentLevelRoleDbService.findByUserDepartmentLevelUuidAndRoleUuidInAndStatus(userDepartmentLevelEntity.getUuid(), rolesUuid, true);
 
 		if (CollectionUtils.isEmpty(userDepartmentLevelRoleEntityListExisting)) {
 			throw new ApiValidationException("Roles does not belong to user");
 		}
 
 		userDepartmentLevelRoleDbService.delete(userDepartmentLevelRoleEntityListExisting);
-		/*if(CollectionUtils.isNotEmpty(userDepartmentLevelRoleEntityListExisting) && Objects.nonNull(userDepartmentLevelRoleEntityListExisting.get(0).getUserDepartmentLevelUuid())){
-			UserDepartmentLevelEntity departmentLevelEntity = userDepartmentLevelDbService.findByUuid(userDepartmentLevelRoleEntityListExisting.get(0).getUserDepartmentLevelUuid());
-			if(Objects.nonNull(departmentLevelEntity))
-				departmentLevelEntity.setStatus(false);
-				userDepartmentLevelDbService.save(departmentLevelEntity);
-		}*/
+		List<UserDepartmentLevelRoleEntity> userDepartmentLevelRoleEntities=userDepartmentLevelRoleDbService.findByUserDepartmentLevelUuidAndStatus(userDepartmentLevelEntity.getUuid(),true);
+
+		if(CollectionUtils.isEmpty(userDepartmentLevelRoleEntities)){
+			userDepartmentLevelDbService.delete(userDepartmentLevelEntity);
+		}
+
 	}
 
 	@Override

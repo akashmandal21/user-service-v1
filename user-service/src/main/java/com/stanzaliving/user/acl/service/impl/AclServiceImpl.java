@@ -3,38 +3,27 @@
  */
 package com.stanzaliving.user.acl.service.impl;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
+import com.stanzaliving.core.base.exception.ApiValidationException;
 import com.stanzaliving.core.transformation.client.cache.TransformationCache;
-import com.stanzaliving.core.user.enums.UserType;
+import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleNameUrlExpandedDto;
+import com.stanzaliving.core.user.acl.enums.RoleAccessType;
+import com.stanzaliving.user.acl.adapters.UserDepartmentLevelRoleAdapter;
+import com.stanzaliving.user.acl.db.service.*;
+import com.stanzaliving.user.acl.entity.*;
+import com.stanzaliving.user.acl.service.AclService;
 import com.stanzaliving.user.adapters.Userv2ToUserAdapter;
 import com.stanzaliving.user.db.service.UserDbService;
 import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.feignclient.UserV2FeignService;
-import com.stanzaliving.user.feignclient.Userv2HttpService;
+import com.stanzaliving.user.service.UserService;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
-import com.stanzaliving.core.user.acl.dto.UserDeptLevelRoleNameUrlExpandedDto;
-import com.stanzaliving.core.user.acl.enums.RoleAccessType;
-import com.stanzaliving.user.acl.adapters.UserDepartmentLevelRoleAdapter;
-import com.stanzaliving.user.acl.db.service.ApiDbService;
-import com.stanzaliving.user.acl.db.service.RoleAccessDbService;
-import com.stanzaliving.user.acl.db.service.RoleDbService;
-import com.stanzaliving.user.acl.db.service.UserDepartmentLevelDbService;
-import com.stanzaliving.user.acl.db.service.UserDepartmentLevelRoleDbService;
-import com.stanzaliving.user.acl.entity.ApiEntity;
-import com.stanzaliving.user.acl.entity.RoleAccessEntity;
-import com.stanzaliving.user.acl.entity.RoleEntity;
-import com.stanzaliving.user.acl.entity.UserDepartmentLevelEntity;
-import com.stanzaliving.user.acl.entity.UserDepartmentLevelRoleEntity;
-import com.stanzaliving.user.acl.service.AclService;
-import com.stanzaliving.user.service.UserService;
-
-import lombok.extern.log4j.Log4j2;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author naveen.kumar
@@ -128,45 +117,31 @@ public class AclServiceImpl implements AclService {
 	}
 
 	private List<UserDeptLevelRoleNameUrlExpandedDto> getUserDeptLevelRoleNameUrlExpandedDto(String userUuid) {
-
 		UserEntity userEntity = userDbService.findByUuidAndStatus(userUuid, true);
-		boolean isActiveInOldUser=true;
-		if(Objects.isNull(userEntity)){
-			isActiveInOldUser=false;
-			com.stanzaliving.user.dto.userv2.UserDto user=userV2FeignService.getActiveUserByUuid(userUuid);
-			if(Objects.nonNull(user)) {
+		boolean isActiveInOldUser = true;
+		if (Objects.isNull(userEntity) || userEntity.isMigrated()) {
+			isActiveInOldUser = false;
+			com.stanzaliving.user.dto.userv2.UserDto user = userV2FeignService.getActiveUserByUuid(userUuid);
+			if (Objects.nonNull(user)) {
 				userEntity = Userv2ToUserAdapter.getUserEntityFromUserv2(user);
 			}
 		}
-
+		if (Objects.isNull(userEntity)) throw new ApiValidationException("User not found for UserId: " + userUuid);
 		List<UserDeptLevelRoleNameUrlExpandedDto> userDeptLevelRoleNameUrlExpandedDtoList = new ArrayList<>();
-
 		List<UserDepartmentLevelEntity> userDepartmentLevelEntityList;
-		List<UserDeptLevelRoleNameUrlExpandedDto> userV2DepartmentLevelEntityList=new ArrayList<>();
-
-		if(!isActiveInOldUser) {
-			if (Objects.nonNull(userEntity)) {
-				userV2DepartmentLevelEntityList = userV2FeignService.getUserDeptRoleNameList(userUuid);
-			}
-		}
-
+		List<UserDeptLevelRoleNameUrlExpandedDto> userV2DepartmentLevelEntityList = new ArrayList<>();
+		if (!isActiveInOldUser) userV2DepartmentLevelEntityList = userV2FeignService.getUserDeptRoleNameList(userUuid);
 		userDepartmentLevelEntityList = userDepartmentLevelDbService.findByUserUuidAndStatus(userUuid, true);
 		for (UserDepartmentLevelEntity userDepartmentLevelEntity : userDepartmentLevelEntityList) {
-
 			Pair<List<String>, List<String>> roleUuidApiUuidList = getRoleUuidApiUuidListOfUser(userDepartmentLevelEntity);
-
-			List<RoleEntity> roleEntityList = roleDbService.findByUuidInAndStatusAndMigrated(roleUuidApiUuidList.getFirst(), true,false);
+			List<RoleEntity> roleEntityList = roleDbService.findByUuidInAndStatusAndMigrated(roleUuidApiUuidList.getFirst(), true, false);
 			List<ApiEntity> apiEntityList = apiDbService.findByUuidInAndStatus(roleUuidApiUuidList.getSecond(), true);
-
 			if (CollectionUtils.isNotEmpty(apiEntityList) || CollectionUtils.isNotEmpty(roleEntityList)) {
-
-				userDeptLevelRoleNameUrlExpandedDtoList.add(
-						UserDepartmentLevelRoleAdapter.getUserDeptLevelRoleNameUrlExpandedDto(userDepartmentLevelEntity, roleEntityList, apiEntityList, transformationCache));
+				userDeptLevelRoleNameUrlExpandedDtoList.add(UserDepartmentLevelRoleAdapter.getUserDeptLevelRoleNameUrlExpandedDto(userDepartmentLevelEntity, roleEntityList, apiEntityList, transformationCache));
 			}
 		}
-
-
 		userV2DepartmentLevelEntityList.addAll(userDeptLevelRoleNameUrlExpandedDtoList);
+
 
 		Map<String,UserDeptLevelRoleNameUrlExpandedDto> userDeptLevelRoleNameUrlExpandedDtoMap=new HashMap<>();
 		for(UserDeptLevelRoleNameUrlExpandedDto userDeptLevelRoleNameUrlExpandedDto:userV2DepartmentLevelEntityList){
@@ -200,6 +175,7 @@ public class AclServiceImpl implements AclService {
 		}
 
 		return new ArrayList<>(userDeptLevelRoleNameUrlExpandedDtoMap.values());
+
 	}
 
 	private Pair<List<String>, List<String>> getRoleUuidApiUuidListOfUser(UserDepartmentLevelEntity userDepartmentLevelEntity) {

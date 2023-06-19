@@ -3,7 +3,7 @@ package com.stanzaliving.user.constants;
 public class NotificationKeys {
 
 	//{#var#} is OTP to verify your phone number with Stanza Living
-	public static final String MOBILE_VERIFICATION_OTP_MSG="1707163756428389949";
+	public static final String MOBILE_VERIFICATION_OTP_MSG="1707168613866522571";
 	//{#var#} is OTP to verify your email with Stanza Living
 	public static final String EMAIL_VERIFICATION_OTP_MSG="1707161200356744733";
 	//{#var#} is your OTP to authenticate with Stanza Living
@@ -27,4 +27,6 @@ public class NotificationKeys {
 	public static final String FINANCE_OTP_MSG_NEW="1707165955200998708";
 	public static final String PROCUREMENT_OTP_MSG_NEW="1707165955200998708";
 	public static final String DEFAULT_OTP_MSG_NEW="1707165955200998708";
+
+	public static final String OTP_V2_MSG="6450ba85d6fc05744e157f72";
 }

@@ -38,6 +38,17 @@ public class UserV2FeignService {
         catch (Exception e){}
         return null;
     }
+
+    public UserDto getUser(Long mobileNumber){
+        try {
+            ResponseDto<UserDto> userDtoResponseDto = userv2HttpService.getUserForMobileNumber(mobileNumber);
+            if (Objects.nonNull(userDtoResponseDto) && Objects.nonNull(userDtoResponseDto.getData())) {
+                return userDtoResponseDto.getData();
+            }
+        }
+        catch (Exception e){}
+        return null;
+    }
 //
 //    public ResponseDto<UserDto> addUser(@RequestBody AddUserRequestDto addUserRequestDto);
 //
@@ -266,4 +277,14 @@ public class UserV2FeignService {
         return null;
     }
 
+    public boolean checkIfPermissionPresent(String userUuid,List<String> roleNames) {
+        try{
+            ResponseDto<Boolean> responseDto=userv2HttpService.checkIfPermissionPresent(userUuid,roleNames);
+            if (Objects.nonNull(responseDto) && Objects.nonNull(responseDto.getData())) {
+                return responseDto.getData();
+            }
+        }
+        catch (Exception e){}
+        return false;
+    }
 }

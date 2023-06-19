@@ -7,6 +7,8 @@ import com.stanzaliving.core.base.common.dto.PaginationRequest;
 import com.stanzaliving.core.base.enums.Department;
 import com.stanzaliving.core.user.dto.UserFilterDto;
 import com.stanzaliving.core.user.enums.UserType;
+import com.stanzaliving.user.acl.db.service.UserDepartmentLevelDbService;
+import com.stanzaliving.user.acl.db.service.UserDepartmentLevelRoleDbService;
 import com.stanzaliving.user.adapters.UserAdapter;
 import com.stanzaliving.user.adapters.Userv2ToUserAdapter;
 import com.stanzaliving.user.dto.userv2.UserAttributesDto;
@@ -51,6 +53,12 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 	@Autowired
 	@Lazy
 	private UserV2FeignService userV2FeignService;
+
+	@Autowired
+	private UserDepartmentLevelDbService userDepartmentLevelDbService;
+
+	@Autowired
+	private UserDepartmentLevelRoleDbService userDepartmentLevelRoleDbService;
 
 	@Override
 	public void createUserManagerMapping(UserManagerMappingRequestDto userManagerMappingDto) {
@@ -113,7 +121,7 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 		if (userManagerMappingEntity != null) {
 
 			UserProfileDto userProfileDto = userService
-					.getUserProfile(userManagerMappingEntity.getManagerId());
+					.getUserByUserId(userManagerMappingEntity.getManagerId());
 
 			return (Objects.nonNull(userProfileDto))
 					? userProfileDto.getFirstName() + " " + userProfileDto.getLastName()
@@ -134,8 +142,7 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 		}
 		UserManagerMappingEntity userManagerMappingEntity = userManagerMappingRepository.findByUserId(userId);
 		if (userManagerMappingEntity != null) {
-
-			return userService.getUserProfile(userManagerMappingEntity.getManagerId());
+			return userService.getUserByUserId(userManagerMappingEntity.getManagerId());
 		}
 
 		return null;
@@ -237,10 +244,17 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 	public List<UserProfileDto> getPeopleReportingToManagerForZonalHead(String managerId, Department department) {
 		List<UserProfileDto> userProfileDtos=getPeopleReportingToManager(managerId);
 		List<UserProfileDto> filteredUserProfileDtos=new ArrayList<>();
+		List<String> roleNames=null;
 		if(Department.DESIGN.equals(department)){
 			for(UserProfileDto userProfileDto:userProfileDtos){
 				if(UserType.DESIGN_COORDINATOR.equals(userProfileDto.getUserType())){
 					filteredUserProfileDtos.add(userProfileDto);
+				}
+				else{
+					roleNames=Arrays.asList("DESIGN_COORDINATOR");
+					if(checkIfRolePresent(userProfileDto,roleNames)){
+						filteredUserProfileDtos.add(userProfileDto);
+					}
 				}
 			}
 		}
@@ -249,10 +263,33 @@ public class UserManagerMappingServiceImpl implements UserManagerMappingService 
 				if(UserType.PROJECT_MANAGER.equals(userProfileDto.getUserType())){
 					filteredUserProfileDtos.add(userProfileDto);
 				}
+				else{
+					roleNames=Arrays.asList("Project Manager","PROJECTS_MANAGER","DPM");
+					if(checkIfRolePresent(userProfileDto,roleNames)){
+						filteredUserProfileDtos.add(userProfileDto);
+					}
+				}
 			}
 		}
 		return filteredUserProfileDtos;
 	}
+
+	public boolean checkIfRolePresent(UserProfileDto userProfileDto,List<String> roleNames){
+		List<String> listOfRoles=userDepartmentLevelDbService.findListOfRoles(userProfileDto.getUuid());
+		if(org.apache.commons.collections.CollectionUtils.isNotEmpty(listOfRoles)){
+			for(String roleName:roleNames) {
+				if(listOfRoles.contains(roleName)){
+					return true;
+				}
+			}
+		}
+		if(userProfileDto.isMigrated()){
+			return userV2FeignService.checkIfPermissionPresent(userProfileDto.getUuid(),roleNames);
+		}
+		return false;
+	}
+
+
 
 	@Override
 	public void deleteManagerMapping(String userUuid) {

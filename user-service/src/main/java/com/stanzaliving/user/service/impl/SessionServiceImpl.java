@@ -233,7 +233,7 @@ public class SessionServiceImpl implements SessionService {
 					return;
 				List<UserSessionEntity> userSessionEntitiesBasedOnAppName = Optional.ofNullable(userSessionDbService.findByUserIdAndBrowserAndStatusOrderByIdDesc(userId, app.name(), true)).orElse(new ArrayList<>());
 				if(CollectionUtils.isEmpty(userSessionEntitiesBasedOnAppName)) {
-					if(App.SIGMA.equals(app))
+					if(App.SIGMA.equals(app) || App.ALFRED.equals(app))
 						throw new StanzaException("Please login again");
 					else
 						return;

@@ -6,6 +6,7 @@ package com.stanzaliving.user.service.impl;
 import java.util.Objects;
 
 import com.stanzaliving.core.base.common.dto.ResponseDto;
+import com.stanzaliving.core.base.exception.ResourceNotFoundException;
 import com.stanzaliving.core.base.exception.UserValidationException;
 import com.stanzaliving.core.bookingservice.dto.request.*;
 import com.stanzaliving.core.base.enums.Department;
@@ -85,7 +86,7 @@ public class AuthServiceImpl implements AuthService {
 
 		UserEntity userEntity = getActiveUser(loginRequestDto);
 
-		otpService.sendLoginOtp(userEntity);
+		otpService.sendLoginOtp(userEntity, Objects.nonNull(loginRequestDto.getUserSource())?loginRequestDto.getUserSource():null);
 
 		log.info("OTP sent for User: " + userEntity.getUuid() + " for Login");
 
@@ -149,7 +150,7 @@ public class AuthServiceImpl implements AuthService {
 		}
 
 		if (Objects.isNull(userEntity)) {
-			throw new AuthException("No user exists with this number", UserErrorCodes.USER_NOT_EXISTS);
+			throw new ResourceNotFoundException("No user exists with this number", UserErrorCodes.USER_NOT_EXISTS);
 		}
 
 		if (!userEntity.isStatus()) {
@@ -173,13 +174,15 @@ public class AuthServiceImpl implements AuthService {
 		userEntity.setMobileVerified(true);
 
 		//call userv2 to update
-		if(Objects.nonNull(userDbService.findByUuidAndStatus(userEntity.getUuid(),true))) {
+		if(userEntity.isMigrated()){
+			userV2FeignService.updateUser(UpdateUserDto.builder()
+					.mobile(Long.parseLong(otpValidateRequestDto.getMobile()))
+					.mobileVerified(true)
+					.build());
+		}
+		else{
 			userDbService.update(userEntity);
 		}
-		userV2FeignService.updateUser(UpdateUserDto.builder()
-						.mobile(Long.parseLong(otpValidateRequestDto.getMobile()))
-						.mobileVerified(true)
-				.build());
 
 		return UserAdapter.getUserProfileDto(userEntity);
 	}
