@@ -7,8 +7,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.stanzaliving.user.Projections.UserView;
+import com.stanzaliving.user.entity.UserProfileEntity;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -22,6 +22,14 @@ import com.stanzaliving.user.constants.UserQueryConstants;
 import com.stanzaliving.user.db.service.UserDbService;
 import com.stanzaliving.user.entity.UserEntity;
 import com.stanzaliving.user.repository.UserRepository;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.domain.Specifications;
+import org.springframework.util.StringUtils;
+import javax.persistence.criteria.Join;
+
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.criteria.Predicate;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -55,78 +63,63 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 
 	@Override
 	public Specification<UserEntity> getSearchQuery(UserFilterDto userFilterDto) {
+		return (root, query, criteriaBuilder) -> {
+			List<Predicate> predicates = new ArrayList<>();
 
-		StanzaSpecificationBuilder<UserEntity> specificationBuilder = new StanzaSpecificationBuilder<>();
-
-		if (CollectionUtils.isNotEmpty(userFilterDto.getUserIds())) {
-
-			specificationBuilder.with(UserQueryConstants.UUID, CriteriaOperation.IN, userFilterDto.getUserIds());
-			if (userFilterDto.getStatus() != null) {
-				if (userFilterDto.getStatus()) {
-					specificationBuilder.with(UserQueryConstants.STATUS, CriteriaOperation.TRUE, true);
-				} else {
-					specificationBuilder.with(UserQueryConstants.STATUS, CriteriaOperation.FALSE, false);
-				}
+			if (StringUtils.hasText(userFilterDto.getName())) {
+				Join<UserEntity, UserProfileEntity> userProfileJoin = root.join("userProfile");
+				Predicate firstNamePredicate = criteriaBuilder.like(criteriaBuilder.lower(userProfileJoin.get("firstName")),
+						"%" + userFilterDto.getName().toLowerCase() + "%");
+				Predicate lastNamePredicate = criteriaBuilder.like(criteriaBuilder.lower(userProfileJoin.get("lastName")),
+						"%" + userFilterDto.getName().toLowerCase() + "%");
+				Predicate namePredicate = criteriaBuilder.or(firstNamePredicate, lastNamePredicate);
+				predicates.add(namePredicate);
 			}
 
-		} else {
 
-			if (StringUtils.isNotBlank(userFilterDto.getMobile())) {
-				specificationBuilder.with(UserQueryConstants.MOBILE, CriteriaOperation.EQ, userFilterDto.getMobile());
+			if (org.springframework.util.StringUtils.hasText(userFilterDto.getMobile())) {
+				Predicate mobilePredicate = criteriaBuilder.equal(root.get(UserQueryConstants.MOBILE),
+						userFilterDto.getMobile());
+				predicates.add(mobilePredicate);
 
-				if (StringUtils.isNotBlank(userFilterDto.getIsoCode())) {
-					specificationBuilder.with(UserQueryConstants.ISO_CODE, CriteriaOperation.EQ,
+				if (org.springframework.util.StringUtils.hasText(userFilterDto.getIsoCode())) {
+					Predicate isoCodePredicate = criteriaBuilder.equal(root.get(UserQueryConstants.ISO_CODE),
 							userFilterDto.getIsoCode());
+					predicates.add(isoCodePredicate);
 				}
 			}
 
-			if (StringUtils.isNotBlank(userFilterDto.getEmail())) {
-				specificationBuilder.with(UserQueryConstants.EMAIL, CriteriaOperation.EQ, userFilterDto.getEmail());
+			if (StringUtils.hasText(userFilterDto.getEmail())) {
+				Predicate emailPredicate = criteriaBuilder.equal(root.get(UserQueryConstants.EMAIL),
+						userFilterDto.getEmail());
+				predicates.add(emailPredicate);
 			}
 
-			if (Objects.nonNull(userFilterDto.getUserType())) {
-				specificationBuilder.with(UserQueryConstants.USER_TYPE, CriteriaOperation.ENUM_EQ,
+			if (userFilterDto.getUserType() != null) {
+				Predicate userTypePredicate = criteriaBuilder.equal(root.get(UserQueryConstants.USER_TYPE),
 						userFilterDto.getUserType());
+				predicates.add(userTypePredicate);
 			}
 
-			if(userFilterDto.getMigrated()!=null){
-				if(userFilterDto.getMigrated()) {
-					specificationBuilder.with("migrated", CriteriaOperation.TRUE, Boolean.TRUE);
-				}
-				else{
-					specificationBuilder.with("migrated",CriteriaOperation.FALSE,Boolean.FALSE);
-				}
+			if (userFilterDto.getMigrated() != null) {
+				Predicate migratedPredicate = criteriaBuilder.equal(root.get("migrated"), userFilterDto.getMigrated());
+				predicates.add(migratedPredicate);
 			}
 
 			if (userFilterDto.getStatus() != null) {
-
-				if (userFilterDto.getStatus()) {
-					specificationBuilder.with(UserQueryConstants.STATUS, CriteriaOperation.TRUE, true);
-				} else {
-					specificationBuilder.with(UserQueryConstants.STATUS, CriteriaOperation.FALSE, false);
-				}
+				Predicate statusPredicate = criteriaBuilder.equal(root.get(UserQueryConstants.STATUS),
+						userFilterDto.getStatus());
+				predicates.add(statusPredicate);
 			}
 
-			if (Objects.nonNull(userFilterDto.getDepartment())) {
-				specificationBuilder.with(UserQueryConstants.DEPARTMENT, CriteriaOperation.ENUM_EQ,
+			if (userFilterDto.getDepartment() != null) {
+				Predicate departmentPredicate = criteriaBuilder.equal(root.get(UserQueryConstants.DEPARTMENT),
 						userFilterDto.getDepartment());
+				predicates.add(departmentPredicate);
 			}
 
-			if (StringUtils.isNotBlank(userFilterDto.getName())) {
-				List<UserEntity> userEntities = userRepository.searchByName(userFilterDto.getName());
-				if (CollectionUtils.isNotEmpty(userEntities)) {
-					List<String> userIdList = new ArrayList<>();
-					userEntities.forEach(userEntity -> {
-						userIdList.add(userEntity.getUuid());
-					});
-					specificationBuilder.with(UserQueryConstants.UUID, CriteriaOperation.IN, userIdList);
-				} else {
-					specificationBuilder.with(UserQueryConstants.UUID, CriteriaOperation.EQ, -1);
-				}
-			}
-		}
-
-		return specificationBuilder.build();
+			return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+		};
 	}
 
 	@Override
