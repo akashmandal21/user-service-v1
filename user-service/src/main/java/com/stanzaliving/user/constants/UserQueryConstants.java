@@ -21,4 +21,5 @@ public class UserQueryConstants {
 	public static final String STATUS = "status";
 	public static final String USER_TYPE = "userType";
 	public static final String DEPARTMENT = "department";
+	public static final String MIGRATED = "migrated";
 }
