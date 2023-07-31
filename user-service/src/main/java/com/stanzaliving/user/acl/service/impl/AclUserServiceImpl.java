@@ -355,7 +355,7 @@ public class AclUserServiceImpl implements AclUserService {
 
 						UserEntity user = userDbService.findByUuid(entity.getUserUuid());
 
-						if(user.isStatus() || (user.isMigrated())) {
+						if(user.isStatus()) {
 							Set<String> accessLevelUuids = new HashSet<>(Arrays.asList((entity.getCsvAccessLevelEntityUuid().split(","))));
 
 							for (String accessLevelEntity : accessLevelEntityList) {
