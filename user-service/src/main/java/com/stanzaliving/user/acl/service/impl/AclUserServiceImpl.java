@@ -353,9 +353,9 @@ public class AclUserServiceImpl implements AclUserService {
 
 					departmentLevelEntities.forEach(entity -> {
 
-						UserEntity user = userDbService.findByUuid(entity.getUserUuid());
+						UserProfileDto userProfileDto=userService.getActiveUserByUserId(entity.getUserUuid());
 
-						if(user.isStatus()) {
+						if(userProfileDto.isStatus()) {
 							Set<String> accessLevelUuids = new HashSet<>(Arrays.asList((entity.getCsvAccessLevelEntityUuid().split(","))));
 
 							for (String accessLevelEntity : accessLevelEntityList) {
@@ -366,9 +366,7 @@ public class AclUserServiceImpl implements AclUserService {
 								}
 							}
 						}
-						// if (!Collections.disjoint(accessLevelEntityList, accessLevelUuids)) {
-						// userIds.add(entity.getUserUuid());
-						// }
+
 					});
 				}
 			}
