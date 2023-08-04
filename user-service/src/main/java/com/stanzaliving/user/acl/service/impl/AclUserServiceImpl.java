@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import com.stanzaliving.core.base.enums.AccessModule;
 import com.stanzaliving.core.base.exception.StanzaException;
+import com.stanzaliving.core.base.exception.UserValidationException;
 import com.stanzaliving.core.transformation.client.cache.TransformationCache;
 import com.stanzaliving.core.user.acl.dto.AddUserAndRoleDto;
 import com.stanzaliving.core.user.acl.dto.CityMicromarketDropdownResponseDto;
@@ -353,18 +354,22 @@ public class AclUserServiceImpl implements AclUserService {
 
 					departmentLevelEntities.forEach(entity -> {
 
-						UserProfileDto userProfileDto=userService.getActiveUserByUserId(entity.getUserUuid());
+						try {
+							UserProfileDto userProfileDto = userService.getActiveUserByUserId(entity.getUserUuid());
+							if(userProfileDto.isStatus()) {
+								Set<String> accessLevelUuids = new HashSet<>(Arrays.asList((entity.getCsvAccessLevelEntityUuid().split(","))));
 
-						if(userProfileDto.isStatus()) {
-							Set<String> accessLevelUuids = new HashSet<>(Arrays.asList((entity.getCsvAccessLevelEntityUuid().split(","))));
-
-							for (String accessLevelEntity : accessLevelEntityList) {
-								if (accessLevelUuids.contains(accessLevelEntity)) {
-									List<String> accessLevelIds = userIdAccessLevelIdListMap.getOrDefault(entity.getUserUuid(), new ArrayList<>());
-									accessLevelIds.add(accessLevelEntity);
-									userIdAccessLevelIdListMap.put(entity.getUserUuid(), accessLevelIds);
+								for (String accessLevelEntity : accessLevelEntityList) {
+									if (accessLevelUuids.contains(accessLevelEntity)) {
+										List<String> accessLevelIds = userIdAccessLevelIdListMap.getOrDefault(entity.getUserUuid(), new ArrayList<>());
+										accessLevelIds.add(accessLevelEntity);
+										userIdAccessLevelIdListMap.put(entity.getUserUuid(), accessLevelIds);
+									}
 								}
 							}
+						}
+						catch (UserValidationException e){
+
 						}
 
 					});
