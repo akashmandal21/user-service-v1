@@ -14,6 +14,8 @@ import com.stanzaliving.core.base.exception.StanzaException;
 import com.stanzaliving.core.base.exception.UserValidationException;
 import com.stanzaliving.core.user.enums.App;
 import com.stanzaliving.core.user.enums.OtpType;
+import com.stanzaliving.user.dto.request.LoginDto;
+import com.stanzaliving.user.dto.request.OtpRequestDto;
 import com.stanzaliving.user.service.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,11 +81,57 @@ public class AuthController {
 		return ResponseDto.success("OTP Sent for Login");
 	}
 
+	@PostMapping("login/v3")
+	public ResponseDto<Void> loginV3(@RequestBody @Valid LoginDto loginDto, HttpServletRequest request, HttpServletResponse response) {
+
+		authService.loginViaEmployeeCode(loginDto);
+
+		SecureCookieUtil.handleLogOutResponse(request, response);
+
+		return ResponseDto.success("OTP Sent for Login");
+	}
+
 	@PostMapping("validateOtp")
 	public ResponseDto<AclUserDto> validateOtp(
 			@RequestBody @Valid OtpValidateRequestDto otpValidateRequestDto, HttpServletRequest request, HttpServletResponse response, @RequestHeader(name = "app", required = false) App app, @RequestHeader(name = "deviceId", required = false) String deviceId) {
 
 		UserProfileDto userProfileDto = authService.validateOtp(otpValidateRequestDto);
+
+		log.info("OTP Successfully Validated for User: " + userProfileDto.getUuid() + ". Creating User Session now " + userProfileDto.getUserType());
+
+		String token = StanzaUtils.generateUniqueId();
+
+		log.debug("app : {}, deviceId : {}", app, deviceId);
+
+		UserSessionEntity userSessionEntity = sessionService.createUserSession(userProfileDto, token, app, deviceId);
+
+		if (Objects.nonNull(userSessionEntity)) {
+			sessionService.validatePreviousSessions(userProfileDto.getUuid(), app, deviceId);
+			addTokenToResponse(request, response, token, userSessionEntity);
+			if(UserType.INVITED_GUEST.equals(userProfileDto.getUserType())) {
+
+				log.info("UserType for user is INVITED_GUEST {} " + userProfileDto.getUuid());
+				ResponseDto<BookingResponseDto> bookingResponseDto = onboardGuestService.createGuestBooking(userProfileDto.getMobile());
+
+				log.info("\n\n\n\n\n OTP Successfully bookingResponseDto " + bookingResponseDto);
+				if (Objects.isNull(bookingResponseDto) ) {
+					return ResponseDto.failure("Failed to create guest booking for " + userProfileDto.getMobile());
+				}
+
+			}
+
+			return ResponseDto.success("User Login Successfull", UserAdapter.getAclUserDto(userProfileDto, aclService.getUserDeptLevelRoleNameUrlExpandedDtoFe(userProfileDto.getUuid())));
+		}
+
+		return ResponseDto.failure("Failed to create user session");
+	}
+
+
+	@PostMapping("validateOtp/v3")
+	public ResponseDto<AclUserDto> validateOtpV3(
+			@RequestBody @Valid OtpRequestDto otpRequestDto, HttpServletRequest request, HttpServletResponse response, @RequestHeader(name = "app", required = false) App app, @RequestHeader(name = "deviceId", required = false) String deviceId) {
+
+		UserProfileDto userProfileDto = authService.validateOtpForEmployeeCode(otpRequestDto);
 
 		log.info("OTP Successfully Validated for User: " + userProfileDto.getUuid() + ". Creating User Session now " + userProfileDto.getUserType());
 

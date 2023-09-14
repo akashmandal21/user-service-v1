@@ -11,6 +11,7 @@ import com.stanzaliving.core.user.request.dto.LoginRequestDto;
 import com.stanzaliving.core.user.request.dto.MobileEmailOtpRequestDto;
 import com.stanzaliving.core.user.request.dto.MobileOtpRequestDto;
 import com.stanzaliving.core.user.request.dto.OtpValidateRequestDto;
+import com.stanzaliving.user.dto.request.OtpRequestDto;
 import com.stanzaliving.user.entity.OtpEntity;
 import com.stanzaliving.user.entity.UserEntity;
 
@@ -24,6 +25,8 @@ public interface OtpService {
 	void sendLoginOtp(UserEntity userEntity, Source source);
 
 	void validateLoginOtp(OtpValidateRequestDto otpValidateRequestDto);
+
+	void validateLoginOtpForEmployeeCode(OtpRequestDto otpRequestDto);
 
 	void validateMobileOtp(String mobile, String isoCode, String otp, OtpType otpType);
 

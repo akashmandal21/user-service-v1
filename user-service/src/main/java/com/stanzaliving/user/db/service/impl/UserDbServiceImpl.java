@@ -54,6 +54,11 @@ public class UserDbServiceImpl extends AbstractJpaServiceImpl<UserEntity, Long, 
 	}
 
 	@Override
+	public UserEntity getUserForEmployeeCodeNotMigrated(String employeeCode, boolean migrated) {
+		return getJpaRepository().findByEmployeeCodeAndMigrated(employeeCode, migrated);
+	}
+
+	@Override
 	public Specification<UserEntity> getSearchQuery(UserFilterDto userFilterDto) {
 
 		StanzaSpecificationBuilder<UserEntity> specificationBuilder = new StanzaSpecificationBuilder<>();

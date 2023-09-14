@@ -17,6 +17,8 @@ import com.stanzaliving.core.user.enums.Nationality;
 import com.stanzaliving.core.user.enums.UserType;
 import com.stanzaliving.core.user.request.dto.*;
 import com.stanzaliving.user.adapters.Userv2ToUserAdapter;
+import com.stanzaliving.user.dto.request.LoginDto;
+import com.stanzaliving.user.dto.request.OtpRequestDto;
 import com.stanzaliving.user.dto.userv2.UpdateUserDto;
 import com.stanzaliving.user.dto.userv2.UserDto;
 import com.stanzaliving.user.entity.UserProfileEntity;
@@ -24,6 +26,7 @@ import com.stanzaliving.user.feignclient.UserV2FeignService;
 import com.stanzaliving.user.feignclient.Userv2HttpService;
 import com.stanzaliving.user.service.UserService;
 import com.stanzaliving.website.response.dto.LeadDetailEntity;
+import org.apache.catalina.User;
 import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -90,6 +93,106 @@ public class AuthServiceImpl implements AuthService {
 
 		log.info("OTP sent for User: " + userEntity.getUuid() + " for Login");
 
+	}
+
+
+
+	public void loginViaEmployeeCode(LoginDto loginDto) {
+		UserEntity userEntity = null;
+		if(Objects.nonNull(loginDto.getEmployeeCode())) {
+			userEntity = getActiveUserByEmployeeCode(loginDto);
+		}
+		else {
+			LoginRequestDto loginRequestDto = LoginRequestDto.builder()
+					.isoCode(loginDto.getIsoCode())
+					.mobile(loginDto.getMobile())
+					.userType(loginDto.getUserType())
+					.userSource(loginDto.getUserSource())
+					.build();
+			userEntity = getActiveUserByMobile(loginRequestDto);
+		}
+		otpService.sendLoginOtp(userEntity, Objects.nonNull(loginDto.getUserSource())?loginDto.getUserSource():null);
+
+		log.info("OTP sent for User: " + userEntity.getUuid() + " for Login");
+
+	}
+
+
+	private UserEntity getActiveUserByEmployeeCode(LoginDto loginDto) {
+		UserEntity userEntity=null;
+		userEntity = userDbService.getUserForEmployeeCodeNotMigrated(loginDto.getEmployeeCode(),false);
+		if (Objects.isNull(userEntity)) {
+			throw new ResourceNotFoundException("No user exists with this number", UserErrorCodes.USER_NOT_EXISTS);
+		}
+
+		if (!userEntity.isStatus()) {
+			throw new AuthException("The booking is disabled for this number", UserErrorCodes.USER_ACCOUNT_INACTIVE);
+		}
+
+		log.info("Found User: " + userEntity.getUuid() + " for EmployeeCode: " + loginDto.getEmployeeCode() + " of Type: " + userEntity.getUserType());
+
+		return userEntity;
+	}
+
+	private UserEntity getActiveUserByMobile(LoginRequestDto loginRequestDto) {
+
+		UserEntity userEntity = userDbService.getUserForMobileNotMigrated(loginRequestDto.getMobile(), loginRequestDto.getIsoCode(),false);
+
+		try {
+			if (Objects.isNull(userEntity)) {
+
+				if (UserType.VENDOR == loginRequestDto.getUserType()) {
+					throw new AuthException("No user exists with this number", UserErrorCodes.USER_NOT_EXISTS);
+				}
+
+				ResponseDto<LeadDetailEntity> leadDetailResponseDto = leadserviceClientApi.search(loginRequestDto.getMobile(), null);
+				if(Objects.isNull(leadDetailResponseDto) || Objects.isNull(leadDetailResponseDto.getData())) {
+					throw new AuthException("No user exists with this number", UserErrorCodes.USER_NOT_EXISTS);
+				}
+				LeadDetailEntity leadDetail = leadDetailResponseDto.getData();
+				if (Objects.isNull(leadDetail) || !(leadDetail.getPhone().equals(loginRequestDto.getMobile()))) {
+					throw new AuthException("No user exists with this number", UserErrorCodes.USER_NOT_EXISTS);
+				} else if(StringUtils.isNotBlank(leadDetail.getLeadTag()) && leadDetail.getLeadTag().equals("GUEST_LEAD")) {
+					GuestRequestPayloadDto guestRequestPayloadDto = bookingDataControllerApi.getGuestDetailsByPhone(leadDetail.getPhone()).getData();
+					AddUserRequestDto addUserRequestDto = new AddUserRequestDto();
+					addUserRequestDto.setMobile(leadDetail.getPhone());
+					addUserRequestDto.setFirstName(leadDetail.getFirstName());
+					addUserRequestDto.setLastName(leadDetail.getLastName());
+					addUserRequestDto.setEmail(leadDetail.getLeadEmail());
+					addUserRequestDto.setIsoCode(loginRequestDto.getIsoCode());
+					addUserRequestDto.setDepartment(Department.WEB);
+					addUserRequestDto.setUserType(UserType.INVITED_GUEST);
+					addUserRequestDto.setGender(Gender.valueOf(guestRequestPayloadDto.getGender()));
+					addUserRequestDto.setNationality(Nationality.valueOf(guestRequestPayloadDto.getNationality()));
+					userService.addUser(addUserRequestDto);
+
+					UserProfileEntity profileEntity = UserAdapter.getUserProfileEntity(addUserRequestDto);
+
+					userEntity = UserEntity.builder().userType(addUserRequestDto.getUserType())
+							.isoCode(addUserRequestDto.getIsoCode()).mobile(addUserRequestDto.getMobile()).mobileVerified(false)
+							.email(addUserRequestDto.getEmail()).emailVerified(false).userProfile(profileEntity).status(true)
+							.department(addUserRequestDto.getDepartment()).build();
+
+					profileEntity.setUser(userEntity);
+
+					userEntity = userDbService.saveAndFlush(userEntity);
+				}
+			}
+		} catch(Exception e){
+			log.error("Error in getActiveUser, error is ", e);
+		}
+
+		if (Objects.isNull(userEntity)) {
+			throw new ResourceNotFoundException("No user exists with this number", UserErrorCodes.USER_NOT_EXISTS);
+		}
+
+		if (!userEntity.isStatus()) {
+			throw new AuthException("The booking is disabled for this number", UserErrorCodes.USER_ACCOUNT_INACTIVE);
+		}
+
+		log.info("Found User: " + userEntity.getUuid() + " for Mobile: " + loginRequestDto.getMobile() + " of Type: " + userEntity.getUserType());
+
+		return userEntity;
 	}
 
 	private UserEntity getActiveUser(LoginRequestDto loginRequestDto) {
@@ -184,6 +287,35 @@ public class AuthServiceImpl implements AuthService {
 			userDbService.update(userEntity);
 		}
 
+		return UserAdapter.getUserProfileDto(userEntity);
+	}
+
+
+	@Override
+	public UserProfileDto validateOtpForEmployeeCode(OtpRequestDto otpRequestDto) {
+
+		UserEntity userEntity = null;
+		if(Objects.nonNull(otpRequestDto.getEmployeeCode())) {
+			userEntity = getActiveUserByEmployeeCode(otpRequestDto);
+			otpRequestDto.setMobile(userEntity.getMobile());
+			otpRequestDto.setIsoCode(userEntity.getIsoCode());
+		}
+		else {
+			LoginRequestDto loginRequestDto = LoginRequestDto.builder()
+					.isoCode(otpRequestDto.getIsoCode())
+					.mobile(otpRequestDto.getMobile())
+					.userType(otpRequestDto.getUserType())
+					.userSource(otpRequestDto.getUserSource())
+					.build();
+			userEntity = getActiveUserByMobile(loginRequestDto);
+		}
+
+		otpService.validateLoginOtpForEmployeeCode(otpRequestDto);
+
+		log.info("OTP verification completed for User: " + userEntity.getUuid());
+
+		userEntity.setMobileVerified(true);
+		userDbService.update(userEntity);
 		return UserAdapter.getUserProfileDto(userEntity);
 	}
 

@@ -67,6 +67,8 @@ public interface UserRepository extends AbstractJpaRepository<UserEntity, Long> 
 
 	UserEntity findByMobileAndIsoCodeAndMigrated(String mobile, String isoCode, boolean migrated);
 
+	UserEntity findByEmployeeCodeAndMigrated(String employeeCode, boolean migrated);
+
 	UserEntity findByUuidAndMigrated(String uuid, boolean migrated);
 
 	List<UserEntity> findByUuidInAndMigrated(List<String> userUuids, boolean migrated);

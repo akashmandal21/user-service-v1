@@ -27,6 +27,8 @@ public interface UserDbService extends AbstractJpaService<UserEntity, Long> {
 
 	UserEntity getUserForMobileNotMigrated(String mobile, String isoCode,boolean migrated);
 
+	UserEntity getUserForEmployeeCodeNotMigrated(String employeeCode, boolean migrated);
+
 	Specification<UserEntity> getSearchQuery(UserFilterDto userFilterDto);
 
 	List<UserEntity> findByEmail(String email);

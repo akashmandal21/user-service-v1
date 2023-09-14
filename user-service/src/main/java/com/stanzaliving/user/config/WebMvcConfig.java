@@ -33,6 +33,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 				.addPathPatterns("/**")
 				.excludePathPatterns(
 						"/signup/**",
+						"/auth/**",
 						"/auth/login",
 						"/auth/logout",
 						"/auth/validateOtp",

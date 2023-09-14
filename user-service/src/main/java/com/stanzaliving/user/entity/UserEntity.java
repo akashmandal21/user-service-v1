@@ -38,6 +38,9 @@ public class UserEntity extends AbstractJpaEntity {
 	@Column(name = "mobile", columnDefinition = "varchar(15)", nullable = false)
 	private String mobile;
 
+	@Column(name = "employee_code", columnDefinition = "varchar(50)")
+	private String employeeCode;
+
 	@Column(name = "mobile_verified", columnDefinition = "bit(1) default 0")
 	private boolean mobileVerified;
 

@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.stanzaliving.core.enums.Source;
+import com.stanzaliving.user.dto.request.OtpRequestDto;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -177,6 +178,11 @@ public class OtpServiceImpl implements OtpService {
 	@Override
 	public void validateLoginOtp(OtpValidateRequestDto otpValidateRequestDto) {
 		validateMobileOtp(otpValidateRequestDto.getMobile(), otpValidateRequestDto.getIsoCode(), otpValidateRequestDto.getOtp(), OtpType.LOGIN);
+	}
+
+	@Override
+	public void validateLoginOtpForEmployeeCode(OtpRequestDto otpRequestDto) {
+		validateMobileOtp(otpRequestDto.getMobile(), otpRequestDto.getIsoCode(), otpRequestDto.getOtp(), OtpType.LOGIN);
 	}
 
 	@Override
