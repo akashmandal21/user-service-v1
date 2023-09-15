@@ -120,7 +120,7 @@ public class AuthServiceImpl implements AuthService {
 
 	private UserEntity getActiveUserByEmployeeCode(LoginDto loginDto) {
 		UserEntity userEntity=null;
-		userEntity = userDbService.getUserForEmployeeCodeNotMigrated(loginDto.getEmployeeCode(),false);
+		userEntity = userDbService.getUserForEmployeeCode(loginDto.getEmployeeCode());
 		if (Objects.isNull(userEntity)) {
 			throw new ResourceNotFoundException("No user exists with this number", UserErrorCodes.USER_NOT_EXISTS);
 		}
