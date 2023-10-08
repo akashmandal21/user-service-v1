@@ -443,6 +443,13 @@ public class OtpServiceImpl implements OtpService {
 	}
 	@Override
 	public void resendMobileOtpV2(MobileOtpRequestDto mobileOtpRequestDto, String mobile, String isoCode, OtpType otpType) {
+
+		if (!PhoneNumberUtils.isValidMobileForCountry(mobileOtpRequestDto.getMobile(), mobileOtpRequestDto.getIsoCode())) {
+			log.error("Number: " + mobileOtpRequestDto.getMobile() + " and ISO: " + mobileOtpRequestDto.getIsoCode()
+					+ " doesn't appear to be a valid mobile combination");
+			throw new ApiValidationException("Mobile Number and ISO Code combination not valid");
+		}
+
 		OtpEntity userOtp = getLastActiveOtp(mobile, isoCode, otpType);
 
 		if (Objects.isNull(userOtp)) {
